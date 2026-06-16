@@ -1,0 +1,5 @@
+node_modules/
+.env
+.DS_Store
+# Optional: .clasp.json is usually safe to commit (it only contains scriptId and rootDir), 
+# but if you use custom authentication tokens, ignore it.

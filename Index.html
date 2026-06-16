@@ -1,0 +1,2414 @@
+<!-- Flatpickr CSS & JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --primary: #10b981;
+    --primary-hover: #059669;
+    --primary-rgb: 16, 185, 129;
+    --primary-transparent-20: rgba(16, 185, 129, 0.2);
+    --primary-transparent-15: rgba(16, 185, 129, 0.15);
+    --amber: #f59e0b;
+    --amber-hover: #d97706;
+    --blue: #3b82f6;
+    --blue-hover: #2563eb;
+    --red: #ef4444;
+    --red-hover: #dc2626;
+    --gray: #6b7280;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --text: #0f172a;
+    --muted: #64748b;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius: 12px;
+    
+    /* Map old variables to new variables for HTML elements that hardcoded old styles */
+    --green: var(--primary);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 8px 0 8px;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 8px 0 16px;
+    letter-spacing: -0.015em;
+  }
+
+  p.sub {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 24px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow);
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  .btn-auto {
+    width: auto;
+    display: inline-block;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px var(--primary-transparent-20);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .btn.secondary {
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn.secondary:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn.danger {
+    background: var(--red);
+  }
+
+  .btn.danger:hover:not(:disabled) {
+    background: var(--red-hover);
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+  }
+
+  .btn.amber {
+    background: var(--amber);
+  }
+
+  .btn.amber:hover:not(:disabled) {
+    background: var(--amber-hover);
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);
+  }
+
+  .btn.blue {
+    background: var(--blue);
+  }
+
+  .btn.blue:hover:not(:disabled) {
+    background: var(--blue-hover);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    margin-top: 6px;
+    background: #fff;
+    color: var(--text);
+    transition: all 0.2s ease;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-transparent-15);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    display: block;
+    margin-top: 16px;
+    color: #334155;
+  }
+
+  label:first-child {
+    margin-top: 0;
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .row>* {
+    flex: 1;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    letter-spacing: 0.025em;
+  }
+
+  .badge.open {
+    background: #d1fae5;
+    color: #047857;
+  }
+
+  .badge.closed {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  .badge.finalized {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .badge.archived {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .muted {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  .success {
+    color: var(--primary);
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .token-box {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    word-break: break-all;
+    border: 1px solid var(--border);
+  }
+
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--blue);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+  }
+
+  .link-btn:hover {
+    color: var(--blue-hover);
+    text-decoration: underline;
+  }
+
+  /* --- SCROLLABLE TABLE UPGRADES --- */
+  .table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 12px;
+  }
+
+  .table-responsive table {
+    margin-top: 0;
+    white-space: nowrap;
+  }
+
+  td .btn, th .btn {
+    width: auto;
+    display: inline-block;
+    white-space: nowrap;
+    margin: 0 !important;
+  }
+  
+  td .action-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  @media (max-width: 767px) {
+    td .btn, th .btn {
+      padding: 10px 14px !important; /* Larger tap targets */
+      font-size: 13px !important;
+    }
+    select {
+      padding: 10px 12px !important;
+      font-size: 16px !important; /* Prevents iOS auto-zoom */
+    }
+  }
+
+  /* Makes the header stick to the top when scrolling */
+  .table-responsive th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    z-index: 1;
+    box-shadow: 0 1px 0 var(--border);
+    backdrop-filter: blur(8px);
+  }
+
+  @media (min-width: 768px) {
+    .wrap {
+      max-width: 1200px;
+      padding: 32px;
+    }
+
+    .split-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .split-left,
+    .split-right {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  /* Modern Toast Notification */
+  #toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #1e293b;
+    color: #fff;
+    text-align: center;
+    border-radius: 999px;
+    padding: 12px 24px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(20px);
+    box-shadow: var(--shadow-md);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+  }
+
+  #toast.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Override Flatpickr default font size and family */
+  .flatpickr-calendar {
+    font-family: inherit !important;
+    font-size: 14px !important;
+  }
+  .flatpickr-current-month {
+    font-size: 110% !important;
+  }
+</style>
+
+<div class="wrap">
+  <h1>Donation Helper</h1>
+
+  <div id="view-landing">
+    <p class="sub">Bantu kumpulkan donasi untuk kolega yang resign, secara rapi dan transparan.</p>
+    <div class="card">
+      <button class="btn" onclick="showView('user-login')">Saya mau donasi</button>
+      <button class="btn secondary" onclick="showView('token-login')">Saya punya token (PIC / Admin / Super
+        Admin)</button>
+    </div>
+  </div>
+
+  <div id="view-user-login" class="hidden">
+    <h2>Masuk sebagai donatur</h2>
+    <div class="card">
+      <label>No. WhatsApp</label>
+      <input id="u-wa" placeholder="08xxxxxxxxxx">
+      <div style="background: rgba(0, 123, 255, 0.06); color: #0056b3; padding: 12px; border-radius: 8px; margin-top: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; border: 1px solid rgba(0, 123, 255, 0.15);">
+        <span style="font-size: 16px; line-height: 1.1;">🔒</span>
+        <span style="line-height: 1.4;"><strong>Kami menjaga privasi Anda.</strong> Nomor WhatsApp hanya digunakan untuk verifikasi akses dan pengingat donasi.</span>
+      </div>
+      
+      <div id="u-register-fields" class="hidden" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+        <div style="font-weight:600; font-size:15px; margin-bottom:16px; color:var(--text);">Pendaftaran Baru</div>
+        <label>Nama Lengkap</label>
+        <input id="u-name" placeholder="Nama kamu">
+        <div style="font-size: 12px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; margin-bottom: 16px;">
+          <span style="font-size: 14px; line-height: 1;">ℹ️</span>
+          <span style="line-height: 1.3;">Gunakan nama asli agar PIC mudah mengenali Anda saat mendata donasi.</span>
+        </div>
+        <label>Status Karyawan</label>
+        <select id="u-status" style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#fff;">
+          <option value="" disabled selected>-- Pilih Status --</option>
+          <option value="active">Active (Karyawan Saat Ini)</option>
+          <option value="ex">Ex (Alumni / Resign)</option>
+        </select>
+      </div>
+
+      <button id="btn-u-login" class="btn" onclick="userLogin()">Lanjut</button>
+      <button class="btn secondary" onclick="cancelUserLogin()">Kembali</button>
+      <div id="u-login-error" class="error"></div>
+    </div>
+  </div>
+
+  <div id="view-user-dashboard" class="hidden">
+    <h2>Halo, <span id="u-display-name"></span> 👋</h2>
+    <div id="campaign-list"></div>
+    <div id="pic-create-btn-container"></div>
+    <button class="btn secondary" onclick="logoutUser()">Ganti nama / nomor</button>
+  </div>
+
+  <div id="view-token-login" class="hidden">
+    <h2>Masuk dengan token</h2>
+    <div class="card">
+      <label>Token</label>
+      <input id="t-token" placeholder="contoh: PIC-AB12CD34">
+      <button class="btn" onclick="tokenLogin()">Lanjut</button>
+      <button class="btn secondary" onclick="showView('landing')">Kembali</button>
+      <div id="t-login-error" class="error"></div>
+    </div>
+  </div>
+
+  <div id="view-pic-create" class="hidden">
+    <h2>Buat campaign donasi baru</h2>
+    <div class="card">
+      <label>Nama target (yang resign)</label>
+      <input id="pc-target" placeholder="contoh: Ihsan Wanda">
+      <label>Alasan / catatan (opsional)</label>
+      <textarea id="pc-reason" rows="2" placeholder="contoh: resign per 1 Juli 2026"></textarea>
+      <label>Total nilai hadiah (IDR)</label>
+      <input id="pc-amount" type="text" inputmode="numeric" placeholder="1.000.000" onkeyup="formatInputRibuan(event)">
+      <label>Tanggal mulai (opsional)</label>
+      <input id="pc-start" type="date">
+      <label>Deadline donasi</label>
+      <input id="pc-deadline" type="date">
+      <button class="btn" onclick="createCampaign()">Buat campaign</button>
+      <button class="btn secondary" onclick="cancelPicCreate()">Keluar / Batal</button>
+      <div id="pc-error" class="error"></div>
+    </div>
+  </div>
+
+  <div id="view-pic-dashboard" class="hidden">
+    <h2>Dashboard PIC</h2>
+    <div id="pic-campaign-info" class="card"></div>
+    <div id="pic-actions" class="card"></div>
+    <div id="pic-donor-list" class="card"></div>
+    <div id="pic-reminder" class="card hidden"></div>
+    <div id="pic-danger-zone" class="card hidden"></div>
+    <button id="btn-pic-logout" class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button>
+    <button id="btn-return-admin" class="btn blue hidden" onclick="returnFromDeepDive()" style="margin-top:8px;">Kembali ke Dashboard Admin</button>
+    <button id="btn-return-member" class="btn blue hidden" onclick="returnToMemberDashboard()" style="margin-top:8px;">🔙 Kembali ke Dashboard Member</button>
+  </div>
+
+  <div id="view-admin-dashboard" class="hidden">
+    <h2>Dashboard Admin</h2>
+    <div id="admin-summary" class="card"></div>
+    <div class="card">
+      <button class="btn" onclick="genPicToken()">Generate token PIC baru</button>
+      <div id="admin-new-token"></div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Menunggu Persetujuan Member</h2>
+      <div id="admin-pending-members"></div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
+      <div id="admin-late-donors"></div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Semua campaign</h2>
+      <div id="admin-campaign-list"></div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Daftar Members</h2>
+      <input id="admin-search-member" placeholder="🔍 Cari nama atau nomor WA..."
+        onkeyup="filterMembers('admin-member-list', 'admin-search-member')">
+      <div id="admin-member-list" class="table-responsive"></div>
+    </div>
+    <button class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button> <!-- ADD THIS -->
+  </div>
+
+  <div id="view-superadmin-dashboard" class="hidden">
+    <h2>Dashboard Super Admin</h2>
+    <div id="sa-summary" class="card"></div>
+
+    <!-- Approval sections — will auto-collapse if empty -->
+    <div id="sa-pending-card" class="card hidden">
+      <h2 style="margin-top:0">Menunggu Persetujuan Member</h2>
+      <div id="sa-pending-members"></div>
+    </div>
+
+    <div id="sa-late-card" class="card hidden">
+      <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
+      <div id="sa-late-donors"></div>
+    </div>
+
+    <!-- Full Width Data Tables -->
+        <!-- Admin Management -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin-top:0; margin-bottom:12px;">Daftar Admin</h2>
+            <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;" onclick="document.getElementById('sa-gen-admin-form').classList.toggle('hidden')">+ Token Admin Baru</button>
+          </div>
+          <div id="sa-gen-admin-form" class="hidden" style="background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:12px; position:relative;">
+            <button style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
+            <label>Alias Admin</label>
+            <input id="sa-admin-alias" placeholder="contoh: Bela EE">
+            <button class="btn" style="margin-top:8px;" onclick="genAdminToken()">Generate token Admin baru</button>
+            <div id="sa-new-token"></div>
+          </div>
+          <div id="sa-admin-list" class="table-responsive"></div>
+        </div>
+
+        <!-- Members Management -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin-top:0; margin-bottom:12px;">Daftar Members</h2>
+            <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;" onclick="document.getElementById('sa-add-member-form').classList.toggle('hidden')">+ Tambah Member</button>
+          </div>
+          <input id="sa-search-member" placeholder="🔍 Cari nama atau nomor WA..." onkeyup="filterMembers('sa-member-list', 'sa-search-member')">
+          <div id="sa-member-list" class="table-responsive"></div>
+
+          <div id="sa-add-member-form" class="hidden" style="background:#f9f9f9; padding:12px; border-radius:8px; margin-top:12px; position:relative;">
+            <button style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('sa-add-member-form').classList.add('hidden')">&times;</button>
+            <h3 style="margin-top:0; font-size:14px;">Tambah member manual</h3>
+            <label>Nama</label>
+            <input id="sa-mem-name" placeholder="Nama">
+            <label>No. WhatsApp</label>
+            <input id="sa-mem-wa" placeholder="08xxxxxxxxxx">
+            <label>Status</label>
+            <select id="sa-mem-status">
+              <option value="active">active</option>
+              <option value="ex">ex</option>
+            </select>
+            <button class="btn" style="margin-top:8px;" onclick="addMemberUI()">Tambah member</button>
+            <div id="sa-member-msg"></div>
+          </div>
+        </div>
+
+        <!-- Campaign List -->
+        <div class="card">
+          <h2 style="margin-top:0">Semua Campaign</h2>
+          <div id="sa-campaign-list"></div>
+        </div>
+    <!-- Settings & Maintenance — at the bottom -->
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:24px;">
+      <div class="card" style="flex:1; min-width:300px; margin-top:0;">
+        <h2 style="margin-top:0">Pengaturan</h2>
+        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-rounding" style="width:auto;"> Aktifkan pembulatan nominal donasi</label>
+        <label>Bulatkan ke kelipatan (IDR)</label>
+        <input id="sa-roundto" type="number" placeholder="500">
+        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-validation" style="width:auto;"> Wajib cocok dengan daftar Members (validasi WhatsApp)</label>
+        <button class="btn" style="margin-top:8px;" onclick="saveSettings()">Simpan pengaturan</button>
+        <div id="sa-settings-msg"></div>
+      </div>
+      <div class="card" style="flex:1; min-width:300px; margin-top:0;">
+        <h3 style="margin-top:0; font-size:14px; color:var(--muted);">Database Maintenance</h3>
+        <p class="muted">Pindahkan data "Archived" ke cold storage untuk mempercepat performa server.</p>
+        <button class="btn amber" onclick="runDataSweep()">Jalankan Sweep Data</button>
+        <div id="sa-sweep-msg"></div>
+      </div>
+    </div>
+
+    <button class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button>
+  </div>
+</div>
+
+<div id="toast">Teks berhasil di-copy!</div>
+
+<script>
+  // Check for shared campaign link on load
+  let targetCampaignId = null;
+  google.script.url.getLocation(function (loc) {
+    if (loc.hash && loc.hash.startsWith('c=')) {
+      targetCampaignId = loc.hash.substring(2);
+    } else if (loc.parameters.c && loc.parameters.c.length > 0) {
+      targetCampaignId = loc.parameters.c[0];
+    }
+  });
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'show';
+    setTimeout(function () { toast.className = toast.className.replace('show', ''); }, 3000);
+  }
+
+  // ---------- Safe Storage Helpers ----------
+  function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) { console.warn("Storage blocked"); } }
+  function safeRemove(key) { try { localStorage.removeItem(key); } catch (e) { } }
+
+  // ---------- Helpers ----------
+  function showInfoModal(message, title = 'Informasi') {
+    let modal = document.getElementById('custom-info-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'custom-info-modal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;text-align:center;">
+          <h3 style="margin-top:0; font-size:18px; color:var(--text);" id="custom-info-title">Informasi</h3>
+          <p id="custom-info-message" style="color:var(--muted); line-height:1.5; font-size:14px; margin-bottom:24px;"></p>
+          <div style="display:flex;justify-content:center;">
+            <button class="btn blue" style="width:100%; font-size:14px; padding:10px;" onclick="document.getElementById('custom-info-modal').style.display='none'">Mengerti</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    document.getElementById('custom-info-title').textContent = title;
+    document.getElementById('custom-info-message').textContent = message;
+    modal.style.display = 'flex';
+  }
+
+  function closeConfirmModal() {
+    var modal = document.getElementById('custom-confirm-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function showConfirmModal(message, onConfirm) {
+    let modal = document.getElementById('custom-confirm-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'custom-confirm-modal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
+          <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeConfirmModal()">&times;</button>
+          <h3 style="margin-top:0;">Konfirmasi</h3>
+          <p id="custom-confirm-message"></p>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn secondary" onclick="closeConfirmModal()">Batal</button>
+            <button class="btn danger" id="custom-confirm-ok">Ya, Lanjutkan</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    document.getElementById('custom-confirm-message').textContent = message;
+    modal.style.display = 'flex';
+    document.getElementById('custom-confirm-ok').onclick = function() {
+      modal.style.display = 'none';
+      onConfirm();
+    };
+  }
+
+  function showView(name) {
+    document.querySelectorAll('.wrap > div[id^="view-"]').forEach(v => v.classList.add('hidden'));
+    document.getElementById('view-' + name).classList.remove('hidden');
+  }
+
+  function formatIDR(n) {
+    return 'Rp' + Number(n || 0).toLocaleString('id-ID');
+  }
+
+  function formatTime(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '-';
+    return d.toLocaleString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Adds periods as the user types
+  function formatInputRibuan(e) {
+    let val = e.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
+    if (val) {
+      e.target.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    } else {
+      e.target.value = '';
+    }
+  }
+
+  // Removes periods before sending to the backend
+  function parseRibuan(str) {
+    return Number(String(str).replace(/\./g, '')) || 0;
+  }
+
+  function statusBadge(status) {
+    const map = { Open: 'open', Closed: 'closed', Finalized: 'finalized', Archived: 'archived' };
+    const labelMap = { Open: 'Terbuka', Closed: 'Ditutup', Finalized: 'Final', Archived: 'Selesai' };
+    const cls = map[status] || 'archived';
+    return '<span class="badge ' + cls + '">' + (labelMap[status] || status) + '</span>';
+  }
+
+  function renderSummaryCard(s) {
+    let html = '<h2 style="margin-top:0">Ringkasan</h2>';
+    html += '<div class="row">';
+    html += '<div><div class="muted">Campaign terbuka</div><strong>' + s.campaignsByStatus.Open + '</strong></div>';
+    html += '<div><div class="muted">Menunggu finalisasi</div><strong>' + s.campaignsByStatus.Closed + '</strong></div>';
+    html += '<div><div class="muted">Final</div><strong>' + s.campaignsByStatus.Finalized + '</strong></div>';
+    html += '</div>';
+    html += '<div class="row" style="margin-top:8px;">';
+    html += '<div><div class="muted">Total donatur</div><strong>' + s.totalDonors + '</strong></div>';
+    html += '<div><div class="muted">Belum dibayar</div><strong>' + formatIDR(s.totalPending) + '</strong></div>';
+    html += '<div><div class="muted">Terkumpul</div><strong>' + formatIDR(s.totalCollected) + '</strong></div>';
+    html += '</div>';
+    html += '<p class="muted" style="margin-top:8px;">Token PIC: ' + s.picTokens.unused + ' belum dipakai, '
+      + s.picTokens.active + ' aktif, ' + s.picTokens.expired + ' kedaluwarsa.</p>';
+    if (s.totalMembers !== undefined) {
+      html += '<p class="muted">Members: ' + s.totalMembers + ' total (' + s.activeMembers + ' aktif).</p>';
+    }
+    return html;
+  }
+
+  function refreshSummary(elId) {
+    call('getDashboardSummary', currentToken()).then(s => {
+      document.getElementById(elId).innerHTML = renderSummaryCard(s);
+    }).catch(e => console.error(e));
+  }
+
+  function run(fn) {
+    return new Promise((resolve, reject) => {
+      if (!fn || !fn.name || typeof google.script.run[fn.name] !== 'function') {
+        return reject(new Error('Backend function "' + (fn ? fn.name : 'undefined') + '" is missing or private.'));
+      }
+      google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(err => reject(err))
+        [fn.name](...(fn.args || []));
+    });
+  }
+
+  // --- API WRITE QUEUE SYSTEM ---
+  const writeQueue = [];
+  let isWriting = false;
+
+  function processWriteQueue() {
+    if (isWriting || writeQueue.length === 0) return;
+    
+    isWriting = true;
+    const task = writeQueue.shift();
+
+    if (typeof google.script.run[task.name] !== 'function') {
+      isWriting = false;
+      task.reject(new Error('Backend function "' + task.name + '" is missing or private.'));
+      processWriteQueue();
+      return;
+    }
+
+    google.script.run
+      .withSuccessHandler(res => {
+        isWriting = false;
+        if (res && typeof res === 'object' && res.error) {
+          task.reject(new Error(res.error));
+        } else {
+          task.resolve(res);
+        }
+        processWriteQueue();
+      })
+      .withFailureHandler(e => {
+        isWriting = false;
+        task.reject(e);
+        processWriteQueue();
+      })
+      [task.name](...task.args);
+  }
+
+  function callQueued(name, ...args) {
+    return new Promise((resolve, reject) => {
+      writeQueue.push({ name, args, resolve, reject });
+      processWriteQueue();
+    });
+  }
+
+  function call(name, ...args) {
+    return new Promise((resolve, reject) => {
+      if (typeof google.script.run[name] !== 'function') {
+        return reject(new Error('Backend function "' + name + '" is missing or private.'));
+      }
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res && typeof res === 'object' && res.error) {
+            reject(new Error(res.error));
+          } else {
+            resolve(res);
+          }
+        })
+        .withFailureHandler(e => reject(e))
+        [name](...args);
+    });
+  }
+
+  // ---------- USER FLOW ----------
+  function resetUserLoginForm() {
+    document.getElementById('u-register-fields').classList.add('hidden');
+    document.getElementById('btn-u-login').textContent = 'Lanjut';
+    document.getElementById('u-login-error').textContent = '';
+    document.getElementById('u-name').value = '';
+    document.getElementById('u-wa').value = '';
+    const statusSel = document.getElementById('u-status');
+    if (statusSel) statusSel.value = '';
+  }
+
+  function cancelUserLogin() {
+    resetUserLoginForm();
+    showView('landing');
+  }
+
+  function userLogin() {
+    const wa = document.getElementById('u-wa').value.trim();
+    const errEl = document.getElementById('u-login-error');
+    const registerFields = document.getElementById('u-register-fields');
+    
+    if (!wa) {
+      errEl.textContent = 'Harap isi Nomor WhatsApp.';
+      return;
+    }
+
+    // STEP 1: Check WhatsApp (Login Mode)
+    if (registerFields.classList.contains('hidden')) {
+      errEl.textContent = 'Memeriksa nomor...';
+      call('checkDonorWhatsApp', wa).then(res => {
+        errEl.textContent = '';
+        if (res.exists) {
+          if (res.pending) {
+            showInfoModal(res.message, 'Menunggu Persetujuan');
+            document.getElementById('u-wa').value = '';
+            return;
+          }
+          // Log them in immediately!
+          safeSet('donor_user', JSON.stringify(res));
+          resetUserLoginForm();
+          loadUserDashboard();
+        } else {
+          // STEP 2: Show Registration Fields
+          registerFields.classList.remove('hidden');
+          document.getElementById('btn-u-login').textContent = 'Selesaikan Pendaftaran';
+        }
+      }).catch(e => errEl.textContent = e.message || String(e));
+      return;
+    }
+
+    // STEP 3: Complete Registration
+    const name = document.getElementById('u-name').value.trim();
+    const statusSel = document.getElementById('u-status');
+    const empStatus = statusSel ? statusSel.value : '';
+    
+    if (!name) {
+      errEl.textContent = 'Harap isi Nama Lengkap.';
+      return;
+    }
+    if (!empStatus) {
+      errEl.textContent = 'Harap pilih Status Karyawan.';
+      return;
+    }
+
+    errEl.textContent = 'Memproses pendaftaran...';
+    callQueued('registerUser', name, wa, empStatus).then(user => {
+      errEl.textContent = '';
+      if (user.pending) {
+        showInfoModal(user.message, 'Pendaftaran Menunggu Persetujuan');
+        resetUserLoginForm();
+        return;
+      }
+      safeSet('donor_user', JSON.stringify(user));
+      resetUserLoginForm();
+      loadUserDashboard();
+    }).catch(e => errEl.textContent = e.message || String(e));
+  }
+
+  function logoutUser() {
+    safeRemove('donor_user');
+    showView('landing');
+  }
+
+  function logoutToken() {
+    safeRemove('auth_token');
+    safeRemove('auth_role');
+    safeRemove('deep_dive_return_token');
+    safeRemove('deep_dive_return_role');
+    showView('landing');
+  }
+
+  function cancelPicCreate() {
+    if (safeGet('deep_dive_return_token')) {
+      returnFromDeepDive();
+    } else if (safeGet('donor_user')) {
+      returnToMemberDashboard();
+    } else {
+      logoutToken();
+    }
+  }
+
+  function loadUserDashboard() {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    if (!user) { showView('user-login'); return; }
+
+    let titleHtml = user.name + ' 👋';
+    if (user.verified) {
+      // Add a visual indicator for Alumni vs Active
+      if (user.status === 'ex') {
+        titleHtml += ' <span class="badge closed">Alumni Member</span>';
+      } else {
+        titleHtml += ' <span class="badge finalized">Verified Member</span>';
+      }
+    }
+    document.getElementById('u-display-name').innerHTML = titleHtml;
+
+    // NEW: Check status before showing the PIC button
+    let picBtnHtml = '';
+    if (user.verified) {
+      if (user.status === 'active') {
+        picBtnHtml = '<button class="btn blue" style="margin-bottom:16px;" onclick="seamlessBecomePic()">+ Buat Campaign Baru (Jadi PIC)</button>';
+      } else if (user.status === 'ex') {
+        picBtnHtml = '<div class="card" style="background:#f1efe8; border:none; margin-bottom:16px;"><p class="muted" style="margin:0;">Status Anda adalah Alumni. Anda dapat berpartisipasi dalam donasi, tetapi pembuatan campaign baru hanya dapat dilakukan oleh karyawan aktif.</p></div>';
+      }
+    }
+
+    const el = document.getElementById('campaign-list');
+    el.innerHTML = '<div id="actual-campaign-list" class="muted">Memuat daftar...</div>';
+
+    document.getElementById('pic-create-btn-container').innerHTML = picBtnHtml;
+
+    showView('user-dashboard');
+    refreshCampaignList();
+  }
+
+  function seamlessBecomePic() {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    const btn = event.target;
+    btn.textContent = "Memproses...";
+    btn.disabled = true;
+
+    call('generateSeamlessPicToken', user.whatsapp).then(token => {
+      // Magic happens here: Auto-login as PIC!
+      safeSet('auth_token', token);
+      safeSet('auth_role', 'PIC');
+      loadPicDashboard();
+    }).catch(e => {
+      showInfoModal(e.message || String(e), 'Error');
+      btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";
+      btn.disabled = false;
+    });
+  }
+
+  function refreshCampaignList() {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    if (!user) return;
+
+    const el = document.getElementById('actual-campaign-list');
+    el.innerHTML = '<div class="muted">Memuat daftar...</div>'; // Visual loading state
+
+    let picHtml = '';
+    call('getUserPicCampaigns', user.whatsapp).then(picList => {
+      if (picList && picList.length > 0) {
+        picHtml += '<h3 style="margin-top:0;">Campaign Saya (Sebagai PIC)</h3>';
+        picList.forEach(p => {
+          picHtml += '<div class="card" style="border-left:4px solid var(--primary); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; gap: 16px;">';
+          picHtml += '<div style="flex: 1;"><strong>' + escapeHtml(p.targetName) + '</strong><br><small>' + statusBadge(p.status) + '</small></div>';
+          picHtml += '<button class="btn blue btn-auto" style="margin:0; font-size:12px; padding:6px 12px; flex-shrink: 0;" onclick="seamlessLoginAsPic(\'' + p.picToken + '\')">Kelola</button>';
+          picHtml += '</div>';
+        });
+      }
+      return call('listActiveCampaigns', user.whatsapp);
+    }).then(list => {
+      let html = picHtml;
+      if (!list || !list.length) {
+        el.innerHTML = html + '<div class="card muted">Belum ada campaign aktif saat ini.</div>';
+        return;
+      }
+
+      if (targetCampaignId) {
+        const targetedCampaign = list.find(c => c.campaignId === targetCampaignId);
+        if (targetedCampaign) {
+          html += '<h3 style="margin-top:0;">✨ Campaign Undangan</h3>';
+          html += renderCampaignCard(targetedCampaign, user, false);
+          html += '<button class="btn secondary" style="margin-top: 16px; display: block; width: 100%; text-align: center;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
+        } else {
+          html += '<div class="card error">Campaign tidak ditemukan atau sudah diarsipkan.</div>';
+          html += '<button class="btn secondary" style="margin-top: 16px;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
+        }
+      } else {
+        const pending = list.filter(c => c.status === 'Finalized' && c.joined && !c.paid);
+        const others = list.filter(c => !(c.status === 'Finalized' && c.joined && !c.paid));
+
+        html += '<div class="split-layout">';
+
+        html += '<div class="split-left">';
+        if (pending.length > 0) {
+          html += '<h3 style="margin-top:0;color:var(--red);">⚠️ Menunggu Pembayaran</h3>';
+          html += pending.map(c => renderCampaignCard(c, user, true)).join('');
+        } else {
+          html += '<h3 style="margin-top:0;">Menunggu Pembayaran</h3>';
+          html += '<div class="card muted">Tidak ada tagihan tertunda.</div>';
+        }
+        html += '</div>';
+
+        html += '<div class="split-right">';
+        if (others.length > 0) {
+          html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
+          html += others.map(c => renderCampaignCard(c, user, false)).join('');
+        } else {
+          html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
+          html += '<div class="card muted">Belum ada campaign lain.</div>';
+        }
+        html += '</div>';
+
+        html += '</div>';
+      }
+
+      el.innerHTML = html;
+    }).catch(e => {
+      // EXPOSE THE ERROR: If the backend crashes, tell the user exactly why
+      el.innerHTML = '<div class="card error">Gagal memuat: ' + escapeHtml(e.message || String(e)) + '</div>';
+    });
+  }
+
+  function clearTargetCampaign() {
+    targetCampaignId = null;
+    try {
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState('', document.title, window.location.pathname + window.location.search);
+      }
+    } catch (e) { }
+    refreshCampaignList();
+  }
+
+  function getDeadlineBadge(deadlineStr) {
+    if (!deadlineStr) return '';
+    const diffDays = Math.ceil((new Date(deadlineStr) - new Date()) / (1000 * 60 * 60 * 24));
+    let color = '#1d9e75';
+    let text = 'Aman';
+    if (diffDays < 0) { color = '#a32d2d'; text = 'Terlewat'; }
+    else if (diffDays === 0) { color = '#a32d2d'; text = 'Hari ini!'; }
+    else if (diffDays <= 2) { color = '#d97706'; text = diffDays + ' hari lagi'; }
+    else if (diffDays <= 5) { color = '#ca8a04'; text = diffDays + ' hari lagi'; }
+
+    return '<span class="badge" style="background:' + color + '22; color:' + color + '; margin-left:8px;">⏳ ' + text + '</span>';
+  }
+
+  function renderCampaignCard(c, user, isPending) {
+    let html = '<div class="card" id="card-' + c.campaignId + '">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+    html += '<strong>' + escapeHtml(c.targetName) + '</strong>';
+    if (isPending) {
+      html += '<div>' + statusBadge(c.status) + getDeadlineBadge(c.deadline) + '</div>';
+    } else {
+      html += statusBadge(c.status);
+    }
+    html += '</div>';
+    if (c.reason) html += '<p class="muted">' + escapeHtml(c.reason) + '</p>';
+
+    // Handle the zero-state gracefully
+    const giftText = c.giftAmount > 0 ? formatIDR(c.giftAmount) : 'Ditentukan nanti';
+    html += '<p class="muted">Total hadiah: ' + giftText + ' &middot; ' + c.donorCount + ' donatur' + (c.deadline ? ' &middot; deadline ' + c.deadline : '') + '</p>';
+
+    if (c.status === 'Finalized' && (c.GiftLink || c.GiftImage)) {
+      html += '<div style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap;">';
+      if (c.GiftLink) html += '<a href="' + escapeHtml(c.GiftLink) + '" target="_blank" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; text-decoration:none;">Lihat Barang/Hadiah</a>';
+      if (c.GiftImage) html += '<a href="' + escapeHtml(c.GiftImage) + '" target="_blank" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; text-decoration:none;">Lihat Screenshot Harga</a>';
+      html += '</div>';
+    }
+
+    if (c.status === 'Open') {
+      if (c.joined) {
+        html += '<div class="success">✓ Kamu sudah daftar di list ini.</div>';
+        html += '<button class="btn secondary" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
+      } else {
+        html += '<div class="card" style="background:#f9f9f9;border:1px solid #eee;margin-top:8px;">';
+        html += '<label style="margin-top:0;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto;"> Saya ingin donasi dengan nominal khusus</label>';
+        html += '<div id="wrap-custom-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
+        html += '<label>Nominal Khusus (IDR)</label>';
+        html += '<input id="input-custom-' + c.campaignId + '" type="text" inputmode="numeric" placeholder="Contoh: 100.000" onkeyup="formatInputRibuan(event)">';
+        html += '</div>';
+        
+        html += '<label style="margin-top:12px;"><input type="checkbox" id="check-alias-' + c.campaignId + '" onchange="document.getElementById(\'wrap-alias-\' + \'' + c.campaignId + '\').classList.toggle(\'hidden\')" style="width:auto;"> Sembunyikan Nama Asli (Gunakan Alias)</label>';
+        html += '<div id="wrap-alias-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
+        html += '<label>Nama Alias / Samaran</label>';
+        html += '<input id="input-alias-' + c.campaignId + '" type="text" placeholder="Contoh: Hamba Allah">';
+        html += '</div>';
+
+        html += '<button class="btn" style="margin-top:12px;" onclick="joinCampaign(\'' + c.campaignId + '\')">Gabung Donasi untuk ' + escapeHtml(c.targetName) + '</button>';
+        html += '</div>';
+      }
+    } else if (c.status === 'Closed') {
+      html += '<p class="muted">List sudah ditutup, menunggu PIC menentukan jumlah & rekening.</p>';
+    } else if (c.status === 'Finalized') {
+      if (c.joined) {
+        html += '<div class="card" style="background:#e6f1fb;border:none;">';
+        html += '<strong>Jumlah yang harus ditransfer: ' + formatIDR(c.amountDue) + '</strong>';
+        html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount) + ' a.n. ' + escapeHtml(c.accountHolder) + '</p>';
+        if (c.paid) {
+          html += '<div class="success">✓ Sudah konfirmasi transfer.</div>';
+          if (c.proofLink) html += '<a class="link-btn" href="' + c.proofLink + '" target="_blank">Lihat bukti transfer</a>';
+        } else {
+          html += '<label>Upload bukti transfer</label>';
+          html += '<input type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf">';
+          html += '<button class="btn" onclick="submitProof(\'' + c.campaignId + '\')">Sudah transfer, kirim bukti</button>';
+          html += '<div id="proof-error-' + c.campaignId + '" class="error"></div>';
+        }
+        html += '</div>';
+      } else {
+        html += '<p class="muted">Kamu tidak terdaftar sebagai donatur di campaign ini.</p>';
+      }
+    } else {
+      html += '<p class="muted">Campaign sudah selesai/diarsipkan.</p>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function joinCampaign(campaignId) {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+
+    let customAmount = 0;
+    const checkEl = document.getElementById('check-custom-' + campaignId);
+    if (checkEl && checkEl.checked) {
+      const inputEl = document.getElementById('input-custom-' + campaignId);
+      customAmount = parseRibuan(inputEl.value);
+      if (!customAmount || customAmount <= 0) {
+        showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
+        return;
+      }
+    }
+
+    let alias = '';
+    const checkAliasEl = document.getElementById('check-alias-' + campaignId);
+    if (checkAliasEl && checkAliasEl.checked) {
+      alias = document.getElementById('input-alias-' + campaignId).value.trim();
+      if (!alias) {
+        showInfoModal('Silakan isi nama alias.', 'Peringatan');
+        return;
+      }
+    }
+
+    callQueued('joinCampaign', campaignId, user.name, user.whatsapp, customAmount, alias)
+      .then(refreshCampaignList)
+      .catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function toggleCustomAmount(campaignId) {
+    const wrap = document.getElementById('wrap-custom-' + campaignId);
+    const check = document.getElementById('check-custom-' + campaignId);
+    if (check.checked) wrap.classList.remove('hidden');
+    else wrap.classList.add('hidden');
+  }
+
+  function withdraw(campaignId) {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    call('withdrawCampaign', campaignId, user.whatsapp)
+      .then(refreshCampaignList)
+      .catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function submitProof(campaignId) {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    const fileInput = document.getElementById('proof-' + campaignId);
+    const errEl = document.getElementById('proof-error-' + campaignId);
+    errEl.textContent = '';
+    const file = fileInput.files[0];
+    if (!file) { errEl.textContent = 'Pilih file bukti transfer dulu.'; return; }
+
+    // PDFs: send as-is, no compression (canvas/Image only works for images)
+    if (file.type === 'application/pdf') {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const base64 = event.target.result.split(',')[1];
+        call('submitPaymentProof', campaignId, user.whatsapp, {
+          base64: base64, mimeType: 'application/pdf', fileName: `Receipt_${campaignId}_${user.whatsapp}.pdf`
+        }).then(() => refreshCampaignList())
+          .catch(e => errEl.textContent = e.message || String(e));
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    // Images: compress before upload
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function (event) {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scaleSize = Math.min(1, MAX_WIDTH / img.width);
+        canvas.width = img.width * scaleSize;
+        canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        const base64 = compressedDataUrl.split(',')[1];
+        call('submitPaymentProof', campaignId, user.whatsapp, {
+          base64: base64, mimeType: 'image/jpeg', fileName: `Receipt_${campaignId}_${user.whatsapp}.jpg`
+        }).then(() => refreshCampaignList())
+          .catch(e => errEl.textContent = e.message || String(e));
+      };
+      img.onerror = function () { errEl.textContent = 'Gagal membaca gambar, coba file lain.'; };
+      img.src = event.target.result;
+    };
+  }
+
+  // ---------- TOKEN LOGIN (PIC / Admin / Super Admin) ----------
+  function loginToken(token) {
+    document.getElementById('t-token').value = token;
+    tokenLogin();
+  }
+
+  function deepDive(picToken) {
+    safeSet('deep_dive_return_token', safeGet('auth_token'));
+    safeSet('deep_dive_return_role', safeGet('auth_role'));
+    document.getElementById('t-token').value = picToken;
+    tokenLogin(true);
+  }
+
+  function returnFromDeepDive() {
+    const rToken = safeGet('deep_dive_return_token');
+    const rRole = safeGet('deep_dive_return_role');
+    if (rToken) {
+      safeSet('auth_token', rToken);
+      safeSet('auth_role', rRole);
+      safeRemove('deep_dive_return_token');
+      safeRemove('deep_dive_return_role');
+      document.getElementById('btn-return-admin').classList.add('hidden');
+      if (rRole === 'Admin') loadAdminDashboard();
+      else if (rRole === 'SuperAdmin') loadSuperAdminDashboard();
+    }
+  }
+
+  function tokenLogin(isDeepDive = false) {
+    const token = document.getElementById('t-token').value.trim();
+    const errEl = document.getElementById('t-login-error');
+    errEl.textContent = '';
+    
+    // Wipe any lingering deep dive states from previous un-logged-out sessions
+    if (isDeepDive !== true) {
+      safeRemove('deep_dive_return_token');
+      safeRemove('deep_dive_return_role');
+    }
+    
+    call('loginWithToken', token).then(res => {
+      safeSet('auth_token', token);
+      safeSet('auth_role', res.role);
+      if (res.alias) safeSet('auth_alias', res.alias);
+      if (res.role === 'PIC') loadPicDashboard();
+      else if (res.role === 'Admin') loadAdminDashboard();
+      else if (res.role === 'SuperAdmin') loadSuperAdminDashboard();
+    }).catch(e => errEl.textContent = e.message || String(e));
+  }
+
+  function currentToken() { return safeGet('auth_token'); }
+
+  // ---------- PIC FLOW ----------
+  function loadPicDashboard() {
+    call('getCampaignForPic', currentToken()).then(detail => {
+      if (!detail) { showView('pic-create'); return; }
+      renderPicDashboard(detail);
+      showView('pic-dashboard');
+      if (safeGet('deep_dive_return_token')) {
+        document.getElementById('btn-return-admin').classList.remove('hidden');
+        document.getElementById('btn-return-member').classList.add('hidden');
+        document.getElementById('btn-pic-logout').classList.add('hidden');
+      } else if (safeGet('donor_user')) {
+        document.getElementById('btn-return-admin').classList.add('hidden');
+        document.getElementById('btn-return-member').classList.remove('hidden');
+        document.getElementById('btn-pic-logout').classList.add('hidden');
+      } else {
+        document.getElementById('btn-return-admin').classList.add('hidden');
+        document.getElementById('btn-return-member').classList.add('hidden');
+        document.getElementById('btn-pic-logout').classList.remove('hidden');
+      }
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function createCampaign() {
+    const errEl = document.getElementById('pc-error');
+    errEl.textContent = '';
+
+    // Use parseRibuan here
+    const rawAmount = parseRibuan(document.getElementById('pc-amount').value);
+
+    const data = {
+      targetName: document.getElementById('pc-target').value.trim(),
+      reason: document.getElementById('pc-reason').value.trim(),
+      giftAmount: rawAmount, // Send the clean number
+      startDate: document.getElementById('pc-start').value,
+      deadline: document.getElementById('pc-deadline').value
+    };
+    call('createCampaign', currentToken(), data).then(detail => {
+      loadPicDashboard();
+    }).catch(e => errEl.textContent = e.message || String(e));
+  }
+
+  function renderPicDashboard(detail) {
+    const c = detail.campaign;
+    _picCampaignData = c; // Store for copyShareLink
+    const infoEl = document.getElementById('pic-campaign-info');
+
+    // Handle the zero-state gracefully
+    const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Belum ditentukan';
+
+    infoEl.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+      '<h2 style="margin:0;">' + escapeHtml(c.TargetName) + '</h2>' + statusBadge(c.Status) + '</div>' +
+      (c.Reason ? '<p class="muted" style="margin-top:4px;">' + escapeHtml(c.Reason) + '</p>' : '') +
+      '<div style="background:var(--blue-light); padding:16px; border-radius:8px; margin: 16px 0; border: 1px solid var(--border);">' +
+      '<span style="display:block; font-size:12px; font-weight:bold; color:var(--blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Target Hadiah</span>' +
+      '<span style="font-size:28px; font-weight:bold; color:var(--text);">' + giftText + '</span>' +
+      '</div>' +
+      '<p class="muted">Deadline: ' + (c.Deadline || '-') + ' &middot; ' + detail.donors.length + ' donatur terdaftar</p>';
+
+    renderPicActions(detail);
+    renderDonorTable(detail);
+
+    // Removed bulk reminder
+    const isAchieved = detail.donors && detail.donors.length > 0 && detail.donors.every(d => String(d.Verified).toUpperCase() === 'TRUE');
+    if (c.Status === 'Finalized' && isAchieved) {
+      infoEl.innerHTML += '<div class="success" style="margin-top:12px;">🎉 Target Tercapai! Semua donatur sudah bayar dan terverifikasi.</div>';
+    }
+
+    const dangerZone = document.getElementById('pic-danger-zone');
+    if (c.Status !== 'Archived') {
+      dangerZone.innerHTML = '<h3 style="margin-top:0; color:var(--red);">Danger Zone</h3>' +
+                             '<button class="btn danger" onclick="archiveThis()">Arsipkan campaign</button>';
+      dangerZone.classList.remove('hidden');
+    } else {
+      dangerZone.classList.add('hidden');
+    }
+  }
+
+  function renderPicActions(detail) {
+    const c = detail.campaign;
+    const el = document.getElementById('pic-actions');
+    let html = '';
+
+    // Calculate achieved state
+    let isAchieved = true;
+    if (!detail.donors || detail.donors.length === 0) isAchieved = false;
+    else {
+      detail.donors.forEach(d => {
+        if (String(d.Verified).toUpperCase() !== 'TRUE') isAchieved = false;
+      });
+    }
+
+    // --- SHARE MESSAGE LOGIC ---
+    html += '<div style="background:#eaf3de; padding:10px; border-radius:8px; margin-bottom:12px;">';
+    if (isAchieved) {
+      html += '<strong>Target Tercapai! 🎉</strong><br>';
+      html += '<p class="muted" style="margin:4px 0;">Semua donatur sudah bayar dan terverifikasi. Bagikan laporan selesai ke grup.</p>';
+      html += '<button class="btn" style="background:var(--blue); margin-top:4px;" onclick="copyLaporanSelesai()">📋 Copy Laporan Selesai</button>';
+    } else {
+      html += '<strong>Bagikan ke Grup WhatsApp:</strong><br>';
+      html += '<p class="muted" style="margin:4px 0;">Copy pesan undangan lengkap beserta link campaign. Donatur perlu login ke akun Google untuk membuka link.</p>';
+      html += '<button class="btn" style="background:var(--green); margin-top:4px;" onclick="copyShareLink()">📋 Copy Pesan Undangan</button>';
+    }
+    html += '</div>';
+    // ----------------------------
+
+    if (c.Status === 'Open') {
+      html += '<button class="btn amber" onclick="closeList()">Tutup pendaftaran</button>';
+      // Pass the current amount to the Finalize form in case they already filled it out
+      html += '<button class="btn blue" onclick="showFinalizeForm(' + c.GiftAmount + ')">Selesaikan & input rekening</button>';
+    } else if (c.Status === 'Closed') {
+      html += '<button class="btn secondary" onclick="reopenList()">Buka lagi pendaftaran</button>';
+      html += '<button class="btn blue" onclick="showFinalizeForm(' + c.GiftAmount + ')">Selesaikan & input rekening</button>';
+    } else if (c.Status === 'Finalized') {
+      const paidCount = detail.donors.filter(d => String(d.Paid).toUpperCase() === 'TRUE').length;
+      
+      let totalRefund = 0;
+      detail.donors.forEach(d => {
+        if (String(d.Paid).toUpperCase() === 'TRUE' && d.AmountPaid) {
+          const diff = Number(d.AmountPaid) - Number(d.AmountDue);
+          if (diff > 0 && String(d.Refunded).toUpperCase() !== 'TRUE') totalRefund += diff;
+        }
+      });
+      
+      html += '<p class="muted">' + paidCount + ' / ' + detail.donors.length + ' sudah upload bukti</p>';
+      if (totalRefund > 0) {
+        html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
+      }
+      
+      if (!isAchieved) {
+        html += '<button class="btn secondary" style="margin-bottom:8px; margin-right:8px;" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
+      }
+      html += '<button class="btn blue" style="margin-bottom:8px;" onclick="showGiftProofForm()">📸 Upload Foto & Link Hadiah</button>';
+    } else {
+      html += '<p class="muted">Campaign sudah diarsipkan. Token ini sudah tidak aktif.</p>';
+    }
+
+    html += '<div id="finalize-form" class="hidden"></div>';
+
+    // Late Donor Form Modal
+    html += '<div id="late-donor-form" class="hidden card" style="background:#f9f9f9; margin-top:16px; position:relative;">';
+    html += '<button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById(\'late-donor-form\').classList.add(\'hidden\')">&times;</button>';
+    html += '<h3 style="margin-top:0;">Ajukan Donatur Susulan</h3>';
+    html += '<label>Nama Donatur</label><input id="late-name" placeholder="Nama lengkap">';
+    html += '<label>Nomor WhatsApp</label><input id="late-wa" placeholder="08xxxxxxxxxx">';
+    html += '<label>Nama Alias / Samaran (Opsional)</label><input id="late-alias" placeholder="Contoh: Hamba Allah">';
+    html += '<label style="display:flex; align-items:center; gap:8px; margin-top:10px; margin-bottom:10px;"><input type="checkbox" id="late-is-custom" onchange="document.getElementById(\'late-custom-wrap\').classList.toggle(\'hidden\')" style="width:auto; margin-top:0;"> Donasi Nominal Khusus (Bukan patungan rata)</label>';
+    html += '<div id="late-custom-wrap" class="hidden"><label>Nominal (Rp)</label><input type="text" inputmode="numeric" id="late-custom-amount" placeholder="Contoh: 150.000" onkeyup="formatInputRibuan(event)"></div>';
+    html += '<label>Alasan</label><input id="late-reason" placeholder="Contoh: Terlewat saat awal">';
+    html += '<button class="btn" onclick="submitLateDonor()">Kirim Pengajuan</button>';
+    html += '<div id="late-error" class="error"></div>';
+    html += '</div>';
+
+    // Gift Proof Form Modal
+    html += '<div id="gift-proof-form" class="hidden card" style="background:#f9f9f9; margin-top:16px; position:relative;">';
+    html += '<button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById(\'gift-proof-form\').classList.add(\'hidden\')">&times;</button>';
+    html += '<h3 style="margin-top:0;">Dokumentasi Hadiah</h3>';
+    if (c.GiftLink || c.GiftImage) {
+      html += '<div style="background:#f5f7fa; padding:16px; border-radius:8px; margin-bottom:16px;">';
+      if (c.GiftImage) {
+        html += '<a href="' + escapeHtml(c.GiftImage) + '" target="_blank"><img src="' + escapeHtml(c.GiftImage) + '" style="max-width:100px; max-height:100px; border-radius:8px; margin-right:16px; margin-bottom:8px; vertical-align:middle; border:1px solid #ccc; object-fit:cover;"></a>';
+      }
+      if (c.GiftLink) {
+        html += '<a class="link-btn" href="' + escapeHtml(c.GiftLink) + '" target="_blank">Buka Link Barang/Hadiah</a>';
+      }
+      html += '<div style="margin-top:12px;"><button class="btn secondary" style="font-size:12px; padding:4px 8px;" onclick="document.getElementById(\'gift-edit-form\').classList.toggle(\'hidden\')">✏️ Edit Dokumentasi</button></div>';
+      html += '</div>';
+    }
+
+    html += '<div id="gift-edit-form" class="' + ((c.GiftLink || c.GiftImage) ? 'hidden' : '') + '">';
+    html += '<p class="muted" style="margin-top:0;">Bagikan dokumentasi hadiah kepada seluruh donatur. Fitur ini bisa digunakan kapan saja.</p>';
+    html += '<label>Link Barang / Hadiah (Opsional)</label><input id="gift-link" placeholder="https://tokopedia.com/..." value="' + (c.GiftLink || '') + '">';
+    html += '<label>Upload Nota Pembelian include ongkir dan diskon (Opsional)</label><input id="gift-image" type="file" accept="image/*">';
+    html += '<button class="btn blue" onclick="submitGiftProof()">' + ((c.GiftLink || c.GiftImage) ? 'Perbarui Dokumentasi' : 'Simpan Dokumentasi') + '</button>';
+    html += '<div id="gift-error" class="error"></div>';
+    html += '</div>';
+    html += '</div>';
+
+    el.innerHTML = html;
+  }
+
+  function showLateDonorForm() {
+    document.getElementById('late-donor-form').classList.remove('hidden');
+    document.getElementById('gift-proof-form').classList.add('hidden');
+  }
+
+  function showGiftProofForm() {
+    document.getElementById('gift-proof-form').classList.remove('hidden');
+    document.getElementById('late-donor-form').classList.add('hidden');
+  }
+
+  function submitGiftProof() {
+    const errEl = document.getElementById('gift-error');
+    errEl.textContent = 'Menyimpan...';
+
+    const link = document.getElementById('gift-link').value.trim();
+    const fileInput = document.getElementById('gift-image');
+    const file = fileInput.files[0];
+
+    if (!file && !link) {
+      errEl.textContent = 'Harap isi link atau upload foto hadiah.';
+      return;
+    }
+
+    if (!file) {
+      call('updateGiftProof', currentToken(), link, null)
+        .then(() => { showToast('Dokumentasi hadiah berhasil disimpan!'); loadPicDashboard(); })
+        .catch(e => errEl.textContent = e.message || String(e));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        const scaleSize = Math.min(1, 800 / img.width);
+        canvas.width = img.width * scaleSize;
+        canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        const base64 = dataUrl.split(',')[1];
+
+        call('updateGiftProof', currentToken(), link, { name: file.name, type: 'image/jpeg', data: base64 })
+          .then(() => { showToast('Dokumentasi hadiah berhasil disimpan!'); loadPicDashboard(); })
+          .catch(e => errEl.textContent = e.message || String(e));
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function submitLateDonor() {
+    const errEl = document.getElementById('late-error');
+    errEl.textContent = 'Mengirim...';
+    const name = document.getElementById('late-name').value;
+    const wa = document.getElementById('late-wa').value;
+    const alias = document.getElementById('late-alias').value;
+    const isCustom = document.getElementById('late-is-custom').checked;
+    const amount = isCustom ? parseRibuan(document.getElementById('late-custom-amount').value) : null;
+    const reason = document.getElementById('late-reason').value;
+
+    if (!name || !wa || !reason) { errEl.textContent = 'Harap isi semua kolom.'; return; }
+
+    const realToken = safeGet('deep_dive_return_token') || null;
+    callQueued('requestLateDonor', currentToken(), name, wa, isCustom, amount, reason, realToken, alias).then(res => {
+      showToast('Pengajuan berhasil dikirim ke Admin!');
+      errEl.textContent = '';
+      document.getElementById('late-name').value = '';
+      document.getElementById('late-wa').value = '';
+      document.getElementById('late-alias').value = '';
+      document.getElementById('late-reason').value = '';
+      document.getElementById('late-custom-amount').value = '';
+      document.getElementById('late-donor-form').classList.add('hidden');
+    }).catch(e => errEl.textContent = e.message || String(e));
+  }
+
+  // Store latest PIC campaign data so copyShareLink can build a rich message
+  let _picCampaignData = null;
+
+  function copyShareLink() {
+    const c = _picCampaignData;
+    if (!c) { showToast('Data campaign belum tersedia.'); return; }
+
+    call('getWebAppUrl').then(url => {
+      const shareUrl = url + '#c=' + c.CampaignID;
+      const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Ditentukan nanti';
+      const deadlineText = c.Deadline || '-';
+
+      const msg = '🎁 *Yuk Patungan Donasi!*\n\n'
+        + '👤 Untuk: *' + c.TargetName + '*\n'
+        + (c.Reason ? '💬 Alasan: ' + c.Reason + '\n' : '')
+        + '💰 Total hadiah: ' + giftText + '\n'
+        + '📅 Deadline: ' + deadlineText + '\n\n'
+        + '👉 Daftar di sini:\n' + shareUrl + '\n\n'
+        + '⚠️ _Buka link di browser yang sudah login akun Google ya!_';
+
+      navigator.clipboard.writeText(msg).then(() => {
+        showToast('Pesan undangan berhasil di-copy! Paste ke grup WhatsApp.');
+      });
+    }).catch(e => showToast('Gagal mengambil URL'));
+  }
+
+  function closeList() {
+    callQueued('closeCampaignList', currentToken()).then(renderAndShow).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+  function reopenList() {
+    call('reopenCampaignList', currentToken()).then(renderAndShow).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+  function archiveThis() {
+    showConfirmModal('Arsipkan campaign ini? Token PIC akan nonaktif.', () => {
+      call('archiveCampaign', currentToken()).then(() => {
+        showToast('Campaign berhasil diarsipkan.');
+        if (safeGet('deep_dive_return_token')) {
+          returnFromDeepDive();
+        } else if (safeGet('donor_user')) {
+          returnToMemberDashboard();
+        } else {
+          safeRemove('auth_token');
+          safeRemove('auth_role');
+          showView('landing');
+        }
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+  function renderAndShow(detail) { renderPicDashboard(detail); }
+
+  function showFinalizeForm(currentAmount) {
+    call('getPublicSettings').then(settings => {
+      const el = document.getElementById('finalize-form');
+      el.classList.remove('hidden');
+
+      // Auto-fill the input if they provided an amount earlier, otherwise leave blank
+      const defaultAmount = currentAmount > 0 ? currentAmount : '';
+
+      let note = settings.enableRounding
+        ? 'Pembulatan AKTIF: tiap orang akan dibulatkan ke atas ke kelipatan ' + formatIDR(settings.roundTo) + '.'
+        : 'Pembulatan NONAKTIF: nominal dibagi rata (selisih kecil ditanggung sebagian donatur agar totalnya pas).';
+
+      el.innerHTML =
+        '<p class="muted">' + note + '</p>' +
+        '<label>Total Harga Hadiah Akhir (IDR)</label>' +
+        '<input id="fin-amount" type="text" inputmode="numeric" value="' + (defaultAmount ? defaultAmount.toLocaleString('id-ID') : '') + '" placeholder="Contoh: 1.000.000" onkeyup="formatInputRibuan(event)">' +
+        '<label>Nama bank</label><input id="fin-bank" placeholder="contoh: BCA">' +
+        '<label>No. rekening</label><input id="fin-acc" placeholder="1234567890">' +
+        '<label>Nama pemilik rekening</label><input id="fin-holder" placeholder="Nama PIC">' +
+        '<label>Link Barang / Hadiah (Opsional)</label><input id="fin-link" placeholder="https://tokopedia.com/...">' +
+        '<label>Screenshot Total Harga (Opsional)</label><input id="fin-image" type="file" accept="image/*">' +
+        '<button class="btn blue" onclick="doFinalize()">Konfirmasi & finalisasi</button>' +
+        '<div id="fin-error" class="error"></div>';
+    });
+  }
+
+  function doFinalize() {
+    const errEl = document.getElementById('fin-error');
+    errEl.textContent = 'Memproses...';
+
+    const rawFinalAmount = parseRibuan(document.getElementById('fin-amount').value);
+
+    const bankInfo = {
+      bankName: document.getElementById('fin-bank').value.trim(),
+      bankAccount: document.getElementById('fin-acc').value.trim(),
+      accountHolder: document.getElementById('fin-holder').value.trim(),
+      giftLink: document.getElementById('fin-link').value.trim()
+    };
+
+    const fileInput = document.getElementById('fin-image');
+    const file = fileInput.files[0];
+
+    const doCall = (fileData) => {
+      errEl.textContent = 'Menyimpan ke server...';
+      call('finalizeCampaign', currentToken(), bankInfo, rawFinalAmount, fileData)
+        .then(renderAndShow)
+        .catch(e => errEl.textContent = escapeHtml(e.message || String(e)));
+    };
+
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        errEl.textContent = 'Ukuran gambar maksimal 2MB.';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        doCall({
+          name: file.name,
+          type: file.type,
+          data: e.target.result.split(',')[1] // Extract base64 part
+        });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      doCall(null);
+    }
+  }
+
+  function renderDonorTable(detail) {
+    const el = document.getElementById('pic-donor-list');
+    if (!detail.donors || !detail.donors.length) {
+      el.innerHTML = '<p class="muted">Belum ada donatur.</p>';
+      return;
+    }
+
+    // Sort: Unpaid first, then highest tagihan
+    detail.donors.sort((a, b) => {
+      const aPaid = String(a.Paid).toUpperCase() === 'TRUE';
+      const bPaid = String(b.Paid).toUpperCase() === 'TRUE';
+      if (aPaid !== bPaid) return aPaid ? 1 : -1;
+      const aDue = Number(a.AmountDue) || 0;
+      const bDue = Number(b.AmountDue) || 0;
+      return bDue - aDue;
+    });
+
+    let html = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>';
+    detail.donors.forEach(d => {
+      html += '<tr>';
+      const displayName = d.Alias ? d.Alias : d.Name;
+      html += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
+      html += '<td class="muted">' + formatTime(d.JoinedAt) + '</td>';
+      
+      const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
+      const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
+      
+      let statusBadge = '';
+      if (isVerified) {
+        statusBadge = '<span class="badge success">✅ Verified</span>';
+      } else if (isPaid) {
+        statusBadge = '<span class="badge warning" style="background:#fff3cd;color:#856404;">⏳ Perlu Cek</span>';
+      } else {
+        statusBadge = '<span class="badge warning" style="background:#faeeda;color:var(--amber);">Belum trf</span>';
+      }
+      html += '<td>' + statusBadge + '</td>';
+
+      let amountHtml = d.AmountDue ? formatIDR(d.AmountDue) : '-';
+      if (isPaid) {
+        amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
+      }
+      html += '<td>' + amountHtml + '</td>';
+
+      // Dedicated Refund Column
+      let refundHtml = '-';
+      const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
+      let needsRefund = false;
+      
+      if (isPaid && d.AmountPaid) {
+        const diff = Number(d.AmountPaid) - Number(d.AmountDue);
+        if (diff > 0) {
+          needsRefund = true;
+          if (isRefunded) {
+             refundHtml = '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(diff) + '</small>';
+          } else {
+             refundHtml = '<span class="badge amber" style="margin-bottom:4px;">⚠️ ' + formatIDR(diff) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>';
+          }
+        }
+      }
+      html += '<td>' + refundHtml + '</td>';
+
+      // Bukti & Verifikasi Column
+      let verificationHtml = '-';
+      if (isPaid && d.ProofLink) {
+        verificationHtml = '<a href="' + escapeHtml(d.ProofLink) + '" target="_blank" class="link-btn" style="font-size:11px; padding:2px 4px; display:inline-block; margin-bottom:4px;">Lihat Bukti</a><br>';
+        if (!isVerified) {
+          if (needsRefund && !isRefunded) {
+            verificationHtml += '<span class="muted" style="font-size:11px; color:var(--red);">⚠️ Selesaikan refund dulu sebelum verifikasi.</span>';
+          } else {
+            verificationHtml += '<button class="btn green" style="padding:2px 4px; font-size:11px; margin-right:4px;" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', true)">Konfirmasi</button>';
+            verificationHtml += '<button class="btn danger" style="padding:2px 4px; font-size:11px;" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', false)">Tolak</button>';
+          }
+        } else {
+          verificationHtml += '<span class="muted" style="font-size:11px;">Sudah dikonfirmasi</span>';
+        }
+      } else if (!isPaid && detail.campaign.Status === 'Finalized') {
+        const msg = encodeURIComponent("Halo " + d.Name + ", ini reminder untuk patungan *" + detail.campaign.TargetName + "*. Tagihan kamu: " + formatIDR(d.AmountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
+        verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" class="btn secondary" style="padding:2px 4px; font-size:11px;">Kirim Reminder WA</a>';
+      }
+      html += '<td>' + verificationHtml + '</td>';
+
+      html += '</tr>';
+    });
+    
+    // Add total tagihan row
+    let totalTagihan = 0;
+    detail.donors.forEach(d => {
+      totalTagihan += (Number(d.AmountDue) || 0);
+    });
+
+    html += '</tbody>';
+    if (totalTagihan > 0) {
+      html += '<tfoot style="background:#f5f7fa; font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
+    }
+    html += '</table></div>';
+    el.innerHTML = html;
+  }
+
+
+
+  function copyBulkMessage() {
+    const el = document.getElementById('pic-bulk-msg');
+    if (el) {
+      el.select();
+      document.execCommand('copy');
+      showToast('Pesan berhasil di-copy!');
+    }
+  }
+
+  function verifyPaymentUI(campaignId, whatsapp, isValid) {
+    const action = isValid ? 'konfirmasi' : 'tolak';
+    showConfirmModal('Yakin ingin ' + action + ' bukti transfer donatur ini?', () => {
+      callQueued('picVerifyPayment', currentToken(), campaignId, whatsapp, isValid).then(res => {
+        if (res.error) throw new Error(res.error);
+        showToast('Bukti transfer berhasil di' + action + '.');
+        call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function markRefundedUI(campaignId, whatsapp) {
+    showConfirmModal('Tandai refund sebagai sudah dikembalikan?', () => {
+      callQueued('picMarkRefunded', currentToken(), campaignId, whatsapp).then(res => {
+        if (res.error) throw new Error(res.error);
+        showToast('Refund berhasil ditandai selesai.');
+        call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function copyLaporanSelesai() {
+    call('getCampaignForPic', currentToken()).then(detail => {
+      let customCount = 0;
+      let proRata = 0;
+      
+      detail.donors.forEach(d => {
+        if (Number(d.CustomAmount) > 0) {
+          customCount++;
+        } else if (proRata === 0) {
+          proRata = Number(d.AmountDue) || 0;
+        }
+      });
+
+      let text = "🎉 *Laporan Selesai: Patungan untuk " + detail.campaign.TargetName + "*\n\n";
+      let summaryText = "Terima kasih banyak untuk teman-teman yang sudah berpartisipasi! Total partisipan : " + detail.donors.length + " orang dengan total donasi " + formatIDR(detail.campaign.GiftAmount);
+      if (customCount > 0) {
+        summaryText += ", " + customCount + " custom amount and pro rata sebanyak " + formatIDR(proRata);
+      } else {
+        summaryText += " and pro rata sebanyak " + formatIDR(proRata);
+      }
+      text += summaryText + "\n\n";
+      text += "*Daftar Donatur:*\n";
+      
+      detail.donors.forEach((d, i) => {
+        const displayName = d.Alias ? d.Alias : d.Name;
+        let suffix = " ✅";
+        if (Number(d.CustomAmount) > 0) {
+          suffix += " (" + formatIDR(d.CustomAmount) + ")";
+        }
+        text += (i + 1) + ". " + displayName + suffix + "\n";
+      });
+      
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      
+      if (detail.campaign.GiftImage) {
+        showInfoModal('Laporan berhasil di-copy! Jangan lupa untuk copy/download gambar barang dan paste ke WhatsApp bersama laporan ini.', 'Sukses');
+      } else {
+        showToast('Laporan selesai berhasil di-copy!');
+      }
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+
+  // ---------- ADMIN FLOW ----------
+  function loadAdminDashboard() {
+    showView('admin-dashboard');
+    const alias = safeGet('auth_alias');
+    const titleEl = document.querySelector('#view-admin-dashboard h2');
+    if (titleEl) {
+      titleEl.textContent = alias ? 'Dashboard Admin (Halo, ' + alias + ')' : 'Dashboard Admin';
+    }
+    refreshSummary('admin-summary');
+    refreshPendingMembers('admin-pending-members');
+    refreshLateRequests('admin-late-donors');
+    refreshAdminCampaigns();
+    refreshMembers();
+  }
+
+  // Smart function that updates whichever dashboard is currently open
+  function refreshPendingMembers(elId) {
+    call('getPendingMembers', currentToken()).then(list => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      // Auto-show/hide the parent card
+      const parentCard = elId === 'sa-pending-members' ? document.getElementById('sa-pending-card') : null;
+      if (!list.length) {
+        el.innerHTML = '<p class="muted">Tidak ada pendaftaran baru.</p>';
+        if (parentCard) parentCard.classList.add('hidden');
+        return;
+      }
+      if (parentCard) parentCard.classList.remove('hidden');
+      let html = '<div class="table-responsive"><table><tr><th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
+      list.forEach((m, idx) => {
+        let defaultStatus = 'active';
+        if (m.AddedBy && String(m.AddedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
+        html += '<tr><td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
+        html += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
+        html += '<td><button class="btn green" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
+        html += '<button class="btn danger" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
+      });
+      html += '</table></div>';
+      el.innerHTML = html;
+    });
+  }
+
+  function approvePending(wa, newStatus, elId) {
+    call('adminUpdateMemberStatus', currentToken(), wa, newStatus).then(() => {
+      refreshPendingMembers(elId);
+      refreshMembers();
+      refreshSummary(elId === 'sa-pending-members' ? 'sa-summary' : 'admin-summary');
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function refreshLateRequests(elId) {
+    call('getPendingLateRequests', currentToken()).then(list => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      // Auto-show/hide the parent card
+      const parentCard = elId === 'sa-late-donors' ? document.getElementById('sa-late-card') : null;
+      if (!list.length) {
+        el.innerHTML = '<p class="muted">Tidak ada pengajuan donatur susulan.</p>';
+        if (parentCard) parentCard.classList.add('hidden');
+        return;
+      }
+      if (parentCard) parentCard.classList.remove('hidden');
+      let html = '<div class="table-responsive"><table><tr><th>Campaign (PIC)</th><th>Donatur Susulan</th><th>Nominal</th><th>Alasan</th><th>Aksi</th></tr>';
+      list.forEach(r => {
+        html += '<tr>';
+        html += '<td><strong>' + escapeHtml(r.targetName) + '</strong><br><small class="muted">PIC: ' + escapeHtml(r.pic) + '</small></td>';
+        html += '<td>' + escapeHtml(r.donorName) + '<br><small class="muted">' + escapeHtml(r.donorWhatsApp) + '</small></td>';
+        html += '<td>' + (r.isCustom ? '<span class="badge blue">Khusus: ' + formatIDR(r.customAmount) + '</span>' : '<span class="badge green">Patungan Rata</span>') + '</td>';
+        html += '<td class="muted">' + escapeHtml(r.reason) + '</td>';
+        html += '<td><button class="btn blue" style="padding:4px 8px; font-size:12px; margin-bottom:4px;" onclick="handleApproveLateDonor(\'' + r.reqId + '\', true, \'' + elId + '\')">Setujui</button>';
+        html += '<br><button class="btn danger" style="padding:4px 8px; font-size:12px;" onclick="handleApproveLateDonor(\'' + r.reqId + '\', false, \'' + elId + '\')">Tolak</button></td>';
+        html += '</tr>';
+      });
+      html += '</table></div>';
+      el.innerHTML = html;
+    }).catch(e => console.error('Error fetching late requests:', e));
+  }
+
+  function handleApproveLateDonor(reqId, isApprove, elId) {
+    if (isApprove) {
+      showConfirmModal('Peringatan: Menyetujui ini akan langsung mendaftarkan member (jika baru) dan MENGHITUNG ULANG tagihan donatur lain di campaign tersebut. Lanjutkan?', () => executeApproveLateDonor(reqId, isApprove, elId));
+    } else {
+      executeApproveLateDonor(reqId, isApprove, elId);
+    }
+  }
+
+  function executeApproveLateDonor(reqId, isApprove, elId) {
+    call('approveLateDonor', currentToken(), reqId, isApprove).then(() => {
+      refreshLateRequests(elId);
+      refreshSummary(elId.startsWith('sa-') ? 'sa-summary' : 'admin-summary');
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function refreshAdmins() {
+    call('listAdmins', currentToken()).then(list => {
+      const el = document.getElementById('sa-admin-list');
+      if (!list.length) {
+        el.innerHTML = '<p class="muted">Belum ada Admin terdaftar.</p>';
+        return;
+      }
+      let html = '<table><tr><th>Alias</th><th>WhatsApp</th><th>Token</th><th>Status</th><th>Aksi</th></tr>';
+      list.forEach(a => {
+        const wa = (a.CreatedBy && (a.CreatedBy.startsWith('62') || a.CreatedBy.startsWith('08'))) ? a.CreatedBy : '-';
+        html += '<tr><td>' + escapeHtml(a.Alias || '-') + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace;">' + escapeHtml(a.TokenID) + '</td><td>' + statusBadge(a.Status) + '</td>';
+        if (a.Status === 'Active') {
+          html += '<td><button class="btn danger" style="padding:4px 8px; margin:0; font-size:12px;" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button></td>';
+        } else {
+          html += '<td><button class="btn green" style="padding:4px 8px; margin:0; font-size:12px;" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button></td>';
+        }
+        html += '</tr>';
+      });
+      html += '</table>';
+      el.innerHTML = html;
+    });
+  }
+
+  function revokeAdmin(id) {
+    showConfirmModal('Nonaktifkan Admin ini? Mereka tidak akan bisa login lagi.', () => {
+        call('revokeAdminToken', currentToken(), id).then(refreshAdmins).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function reactivateAdmin(id) {
+    showConfirmModal('Aktifkan kembali Admin ini?', () => {
+        call('reactivateAdminToken', currentToken(), id).then(() => {
+          showToast('Admin berhasil diaktifkan kembali.');
+          refreshAdmins();
+        }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function genPicToken() {
+    call('generatePicToken', currentToken()).then(tok => {
+      document.getElementById('admin-new-token').innerHTML =
+        '<p>Token PIC baru (bagikan ke 1 orang saja):</p><div class="token-box">' + tok + '</div>';
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function refreshAdminCampaigns() {
+    call('listAllCampaigns', currentToken()).then(list => {
+      document.getElementById('admin-campaign-list').innerHTML = renderAdminCampaignTable(list);
+    });
+  }
+
+  function renderAdminCampaignTable(list) {
+    const role = safeGet('auth_role');
+    if (!list.length) return '<p class="muted">Belum ada campaign.</p>';
+    let html = '<table><tr><th>Target</th><th>Status</th><th>PIC</th><th>Donatur</th><th>Terakhir Diupdate</th><th>Aksi</th></tr>';
+    list.forEach(c => {
+      html += '<tr><td>' + escapeHtml(c.TargetName) + '</td><td>' + statusBadge(c.Status) + '</td>';
+      html += '<td>' + escapeHtml(c.picName || '-') + '</td>';
+      html += '<td>' + c.paidCount + '/' + c.donorCount + '</td>';
+      
+      const updateText = c.ModifiedBy ? (formatTime(c.ModifiedAt) + '<br><small>oleh ' + escapeHtml(c.ModifiedBy) + '</small>') : '-';
+      html += '<td class="muted">' + updateText + '</td>';
+      html += '<td style="white-space:nowrap;">';
+
+      html += '<button class="btn secondary" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="adminView(\'' + c.CampaignID + '\')">Lihat</button> ';
+
+      if (role === 'SuperAdmin') {
+        if (c.Status !== 'Archived') {
+          html += '<button class="btn amber" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="adminArchive(\'' + c.CampaignID + '\')">Arsipkan</button> ';
+        }
+        html += '<button class="btn danger" style="padding:4px 8px; margin:0; font-size:12px;" onclick="adminDelete(\'' + c.CampaignID + '\')">Hapus</button>';
+      }
+
+      html += '</td></tr>';
+    });
+    html += '</table>';
+    return html;
+  }
+
+  function adminView(campaignId) {
+    call('getCampaignDetailAdmin', currentToken(), campaignId)
+      .then(detail => {
+        let html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;">';
+        html += '<div class="card" style="width:100%;max-width:600px;max-height:90vh;overflow-y:auto;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+        html += '<h2 style="margin:0;">Detail Campaign</h2>';
+        html += '<button class="link-btn" onclick="document.getElementById(\'admin-modal\').innerHTML=\'\'" style="font-size:18px;color:var(--text);">&times;</button>';
+        html += '</div>';
+
+        if (detail.picToken) {
+          html += '<button class="btn secondary" style="margin-bottom:12px;" onclick="deepDive(\'' + detail.picToken + '\'); document.getElementById(\'admin-modal\').innerHTML=\'\';">Lihat sebagai PIC (Deep Dive)</button>';
+        }
+
+        const c = detail.campaign;
+        let totalRefund = 0;
+        detail.donors.forEach(d => {
+          if (String(d.Paid).toUpperCase() === 'TRUE' && d.AmountPaid) {
+            const diff = Number(d.AmountPaid) - Number(d.AmountDue);
+            if (diff > 0 && String(d.Refunded).toUpperCase() !== 'TRUE') totalRefund += diff;
+          }
+        });
+        
+        html += '<strong>Target: ' + escapeHtml(c.TargetName) + '</strong> ' + statusBadge(c.Status) + '<br>';
+        html += '<p class="muted">Total Hadiah: ' + formatIDR(c.GiftAmount) + ' &middot; ' + detail.donors.length + ' donatur</p>';
+        if (totalRefund > 0) {
+          html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
+        }
+        if (c.Reason) html += '<p class="muted">' + escapeHtml(c.Reason) + '</p>';
+
+        if (detail.donors.length) {
+          html += '<table><tr><th>Nama</th><th>WA</th><th>Tagihan</th><th>Nominal Transfer</th><th>Terakhir Diupdate</th></tr>';
+          detail.donors.forEach(d => {
+            const displayName = d.Alias ? d.Name + ' (Alias: ' + d.Alias + ')' : d.Name;
+            html += '<tr><td>' + escapeHtml(displayName) + '<br><small>' + (String(d.Paid).toUpperCase() === 'TRUE' ? '<span style="color:var(--green);">Lunas</span>' : '<span style="color:var(--amber);">Belum</span>') + '</small></td>';
+            html += '<td>' + escapeHtml(d.WhatsApp) + '</td>';
+            html += '<td>' + formatIDR(d.AmountDue) + '</td>';
+            
+            let paidText = d.AmountPaid ? formatIDR(d.AmountPaid) : '(Kosong)';
+            html += '<td>' + paidText + ' <button class="link-btn" style="font-size:12px; margin-left:4px;" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">✏️</button></td>';
+
+            const updateText = d.ModifiedBy ? (formatTime(d.ModifiedAt) + '<br><small>oleh ' + escapeHtml(d.ModifiedBy) + '</small>') : '-';
+            html += '<td class="muted">' + updateText + '</td></tr>';
+          });
+          html += '</table>';
+        } else {
+          html += '<p class="muted">Belum ada donatur.</p>';
+        }
+
+        html += '</div></div>';
+
+        let modalContainer = document.getElementById('admin-modal');
+        if (!modalContainer) {
+          modalContainer = document.createElement('div');
+          modalContainer.id = 'admin-modal';
+          document.body.appendChild(modalContainer);
+        }
+        modalContainer.innerHTML = html;
+      })
+      .catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function closeEditAmountModal() {
+    const modal = document.getElementById('edit-amount-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function editAmountPaid(campaignId, whatsapp, currentAmount) {
+    let modal = document.getElementById('edit-amount-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'edit-amount-modal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
+          <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeEditAmountModal()">&times;</button>
+          <h3 style="margin-top:0;">Edit Nominal Transfer</h3>
+          <p class="muted" id="edit-amount-desc"></p>
+          <label>Nominal Aktual (IDR)</label>
+          <input type="text" id="edit-amount-input" inputmode="numeric" onkeyup="formatInputRibuan(event)" placeholder="Contoh: 1.000.000">
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn secondary" onclick="closeEditAmountModal()">Batal</button>
+            <button class="btn blue" id="edit-amount-save">Simpan</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    document.getElementById('edit-amount-desc').textContent = 'Masukkan nominal yang benar untuk ' + whatsapp + ':';
+    
+    // Set default value and format it immediately
+    const inputEl = document.getElementById('edit-amount-input');
+    let initialVal = '';
+    if (currentAmount && currentAmount !== 'undefined' && currentAmount !== 'null') {
+      initialVal = Number(currentAmount).toLocaleString('id-ID');
+    }
+    inputEl.value = initialVal;
+    
+    modal.style.display = 'flex';
+    inputEl.focus();
+
+    document.getElementById('edit-amount-save').onclick = function() {
+      const rawStr = inputEl.value;
+      const amount = parseRibuan(rawStr);
+      if (isNaN(amount) || rawStr.trim() === '') {
+        showInfoModal('Nominal tidak valid.', 'Peringatan');
+        return;
+      }
+      
+      closeEditAmountModal();
+      
+      callQueued('updateDonorPaidAmountAdmin', currentToken(), campaignId, whatsapp, amount)
+        .then(() => {
+          showToast('Data berhasil diperbarui!');
+          adminView(campaignId);
+          refreshSummary('sa-summary');
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    };
+  }
+
+  function adminArchive(id) {
+    showConfirmModal('Arsipkan campaign ini?', () => {
+      callQueued('setCampaignStatusAdmin', currentToken(), id, 'Archived')
+        .then(() => { refreshAdminCampaigns(); if (document.getElementById('sa-campaign-list')) refreshSACampaigns(); })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function adminDelete(id) {
+    showConfirmModal('Hapus campaign ini secara permanen? Tidak bisa dibatalkan.', () => {
+      callQueued('deleteCampaignAdmin', currentToken(), id)
+        .then(() => { refreshAdminCampaigns(); if (document.getElementById('sa-campaign-list')) refreshSACampaigns(); })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  // ---------- SUPER ADMIN FLOW ----------
+  function loadSuperAdminDashboard() {
+    showView('superadmin-dashboard');
+    refreshSummary('sa-summary');
+    call('getSettingsForSuperAdmin', currentToken()).then(s => {
+      document.getElementById('sa-rounding').checked = String(s.EnableRounding).toUpperCase() === 'TRUE';
+      document.getElementById('sa-roundto').value = s.RoundToNearest || 500;
+      document.getElementById('sa-validation').checked = String(s.RequireMemberValidation).toUpperCase() === 'TRUE';
+    });
+    refreshMembers();
+    refreshAdmins(); // NEW: Load Admin List
+    refreshPendingMembers('sa-pending-members'); // NEW: Load SA Pending List
+    refreshLateRequests('sa-late-donors'); // NEW: Load SA Late Donors
+    refreshSACampaigns();
+  }
+
+  function runDataSweep() {
+    const msgEl = document.getElementById('sa-sweep-msg');
+    msgEl.innerHTML = '<span class="muted">Sweeping database...</span>';
+
+    call('sweepArchivedData', currentToken())
+      .then(msg => {
+        msgEl.innerHTML = '<div class="success">✓ ' + msg + '</div>';
+        refreshSACampaigns();
+      })
+      .catch(e => msgEl.innerHTML = '<div class="error">' + (e.message || e) + '</div>');
+  }
+
+  function saveSettings() {
+    const settings = {
+      EnableRounding: document.getElementById('sa-rounding').checked ? 'TRUE' : 'FALSE',
+      RoundToNearest: document.getElementById('sa-roundto').value || '500',
+      RequireMemberValidation: document.getElementById('sa-validation').checked ? 'TRUE' : 'FALSE'
+    };
+    call('updateSettings', currentToken(), settings).then(() => {
+      document.getElementById('sa-settings-msg').innerHTML = '<div class="success">Pengaturan disimpan.</div>';
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function genAdminToken() {
+    const alias = document.getElementById('sa-admin-alias').value.trim();
+
+    // Guardrail: Ensure SuperAdmin doesn't accidentally generate a token without an alias
+    if (!alias) {
+      showInfoModal('Silakan isi Alias Admin terlebih dahulu.', 'Peringatan');
+      return;
+    }
+
+    // Call the backend function and pass the alias
+    call('generateAdminToken', currentToken(), alias).then(tok => {
+      document.getElementById('sa-new-token').innerHTML =
+        '<p class="success">✓ Token Admin (' + escapeHtml(alias) + ') berhasil dibuat:</p>' +
+        '<div class="token-box">' + tok + '</div>';
+
+      // Clear the input box after success
+      document.getElementById('sa-admin-alias').value = '';
+      // Refresh the admin list so the new token appears immediately
+      refreshAdmins();
+    }).catch(e => {
+      document.getElementById('sa-new-token').innerHTML = '<p class="error">Gagal membuat token: ' + escapeHtml(e.message || String(e)) + '</p>';
+      showInfoModal(e.message || String(e), 'Error');
+    });
+  }
+
+  function refreshMembers() {
+    call('fetchAllMembers', currentToken()).then(list => {
+      // Filter out deleted members so they are hidden from the UI
+      const activeList = list.filter(m => {
+        const st = String(m.Status).toLowerCase();
+        return st !== 'deleted' && st !== 'rejected';
+      });
+      
+      let html = '';
+      if (!activeList.length) {
+        html = '<p class="muted">Belum ada member terdaftar.</p>';
+      } else {
+        const isSuperAdmin = safeGet('auth_role') === 'SuperAdmin';
+        html = '<table><tr><th>Nama</th><th>WA</th><th>Role</th><th>Status</th><th>Terakhir Diupdate</th>' + (isSuperAdmin ? '<th>Aksi</th>' : '') + '</tr>';
+        activeList.forEach(m => {
+          html += '<tr><td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
+          html += '<td><span class="badge">' + escapeHtml(m.Role || 'Member') + '</span></td><td>';
+          html += '<select id="status-' + m.WhatsApp + '" style="margin-top:0;" onchange="updateMemberStatusUI(\'' + m.WhatsApp + '\')">';
+          ['Active', 'Ex', 'Pending'].forEach(st => {
+            html += '<option value="' + st.toLowerCase() + '"' + (String(m.Status).toLowerCase() === st.toLowerCase() ? ' selected' : '') + '>' + st + '</option>';
+          });
+          html += '</select></td>';
+          
+          const updateText = m.ModifiedBy ? (formatTime(m.ModifiedAt) + '<br><small>oleh ' + escapeHtml(m.ModifiedBy) + '</small>') : '-';
+          html += '<td class="muted">' + updateText + '</td>';
+
+          if (isSuperAdmin) {
+            html += '<td><div class="action-group">';
+            html += '<button class="btn danger" onclick="removeMemberUI(\'' + m.WhatsApp + '\')" style="padding:6px 10px; font-size:11px;" title="Hapus Member">Hapus</button>';
+            if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
+              html += '<button class="btn green" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')" style="padding:6px 10px; font-size:11px;" title="Jadikan Admin">+ Admin</button>';
+            }
+            if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
+              html += '<button class="btn blue" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')" style="padding:6px 10px; font-size:11px;" title="Jadikan PIC">+ PIC</button>';
+            }
+            html += '</div></td>';
+          }
+          html += '</tr>';
+        });
+        html += '</table>';
+      }
+
+      const role = safeGet('auth_role');
+      if (role === 'Admin') {
+        const elAdmin = document.getElementById('admin-member-list');
+        if (elAdmin) elAdmin.innerHTML = html;
+      } else if (role === 'SuperAdmin') {
+        const elSA = document.getElementById('sa-member-list');
+        if (elSA) elSA.innerHTML = html;
+      }
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function updateMemberStatusUI(wa) {
+    const sel = document.getElementById('status-' + wa);
+    if (!sel) return;
+    const newStatus = sel.value;
+    sel.disabled = true; // Block UI until queued action resolves
+    callQueued('adminUpdateMemberStatus', currentToken(), wa, newStatus)
+      .then(() => {
+        sel.disabled = false;
+        showToast('Status berhasil diupdate.');
+        refreshMembers();
+        refreshPendingMembers(safeGet('auth_role') === 'SuperAdmin' ? 'sa-pending-members' : 'admin-pending-members');
+      })
+      .catch(e => {
+        sel.disabled = false;
+        showInfoModal(e.message || String(e), 'Error');
+      });
+  }
+
+  function assignMemberRoleUI(wa, role) {
+    showConfirmModal('Jadikan member ini sebagai ' + role + '?', () => {
+      call('superAdminAssignMemberRole', currentToken(), wa, role)
+        .then(res => {
+          if (res.error) throw new Error(res.error);
+          showToast(res.message);
+          refreshMembers();
+          if (role === 'Admin') refreshAdmins();
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  // NEW: Instantly filter the table without calling the backend
+  function filterMembers(listId, searchId) {
+    const input = document.getElementById(searchId).value.toLowerCase();
+
+    // Grab all rows in the member table EXCEPT the header row
+    const rows = document.querySelectorAll('#' + listId + ' table tr:not(:first-child)');
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      // If the row contains the typed text, show it. Otherwise, hide it.
+      row.style.display = text.includes(input) ? '' : 'none';
+    });
+  }
+
+  function addMemberUI() {
+    const name = document.getElementById('sa-mem-name').value.trim();
+    const wa = document.getElementById('sa-mem-wa').value.trim();
+    const status = document.getElementById('sa-mem-status').value;
+    call('addMember', currentToken(), name, wa, status).then(() => {
+      document.getElementById('sa-mem-name').value = '';
+      document.getElementById('sa-mem-wa').value = '';
+      refreshMembers();
+    }).catch(e => document.getElementById('sa-member-msg').innerHTML = '<div class="error">' + (e.message || e) + '</div>');
+  }
+
+  function removeMemberUI(wa) {
+    showConfirmModal('Hapus member ini?', () => {
+      callQueued('removeMember', currentToken(), wa).then(() => {
+        showToast('Member berhasil dihapus.');
+        refreshMembers();
+        refreshPendingMembers(safeGet('auth_role') === 'SuperAdmin' ? 'sa-pending-members' : 'admin-pending-members');
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function refreshSACampaigns() {
+    call('listAllCampaigns', currentToken()).then(list => {
+      document.getElementById('sa-campaign-list').innerHTML = renderAdminCampaignTable(list);
+    });
+  }
+
+  // ---------- UTIL ----------
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ---------- INIT ----------
+  (function init() {
+    const user = safeGet('donor_user');
+    const token = safeGet('auth_token');
+    const role = safeGet('auth_role');
+    if (token && role) {
+      if (role === 'PIC') loadPicDashboard();
+      else if (role === 'Admin') loadAdminDashboard();
+      else if (role === 'SuperAdmin') loadSuperAdminDashboard();
+    } else if (user) {
+      loadUserDashboard();
+    } else {
+      showView('landing');
+    }
+  })();
+  function seamlessLoginAsPic(token) {
+    safeSet('auth_token', token);
+    safeSet('auth_role', 'PIC');
+    loadPicDashboard();
+  }
+
+  function returnToMemberDashboard() {
+    safeRemove('auth_token');
+    safeRemove('auth_role');
+    loadUserDashboard();
+  }
+
+  // Initialize Flatpickr for all date inputs
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof flatpickr !== 'undefined') {
+      const maxD = new Date();
+      maxD.setMonth(maxD.getMonth() + 2);
+      
+      flatpickr("input[type='date']", {
+        dateFormat: "Y-m-d",
+        allowInput: true,
+        disableMobile: "true",
+        minDate: "today",
+        maxDate: maxD
+      });
+    }
+  });
+</script>
