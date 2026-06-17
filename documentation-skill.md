@@ -9,9 +9,9 @@
 
 **Structural Rules:**
 1. **Target Audience Separation:**
-   * **User & PIC Guide:** Focus strictly on the frontend workflow. How to navigate the UI, fill out the donor forms, search/update records, and manage daily data entry. Exclude all script or database references.
-   * **Admin Guide:** Focus strictly on the backend. Document `code.js` logic, Google Sheets column structures, data validations, and troubleshooting silent failures. Exclude standard UI entry instructions.
-   * **Rule:** Do not generate any instructions for a "Superadmin."
+   * **User & PIC Guide:** Focus purely on the frontend workflow. How to navigate the UI, fill out forms, and manage daily data entry. Accommodate non-technical users.
+   * **Admin Guide:** Focus purely on the Admin Dashboard workflow (approving members, generating tokens, basic UI troubleshooting). Explain the app's function and flow clearly. Accommodate non-technical users and exclude ALL backend, script, or database references.
+   * **Superadmin Guide:** All technical documentation (`code.js` logic, Google Sheets structures, validations, routing) is strictly reserved for the Superadmin guide.
 
 **Loop Engineering Protocol (State Machine):**
 1. **Watcher Mode:** When I type `[CHECK CHANGES]`, compare the current state of `code.js` and `index.html` against the last manual update.
@@ -20,5 +20,7 @@
 4. **The "Yes" State (Execution):** If I say "Yes," you must execute file writes for exactly TWO distinct files, written entirely in natural, humanized Bahasa Indonesia:
    * `PANDUAN_USER_PIC.md` (Panduan UI & Workflow untuk User/PIC)
    * `PANDUAN_ADMIN.md` (Panduan Backend, Script & Database untuk Admin)
-5. **Image Formatting Protocol:** When visualizing steps, use HTML injection for automatic PDF beautification. Do not use standard markdown images. Inject this exact tag, replacing the filename with a logical placeholder (e.g., `assets/admin-sheet-view.png` atau `assets/user-form-submit.png`):
-   `<img src="assets/[FILENAME_HERE].png" style="width: 100%; max-width: 600px; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: block; margin: 20px auto;">`
+5. **Image Formatting Protocol:** When visualizing steps, use HTML injection for automatic PDF beautification. Do not use standard markdown images. Inject this exact tag, replacing the filename with a logical placeholder (e.g., `assets/admin-sheet-view.svg` atau `assets/user-form-submit.svg`):
+   `<img src="assets/[FILENAME_HERE].svg" style="width: 100%; max-width: 600px; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: block; margin: 20px auto;">`
+   
+   **CRITICAL RULE:** Because these are placeholders, you MUST automatically create the corresponding `.svg` files in the `assets/` folder every time you add a new image tag. Use your file creation tools to generate a simple SVG placeholder (e.g., a styled layout box with clear text indicating the image name) so the user doesn't see a broken image icon.

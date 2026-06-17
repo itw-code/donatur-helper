@@ -28,7 +28,7 @@
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --radius: 12px;
-    
+
     /* Map old variables to new variables for HTML elements that hardcoded old styles */
     --green: var(--primary);
   }
@@ -102,7 +102,7 @@
     text-align: center;
     text-decoration: none;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   .btn-auto {
@@ -337,13 +337,14 @@
     white-space: nowrap;
   }
 
-  td .btn, th .btn {
+  td .btn,
+  th .btn {
     width: auto;
     display: inline-block;
     white-space: nowrap;
     margin: 0 !important;
   }
-  
+
   td .action-group {
     display: flex;
     flex-wrap: wrap;
@@ -351,13 +352,18 @@
   }
 
   @media (max-width: 767px) {
-    td .btn, th .btn {
-      padding: 10px 14px !important; /* Larger tap targets */
+
+    td .btn,
+    th .btn {
+      padding: 10px 14px !important;
+      /* Larger tap targets */
       font-size: 13px !important;
     }
+
     select {
       padding: 10px 12px !important;
-      font-size: 16px !important; /* Prevents iOS auto-zoom */
+      font-size: 16px !important;
+      /* Prevents iOS auto-zoom */
     }
   }
 
@@ -422,6 +428,7 @@
     font-family: inherit !important;
     font-size: 14px !important;
   }
+
   .flatpickr-current-month {
     font-size: 110% !important;
   }
@@ -444,21 +451,26 @@
     <div class="card">
       <label>No. WhatsApp</label>
       <input id="u-wa" placeholder="08xxxxxxxxxx">
-      <div style="background: rgba(0, 123, 255, 0.06); color: #0056b3; padding: 12px; border-radius: 8px; margin-top: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; border: 1px solid rgba(0, 123, 255, 0.15);">
+      <div
+        style="background: rgba(0, 123, 255, 0.06); color: #0056b3; padding: 12px; border-radius: 8px; margin-top: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; border: 1px solid rgba(0, 123, 255, 0.15);">
         <span style="font-size: 16px; line-height: 1.1;">🔒</span>
-        <span style="line-height: 1.4;"><strong>Kami menjaga privasi Anda.</strong> Nomor WhatsApp hanya digunakan untuk verifikasi akses dan pengingat donasi.</span>
+        <span style="line-height: 1.4;"><strong>Kami menjaga privasi Anda.</strong> Nomor WhatsApp hanya digunakan untuk
+          verifikasi akses dan pengingat donasi.</span>
       </div>
-      
-      <div id="u-register-fields" class="hidden" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+
+      <div id="u-register-fields" class="hidden"
+        style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
         <div style="font-weight:600; font-size:15px; margin-bottom:16px; color:var(--text);">Pendaftaran Baru</div>
         <label>Nama Lengkap</label>
         <input id="u-name" placeholder="Nama kamu">
-        <div style="font-size: 12px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; margin-bottom: 16px;">
+        <div
+          style="font-size: 12px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; margin-bottom: 16px;">
           <span style="font-size: 14px; line-height: 1;">ℹ️</span>
           <span style="line-height: 1.3;">Gunakan nama asli agar PIC mudah mengenali Anda saat mendata donasi.</span>
         </div>
         <label>Status Karyawan</label>
-        <select id="u-status" style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#fff;">
+        <select id="u-status"
+          style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#fff;">
           <option value="" disabled selected>-- Pilih Status --</option>
           <option value="active">Active (Karyawan Saat Ini)</option>
           <option value="ex">Ex (Alumni / Resign)</option>
@@ -516,13 +528,19 @@
     <div id="pic-reminder" class="card hidden"></div>
     <div id="pic-danger-zone" class="card hidden"></div>
     <button id="btn-pic-logout" class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button>
-    <button id="btn-return-admin" class="btn blue hidden" onclick="returnFromDeepDive()" style="margin-top:8px;">Kembali ke Dashboard Admin</button>
-    <button id="btn-return-member" class="btn blue hidden" onclick="returnToMemberDashboard()" style="margin-top:8px;">🔙 Kembali ke Dashboard Member</button>
+    <button id="btn-return-admin" class="btn blue hidden" onclick="returnFromDeepDive()" style="margin-top:8px;">Kembali
+      ke Dashboard Admin</button>
+    <button id="btn-return-member" class="btn blue hidden" onclick="returnToMemberDashboard()"
+      style="margin-top:8px;">🔙 Kembali ke Dashboard Member</button>
   </div>
 
   <div id="view-admin-dashboard" class="hidden">
     <h2>Dashboard Admin</h2>
     <div id="admin-summary" class="card"></div>
+    <div class="card">
+      <h2 style="margin-top:0">Semua campaign</h2>
+      <div id="admin-campaign-list"></div>
+    </div>
     <div class="card">
       <button class="btn" onclick="genPicToken()">Generate token PIC baru</button>
       <div id="admin-new-token"></div>
@@ -534,10 +552,6 @@
     <div class="card">
       <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
       <div id="admin-late-donors"></div>
-    </div>
-    <div class="card">
-      <h2 style="margin-top:0">Semua campaign</h2>
-      <div id="admin-campaign-list"></div>
     </div>
     <div class="card">
       <h2 style="margin-top:0">Daftar Members</h2>
@@ -552,6 +566,11 @@
     <h2>Dashboard Super Admin</h2>
     <div id="sa-summary" class="card"></div>
 
+    <div class="card">
+      <h2 style="margin-top:0">Semua Campaign</h2>
+      <div id="sa-campaign-list"></div>
+    </div>
+
     <!-- Approval sections — will auto-collapse if empty -->
     <div id="sa-pending-card" class="card hidden">
       <h2 style="margin-top:0">Menunggu Persetujuan Member</h2>
@@ -564,61 +583,67 @@
     </div>
 
     <!-- Full Width Data Tables -->
-        <!-- Admin Management -->
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <h2 style="margin-top:0; margin-bottom:12px;">Daftar Admin</h2>
-            <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;" onclick="document.getElementById('sa-gen-admin-form').classList.toggle('hidden')">+ Token Admin Baru</button>
-          </div>
-          <div id="sa-gen-admin-form" class="hidden" style="background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:12px; position:relative;">
-            <button style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
-            <label>Alias Admin</label>
-            <input id="sa-admin-alias" placeholder="contoh: Bela EE">
-            <button class="btn" style="margin-top:8px;" onclick="genAdminToken()">Generate token Admin baru</button>
-            <div id="sa-new-token"></div>
-          </div>
-          <div id="sa-admin-list" class="table-responsive"></div>
-        </div>
+    <!-- Admin Management -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="margin-top:0; margin-bottom:12px;">Daftar Admin</h2>
+        <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
+          onclick="document.getElementById('sa-gen-admin-form').classList.toggle('hidden')">+ Token Admin Baru</button>
+      </div>
+      <div id="sa-gen-admin-form" class="hidden"
+        style="background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:12px; position:relative;">
+        <button
+          style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
+          onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
+        <label>Alias Admin</label>
+        <input id="sa-admin-alias" placeholder="contoh: Bela EE">
+        <button class="btn" style="margin-top:8px;" onclick="genAdminToken()">Generate token Admin baru</button>
+        <div id="sa-new-token"></div>
+      </div>
+      <div id="sa-admin-list" class="table-responsive"></div>
+    </div>
 
-        <!-- Members Management -->
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <h2 style="margin-top:0; margin-bottom:12px;">Daftar Members</h2>
-            <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;" onclick="document.getElementById('sa-add-member-form').classList.toggle('hidden')">+ Tambah Member</button>
-          </div>
-          <input id="sa-search-member" placeholder="🔍 Cari nama atau nomor WA..." onkeyup="filterMembers('sa-member-list', 'sa-search-member')">
-          <div id="sa-member-list" class="table-responsive"></div>
+    <!-- Members Management -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="margin-top:0; margin-bottom:12px;">Daftar Members</h2>
+        <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
+          onclick="document.getElementById('sa-add-member-form').classList.toggle('hidden')">+ Tambah Member</button>
+      </div>
+      <input id="sa-search-member" placeholder="🔍 Cari nama atau nomor WA..."
+        onkeyup="filterMembers('sa-member-list', 'sa-search-member')">
+      <div id="sa-member-list" class="table-responsive"></div>
 
-          <div id="sa-add-member-form" class="hidden" style="background:#f9f9f9; padding:12px; border-radius:8px; margin-top:12px; position:relative;">
-            <button style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('sa-add-member-form').classList.add('hidden')">&times;</button>
-            <h3 style="margin-top:0; font-size:14px;">Tambah member manual</h3>
-            <label>Nama</label>
-            <input id="sa-mem-name" placeholder="Nama">
-            <label>No. WhatsApp</label>
-            <input id="sa-mem-wa" placeholder="08xxxxxxxxxx">
-            <label>Status</label>
-            <select id="sa-mem-status">
-              <option value="active">active</option>
-              <option value="ex">ex</option>
-            </select>
-            <button class="btn" style="margin-top:8px;" onclick="addMemberUI()">Tambah member</button>
-            <div id="sa-member-msg"></div>
-          </div>
-        </div>
+      <div id="sa-add-member-form" class="hidden"
+        style="background:#f9f9f9; padding:12px; border-radius:8px; margin-top:12px; position:relative;">
+        <button
+          style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
+          onclick="document.getElementById('sa-add-member-form').classList.add('hidden')">&times;</button>
+        <h3 style="margin-top:0; font-size:14px;">Tambah member manual</h3>
+        <label>Nama</label>
+        <input id="sa-mem-name" placeholder="Nama">
+        <label>No. WhatsApp</label>
+        <input id="sa-mem-wa" placeholder="08xxxxxxxxxx">
+        <label>Status</label>
+        <select id="sa-mem-status">
+          <option value="active">active</option>
+          <option value="ex">ex</option>
+        </select>
+        <button class="btn" style="margin-top:8px;" onclick="addMemberUI()">Tambah member</button>
+        <div id="sa-member-msg"></div>
+      </div>
+    </div>
 
-        <!-- Campaign List -->
-        <div class="card">
-          <h2 style="margin-top:0">Semua Campaign</h2>
-          <div id="sa-campaign-list"></div>
-        </div>
     <!-- Settings & Maintenance — at the bottom -->
     <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:24px;">
       <div class="card" style="flex:1; min-width:300px; margin-top:0;">
         <h2 style="margin-top:0">Pengaturan</h2>
-        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-rounding" style="width:auto;"> Aktifkan pembulatan nominal donasi</label>
+        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-rounding"
+            style="width:auto;"> Aktifkan pembulatan nominal donasi</label>
         <label>Bulatkan ke kelipatan (IDR)</label>
         <input id="sa-roundto" type="number" placeholder="500">
-        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-validation" style="width:auto;"> Wajib cocok dengan daftar Members (validasi WhatsApp)</label>
+        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-validation"
+            style="width:auto;"> Wajib cocok dengan daftar Members (validasi WhatsApp)</label>
         <button class="btn" style="margin-top:8px;" onclick="saveSettings()">Simpan pengaturan</button>
         <div id="sa-settings-msg"></div>
       </div>
@@ -708,7 +733,7 @@
     }
     document.getElementById('custom-confirm-message').textContent = message;
     modal.style.display = 'flex';
-    document.getElementById('custom-confirm-ok').onclick = function() {
+    document.getElementById('custom-confirm-ok').onclick = function () {
       modal.style.display = 'none';
       onConfirm();
     };
@@ -773,6 +798,7 @@
   }
 
   function refreshSummary(elId) {
+    document.getElementById(elId).innerHTML = '<div class="muted" style="padding:16px;text-align:center;">⏳ Memuat ringkasan...</div>';
     call('getDashboardSummary', currentToken()).then(s => {
       document.getElementById(elId).innerHTML = renderSummaryCard(s);
     }).catch(e => console.error(e));
@@ -786,7 +812,7 @@
       google.script.run
         .withSuccessHandler(resolve)
         .withFailureHandler(err => reject(err))
-        [fn.name](...(fn.args || []));
+      [fn.name](...(fn.args || []));
     });
   }
 
@@ -796,7 +822,7 @@
 
   function processWriteQueue() {
     if (isWriting || writeQueue.length === 0) return;
-    
+
     isWriting = true;
     const task = writeQueue.shift();
 
@@ -822,7 +848,7 @@
         task.reject(e);
         processWriteQueue();
       })
-      [task.name](...task.args);
+    [task.name](...task.args);
   }
 
   function callQueued(name, ...args) {
@@ -846,7 +872,7 @@
           }
         })
         .withFailureHandler(e => reject(e))
-        [name](...args);
+      [name](...args);
     });
   }
 
@@ -870,7 +896,7 @@
     const wa = document.getElementById('u-wa').value.trim();
     const errEl = document.getElementById('u-login-error');
     const registerFields = document.getElementById('u-register-fields');
-    
+
     if (!wa) {
       errEl.textContent = 'Harap isi Nomor WhatsApp.';
       return;
@@ -904,7 +930,7 @@
     const name = document.getElementById('u-name').value.trim();
     const statusSel = document.getElementById('u-status');
     const empStatus = statusSel ? statusSel.value : '';
-    
+
     if (!name) {
       errEl.textContent = 'Harap isi Nama Lengkap.';
       return;
@@ -1132,7 +1158,7 @@
         html += '<label>Nominal Khusus (IDR)</label>';
         html += '<input id="input-custom-' + c.campaignId + '" type="text" inputmode="numeric" placeholder="Contoh: 100.000" onkeyup="formatInputRibuan(event)">';
         html += '</div>';
-        
+
         html += '<label style="margin-top:12px;"><input type="checkbox" id="check-alias-' + c.campaignId + '" onchange="document.getElementById(\'wrap-alias-\' + \'' + c.campaignId + '\').classList.toggle(\'hidden\')" style="width:auto;"> Sembunyikan Nama Asli (Gunakan Alias)</label>';
         html += '<div id="wrap-alias-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
         html += '<label>Nama Alias / Samaran</label>';
@@ -1290,13 +1316,13 @@
     const token = document.getElementById('t-token').value.trim();
     const errEl = document.getElementById('t-login-error');
     errEl.textContent = '';
-    
+
     // Wipe any lingering deep dive states from previous un-logged-out sessions
     if (isDeepDive !== true) {
       safeRemove('deep_dive_return_token');
       safeRemove('deep_dive_return_role');
     }
-    
+
     call('loginWithToken', token).then(res => {
       safeSet('auth_token', token);
       safeSet('auth_role', res.role);
@@ -1380,7 +1406,7 @@
     const dangerZone = document.getElementById('pic-danger-zone');
     if (c.Status !== 'Archived') {
       dangerZone.innerHTML = '<h3 style="margin-top:0; color:var(--red);">Danger Zone</h3>' +
-                             '<button class="btn danger" onclick="archiveThis()">Arsipkan campaign</button>';
+        '<button class="btn danger" onclick="archiveThis()">Arsipkan campaign</button>';
       dangerZone.classList.remove('hidden');
     } else {
       dangerZone.classList.add('hidden');
@@ -1424,7 +1450,7 @@
       html += '<button class="btn blue" onclick="showFinalizeForm(' + c.GiftAmount + ')">Selesaikan & input rekening</button>';
     } else if (c.Status === 'Finalized') {
       const paidCount = detail.donors.filter(d => String(d.Paid).toUpperCase() === 'TRUE').length;
-      
+
       let totalRefund = 0;
       detail.donors.forEach(d => {
         if (String(d.Paid).toUpperCase() === 'TRUE' && d.AmountPaid) {
@@ -1432,12 +1458,12 @@
           if (diff > 0 && String(d.Refunded).toUpperCase() !== 'TRUE') totalRefund += diff;
         }
       });
-      
+
       html += '<p class="muted">' + paidCount + ' / ' + detail.donors.length + ' sudah upload bukti</p>';
       if (totalRefund > 0) {
         html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
       }
-      
+
       if (!isAchieved) {
         html += '<button class="btn secondary" style="margin-bottom:8px; margin-right:8px;" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
       }
@@ -1585,7 +1611,7 @@
         + '💰 Total hadiah: ' + giftText + '\n'
         + '📅 Deadline: ' + deadlineText + '\n\n'
         + '👉 Daftar di sini:\n' + shareUrl + '\n\n'
-        + '⚠️ _Buka link di browser yang sudah login akun Google ya!_';
+        + '💡 _Jika link error di HP, buka di mode *Incognito / Private* di browser Chrome/Safari._';
 
       navigator.clipboard.writeText(msg).then(() => {
         showToast('Pesan undangan berhasil di-copy! Paste ke grup WhatsApp.');
@@ -1708,10 +1734,10 @@
       const displayName = d.Alias ? d.Alias : d.Name;
       html += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
       html += '<td class="muted">' + formatTime(d.JoinedAt) + '</td>';
-      
+
       const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
       const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
-      
+
       let statusBadge = '';
       if (isVerified) {
         statusBadge = '<span class="badge success">✅ Verified</span>';
@@ -1732,15 +1758,15 @@
       let refundHtml = '-';
       const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
       let needsRefund = false;
-      
+
       if (isPaid && d.AmountPaid) {
         const diff = Number(d.AmountPaid) - Number(d.AmountDue);
         if (diff > 0) {
           needsRefund = true;
           if (isRefunded) {
-             refundHtml = '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(diff) + '</small>';
+            refundHtml = '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(diff) + '</small>';
           } else {
-             refundHtml = '<span class="badge amber" style="margin-bottom:4px;">⚠️ ' + formatIDR(diff) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>';
+            refundHtml = '<span class="badge amber" style="margin-bottom:4px;">⚠️ ' + formatIDR(diff) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>';
           }
         }
       }
@@ -1768,7 +1794,7 @@
 
       html += '</tr>';
     });
-    
+
     // Add total tagihan row
     let totalTagihan = 0;
     detail.donors.forEach(d => {
@@ -1819,7 +1845,7 @@
     call('getCampaignForPic', currentToken()).then(detail => {
       let customCount = 0;
       let proRata = 0;
-      
+
       detail.donors.forEach(d => {
         if (Number(d.CustomAmount) > 0) {
           customCount++;
@@ -1837,7 +1863,7 @@
       }
       text += summaryText + "\n\n";
       text += "*Daftar Donatur:*\n";
-      
+
       detail.donors.forEach((d, i) => {
         const displayName = d.Alias ? d.Alias : d.Name;
         let suffix = " ✅";
@@ -1846,14 +1872,14 @@
         }
         text += (i + 1) + ". " + displayName + suffix + "\n";
       });
-      
+
       const el = document.createElement('textarea');
       el.value = text;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
-      
+
       if (detail.campaign.GiftImage) {
         showInfoModal('Laporan berhasil di-copy! Jangan lupa untuk copy/download gambar barang dan paste ke WhatsApp bersama laporan ini.', 'Sukses');
       } else {
@@ -1965,32 +1991,44 @@
       }
       let html = '<table><tr><th>Alias</th><th>WhatsApp</th><th>Token</th><th>Status</th><th>Aksi</th></tr>';
       list.forEach(a => {
-        const wa = (a.CreatedBy && (a.CreatedBy.startsWith('62') || a.CreatedBy.startsWith('08'))) ? a.CreatedBy : '-';
+        const waStr = String(a.CreatedBy || '');
+        const wa = (waStr && (waStr.startsWith('62') || waStr.startsWith('08'))) ? waStr : '-';
         html += '<tr><td>' + escapeHtml(a.Alias || '-') + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace;">' + escapeHtml(a.TokenID) + '</td><td>' + statusBadge(a.Status) + '</td>';
+        html += '<td style="white-space:nowrap;">';
         if (a.Status === 'Active') {
-          html += '<td><button class="btn danger" style="padding:4px 8px; margin:0; font-size:12px;" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button></td>';
+          html += '<button class="btn secondary" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button>';
         } else {
-          html += '<td><button class="btn green" style="padding:4px 8px; margin:0; font-size:12px;" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button></td>';
+          html += '<button class="btn green" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button>';
         }
-        html += '</tr>';
+        html += '<button class="btn danger" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="deleteAdmin(\'' + a.TokenID + '\')">Hapus</button>';
+        html += '</td></tr>';
       });
       html += '</table>';
       el.innerHTML = html;
-    });
+    }).catch(e => console.error('Admin list error:', e));
   }
 
   function revokeAdmin(id) {
     showConfirmModal('Nonaktifkan Admin ini? Mereka tidak akan bisa login lagi.', () => {
-        call('revokeAdminToken', currentToken(), id).then(refreshAdmins).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      call('revokeAdminToken', currentToken(), id).then(refreshAdmins).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function deleteAdmin(id) {
+    showConfirmModal('Hapus Admin ini secara permanen dari database?', () => {
+      call('deleteAdminToken', currentToken(), id).then(() => {
+        showToast('Admin berhasil dihapus permanen.');
+        refreshAdmins();
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
   }
 
   function reactivateAdmin(id) {
     showConfirmModal('Aktifkan kembali Admin ini?', () => {
-        call('reactivateAdminToken', currentToken(), id).then(() => {
-          showToast('Admin berhasil diaktifkan kembali.');
-          refreshAdmins();
-        }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      call('reactivateAdminToken', currentToken(), id).then(() => {
+        showToast('Admin berhasil diaktifkan kembali.');
+        refreshAdmins();
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
   }
 
@@ -2002,6 +2040,7 @@
   }
 
   function refreshAdminCampaigns() {
+    document.getElementById('admin-campaign-list').innerHTML = '<div class="muted" style="padding:16px;text-align:center;">⏳ Memuat daftar campaign...</div>';
     call('listAllCampaigns', currentToken()).then(list => {
       document.getElementById('admin-campaign-list').innerHTML = renderAdminCampaignTable(list);
     });
@@ -2010,22 +2049,54 @@
   function renderAdminCampaignTable(list) {
     const role = safeGet('auth_role');
     if (!list.length) return '<p class="muted">Belum ada campaign.</p>';
-    let html = '<table><tr><th>Target</th><th>Status</th><th>PIC</th><th>Donatur</th><th>Terakhir Diupdate</th><th>Aksi</th></tr>';
+
+    list.sort((a, b) => {
+      // 1. Group by active vs completed
+      const isActiveA = (a.Status === 'Open' || a.Status === 'Closed') ? 1 : 0;
+      const isActiveB = (b.Status === 'Open' || b.Status === 'Closed') ? 1 : 0;
+      if (isActiveA !== isActiveB) return isActiveB - isActiveA;
+
+      // 2. Sort by Deadline within the same group
+      const deadlineA = a.Deadline ? new Date(a.Deadline).getTime() : Infinity;
+      const deadlineB = b.Deadline ? new Date(b.Deadline).getTime() : Infinity;
+      if (deadlineA !== deadlineB) return deadlineA - deadlineB;
+
+      // 3. Fallback to CreatedAt
+      const createdA = a.CreatedAt ? new Date(a.CreatedAt).getTime() : Infinity;
+      const createdB = b.CreatedAt ? new Date(b.CreatedAt).getTime() : Infinity;
+      return createdA - createdB;
+    });
+
+    let html = '<table><tr><th>Target</th><th>Status</th><th>Sisa Waktu</th><th>PIC</th><th>Donatur</th><th>Terakhir Diupdate</th><th>Aksi</th></tr>';
     list.forEach(c => {
+      let durationHtml = '-';
+      if (c.Deadline && c.Status !== 'Archived') {
+        const diffDays = Math.ceil((new Date(c.Deadline) - new Date()) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) {
+          durationHtml = '<span style="color:var(--red); font-weight:bold;">🔴 Terlewat ' + Math.abs(diffDays) + ' hari</span>';
+        } else if (diffDays <= 2) {
+          durationHtml = '<span style="color:var(--amber); font-weight:bold;">🟠 ' + (diffDays === 0 ? 'Hari ini!' : diffDays + ' hari lagi') + '</span>';
+        } else {
+          durationHtml = '<span style="color:var(--green);">🟢 ' + diffDays + ' hari lagi</span>';
+        }
+      }
+
       html += '<tr><td>' + escapeHtml(c.TargetName) + '</td><td>' + statusBadge(c.Status) + '</td>';
+      html += '<td style="white-space:nowrap;">' + durationHtml + '</td>';
       html += '<td>' + escapeHtml(c.picName || '-') + '</td>';
       html += '<td>' + c.paidCount + '/' + c.donorCount + '</td>';
-      
+
       const updateText = c.ModifiedBy ? (formatTime(c.ModifiedAt) + '<br><small>oleh ' + escapeHtml(c.ModifiedBy) + '</small>') : '-';
       html += '<td class="muted">' + updateText + '</td>';
       html += '<td style="white-space:nowrap;">';
 
       html += '<button class="btn secondary" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="adminView(\'' + c.CampaignID + '\')">Lihat</button> ';
 
+      if (c.Status !== 'Archived') {
+        html += '<button class="btn amber" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="adminArchive(\'' + c.CampaignID + '\')">Arsipkan</button> ';
+      }
+
       if (role === 'SuperAdmin') {
-        if (c.Status !== 'Archived') {
-          html += '<button class="btn amber" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="adminArchive(\'' + c.CampaignID + '\')">Arsipkan</button> ';
-        }
         html += '<button class="btn danger" style="padding:4px 8px; margin:0; font-size:12px;" onclick="adminDelete(\'' + c.CampaignID + '\')">Hapus</button>';
       }
 
@@ -2057,7 +2128,7 @@
             if (diff > 0 && String(d.Refunded).toUpperCase() !== 'TRUE') totalRefund += diff;
           }
         });
-        
+
         html += '<strong>Target: ' + escapeHtml(c.TargetName) + '</strong> ' + statusBadge(c.Status) + '<br>';
         html += '<p class="muted">Total Hadiah: ' + formatIDR(c.GiftAmount) + ' &middot; ' + detail.donors.length + ' donatur</p>';
         if (totalRefund > 0) {
@@ -2072,7 +2143,7 @@
             html += '<tr><td>' + escapeHtml(displayName) + '<br><small>' + (String(d.Paid).toUpperCase() === 'TRUE' ? '<span style="color:var(--green);">Lunas</span>' : '<span style="color:var(--amber);">Belum</span>') + '</small></td>';
             html += '<td>' + escapeHtml(d.WhatsApp) + '</td>';
             html += '<td>' + formatIDR(d.AmountDue) + '</td>';
-            
+
             let paidText = d.AmountPaid ? formatIDR(d.AmountPaid) : '(Kosong)';
             html += '<td>' + paidText + ' <button class="link-btn" style="font-size:12px; margin-left:4px;" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">✏️</button></td>';
 
@@ -2123,9 +2194,9 @@
       `;
       document.body.appendChild(modal);
     }
-    
+
     document.getElementById('edit-amount-desc').textContent = 'Masukkan nominal yang benar untuk ' + whatsapp + ':';
-    
+
     // Set default value and format it immediately
     const inputEl = document.getElementById('edit-amount-input');
     let initialVal = '';
@@ -2133,20 +2204,20 @@
       initialVal = Number(currentAmount).toLocaleString('id-ID');
     }
     inputEl.value = initialVal;
-    
+
     modal.style.display = 'flex';
     inputEl.focus();
 
-    document.getElementById('edit-amount-save').onclick = function() {
+    document.getElementById('edit-amount-save').onclick = function () {
       const rawStr = inputEl.value;
       const amount = parseRibuan(rawStr);
       if (isNaN(amount) || rawStr.trim() === '') {
         showInfoModal('Nominal tidak valid.', 'Peringatan');
         return;
       }
-      
+
       closeEditAmountModal();
-      
+
       callQueued('updateDonorPaidAmountAdmin', currentToken(), campaignId, whatsapp, amount)
         .then(() => {
           showToast('Data berhasil diperbarui!');
@@ -2244,7 +2315,7 @@
         const st = String(m.Status).toLowerCase();
         return st !== 'deleted' && st !== 'rejected';
       });
-      
+
       let html = '';
       if (!activeList.length) {
         html = '<p class="muted">Belum ada member terdaftar.</p>';
@@ -2259,7 +2330,7 @@
             html += '<option value="' + st.toLowerCase() + '"' + (String(m.Status).toLowerCase() === st.toLowerCase() ? ' selected' : '') + '>' + st + '</option>';
           });
           html += '</select></td>';
-          
+
           const updateText = m.ModifiedBy ? (formatTime(m.ModifiedAt) + '<br><small>oleh ' + escapeHtml(m.ModifiedBy) + '</small>') : '-';
           html += '<td class="muted">' + updateText + '</td>';
 
@@ -2357,6 +2428,7 @@
   }
 
   function refreshSACampaigns() {
+    document.getElementById('sa-campaign-list').innerHTML = '<div class="muted" style="padding:16px;text-align:center;">⏳ Memuat daftar campaign...</div>';
     call('listAllCampaigns', currentToken()).then(list => {
       document.getElementById('sa-campaign-list').innerHTML = renderAdminCampaignTable(list);
     });
@@ -2397,11 +2469,11 @@
   }
 
   // Initialize Flatpickr for all date inputs
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     if (typeof flatpickr !== 'undefined') {
       const maxD = new Date();
       maxD.setMonth(maxD.getMonth() + 2);
-      
+
       flatpickr("input[type='date']", {
         dateFormat: "Y-m-d",
         allowInput: true,

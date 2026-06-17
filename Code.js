@@ -1611,6 +1611,8 @@ function listAllCampaigns(adminToken) {
       picName: picName,
       donorCount: cDonors.length,
       paidCount: paidCount,
+      Deadline: c.Deadline instanceof Date ? c.Deadline.toISOString().split('T')[0] : (c.Deadline || ''),
+      CreatedAt: c.CreatedAt instanceof Date ? c.CreatedAt.toISOString() : (c.CreatedAt || ''),
       ModifiedBy: c.ModifiedBy || '',
       ModifiedAt: c.ModifiedAt instanceof Date ? c.ModifiedAt.toISOString() : (c.ModifiedAt || '')
     };
@@ -1863,6 +1865,25 @@ function reactivateAdminToken(token, tokenId) {
     if (!tok) throw new Error('Token Admin tidak ditemukan.');
 
     sheet_(SHEETS.TOKENS).getRange(tok._row, headerIndex_(SHEETS.TOKENS, 'Status') + 1).setValue('Active');
+    SpreadsheetApp.flush();
+    return true;
+  } catch (e) {
+    return { error: e.message || String(e) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// 8b. SuperAdmin: Delete an Admin Token
+function deleteAdminToken(token, tokenId) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    if (!checkSuperAdmin_(token)) throw new Error('Not authorized');
+    const tok = getRows_(SHEETS.TOKENS).find(t => t.TokenID === tokenId);
+    if (!tok) throw new Error('Token Admin tidak ditemukan.');
+
+    deleteRowsWhere_(SHEETS.TOKENS, 'TokenID', tokenId);
     SpreadsheetApp.flush();
     return true;
   } catch (e) {
