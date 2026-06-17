@@ -121,6 +121,48 @@ function doGet(e) {
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
+function doPost(e) {
+  var data;
+  try {
+    data = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: 'Invalid JSON payload'
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  var action = data.action;
+  var params = data.params || [];
+  if (!Array.isArray(params)) {
+    params = [params];
+  }
+  
+  try {
+    if (typeof this[action] !== 'function') {
+      throw new Error('Backend function "' + action + '" is missing or private.');
+    }
+    
+    var result = this[action].apply(this, params);
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      data: result
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: err.message || String(err)
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doOptions(e) {
+  return ContentService.createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
 // ====================== GENERIC HELPERS ======================
 
 function sheet_(name) {

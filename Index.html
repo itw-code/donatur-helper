@@ -662,15 +662,19 @@
 <div id="toast">Teks berhasil di-copy!</div>
 
 <script>
+  // Replace with your Google Apps Script /exec URL
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzt4dyTtpTZhAXYleHJ6bC0na7jAfJpJft_sIfN0nReNtC9751ltMGKE07zMqAr-9rQZA/exec";
+
   // Check for shared campaign link on load
   let targetCampaignId = null;
-  google.script.url.getLocation(function (loc) {
-    if (loc.hash && loc.hash.startsWith('c=')) {
-      targetCampaignId = loc.hash.substring(2);
-    } else if (loc.parameters.c && loc.parameters.c.length > 0) {
-      targetCampaignId = loc.parameters.c[0];
-    }
-  });
+  const hash = window.location.hash;
+  const urlParams = new URLSearchParams(window.location.search);
+
+  if (hash && hash.startsWith('#c=')) {
+    targetCampaignId = hash.substring(3);
+  } else if (urlParams.has('c')) {
+    targetCampaignId = urlParams.get('c');
+  }
 
   function showToast(message) {
     const toast = document.getElementById('toast');
@@ -804,16 +808,30 @@
     }).catch(e => console.error(e));
   }
 
-  function run(fn) {
-    return new Promise((resolve, reject) => {
-      if (!fn || !fn.name || typeof google.script.run[fn.name] !== 'function') {
-        return reject(new Error('Backend function "' + (fn ? fn.name : 'undefined') + '" is missing or private.'));
+  function fetchBackend(name, args) {
+    return fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: name, params: args }),
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
       }
-      google.script.run
-        .withSuccessHandler(resolve)
-        .withFailureHandler(err => reject(err))
-      [fn.name](...(fn.args || []));
-    });
+    })
+      .then(response => response.json())
+      .then(res => {
+        if (res.status === 'error') throw new Error(res.message);
+        if (res.data && typeof res.data === 'object' && res.data.error) {
+          throw new Error(res.data.error);
+        }
+        return res.data;
+      });
+  }
+
+  function run(fn) {
+    if (!fn || !fn.name) {
+      return Promise.reject(new Error('Backend function is missing or invalid.'));
+    }
+    return fetchBackend(fn.name, fn.args || []);
   }
 
   // --- API WRITE QUEUE SYSTEM ---
@@ -826,29 +844,17 @@
     isWriting = true;
     const task = writeQueue.shift();
 
-    if (typeof google.script.run[task.name] !== 'function') {
-      isWriting = false;
-      task.reject(new Error('Backend function "' + task.name + '" is missing or private.'));
-      processWriteQueue();
-      return;
-    }
-
-    google.script.run
-      .withSuccessHandler(res => {
+    fetchBackend(task.name, task.args)
+      .then(res => {
         isWriting = false;
-        if (res && typeof res === 'object' && res.error) {
-          task.reject(new Error(res.error));
-        } else {
-          task.resolve(res);
-        }
+        task.resolve(res);
         processWriteQueue();
       })
-      .withFailureHandler(e => {
+      .catch(e => {
         isWriting = false;
         task.reject(e);
         processWriteQueue();
-      })
-    [task.name](...task.args);
+      });
   }
 
   function callQueued(name, ...args) {
@@ -859,21 +865,7 @@
   }
 
   function call(name, ...args) {
-    return new Promise((resolve, reject) => {
-      if (typeof google.script.run[name] !== 'function') {
-        return reject(new Error('Backend function "' + name + '" is missing or private.'));
-      }
-      google.script.run
-        .withSuccessHandler(res => {
-          if (res && typeof res === 'object' && res.error) {
-            reject(new Error(res.error));
-          } else {
-            resolve(res);
-          }
-        })
-        .withFailureHandler(e => reject(e))
-      [name](...args);
-    });
+    return fetchBackend(name, args);
   }
 
   // ---------- USER FLOW ----------
@@ -1600,23 +1592,25 @@
     const c = _picCampaignData;
     if (!c) { showToast('Data campaign belum tersedia.'); return; }
 
-    call('getWebAppUrl').then(url => {
-      const shareUrl = url + '#c=' + c.CampaignID;
-      const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Ditentukan nanti';
-      const deadlineText = c.Deadline || '-';
+    // Use the current Netlify/Frontend URL instead of asking the backend
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = baseUrl + '#c=' + c.CampaignID;
+    const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Ditentukan nanti';
+    const deadlineText = c.Deadline || '-';
 
-      const msg = '🎁 *Yuk Patungan Donasi!*\n\n'
-        + '👤 Untuk: *' + c.TargetName + '*\n'
-        + (c.Reason ? '💬 Alasan: ' + c.Reason + '\n' : '')
-        + '💰 Total hadiah: ' + giftText + '\n'
-        + '📅 Deadline: ' + deadlineText + '\n\n'
-        + '👉 Daftar di sini:\n' + shareUrl + '\n\n'
-        + '💡 _Jika link error di HP, buka di mode *Incognito / Private* di browser Chrome/Safari._';
+    const msg = '🎁 *Yuk Patungan Donasi!*\n\n'
+      + '👤 Untuk: *' + c.TargetName + '*\n'
+      + (c.Reason ? '💬 Alasan: ' + c.Reason + '\n' : '')
+      + '💰 Total hadiah: ' + giftText + '\n'
+      + '📅 Deadline: ' + deadlineText + '\n\n'
+      + '👉 Daftar di sini:\n' + shareUrl;
 
-      navigator.clipboard.writeText(msg).then(() => {
-        showToast('Pesan undangan berhasil di-copy! Paste ke grup WhatsApp.');
-      });
-    }).catch(e => showToast('Gagal mengambil URL'));
+    navigator.clipboard.writeText(msg).then(() => {
+      showToast('Pesan undangan berhasil di-copy! Paste ke grup WhatsApp.');
+    }).catch(e => {
+      showToast('Gagal meng-copy pesan.');
+      console.error(e);
+    });
   }
 
   function closeList() {
