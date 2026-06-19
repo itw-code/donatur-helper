@@ -521,7 +521,7 @@ function closeCampaignList(picToken) {
 function reopenCampaignList(picToken) {
   const tok = requirePicCampaign_(picToken);
   const detail = getCampaignDetail_(tok.LinkedCampaignID);
-  if (detail.campaign.Status !== 'Closed') throw new Error('Campaign sedang tidak dalam status Closed.');
+  if (detail.campaign.Status !== 'Closed' && detail.campaign.Status !== 'Finalized') throw new Error('Campaign sedang tidak dalam status Closed atau Finalized.');
   setCampaignField_(tok.LinkedCampaignID, 'Status', 'Open');
   return getCampaignDetail_(tok.LinkedCampaignID);
 }
@@ -542,8 +542,8 @@ function finalizeCampaign(picToken, bankInfo, finalGiftAmount, fileData) {
     const campaign = detail.campaign;
     const donors = detail.donors;
 
-    if (campaign.Status === 'Finalized' || campaign.Status === 'Archived') {
-      throw new Error('Campaign sudah difinalisasi sebelumnya.');
+    if (campaign.Status === 'Archived') {
+      throw new Error('Campaign sudah diarsipkan.');
     }
     if (donors.length === 0) throw new Error('Belum ada yang join, tidak bisa difinalisasi.');
     if (!bankInfo.bankName || !bankInfo.bankAccount || !bankInfo.accountHolder) {
@@ -2012,4 +2012,23 @@ function getUserPicCampaigns(whatsapp) {
     if (b.status === 'Draft' && a.status !== 'Draft') return 1;
     return 0;
   });
+}
+
+// ====================== ADMIN: RECALCULATE CAMPAIGN ======================
+function adminRecalculateCampaign(adminToken, campaignId) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
+    
+    // Recalculates AmountDue without altering existing payment proofs (AmountPaid, Paid, Verified status)
+    recalculateCampaignMath_(campaignId);
+    
+    SpreadsheetApp.flush();
+    return { success: true, message: 'Math recalculated successfully.' };
+  } catch (e) {
+    return { error: e.message || String(e) };
+  } finally {
+    lock.releaseLock();
+  }
 }

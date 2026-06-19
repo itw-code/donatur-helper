@@ -2115,6 +2115,10 @@
         }
 
         const c = detail.campaign;
+
+        if (c.Status === 'Finalized') {
+          html += '<button class="btn amber" style="margin-bottom:12px; margin-left:8px;" onclick="adminRecalculateUI(\'' + c.CampaignID + '\')">Recalculate Donor Split</button>';
+        }
         let totalRefund = 0;
         detail.donors.forEach(d => {
           if (String(d.Paid).toUpperCase() === 'TRUE' && d.AmountPaid) {
@@ -2160,6 +2164,18 @@
         modalContainer.innerHTML = html;
       })
       .catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function adminRecalculateUI(campaignId) {
+    showConfirmModal('Yakin ingin melakukan Recalculate Donor Split? Ini akan menghitung ulang dan mengubah tagihan (Amount Due) seluruh donatur pada campaign ini.', () => {
+      // Calls the requested backend function and handles loading queue
+      callQueued('adminRecalculateCampaign', currentToken(), campaignId)
+        .then(() => {
+          showToast('Kalkulasi ulang berhasil.');
+          adminView(campaignId); // Refresh the UI to show updated AmountDue
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
   }
 
   function closeEditAmountModal() {
