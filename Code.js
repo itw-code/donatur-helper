@@ -56,7 +56,7 @@ function setupDatabase() {
   Object.keys(HEADERS).forEach(name => {
     let sh = ss.getSheetByName(name);
     if (!sh) sh = ss.insertSheet(name);
-    
+
     const expectedHeaders = HEADERS[name];
     if (sh.getLastRow() === 0) {
       sh.appendRow(expectedHeaders);
@@ -131,25 +131,25 @@ function doPost(e) {
       message: 'Invalid JSON payload'
     })).setMimeType(ContentService.MimeType.JSON);
   }
-  
+
   var action = data.action;
   var params = data.params || [];
   if (!Array.isArray(params)) {
     params = [params];
   }
-  
+
   try {
     if (typeof this[action] !== 'function') {
       throw new Error('Backend function "' + action + '" is missing or private.');
     }
-    
+
     var result = this[action].apply(this, params);
-    
+
     return ContentService.createTextOutput(JSON.stringify({
       status: 'success',
       data: result
     })).setMimeType(ContentService.MimeType.JSON);
-    
+
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({
       status: 'error',
@@ -657,25 +657,40 @@ function archiveCampaign(picToken) {
  * Returns a ready-to-copy bulk reminder message for the WhatsApp group, plus
  * per-person wa.me deep links for unpaid donors only.
  */
-function getReminderInfo(picToken) {
+function getReminderInfo(picToken, baseUrl) {
   const tok = requirePicCampaign_(picToken);
   const detail = getCampaignDetail_(tok.LinkedCampaignID);
   const campaign = detail.campaign;
-  if (campaign.Status !== 'Finalized') throw new Error('Campaign belum difinalisasi.');
+  
+  if (!baseUrl) {
+    try {
+      baseUrl = ScriptApp.getService().getUrl();
+    } catch(e) {
+      baseUrl = "https://script.google.com/macros/s/AKfycbzt4dyTtpTZhAXYleHJ6bC0na7jAfJpJft_sIfN0nReNtC9751ltMGKE07zMqAr-9rQZA/exec";
+    }
+  }
+
+  // Ensure Campaign URL contains campaign query param
+  const shareUrl = baseUrl.indexOf('?') === -1 
+    ? baseUrl + '?c=' + campaign.CampaignID 
+    : baseUrl + '&c=' + campaign.CampaignID;
+
+  let bulkMessage = '';
+  
+  if (campaign.Status === 'Open' || campaign.Status === 'Closed') {
+    bulkMessage = generatePreRegistrationMessage_(campaign, detail.donors, shareUrl);
+  } else if (campaign.Status === 'Finalized') {
+    const unpaid = detail.donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
+    if (unpaid.length > 0) {
+      bulkMessage = generateGroupBillingReminder_(campaign, detail.donors, shareUrl);
+    } else {
+      bulkMessage = generateGratitudeMessage_(campaign, detail.donors);
+    }
+  } else {
+    throw new Error('Status campaign tidak didukung untuk membuat reminder.');
+  }
 
   const unpaid = detail.donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
-  const names = unpaid.map(d => d.Name);
-
-  const bulkLines = [
-    `Halo semua, reminder donasi untuk "${campaign.TargetName}".`,
-    `Yang belum konfirmasi transfer (${unpaid.length} orang):`,
-    names.length ? '- ' + names.join('\n- ') : '(semua sudah konfirmasi, terima kasih!)',
-    '',
-    `Silakan transfer sesuai nominal masing-masing ke:`,
-    `${campaign.BankName} ${campaign.BankAccount} a.n. ${campaign.AccountHolder}`,
-    `Lalu submit bukti transfer lewat web ini ya. Terima kasih!`
-  ];
-
   const personal = unpaid.map(d => ({
     name: d.Name,
     whatsapp: d.WhatsApp,
@@ -687,20 +702,176 @@ function getReminderInfo(picToken) {
     )
   }));
 
-  return { bulkMessage: bulkLines.join('\n'), personal: personal, unpaidCount: unpaid.length, totalDonors: detail.donors.length };
+  return { bulkMessage: bulkMessage, personal: personal, unpaidCount: unpaid.length, totalDonors: detail.donors.length };
 }
+
+function generatePreRegistrationMessage_(campaign, donors, webUrl) {
+  const donorNames = donors.map(d => d.Alias ? d.Alias : d.Name);
+  const deadlineText = campaign.Deadline || '-';
+  
+  const lines = [
+    `🎁 *Yuk Patungan Donasi!*`,
+    ``,
+    `👤 Untuk: *${campaign.TargetName}*` + (campaign.Reason ? `\n💬 Alasan: ${campaign.Reason}` : ''),
+    `📅 Batas akhir pendaftaran: ${deadlineText}`,
+    ``,
+    `Yuk, segera gabung dan klik "Count me in" melalui link dashboard ini:`,
+    webUrl,
+    ``,
+    `Rekan-rekan yang sudah gabung (${donors.length} orang):`
+  ];
+  
+  if (donorNames.length) {
+    donorNames.forEach(name => lines.push(`- ${name}`));
+  } else {
+    lines.push(`(belum ada, yuk jadi yang pertama!)`);
+  }
+  
+  return lines.join('\n');
+}
+
+function generateGroupBillingReminder_(campaign, donors, webUrl) {
+  const unpaid = donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
+  const unpaidLines = unpaid.map(d => {
+    const displayName = d.Alias ? d.Alias : d.Name;
+    const isCustom = Number(d.CustomAmount) > 0;
+    return `- ${displayName}` + (isCustom ? ` (Rp${formatNumber_(d.AmountDue)} - Nominal Bebas)` : ` (Rp${formatNumber_(d.AmountDue)})`);
+  });
+
+  const totalGift = Number(campaign.GiftAmount) || 0;
+  const totalDonors = donors.length;
+  
+  // Math breakdowns for Custom vs Standard
+  let customDonors = donors.filter(d => Number(d.CustomAmount) > 0);
+  let customSum = customDonors.reduce((sum, d) => sum + Number(d.CustomAmount), 0);
+  let customCount = customDonors.length;
+  let standardCount = totalDonors - customCount;
+  
+  let standardAmount = 0;
+  let firstStandard = donors.find(d => !d.CustomAmount || Number(d.CustomAmount) <= 0);
+  if (firstStandard) {
+    standardAmount = Number(firstStandard.AmountDue) || 0;
+  }
+
+  const detailLines = [
+    `Detail Patungan:`,
+    `* Total Nilai Hadiah: Rp${formatNumber_(totalGift)}`,
+    `* Total Donatur: ${totalDonors} orang`
+  ];
+
+  if (customCount > 0) {
+    const remainingGoal = Math.max(0, totalGift - customSum);
+    detailLines.push(`  (Terdapat ${customCount} donatur nominal bebas dengan total Rp${formatNumber_(customSum)})`);
+    detailLines.push(`* Sisa target patungan: Rp${formatNumber_(remainingGoal)}`);
+    detailLines.push(`* Tagihan per orang standard (untuk ${standardCount} orang): Rp${formatNumber_(standardAmount)}`);
+  } else {
+    detailLines.push(`* Tagihan per orang: Rp${formatNumber_(standardAmount)}`);
+  }
+
+  const lines = [
+    `Halo semua, reminder transfer donasi untuk "${campaign.TargetName}"` + (campaign.Reason ? ` (${campaign.Reason})` : '') + `.`,
+    ``,
+    `Rekan-rekan yang belum konfirmasi transfer (${unpaid.length} orang):`,
+    unpaidLines.length ? unpaidLines.join('\n') : '(semua sudah konfirmasi transfer, terima kasih!)',
+    ``,
+    detailLines.join('\n'),
+    ``,
+    `Silakan transfer ke rekening target:`,
+    `👉 ${campaign.BankName} ${campaign.BankAccount} a.n. ${campaign.AccountHolder}`,
+    ``,
+    `Setelah transfer, mohon unggah bukti di web:`,
+    webUrl,
+    ``,
+    `Terima kasih!`
+  ];
+  return lines.join('\n');
+}
+
+function generateGratitudeMessage_(campaign, donors) {
+  const totalGift = Number(campaign.GiftAmount) || 0;
+  const donorNames = donors.map(d => d.Alias ? d.Alias : d.Name);
+  
+  const customDonors = donors.filter(d => Number(d.CustomAmount) > 0);
+  const customSum = customDonors.reduce((sum, d) => sum + Number(d.CustomAmount), 0);
+  const customCount = customDonors.length;
+
+  const lines = [
+    `Alhamdulillah! Kegiatan donasi untuk "${campaign.TargetName}"` + (campaign.Reason ? ` (${campaign.Reason})` : '') + ` dengan total nilai hadiah Rp${formatNumber_(totalGift)} telah selesai dan semua pembayaran telah diverifikasi.`,
+    ``
+  ];
+
+  if (customCount > 0) {
+    lines.push(`*Catatan: Termasuk total donasi nominal bebas sebesar Rp${formatNumber_(customSum)} dari ${customCount} donatur.*`);
+    lines.push(``);
+  }
+
+  lines.push(`Terima kasih banyak atas ketulusan dan partisipasi dari ${donors.length} rekan-rekan donatur:`);
+  if (donorNames.length) {
+    donorNames.forEach(name => lines.push(`- ${name}`));
+  } else {
+    lines.push(`- (tidak ada donatur)`);
+  }
+  lines.push(``);
+  lines.push(`Semoga kebaikan rekan-rekan dibalas dengan kelimpahan. Hadiah akan segera diserahkan oleh PIC.`);
+  
+  return lines.join('\n');
+}
+
+function runReminderTests() {
+  const mockCampaign = {
+    CampaignID: "C-TEST1",
+    TargetName: "Test Target",
+    Reason: "Resign",
+    GiftAmount: 1000000,
+    Deadline: "2026-07-01",
+    Status: "Open",
+    BankName: "BCA",
+    BankAccount: "123456",
+    AccountHolder: "Test Holder"
+  };
+  
+  const mockDonors = [
+    { Name: "Donor A", WhatsApp: "6281", DonorStatus: "Pledged", Paid: "FALSE", AmountDue: 400000 },
+    { Name: "Donor B", WhatsApp: "6282", DonorStatus: "Pledged", Paid: "TRUE", AmountDue: 200000, CustomAmount: 200000 },
+    { Name: "Donor C", WhatsApp: "6283", DonorStatus: "Pledged", Paid: "FALSE", AmountDue: 400000, Alias: "Hamba Allah" }
+  ];
+  
+  // Test Pre-Registration Message
+  const invite = generatePreRegistrationMessage_(mockCampaign, mockDonors, "http://mock?c=C-TEST1");
+  if (!invite.includes("Test Target") || !invite.includes("Donor A") || !invite.includes("Hamba Allah")) {
+    throw new Error("Pre-Registration template generation failed");
+  }
+  
+  // Test Billing Reminder Message (with Custom Pledge)
+  mockCampaign.Status = "Finalized";
+  const bill = generateGroupBillingReminder_(mockCampaign, mockDonors, "http://mock?c=C-TEST1");
+  if (!bill.includes("Hamba Allah") || !bill.toLowerCase().includes("nominal bebas") || !bill.includes("BCA 123456")) {
+    throw new Error("Group Billing template generation failed");
+  }
+  
+  // Test Gratitude Message
+  const mockAllPaid = mockDonors.map(d => ({ ...d, Paid: "TRUE" }));
+  const thanks = generateGratitudeMessage_(mockCampaign, mockAllPaid);
+  if (!thanks.includes("Test Target") || !thanks.includes("Hamba Allah") || !thanks.includes("Rp200.000")) {
+    throw new Error("Gratitude template generation failed");
+  }
+  
+  console.log("ALL REMINDER TEST CASES PASSED!");
+  return "ALL REMINDER TEST CASES PASSED!";
+}
+
 
 // ====================== USER FUNCTIONS ======================
 
 function checkDonorWhatsApp(whatsapp) {
   whatsapp = normalizePhone_(whatsapp);
   if (!whatsapp) throw new Error('Nomor WhatsApp wajib diisi.');
-  
+
   const members = getRows_(SHEETS.MEMBERS);
   const existingMember = members.find(m => normalizePhone_(m.WhatsApp) === whatsapp);
-  
+
   const requireValidation = String(getSetting('RequireMemberValidation')).toUpperCase() === 'TRUE';
-  
+
   if (existingMember) {
     if (requireValidation) {
       const currentStatus = String(existingMember.Status).toLowerCase();
@@ -714,7 +885,7 @@ function checkDonorWhatsApp(whatsapp) {
     // Successfully verified / logged in
     return { exists: true, name: existingMember.Name, whatsapp: whatsapp, verified: true, status: existingMember.Status };
   }
-  
+
   return { exists: false };
 }
 
@@ -847,12 +1018,12 @@ function joinCampaign(campaignId, name, whatsapp, customAmount, alias) {
       if (customCol > 0) {
         sh.getRange(existing._row, customCol).setValue(finalCustomAmount > 0 ? finalCustomAmount : '');
       }
-      
+
       let aliasCol = headerIndex_(SHEETS.DONORS, 'Alias') + 1;
       if (aliasCol > 0) {
         sh.getRange(existing._row, aliasCol).setValue(alias || '');
       }
-      
+
       return true;
     }
 
@@ -905,22 +1076,22 @@ function submitPaymentProof(campaignId, whatsapp, fileData) {
 function requestLateDonor(picToken, donorName, donorWhatsApp, isCustom, customAmount, reason, realRequestorToken, donorAlias) {
   const tok = requirePicCampaign_(picToken);
   const campaignId = tok.LinkedCampaignID;
-  
+
   // By default, assume it's just the PIC submitting
   let picAlias = 'PIC';
   const campObj = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);
   if (campObj) picAlias = 'PIC (' + campObj.TargetName + ')';
-  
+
   // If Deep Dive is active, the frontend sends the real token
   if (realRequestorToken) {
     const rTok = findToken_(realRequestorToken, 'SuperAdmin') || findToken_(realRequestorToken, 'Admin');
     if (rTok) picAlias = rTok.Role === 'SuperAdmin' ? 'SuperAdmin' : 'Admin (' + (rTok.Alias || 'No Alias') + ')';
   }
-  
+
   const sh = sheet_(SHEETS.LATE_REQUESTS);
   const reqId = 'REQ-' + Utilities.getUuid().split('-')[0].toUpperCase();
   const cAmt = isCustom ? (Number(customAmount) || 0) : '';
-  
+
   sh.appendRow([reqId, campaignId, picAlias, donorName.trim(), normalizePhone_(donorWhatsApp), isCustom ? 'TRUE' : 'FALSE', cAmt, reason.trim(), 'Pending', new Date(), donorAlias || '']);
   return { success: true, reqId: reqId };
 }
@@ -930,15 +1101,15 @@ function fixLateRequestsDB() {
   if (!sh) return;
   const data = sh.getDataRange().getValues();
   if (data.length < 2) return;
-  
+
   const expectedHeaders = HEADERS.LateRequests;
   const currentHeaders = data[0].map(h => String(h).trim());
-  
+
   // If headers perfectly match, no need to fix
   if (expectedHeaders.join(',') === currentHeaders.join(',')) {
     return;
   }
-  
+
   const newData = [expectedHeaders];
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
@@ -946,25 +1117,25 @@ function fixLateRequestsDB() {
     if (String(row[8]).trim() === 'Pending' || String(row[8]).trim() === 'Approved' || String(row[8]).trim() === 'Rejected') {
       // It's the new format!
       newData.push(row);
-    } 
+    }
     // Check if it's the old format (9 columns, col index 7 is 'Pending')
     else if (String(row[7]).trim() === 'Pending' || String(row[7]).trim() === 'Approved' || String(row[7]).trim() === 'Rejected') {
       // It's the old format. Insert an empty string for PIC_Alias at index 2
       const newRow = [...row];
-      newRow.splice(2, 0, ''); 
+      newRow.splice(2, 0, '');
       newData.push(newRow);
     } else {
       // Unknown format, try to preserve as best as possible
       newData.push(row);
     }
   }
-  
+
   // Ensure every row has exactly expectedHeaders.length columns to avoid jagged array errors in setValues
   for (let i = 0; i < newData.length; i++) {
     while (newData[i].length < expectedHeaders.length) newData[i].push('');
     if (newData[i].length > expectedHeaders.length) newData[i] = newData[i].slice(0, expectedHeaders.length);
   }
-  
+
   // Overwrite the sheet
   sh.clear();
   sh.getRange(1, 1, newData.length, expectedHeaders.length).setValues(newData);
@@ -972,17 +1143,17 @@ function fixLateRequestsDB() {
 
 function getPendingLateRequests(adminToken) {
   if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
-  
+
   // Auto-fix DB before reading
   fixLateRequestsDB();
-  
+
   const reqs = getRows_(SHEETS.LATE_REQUESTS).filter(r => String(r.Status).trim() === 'Pending');
   const campaigns = getRows_(SHEETS.CAMPAIGNS);
-  
+
   // Remove duplicates based on DonorWhatsApp + CampaignID for pending requests
   const uniqueReqs = [];
   const seen = new Set();
-  
+
   for (const r of reqs) {
     const key = r.CampaignID + '_' + r.DonorWhatsApp;
     if (!seen.has(key)) {
@@ -993,7 +1164,7 @@ function getPendingLateRequests(adminToken) {
       sheet_(SHEETS.LATE_REQUESTS).getRange(rowNum, headerIndex_(SHEETS.LATE_REQUESTS, 'Status') + 1).setValue('Duplicate');
     }
   }
-  
+
   return uniqueReqs.map(r => {
     const camp = campaigns.find(c => c.CampaignID === r.CampaignID) || {};
     // CRITICAL: google.script.run silently converts objects containing Date to NULL.
@@ -1004,7 +1175,7 @@ function getPendingLateRequests(adminToken) {
     } else if (r.CreatedAt) {
       createdAtStr = String(r.CreatedAt);
     }
-    
+
     return {
       reqId: String(r.RequestID || ''),
       campaignId: String(r.CampaignID || ''),
@@ -1028,7 +1199,7 @@ function approveLateDonor(adminToken, reqId, isApproved) {
     const sh = sheet_(SHEETS.LATE_REQUESTS);
     const req = getRows_(SHEETS.LATE_REQUESTS).find(r => r.RequestID === reqId && r.Status === 'Pending');
     if (!req) throw new Error('Request tidak ditemukan atau sudah diproses.');
-    
+
     if (!isApproved) {
       sh.getRange(req._row, headerIndex_(SHEETS.LATE_REQUESTS, 'Status') + 1).setValue('Rejected');
       SpreadsheetApp.flush();
@@ -1037,14 +1208,14 @@ function approveLateDonor(adminToken, reqId, isApproved) {
 
     const campaignId = req.CampaignID;
     const donorPhone = req.DonorWhatsApp;
-    
+
     // Auto-register member if not exists
     const memSheet = sheet_(SHEETS.MEMBERS);
     const existingMem = getRows_(SHEETS.MEMBERS).find(m => normalizePhone_(m.WhatsApp) === donorPhone);
     if (!existingMem) {
       memSheet.appendRow([req.DonorName, donorPhone, 'active', 'Admin-LateApprove', new Date()]);
     }
-    
+
     // Inject donor
     const donSheet = sheet_(SHEETS.DONORS);
     const existingDonor = getRows_(SHEETS.DONORS).find(d => d.CampaignID === campaignId && normalizePhone_(d.WhatsApp) === donorPhone);
@@ -1055,7 +1226,7 @@ function approveLateDonor(adminToken, reqId, isApproved) {
 
     // Recalculate everything
     recalculateCampaignMath_(campaignId);
-    
+
     // Update request status
     sh.getRange(req._row, headerIndex_(SHEETS.LATE_REQUESTS, 'Status') + 1).setValue('Approved');
     SpreadsheetApp.flush();
@@ -1085,6 +1256,7 @@ function recalculateCampaignMath_(campaignId) {
 
   allDonorRows.forEach(d => {
     let customVal = Number(d.CustomAmount) || 0;
+    if (customVal <= 0 && Number(d.AmountPaid) > 0) customVal = Number(d.AmountPaid);
     if (customVal > 0) { customSum += customVal; } else { regularCount++; }
   });
   let remainingGoal = finalGiftAmount - customSum;
@@ -1096,6 +1268,7 @@ function recalculateCampaignMath_(campaignId) {
   allDonorRows.forEach(d => {
     let finalAmount = 0;
     let customVal = Number(d.CustomAmount) || 0;
+    if (customVal <= 0 && Number(d.AmountPaid) > 0) customVal = Number(d.AmountPaid);
     if (customVal > 0) {
       finalAmount = customVal;
     } else {
@@ -1181,7 +1354,7 @@ function migrateDatabases_() {
       }
     } else {
       for (let i = 1; i < dataMem.length; i++) {
-        if (!dataMem[i][roleIdx]) updates.push({row: i + 1, col: roleIdx + 1, val: 'Member'});
+        if (!dataMem[i][roleIdx]) updates.push({ row: i + 1, col: roleIdx + 1, val: 'Member' });
       }
       updates.forEach(u => shMem.getRange(u.row, u.col).setValue(u.val));
     }
@@ -1195,7 +1368,7 @@ function migrateDatabases_() {
     let vfIdx = headers.indexOf('Verified');
     let rfIdx = headers.indexOf('Refunded');
     let added = false;
-    
+
     if (vfIdx === -1) {
       vfIdx = headers.length;
       shDon.getRange(1, vfIdx + 1).setValue('Verified');
@@ -1206,14 +1379,14 @@ function migrateDatabases_() {
       shDon.getRange(1, rfIdx + 1).setValue('Refunded');
       added = true;
     }
-    
+
     if (added && dataDon.length > 1) {
       // Initialize with FALSE
       const range = shDon.getRange(2, vfIdx + 1, dataDon.length - 1, 2);
       range.setValues(new Array(dataDon.length - 1).fill(['FALSE', 'FALSE']));
     }
   }
-  
+
   // 3. Late Requests DB Setup
   getOrCreateSheet_(SHEETS.LATE_REQUESTS, ['RequestID', 'CampaignID', 'DonorWhatsApp', 'DonorName', 'DonorAlias', 'Reason', 'IsCustom', 'CustomAmount', 'Status', 'CreatedAt']);
 }
@@ -1222,37 +1395,37 @@ function migrateDatabases_() {
 function fixLateRequestsDB() {
   const sh = sheet_(SHEETS.LATE_REQUESTS);
   const expectedHeaders = ['RequestID', 'CampaignID', 'PIC_Alias', 'DonorWhatsApp', 'DonorName', 'DonorAlias', 'Reason', 'IsCustom', 'CustomAmount', 'Status', 'CreatedAt'];
-  
+
   const data = sh.getDataRange().getValues();
   if (!data || data.length === 0) return;
-  
+
   const currentHeaders = data[0].map(h => String(h).trim());
   if (currentHeaders.length === expectedHeaders.length && currentHeaders.join(',') === expectedHeaders.join(',')) {
     return; // Already fixed
   }
-  
+
   const newData = [expectedHeaders];
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
     // Check if it's the new format written blindly (10 columns, col index 8 is 'Pending')
     if (String(row[8]).trim() === 'Pending' || String(row[8]).trim() === 'Approved' || String(row[8]).trim() === 'Rejected') {
       newData.push(row);
-    } 
+    }
     // Check if it's the old format (9 columns, col index 7 is 'Pending')
     else if (String(row[7]).trim() === 'Pending' || String(row[7]).trim() === 'Approved' || String(row[7]).trim() === 'Rejected') {
       const newRow = [...row];
-      newRow.splice(2, 0, ''); 
+      newRow.splice(2, 0, '');
       newData.push(newRow);
     } else {
       newData.push(row);
     }
   }
-  
+
   for (let i = 0; i < newData.length; i++) {
     while (newData[i].length < expectedHeaders.length) newData[i].push('');
     if (newData[i].length > expectedHeaders.length) newData[i] = newData[i].slice(0, expectedHeaders.length);
   }
-  
+
   sh.clear();
   sh.getRange(1, 1, newData.length, expectedHeaders.length).setValues(newData);
 }
@@ -1348,6 +1521,7 @@ function recalculateCampaignMath_(campaignId) {
   let regularCount = 0;
   allDonorRows.forEach(d => {
     let customVal = Number(d.CustomAmount) || 0;
+    if (customVal <= 0 && Number(d.AmountPaid) > 0) customVal = Number(d.AmountPaid);
     if (customVal > 0) { customSum += customVal; } else { regularCount++; }
   });
   let remainingGoal = finalGiftAmount - customSum;
@@ -1357,6 +1531,7 @@ function recalculateCampaignMath_(campaignId) {
   allDonorRows.forEach(d => {
     let finalAmount = 0;
     let customVal = Number(d.CustomAmount) || 0;
+    if (customVal <= 0 && Number(d.AmountPaid) > 0) customVal = Number(d.AmountPaid);
     if (customVal > 0) {
       finalAmount = customVal;
     } else {
@@ -1371,10 +1546,10 @@ function recalculateCampaignMath_(campaignId) {
 function getUserPicCampaigns(whatsapp) {
   whatsapp = normalizePhone_(whatsapp);
   const tokens = getRows_(SHEETS.TOKENS).filter(t => t.Role === 'PIC' && normalizePhone_(t.CreatedBy) === whatsapp && t.Status !== 'Expired');
-  
+
   const campaigns = getRows_(SHEETS.CAMPAIGNS);
   const result = [];
-  
+
   tokens.forEach(t => {
     if (!String(t.LinkedCampaignID || '').trim()) {
       result.push({
@@ -1393,7 +1568,7 @@ function getUserPicCampaigns(whatsapp) {
       }
     }
   });
-  
+
   return result.sort((a, b) => {
     if (a.status === 'Draft' && b.status !== 'Draft') return -1;
     if (b.status === 'Draft' && a.status !== 'Draft') return 1;
@@ -1552,10 +1727,10 @@ function addMember(token, name, wa, status) {
     wa = normalizePhone_(wa);
     name = String(name || '').trim();
     if (!name || !wa) throw new Error('Nama dan WhatsApp wajib diisi.');
-    
+
     const existing = getRows_(SHEETS.MEMBERS).find(m => normalizePhone_(m.WhatsApp) === wa);
     if (existing) throw new Error('Member dengan nomor WhatsApp ini sudah ada.');
-    
+
     sheet_(SHEETS.MEMBERS).appendRow([name, wa, status || 'active', 'SuperAdmin', new Date(), 'Member']);
     return true;
   } finally {
@@ -1569,11 +1744,11 @@ function removeMember(token, wa) {
   try {
     if (!checkSuperAdmin_(token)) throw new Error('Not authorized');
     wa = normalizePhone_(wa);
-    
+
     const sh = sheet_(SHEETS.MEMBERS);
     const existing = getRows_(SHEETS.MEMBERS).find(m => normalizePhone_(m.WhatsApp) === wa);
     if (!existing) throw new Error('Member tidak ditemukan.');
-    
+
     sh.getRange(existing._row, headerIndex_(SHEETS.MEMBERS, 'Status') + 1).setValue('deleted');
     return true;
   } finally {
@@ -1595,11 +1770,11 @@ function updateSettings(token, settings) {
   lock.waitLock(10000);
   try {
     if (!checkSuperAdmin_(token)) throw new Error('Not authorized');
-    
+
     if (settings.EnableRounding !== undefined) setSetting('EnableRounding', settings.EnableRounding);
     if (settings.RoundToNearest !== undefined) setSetting('RoundToNearest', settings.RoundToNearest);
     if (settings.RequireMemberValidation !== undefined) setSetting('RequireMemberValidation', settings.RequireMemberValidation);
-    
+
     return true;
   } finally {
     lock.releaseLock();
@@ -1612,20 +1787,23 @@ function updateDonorPaidAmountAdmin(token, campaignId, whatsapp, amount) {
   try {
     if (!checkAdmin_(token)) throw new Error('Not authorized');
     whatsapp = normalizePhone_(whatsapp);
-    
+
     const sh = sheet_(SHEETS.DONORS);
-    const existing = getRows_(SHEETS.DONORS).find(d => 
+    const existing = getRows_(SHEETS.DONORS).find(d =>
       d.CampaignID === campaignId && normalizePhone_(d.WhatsApp) === whatsapp && d.DonorStatus === 'Pledged'
     );
     if (!existing) throw new Error('Donatur tidak ditemukan di campaign ini.');
-    
+
     sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'AmountPaid') + 1).setValue(amount);
-    
+
+    const customCol = headerIndex_(SHEETS.DONORS, 'CustomAmount') + 1;
+    if (customCol > 0) sh.getRange(existing._row, customCol).setValue(amount);
+
     const modifiedByCol = headerIndex_(SHEETS.DONORS, 'ModifiedBy') + 1;
     const modifiedAtCol = headerIndex_(SHEETS.DONORS, 'ModifiedAt') + 1;
     if (modifiedByCol > 0) sh.getRange(existing._row, modifiedByCol).setValue(getAdminAlias_(token));
     if (modifiedAtCol > 0) sh.getRange(existing._row, modifiedAtCol).setValue(new Date());
-    
+
     return true;
   } finally {
     lock.releaseLock();
@@ -1634,18 +1812,18 @@ function updateDonorPaidAmountAdmin(token, campaignId, whatsapp, amount) {
 
 function listAllCampaigns(adminToken) {
   if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
-  
+
   const campaigns = getRows_(SHEETS.CAMPAIGNS);
   const donors = getRows_(SHEETS.DONORS);
   const tokens = getRows_(SHEETS.TOKENS);
-  
+
   return campaigns.map(c => {
     const cDonors = donors.filter(d => d.CampaignID === c.CampaignID && d.DonorStatus === 'Pledged');
     const paidCount = cDonors.filter(d => String(d.Paid).toUpperCase() === 'TRUE').length;
-    
+
     const cToken = tokens.find(t => t.LinkedCampaignID === c.CampaignID && t.Role === 'PIC');
     const picName = cToken ? (cToken.Alias || cToken.CreatedBy) : '';
-    
+
     return {
       CampaignID: c.CampaignID,
       TargetName: c.TargetName,
@@ -1663,13 +1841,13 @@ function listAllCampaigns(adminToken) {
 
 function getCampaignDetailAdmin(adminToken, campaignId) {
   if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
-  
+
   const detail = getCampaignDetail_(campaignId);
   if (!detail) throw new Error('Campaign tidak ditemukan.');
-  
+
   const tokens = getRows_(SHEETS.TOKENS);
   const cToken = tokens.find(t => t.LinkedCampaignID === campaignId && t.Role === 'PIC');
-  
+
   detail.picToken = cToken ? cToken.TokenID : '';
   return detail;
 }
@@ -1679,10 +1857,10 @@ function setCampaignStatusAdmin(adminToken, campaignId, newStatus) {
   lock.waitLock(10000);
   try {
     if (!checkSuperAdmin_(adminToken)) throw new Error('Not authorized');
-    
+
     const existing = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);
     if (!existing) throw new Error('Campaign tidak ditemukan.');
-    
+
     setCampaignField_(campaignId, 'Status', newStatus);
     return true;
   } finally {
@@ -1695,11 +1873,11 @@ function deleteCampaignAdmin(adminToken, campaignId) {
   lock.waitLock(15000);
   try {
     if (!checkSuperAdmin_(adminToken)) throw new Error('Not authorized');
-    
+
     deleteRowsWhere_(SHEETS.CAMPAIGNS, 'CampaignID', campaignId);
     deleteRowsWhere_(SHEETS.DONORS, 'CampaignID', campaignId);
     deleteRowsWhere_(SHEETS.LATE_REQUESTS, 'CampaignID', campaignId);
-    
+
     const sh = sheet_(SHEETS.TOKENS);
     const tokens = getRows_(SHEETS.TOKENS);
     const cToken = tokens.find(t => t.LinkedCampaignID === campaignId && t.Role === 'PIC');
@@ -1707,7 +1885,7 @@ function deleteCampaignAdmin(adminToken, campaignId) {
       sh.getRange(cToken._row, headerIndex_(SHEETS.TOKENS, 'LinkedCampaignID') + 1).setValue('');
       sh.getRange(cToken._row, headerIndex_(SHEETS.TOKENS, 'Status') + 1).setValue('Expired');
     }
-    
+
     return true;
   } finally {
     lock.releaseLock();
@@ -1771,7 +1949,7 @@ function getWebAppUrl() {
   try {
     return ScriptApp.getService().getUrl();
   } catch (e) {
-    return "URL_BELUM_TERSEDIA"; 
+    return "URL_BELUM_TERSEDIA";
   }
 }
 
@@ -1787,10 +1965,10 @@ function generateAdminToken(superAdminToken, alias) {
 
     // Append the alias to the 7th column (G)
     sheet_(SHEETS.TOKENS).appendRow([id, 'Admin', 'Active', '', 'SuperAdmin', new Date(), String(alias)]);
-    
+
     // Force write to ensure the next immediate read fetch has the new row
     SpreadsheetApp.flush();
-    
+
     return id;
   } finally {
     lock.releaseLock();
@@ -1831,7 +2009,7 @@ function adminUpdateMemberStatus(adminToken, whatsapp, newStatus) {
     if (statusLower === 'deleted' || statusLower === 'rejected') finalStatus = statusLower;
 
     sh.getRange(existing._row, headerIndex_(SHEETS.MEMBERS, 'Status') + 1).setValue(finalStatus);
-    
+
     // Write modification audit logs
     const modifiedByCol = headerIndex_(SHEETS.MEMBERS, 'ModifiedBy') + 1;
     const modifiedAtCol = headerIndex_(SHEETS.MEMBERS, 'ModifiedAt') + 1;
@@ -1942,7 +2120,7 @@ function superAdminAssignMemberRole(token, whatsapp, newRole) {
   try {
     if (!checkSuperAdmin_(token)) throw new Error('Not authorized');
     whatsapp = normalizePhone_(whatsapp);
-    
+
     const sh = sheet_(SHEETS.MEMBERS);
     const m = getRows_(SHEETS.MEMBERS).find(r => normalizePhone_(r.WhatsApp) === whatsapp);
     if (!m) throw new Error('Member tidak ditemukan.');
@@ -1984,10 +2162,10 @@ function superAdminAssignMemberRole(token, whatsapp, newRole) {
 function getUserPicCampaigns(whatsapp) {
   whatsapp = normalizePhone_(whatsapp);
   const tokens = getRows_(SHEETS.TOKENS).filter(t => t.Role === 'PIC' && normalizePhone_(t.CreatedBy) === whatsapp && t.Status !== 'Expired');
-  
+
   const campaigns = getRows_(SHEETS.CAMPAIGNS);
   const result = [];
-  
+
   tokens.forEach(t => {
     if (!String(t.LinkedCampaignID || '').trim()) {
       result.push({
@@ -2006,7 +2184,7 @@ function getUserPicCampaigns(whatsapp) {
       }
     }
   });
-  
+
   return result.sort((a, b) => {
     if (a.status === 'Draft' && b.status !== 'Draft') return -1;
     if (b.status === 'Draft' && a.status !== 'Draft') return 1;
@@ -2020,12 +2198,112 @@ function adminRecalculateCampaign(adminToken, campaignId) {
   lock.waitLock(15000);
   try {
     if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
-    
+
     // Recalculates AmountDue without altering existing payment proofs (AmountPaid, Paid, Verified status)
+    recalculateCampaignMath_(campaignId);
+
+    SpreadsheetApp.flush();
+    return { success: true, message: 'Math recalculated successfully.' };
+  } catch (e) {
+    return { error: e.message || String(e) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ====================== ADMIN: UPDATE GIFT AMOUNT ======================
+function adminUpdateGiftAmount(adminToken, campaignId, newAmount) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    if (!checkAdmin_(adminToken)) throw new Error('Not authorized. Admin access required.');
+    
+    const existing = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);
+    if (!existing) throw new Error('Campaign tidak ditemukan.');
+    
+    newAmount = Number(newAmount);
+    if (!newAmount || newAmount <= 0) {
+      throw new Error('Nominal tidak valid.');
+    }
+    
+    setCampaignField_(campaignId, 'GiftAmount', newAmount);
+    setCampaignField_(campaignId, 'ModifiedBy', getAdminAlias_(adminToken));
+    setCampaignField_(campaignId, 'ModifiedAt', new Date());
+    
     recalculateCampaignMath_(campaignId);
     
     SpreadsheetApp.flush();
-    return { success: true, message: 'Math recalculated successfully.' };
+    return { success: true, message: 'Gift Amount updated and math recalculated successfully.' };
+  } catch (e) {
+    return { error: e.message || String(e) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ====================== ADMIN: DELETE DONOR ======================
+function adminDeleteDonor(adminToken, campaignId, donorWhatsApp) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    if (!checkAdmin_(adminToken)) throw new Error('Not authorized. Admin access required.');
+    donorWhatsApp = normalizePhone_(donorWhatsApp);
+    
+    const sh = sheet_(SHEETS.DONORS);
+    const existing = getRows_(SHEETS.DONORS).find(d => 
+      d.CampaignID === campaignId && normalizePhone_(d.WhatsApp) === donorWhatsApp
+    );
+    if (!existing) throw new Error('Donatur tidak ditemukan.');
+    
+    sh.deleteRow(existing._row);
+    recalculateCampaignMath_(campaignId);
+    
+    SpreadsheetApp.flush();
+    return { success: true, message: 'Donatur berhasil dihapus dan tagihan dihitung ulang.' };
+  } catch (e) {
+    return { error: e.message || String(e) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ====================== ADMIN: TOGGLE PAID STATUS ======================
+function adminTogglePaidStatus(adminToken, campaignId, donorWhatsApp, isPaid) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    if (!checkAdmin_(adminToken)) throw new Error('Not authorized. Admin access required.');
+    donorWhatsApp = normalizePhone_(donorWhatsApp);
+    const isPaidBool = String(isPaid).toLowerCase() === 'true';
+    
+    const sh = sheet_(SHEETS.DONORS);
+    const existing = getRows_(SHEETS.DONORS).find(d => 
+      d.CampaignID === campaignId && normalizePhone_(d.WhatsApp) === donorWhatsApp
+    );
+    if (!existing) throw new Error('Donatur tidak ditemukan.');
+    
+    const isPaidStr = isPaidBool ? 'TRUE' : 'FALSE';
+    sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Paid') + 1).setValue(isPaidStr);
+    sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Verified') + 1).setValue(isPaidStr);
+    
+    if (isPaidBool) {
+      const amountPaid = Number(existing.AmountPaid) || 0;
+      if (amountPaid === 0) {
+        const due = Number(existing.AmountDue) || 0;
+        sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'AmountPaid') + 1).setValue(due);
+        
+        const customCol = headerIndex_(SHEETS.DONORS, 'CustomAmount') + 1;
+        if (customCol > 0) sh.getRange(existing._row, customCol).setValue(due);
+      }
+    }
+    
+    const modifiedByCol = headerIndex_(SHEETS.DONORS, 'ModifiedBy') + 1;
+    const modifiedAtCol = headerIndex_(SHEETS.DONORS, 'ModifiedAt') + 1;
+    if (modifiedByCol > 0) sh.getRange(existing._row, modifiedByCol).setValue(getAdminAlias_(adminToken));
+    if (modifiedAtCol > 0) sh.getRange(existing._row, modifiedAtCol).setValue(new Date());
+    
+    SpreadsheetApp.flush();
+    return { success: true, message: 'Status pembayaran berhasil diupdate.' };
   } catch (e) {
     return { error: e.message || String(e) };
   } finally {
