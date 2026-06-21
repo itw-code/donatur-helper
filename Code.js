@@ -734,8 +734,7 @@ function generateGroupBillingReminder_(campaign, donors, webUrl) {
   const unpaid = donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
   const unpaidLines = unpaid.map(d => {
     const displayName = d.Alias ? d.Alias : d.Name;
-    const isCustom = Number(d.CustomAmount) > 0;
-    return `- ${displayName}` + (isCustom ? ` (Rp${formatNumber_(d.AmountDue)} - Nominal Bebas)` : ` (Rp${formatNumber_(d.AmountDue)})`);
+    return `* ${displayName}`;
   });
 
   const totalGift = Number(campaign.GiftAmount) || 0;
@@ -748,9 +747,16 @@ function generateGroupBillingReminder_(campaign, donors, webUrl) {
   let standardCount = totalDonors - customCount;
   
   let standardAmount = 0;
-  let firstStandard = donors.find(d => !d.CustomAmount || Number(d.CustomAmount) <= 0);
+  // Prioritize unpaid standard donors to find the live standard amount
+  let firstStandard = donors.find(d => String(d.Paid).toUpperCase() !== 'TRUE' && (!d.CustomAmount || Number(d.CustomAmount) <= 0));
   if (firstStandard) {
     standardAmount = Number(firstStandard.AmountDue) || 0;
+  } else {
+    // Fallback if all standard donors are paid
+    let anyStandard = donors.find(d => !d.CustomAmount || Number(d.CustomAmount) <= 0);
+    if (anyStandard) {
+      standardAmount = Number(anyStandard.AmountDue) || 0;
+    }
   }
 
   const detailLines = [
