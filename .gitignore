@@ -3,3 +3,9 @@ node_modules/
 .DS_Store
 # Optional: .clasp.json is usually safe to commit (it only contains scriptId and rootDir), 
 # but if you use custom authentication tokens, ignore it.
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
