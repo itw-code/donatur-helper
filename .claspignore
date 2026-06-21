@@ -3,5 +3,5 @@
 
 # Permitted files to push to Apps Script
 !Code.js
-!Index.html
+!index.html
 !appsscript.json
