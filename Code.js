@@ -116,7 +116,7 @@ function rotateSuperAdminToken() {
 // ====================== WEB APP ENTRY ======================
 
 function doGet(e) {
-  return HtmlService.createHtmlOutputFromFile('Index')
+  return HtmlService.createHtmlOutputFromFile('index')
     .setTitle('Donation Helper')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
