@@ -1165,15 +1165,20 @@
     } else if (c.status === 'Finalized') {
       if (c.joined) {
         html += '<div class="card" style="background:#e6f1fb;border:none;">';
-        html += '<strong>Jumlah yang harus ditransfer: ' + formatIDR(c.amountDue) + '</strong>';
-        html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount) + ' a.n. ' + escapeHtml(c.accountHolder) + '</p>';
+        html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin-bottom:12px;">';
+        html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
+        html += '<div style="font-size:24px; font-weight:bold; color:var(--blue);">' + formatIDR(c.amountDue) + '</div>';
+        html += '</div>';
+        html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount);
+        html += ' <button class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(c.bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">📋 Copy</button>';
+        html += ' a.n. ' + escapeHtml(c.accountHolder) + '</p>';
         if (c.paid) {
           html += '<div class="success">✓ Sudah konfirmasi transfer.</div>';
           if (c.proofLink) html += '<a class="link-btn" href="' + c.proofLink + '" target="_blank">Lihat bukti transfer</a>';
         } else {
           html += '<label>Upload bukti transfer</label>';
           html += '<input type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf">';
-          html += '<button class="btn" onclick="submitProof(\'' + c.campaignId + '\')">Sudah transfer, kirim bukti</button>';
+          html += '<button id="btn-submit-proof-' + c.campaignId + '" class="btn" onclick="submitProof(\'' + c.campaignId + '\')">Sudah transfer, kirim bukti</button>';
           html += '<div id="proof-error-' + c.campaignId + '" class="error"></div>';
         }
         html += '</div>';
@@ -1234,9 +1239,22 @@
     const user = JSON.parse(safeGet('donor_user') || 'null');
     const fileInput = document.getElementById('proof-' + campaignId);
     const errEl = document.getElementById('proof-error-' + campaignId);
+    const submitBtn = document.getElementById('btn-submit-proof-' + campaignId);
     errEl.textContent = '';
     const file = fileInput.files[0];
     if (!file) { errEl.textContent = 'Pilih file bukti transfer dulu.'; return; }
+
+    if (submitBtn) {
+      submitBtn.textContent = 'Mengunggah...';
+      submitBtn.disabled = true;
+    }
+
+    const resetBtn = () => {
+      if (submitBtn) {
+        submitBtn.textContent = 'Sudah transfer, kirim bukti';
+        submitBtn.disabled = false;
+      }
+    };
 
     // PDFs: send as-is, no compression (canvas/Image only works for images)
     if (file.type === 'application/pdf') {
@@ -1246,8 +1264,12 @@
         call('submitPaymentProof', campaignId, user.whatsapp, {
           base64: base64, mimeType: 'application/pdf', fileName: `Receipt_${campaignId}_${user.whatsapp}.pdf`
         }).then(() => refreshCampaignList())
-          .catch(e => errEl.textContent = e.message || String(e));
+          .catch(e => {
+            errEl.textContent = e.message || String(e);
+            resetBtn();
+          });
       };
+      reader.onerror = function() { errEl.textContent = 'Gagal membaca file PDF.'; resetBtn(); };
       reader.readAsDataURL(file);
       return;
     }
@@ -1255,6 +1277,7 @@
     // Images: compress before upload
     const reader = new FileReader();
     reader.readAsDataURL(file);
+    reader.onerror = function() { errEl.textContent = 'Gagal membaca file gambar.'; resetBtn(); };
     reader.onload = function (event) {
       const img = new Image();
       img.onload = function () {
@@ -1270,9 +1293,15 @@
         call('submitPaymentProof', campaignId, user.whatsapp, {
           base64: base64, mimeType: 'image/jpeg', fileName: `Receipt_${campaignId}_${user.whatsapp}.jpg`
         }).then(() => refreshCampaignList())
-          .catch(e => errEl.textContent = e.message || String(e));
+          .catch(e => {
+            errEl.textContent = e.message || String(e);
+            resetBtn();
+          });
       };
-      img.onerror = function () { errEl.textContent = 'Gagal membaca gambar, coba file lain.'; };
+      img.onerror = function () { 
+        errEl.textContent = 'Gagal membaca gambar, coba file lain.'; 
+        resetBtn();
+      };
       img.src = event.target.result;
     };
   }
@@ -1421,14 +1450,23 @@
 
     // --- SHARE MESSAGE LOGIC ---
     html += '<div style="background:#eaf3de; padding:10px; border-radius:8px; margin-bottom:12px;">';
-    if (isAchieved) {
-      html += '<strong>Target Tercapai! 🎉</strong><br>';
-      html += '<p class="muted" style="margin:4px 0;">Semua donatur sudah bayar dan terverifikasi. Bagikan laporan selesai ke grup.</p>';
-      html += '<button class="btn" style="background:var(--blue); margin-top:4px;" onclick="copyLaporanSelesai()">📋 Copy Laporan Selesai</button>';
+    if (c.Status === 'Open' || c.Status === 'Closed') {
+      html += '<strong>Bagikan Undangan Patungan:</strong><br>';
+      html += '<p class="muted" style="margin:4px 0;">Copy pesan undangan beserta daftar peserta yang sudah gabung.</p>';
+      html += '<button class="btn" style="background:var(--green); margin-top:4px;" onclick="copyPicGroupReminder()">📋 Copy Undangan Patungan</button>';
+    } else if (c.Status === 'Finalized') {
+      if (isAchieved) {
+        html += '<strong>Target Terkumpul! 🎉</strong><br>';
+        html += '<p class="muted" style="margin:4px 0;">Semua pembayaran terverifikasi. Salin pesan terima kasih untuk grup.</p>';
+        html += '<button class="btn" style="background:var(--blue); margin-top:4px;" onclick="copyPicGroupReminder()">📋 Copy Laporan Selesai (Gratitude)</button>';
+      } else {
+        html += '<strong>Tagihan Patungan (Grup):</strong><br>';
+        html += '<p class="muted" style="margin:4px 0;">Salin rincian tagihan pro-rata, nominal bebas, dan nomor rekening untuk dibagikan ke grup.</p>';
+        html += '<button class="btn" style="background:var(--amber); margin-top:4px;" onclick="copyPicGroupReminder()">📋 Copy Tagihan Patungan (Grup)</button>';
+      }
     } else {
-      html += '<strong>Bagikan ke Grup WhatsApp:</strong><br>';
-      html += '<p class="muted" style="margin:4px 0;">Copy pesan undangan lengkap beserta link campaign. Donatur perlu login ke akun Google untuk membuka link.</p>';
-      html += '<button class="btn" style="background:var(--green); margin-top:4px;" onclick="copyShareLink()">📋 Copy Pesan Undangan</button>';
+      html += '<strong>Campaign Selesai:</strong><br>';
+      html += '<p class="muted" style="margin:4px 0;">Campaign sudah selesai/diarsipkan.</p>';
     }
     html += '</div>';
     // ----------------------------
@@ -1610,6 +1648,35 @@
     }).catch(e => {
       showToast('Gagal meng-copy pesan.');
       console.error(e);
+    });
+  }
+
+  function copyPicGroupReminder() {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const btn = event.target;
+    const oldText = btn.textContent;
+    btn.textContent = "Loading...";
+    btn.disabled = true;
+
+    call('getReminderInfo', currentToken(), baseUrl).then(res => {
+      btn.textContent = oldText;
+      btn.disabled = false;
+      
+      if (!res || !res.bulkMessage) {
+        showInfoModal("Gagal menghasilkan pesan reminder.", "Error");
+        return;
+      }
+      
+      navigator.clipboard.writeText(res.bulkMessage).then(() => {
+        showToast('Pesan berhasil di-copy! Paste ke grup WhatsApp.');
+      }).catch(err => {
+        showToast('Gagal menyalin pesan.');
+        console.error(err);
+      });
+    }).catch(e => {
+      btn.textContent = oldText;
+      btn.disabled = false;
+      showInfoModal(e.message || String(e), 'Error');
     });
   }
 
@@ -2128,17 +2195,31 @@
         });
 
         html += '<strong>Target: ' + escapeHtml(c.TargetName) + '</strong> ' + statusBadge(c.Status) + '<br>';
-        html += '<p class="muted">Total Hadiah: ' + formatIDR(c.GiftAmount) + ' &middot; ' + detail.donors.length + ' donatur</p>';
+        const role = safeGet('auth_role');
+        let editGiftBtn = '';
+        if (role === 'Admin' || role === 'SuperAdmin') {
+          editGiftBtn = ' <button class="link-btn" style="font-size:12px; margin-left:4px;" onclick="adminEditGiftAmountUI(\'' + c.CampaignID + '\', \'' + c.GiftAmount + '\')">✏️ Edit</button>';
+        }
+        html += '<p class="muted">Total Hadiah: ' + formatIDR(c.GiftAmount) + editGiftBtn + ' &middot; ' + detail.donors.length + ' donatur</p>';
         if (totalRefund > 0) {
           html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
         }
         if (c.Reason) html += '<p class="muted">' + escapeHtml(c.Reason) + '</p>';
 
         if (detail.donors.length) {
-          html += '<table><tr><th>Nama</th><th>WA</th><th>Tagihan</th><th>Nominal Transfer</th><th>Terakhir Diupdate</th></tr>';
+          html += '<table><tr><th>Nama</th><th>WA</th><th>Tagihan</th><th>Nominal Transfer</th><th>Terakhir Diupdate</th>';
+          if (role === 'Admin' || role === 'SuperAdmin') {
+            html += '<th>Aksi</th>';
+          }
+          html += '</tr>';
           detail.donors.forEach(d => {
             const displayName = d.Alias ? d.Name + ' (Alias: ' + d.Alias + ')' : d.Name;
-            html += '<tr><td>' + escapeHtml(displayName) + '<br><small>' + (String(d.Paid).toUpperCase() === 'TRUE' ? '<span style="color:var(--green);">Lunas</span>' : '<span style="color:var(--amber);">Belum</span>') + '</small></td>';
+            let statusHtml = String(d.Paid).toUpperCase() === 'TRUE' ? '<span style="color:var(--green);">Lunas</span>' : '<span style="color:var(--amber);">Belum</span>';
+            if (role === 'Admin' || role === 'SuperAdmin') {
+              const newPaidStatus = String(d.Paid).toUpperCase() === 'TRUE' ? 'FALSE' : 'TRUE';
+              statusHtml += ' <button class="link-btn" style="font-size:12px; margin-left:4px;" onclick="adminTogglePaidUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + newPaidStatus + '\')">🔄</button>';
+            }
+            html += '<tr><td>' + escapeHtml(displayName) + '<br><small>' + statusHtml + '</small></td>';
             html += '<td>' + escapeHtml(d.WhatsApp) + '</td>';
             html += '<td>' + formatIDR(d.AmountDue) + '</td>';
 
@@ -2146,7 +2227,13 @@
             html += '<td>' + paidText + ' <button class="link-btn" style="font-size:12px; margin-left:4px;" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">✏️</button></td>';
 
             const updateText = d.ModifiedBy ? (formatTime(d.ModifiedAt) + '<br><small>oleh ' + escapeHtml(d.ModifiedBy) + '</small>') : '-';
-            html += '<td class="muted">' + updateText + '</td></tr>';
+            html += '<td class="muted">' + updateText + '</td>';
+            
+            if (role === 'Admin' || role === 'SuperAdmin') {
+              let deleteDonorBtn = '<button class="link-btn" style="font-size:12px; color:var(--red);" onclick="adminDeleteDonorUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\')">🗑️</button>';
+              html += '<td>' + deleteDonorBtn + '</td>';
+            }
+            html += '</tr>';
           });
           html += '</table>';
         } else {
@@ -2173,6 +2260,79 @@
         .then(() => {
           showToast('Kalkulasi ulang berhasil.');
           adminView(campaignId); // Refresh the UI to show updated AmountDue
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function closeEditGiftModal() {
+    const modal = document.getElementById('edit-gift-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function adminEditGiftAmountUI(campaignId, currentGiftAmount) {
+    let modal = document.getElementById('edit-gift-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'edit-gift-modal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
+          <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeEditGiftModal()">&times;</button>
+          <h3 style="margin-top:0;">Edit Total Hadiah</h3>
+          <p class="muted">Masukkan nominal Total Hadiah baru (IDR):</p>
+          <label>Total Hadiah</label>
+          <input type="text" id="edit-gift-input" inputmode="numeric" onkeyup="formatInputRibuan(event)" placeholder="Contoh: 1.000.000">
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn secondary" onclick="closeEditGiftModal()">Batal</button>
+            <button class="btn blue" id="edit-gift-save">Simpan</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    const inputEl = document.getElementById('edit-gift-input');
+    inputEl.value = currentGiftAmount ? Number(currentGiftAmount).toLocaleString('id-ID') : '';
+    modal.style.display = 'flex';
+    inputEl.focus();
+
+    document.getElementById('edit-gift-save').onclick = function () {
+      const rawStr = inputEl.value;
+      const newVal = parseRibuan(rawStr);
+      if (isNaN(newVal) || rawStr.trim() === '' || newVal < 0) {
+        showInfoModal('Nominal tidak valid.', 'Error');
+        return;
+      }
+      closeEditGiftModal();
+      showConfirmModal('Yakin ingin mengubah Total Hadiah menjadi ' + formatIDR(newVal) + '? (Jangan lupa Recalculate Donor Split setelah ini!)', () => {
+        callQueued('adminUpdateGiftAmount', currentToken(), campaignId, newVal)
+          .then(() => {
+            showToast('Total Hadiah berhasil diperbarui.');
+            adminView(campaignId);
+          })
+          .catch(e => showInfoModal(e.message || String(e), 'Error'));
+      });
+    };
+  }
+
+  function adminDeleteDonorUI(campaignId, whatsapp) {
+    showConfirmModal('Yakin ingin menghapus donatur ini?', () => {
+      callQueued('adminDeleteDonor', currentToken(), campaignId, whatsapp)
+        .then(() => {
+          showToast('Donatur berhasil dihapus.');
+          adminView(campaignId);
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function adminTogglePaidUI(campaignId, whatsapp, newPaidStatus) {
+    showConfirmModal('Yakin ingin mengubah status pembayaran donatur ini?', () => {
+      callQueued('adminTogglePaidStatus', currentToken(), campaignId, whatsapp, newPaidStatus)
+        .then(() => {
+          showToast('Status pembayaran berhasil diubah.');
+          adminView(campaignId);
         })
         .catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
