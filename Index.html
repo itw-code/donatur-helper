@@ -432,6 +432,51 @@
   .flatpickr-current-month {
     font-size: 110% !important;
   }
+
+  /* Milestone timeline styling */
+  .milestone-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 0;
+  }
+  .milestone-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .milestone-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+  .milestone-dot.daftar {
+    background: var(--blue);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  }
+  .milestone-dot.bayar {
+    background: var(--amber);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+  }
+  .milestone-dot.verif {
+    background: var(--primary);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  }
+  .milestone-dot.refund {
+    background: var(--red);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+  }
+  .milestone-label {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .milestone-time {
+    color: var(--muted);
+  }
 </style>
 
 <div class="wrap">
@@ -1794,10 +1839,30 @@
       html += '<tr>';
       const displayName = d.Alias ? d.Alias : d.Name;
       html += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
-      html += '<td class="muted">' + formatTime(d.JoinedAt) + '</td>';
 
       const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
       const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
+      const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
+      const picName = d.ModifiedBy ? escapeHtml(d.ModifiedBy) : '';
+      const picLabel = picName ? ' (' + picName + ')' : '';
+
+      let timeHtml = '<div class="milestone-stack">';
+      timeHtml += '<div class="milestone-item"><span class="milestone-dot daftar"></span><span class="milestone-label">Daftar:</span><span class="milestone-time">' + formatTime(d.JoinedAt) + '</span></div>';
+      if (isPaid) {
+        const payTime = d.PaidAt ? formatTime(d.PaidAt) : '-';
+        timeHtml += '<div class="milestone-item"><span class="milestone-dot bayar"></span><span class="milestone-label">Bayar:</span><span class="milestone-time">' + payTime + '</span></div>';
+      }
+      if (isVerified) {
+        const verTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
+        timeHtml += '<div class="milestone-item"><span class="milestone-dot verif"></span><span class="milestone-label">Verif' + picLabel + ':</span><span class="milestone-time">' + verTime + '</span></div>';
+      }
+      if (isRefunded) {
+        const refTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
+        timeHtml += '<div class="milestone-item"><span class="milestone-dot refund"></span><span class="milestone-label">Refund' + picLabel + ':</span><span class="milestone-time">' + refTime + '</span></div>';
+      }
+      timeHtml += '</div>';
+
+      html += '<td>' + timeHtml + '</td>';
 
       let statusBadge = '';
       if (isVerified) {
