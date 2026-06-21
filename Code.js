@@ -1294,6 +1294,7 @@ function picVerifyPayment(picToken, campaignId, whatsapp, isValid) {
     if (!tok || tok.Status === 'Expired') throw new Error('Token PIC tidak valid.');
     if (String(tok.LinkedCampaignID).trim() !== String(campaignId).trim()) throw new Error('Not authorized for this campaign');
 
+    const picAlias = tok.Alias ? String(tok.Alias).trim() : 'PIC';
     whatsapp = normalizePhone_(whatsapp);
     const sh = sheet_(SHEETS.DONORS);
     const existing = getRows_(SHEETS.DONORS).find(d =>
@@ -1306,6 +1307,11 @@ function picVerifyPayment(picToken, campaignId, whatsapp, isValid) {
       sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'ProofLink') + 1).setValue('');
       sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Verified') + 1).setValue('FALSE');
     }
+
+    const modByCol = headerIndex_(SHEETS.DONORS, 'ModifiedBy') + 1;
+    const modAtCol = headerIndex_(SHEETS.DONORS, 'ModifiedAt') + 1;
+    if (modByCol > 0) sh.getRange(existing._row, modByCol).setValue(picAlias);
+    if (modAtCol > 0) sh.getRange(existing._row, modAtCol).setValue(new Date());
 
     SpreadsheetApp.flush();
     return true;
@@ -1325,6 +1331,7 @@ function picMarkRefunded(picToken, campaignId, whatsapp) {
     if (!tok || tok.Status === 'Expired') throw new Error('Token PIC tidak valid.');
     if (String(tok.LinkedCampaignID).trim() !== String(campaignId).trim()) throw new Error('Not authorized for this campaign');
 
+    const picAlias = tok.Alias ? String(tok.Alias).trim() : 'PIC';
     whatsapp = normalizePhone_(whatsapp);
     const sh = sheet_(SHEETS.DONORS);
     const existing = getRows_(SHEETS.DONORS).find(d =>
@@ -1332,6 +1339,11 @@ function picMarkRefunded(picToken, campaignId, whatsapp) {
     if (!existing) throw new Error('Donatur tidak ditemukan.');
 
     sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Refunded') + 1).setValue('TRUE');
+
+    const modByCol = headerIndex_(SHEETS.DONORS, 'ModifiedBy') + 1;
+    const modAtCol = headerIndex_(SHEETS.DONORS, 'ModifiedAt') + 1;
+    if (modByCol > 0) sh.getRange(existing._row, modByCol).setValue(picAlias);
+    if (modAtCol > 0) sh.getRange(existing._row, modAtCol).setValue(new Date());
 
     SpreadsheetApp.flush();
     return true;
