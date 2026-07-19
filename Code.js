@@ -1966,19 +1966,21 @@ function getSettingsForSuperAdmin(token) {
   return {
     EnableRounding: String(getSetting('EnableRounding')).toUpperCase() === 'TRUE',
     RoundToNearest: Number(getSetting('RoundToNearest')) || 500,
-    RequireMemberValidation: String(getSetting('RequireMemberValidation')).toUpperCase() === 'TRUE'
+    RequireMemberValidation: String(getSetting('RequireMemberValidation')).toUpperCase() === 'TRUE',
+    AdminNotificationEmails: getSetting('AdminNotificationEmails') || ''
   };
 }
 
 function updateSettings(token, settings) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
   try {
+    lock.waitLock(10000);
     if (!checkSuperAdmin_(token)) throw new Error('Not authorized');
 
     if (settings.EnableRounding !== undefined) setSetting('EnableRounding', settings.EnableRounding);
     if (settings.RoundToNearest !== undefined) setSetting('RoundToNearest', settings.RoundToNearest);
     if (settings.RequireMemberValidation !== undefined) setSetting('RequireMemberValidation', settings.RequireMemberValidation);
+    if (settings.AdminNotificationEmails !== undefined) setSetting('AdminNotificationEmails', settings.AdminNotificationEmails);
 
     return true;
   } finally {
