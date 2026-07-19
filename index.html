@@ -581,6 +581,7 @@
 
   <div id="view-admin-dashboard" class="hidden">
     <h2>Dashboard Admin</h2>
+    <div id="admin-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <div id="admin-summary" class="card"></div>
     <div class="card">
       <h2 style="margin-top:0">Semua campaign</h2>
@@ -609,6 +610,7 @@
 
   <div id="view-superadmin-dashboard" class="hidden">
     <h2>Dashboard Super Admin</h2>
+    <div id="sa-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <div id="sa-summary" class="card"></div>
 
     <div class="card">
@@ -997,6 +999,10 @@
   }
 
   function logoutToken() {
+    if (_pollingInterval) {
+      clearInterval(_pollingInterval);
+      _pollingInterval = null;
+    }
     safeRemove('auth_token');
     safeRemove('auth_role');
     safeRemove('deep_dive_return_token');
@@ -1868,6 +1874,28 @@
 
   // Store latest PIC campaign data so copyShareLink can build a rich message
   let _picCampaignData = null;
+  let _pollingInterval = null;
+
+  function startDashboardPolling() {
+    if (_pollingInterval) clearInterval(_pollingInterval);
+    
+    const pollFunc = () => {
+      if (document.hidden) return;
+      
+      const role = safeGet('auth_role');
+      if (role === 'Admin') {
+        refreshPendingMembers('admin-pending-members');
+        refreshSummary('admin-summary');
+        refreshLateRequests('admin-late-donors');
+      } else if (role === 'SuperAdmin') {
+        refreshPendingMembers('sa-pending-members');
+        refreshSummary('sa-summary');
+        refreshLateRequests('sa-late-donors');
+      }
+    };
+    
+    _pollingInterval = setInterval(pollFunc, 60000);
+  }
 
   function copyShareLink() {
     const c = _picCampaignData;
@@ -2250,6 +2278,7 @@
     refreshLateRequests('admin-late-donors');
     refreshAdminCampaigns();
     refreshMembers();
+    startDashboardPolling();
   }
 
   // Smart function that updates whichever dashboard is currently open
@@ -2259,12 +2288,22 @@
       if (!el) return;
       // Auto-show/hide the parent card
       const parentCard = elId === 'sa-pending-members' ? document.getElementById('sa-pending-card') : null;
+      const bannerId = elId === 'sa-pending-members' ? 'sa-notify-banner' : 'admin-notify-banner';
+      const bannerEl = document.getElementById(bannerId);
+
       if (!list.length) {
         el.innerHTML = '<p class="muted">Tidak ada pendaftaran baru.</p>';
         if (parentCard) parentCard.classList.add('hidden');
+        if (bannerEl) bannerEl.classList.add('hidden');
         return;
       }
       if (parentCard) parentCard.classList.remove('hidden');
+
+      if (bannerEl) {
+        bannerEl.innerHTML = '<span>🔔 Ada ' + list.length + ' pendaftaran member baru yang memerlukan persetujuan!</span>' +
+                              '<button class="link-btn" onclick="scrollToPending(\'' + elId + '\')" style="color:white; font-size:12px; text-decoration:underline;">Lihat Detail</button>';
+        bannerEl.classList.remove('hidden');
+      }
 
       let html = '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
       html += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
@@ -2288,6 +2327,13 @@
       html += '</table></div>';
       el.innerHTML = html;
     });
+  }
+
+  function scrollToPending(elId) {
+    const el = document.getElementById(elId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   function approvePending(wa, newStatus, elId) {
@@ -2804,6 +2850,7 @@
     refreshPendingMembers('sa-pending-members'); // NEW: Load SA Pending List
     refreshLateRequests('sa-late-donors'); // NEW: Load SA Late Donors
     refreshSACampaigns();
+    startDashboardPolling();
   }
 
   function runDataSweep() {

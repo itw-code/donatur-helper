@@ -935,6 +935,9 @@ function registerUser(name, whatsapp, empStatus = 'active') {
         // If they are not in the database, append them as 'Pending'
         sheet_(SHEETS.MEMBERS).appendRow([name, whatsapp, 'Pending', 'Self-Registered - ' + empStatus, new Date()]);
 
+        // Send email alert to Admin
+        sendAdminSignupAlert_(name, whatsapp, empStatus);
+
         // We return a pending object so the frontend can show a clean UI modal
         return { pending: true, message: 'Pendaftaran berhasil dikirim! Mohon tunggu persetujuan dari Admin sebelum Anda bisa masuk.' };
       }
@@ -946,6 +949,42 @@ function registerUser(name, whatsapp, empStatus = 'active') {
   } finally {
     // Release the script lock so other users can register
     lock.releaseLock();
+  }
+}
+
+function sendAdminSignupAlert_(name, whatsapp, empStatus) {
+  try {
+    const ownerEmail = Session.getEffectiveUser().getEmail();
+    const ccEmails = getSetting('NotificationCC') || '';
+    
+    let subject = '[Donatur Helper] Pendaftaran Member Baru: ' + name;
+    let body = 'Halo Admin,\n\n' +
+               'Ada pendaftaran member baru yang memerlukan persetujuan Anda:\n\n' +
+               'Nama: ' + name + '\n' +
+               'WhatsApp: ' + whatsapp + '\n' +
+               'Status Karyawan: ' + empStatus + '\n\n' +
+               'Silakan login ke Dashboard Admin untuk menyetujui atau menolak pendaftaran ini.\n\n' +
+               'Salam,\n' +
+               'Donatur Helper System';
+               
+    const mailOptions = {
+      name: 'Donatur Helper Notification',
+      subject: subject,
+      body: body
+    };
+    
+    if (ccEmails) {
+      mailOptions.cc = ccEmails;
+    }
+    
+    if (ownerEmail) {
+      MailApp.sendEmail(ownerEmail, subject, body, mailOptions);
+    } else if (ccEmails) {
+      const firstCc = ccEmails.split(',')[0].trim();
+      MailApp.sendEmail(firstCc, subject, body, mailOptions);
+    }
+  } catch (e) {
+    console.error('Failed to send admin signup email alert: ' + e.message);
   }
 }
 
