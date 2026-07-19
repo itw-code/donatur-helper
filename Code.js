@@ -1322,6 +1322,40 @@ function picVerifyPayment(picToken, campaignId, whatsapp, isValid) {
   }
 }
 
+function picVerifyAllPayments(picToken, campaignId) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const tok = findToken_(picToken, 'PIC');
+    if (!tok || tok.Status === 'Expired') throw new Error('Token PIC tidak valid.');
+    if (String(tok.LinkedCampaignID).trim() !== String(campaignId).trim()) throw new Error('Not authorized for this campaign');
+
+    const picAlias = tok.Alias ? String(tok.Alias).trim() : 'PIC';
+    const sh = sheet_(SHEETS.DONORS);
+    const donors = getRows_(SHEETS.DONORS).filter(d =>
+      d.CampaignID === campaignId &&
+      d.DonorStatus === 'Pledged' &&
+      String(d.Paid).toUpperCase() === 'TRUE' &&
+      String(d.Verified).toUpperCase() !== 'TRUE'
+    );
+
+    const verifiedCol = headerIndex_(SHEETS.DONORS, 'Verified') + 1;
+    const modByCol = headerIndex_(SHEETS.DONORS, 'ModifiedBy') + 1;
+    const modAtCol = headerIndex_(SHEETS.DONORS, 'ModifiedAt') + 1;
+
+    donors.forEach(d => {
+      sh.getRange(d._row, verifiedCol).setValue('TRUE');
+      if (modByCol > 0) sh.getRange(d._row, modByCol).setValue(picAlias);
+      if (modAtCol > 0) sh.getRange(d._row, modAtCol).setValue(new Date());
+    });
+
+    SpreadsheetApp.flush();
+    return donors.length;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 // 11. PIC: Mark Refund as Settled
 function picMarkRefunded(picToken, campaignId, whatsapp) {
   const lock = LockService.getScriptLock();

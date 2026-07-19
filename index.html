@@ -1539,6 +1539,10 @@
         html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
       }
 
+      const hasUnverified = detail.donors.some(d => String(d.Paid).toUpperCase() === 'TRUE' && String(d.Verified).toUpperCase() !== 'TRUE');
+      if (hasUnverified) {
+        html += '<button class="btn green" style="margin-bottom:8px; margin-right:8px;" onclick="picVerifyAllUI(\'' + c.CampaignID + '\')">✓ Setujui Semua Bukti</button>';
+      }
       if (!isAchieved) {
         html += '<button class="btn secondary" style="margin-bottom:8px; margin-right:8px;" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
       }
@@ -1951,6 +1955,16 @@
       callQueued('picVerifyPayment', currentToken(), campaignId, whatsapp, isValid).then(res => {
         if (res.error) throw new Error(res.error);
         showToast('Bukti transfer berhasil di' + action + '.');
+        call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function picVerifyAllUI(campaignId) {
+    showConfirmModal('Yakin ingin menyetujui/mengonfirmasi SEMUA bukti transfer yang sudah diupload?', () => {
+      callQueued('picVerifyAllPayments', currentToken(), campaignId).then(count => {
+        if (typeof count === 'object' && count.error) throw new Error(count.error);
+        showToast('Berhasil mengonfirmasi ' + count + ' bukti transfer.');
         call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
       }).catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
