@@ -1874,7 +1874,7 @@ function setCampaignStatusAdmin(adminToken, campaignId, newStatus) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
-    if (!checkSuperAdmin_(adminToken)) throw new Error('Not authorized');
+    if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
 
     const existing = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);
     if (!existing) throw new Error('Campaign tidak ditemukan.');
