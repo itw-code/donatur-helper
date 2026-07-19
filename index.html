@@ -559,7 +559,7 @@
       <input id="pc-start" type="date">
       <label>Deadline donasi</label>
       <input id="pc-deadline" type="date">
-      <button class="btn" onclick="createCampaign()">Buat campaign</button>
+      <button id="btn-create-campaign" class="btn" onclick="createCampaign()">Buat campaign</button>
       <button class="btn secondary" onclick="cancelPicCreate()">Keluar / Batal</button>
       <div id="pc-error" class="error"></div>
     </div>
@@ -771,11 +771,11 @@
       modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
       modal.innerHTML = `
         <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
-          <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeConfirmModal()">&times;</button>
+          <button id="custom-confirm-close" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeConfirmModal()">&times;</button>
           <h3 style="margin-top:0;">Konfirmasi</h3>
           <p id="custom-confirm-message"></p>
           <div style="display:flex;gap:8px;margin-top:16px;">
-            <button class="btn secondary" onclick="closeConfirmModal()">Batal</button>
+            <button class="btn secondary" id="custom-confirm-cancel" onclick="closeConfirmModal()">Batal</button>
             <button class="btn danger" id="custom-confirm-ok">Ya, Lanjutkan</button>
           </div>
         </div>
@@ -784,9 +784,29 @@
     }
     document.getElementById('custom-confirm-message').textContent = message;
     modal.style.display = 'flex';
-    document.getElementById('custom-confirm-ok').onclick = function () {
-      modal.style.display = 'none';
-      onConfirm();
+
+    const okBtn = document.getElementById('custom-confirm-ok');
+    const cancelBtn = document.getElementById('custom-confirm-cancel');
+    const closeBtn = document.getElementById('custom-confirm-close');
+
+    okBtn.disabled = false;
+    okBtn.textContent = 'Ya, Lanjutkan';
+    cancelBtn.disabled = false;
+    if (closeBtn) closeBtn.style.display = 'block';
+
+    okBtn.onclick = function () {
+      okBtn.disabled = true;
+      okBtn.textContent = 'Memproses...';
+      cancelBtn.disabled = true;
+      if (closeBtn) closeBtn.style.display = 'none';
+
+      Promise.resolve(onConfirm())
+        .then(() => {
+          modal.style.display = 'none';
+        })
+        .catch(() => {
+          modal.style.display = 'none';
+        });
     };
   }
 
@@ -935,6 +955,7 @@
     const wa = document.getElementById('u-wa').value.trim();
     const errEl = document.getElementById('u-login-error');
     const registerFields = document.getElementById('u-register-fields');
+    const btn = document.getElementById('btn-u-login');
 
     if (!wa) {
       errEl.textContent = 'Harap isi Nomor WhatsApp.';
@@ -944,12 +965,14 @@
     // STEP 1: Check WhatsApp (Login Mode)
     if (registerFields.classList.contains('hidden')) {
       errEl.textContent = 'Memeriksa nomor...';
+      btn.disabled = true;
       call('checkDonorWhatsApp', wa).then(res => {
         errEl.textContent = '';
         if (res.exists) {
           if (res.pending) {
             showInfoModal(res.message, 'Menunggu Persetujuan');
             document.getElementById('u-wa').value = '';
+            btn.disabled = false;
             return;
           }
           // Log them in immediately!
@@ -959,9 +982,13 @@
         } else {
           // STEP 2: Show Registration Fields
           registerFields.classList.remove('hidden');
-          document.getElementById('btn-u-login').textContent = 'Selesaikan Pendaftaran';
+          btn.textContent = 'Selesaikan Pendaftaran';
+          btn.disabled = false;
         }
-      }).catch(e => errEl.textContent = e.message || String(e));
+      }).catch(e => {
+        errEl.textContent = e.message || String(e);
+        btn.disabled = false;
+      });
       return;
     }
 
@@ -980,8 +1007,10 @@
     }
 
     errEl.textContent = 'Memproses pendaftaran...';
+    btn.disabled = true;
     callQueued('registerUser', name, wa, empStatus).then(user => {
       errEl.textContent = '';
+      btn.disabled = false;
       if (user.pending) {
         showInfoModal(user.message, 'Pendaftaran Menunggu Persetujuan');
         resetUserLoginForm();
@@ -990,7 +1019,10 @@
       safeSet('donor_user', JSON.stringify(user));
       resetUserLoginForm();
       loadUserDashboard();
-    }).catch(e => errEl.textContent = e.message || String(e));
+    }).catch(e => {
+      errEl.textContent = e.message || String(e);
+      btn.disabled = false;
+    });
   }
 
   function logoutUser() {
@@ -1251,7 +1283,7 @@
 
         <div style="display:flex; justify-content:flex-end; gap:8px;">
           <button class="btn secondary" style="margin:0; padding:8px 16px; font-size:13px;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">Batal</button>
-          <button class="btn blue" style="margin:0; padding:8px 16px; font-size:13px;" onclick="submitBulkJoin('\${selectedIds.join(\u0027,\u0027)}')">Gabung</button>
+          <button id="btn-submit-bulk-join" class="btn blue" style="margin:0; padding:8px 16px; font-size:13px;" onclick="submitBulkJoin('\${selectedIds.join(\u0027,\u0027)}')">Gabung</button>
         </div>
       </div>
     `;
@@ -1273,6 +1305,21 @@
     const user = JSON.parse(safeGet('donor_user') || 'null');
     if (!user) return;
 
+    const btn = document.getElementById('btn-submit-bulk-join');
+    let originalText = '';
+    if (btn) {
+      originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+    }
+
+    const resetBtn = () => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    };
+
     const campaignIds = campaignIdsStr.split(',');
     const isBebas = document.getElementById('bj-type-bebas').checked;
     let customAmount = '';
@@ -1280,6 +1327,7 @@
       customAmount = document.getElementById('bj-custom-amount').value;
       if (!customAmount || Number(customAmount) <= 0) {
         showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
+        resetBtn();
         return;
       }
     }
@@ -1287,11 +1335,15 @@
 
     call('joinCampaignsBulk', campaignIds, user.name, user.whatsapp, customAmount, alias)
       .then(() => {
+        resetBtn();
         document.getElementById('custom-bulk-join-modal').style.display = 'none';
         showToast('Berhasil bergabung di ' + campaignIds.length + ' campaign.');
         refreshCampaignList();
       })
-      .catch(e => showInfoModal(e.message || String(e), 'Error'));
+      .catch(e => {
+        resetBtn();
+        showInfoModal(e.message || String(e), 'Error');
+      });
   }
 
   function getDeadlineBadge(deadlineStr) {
@@ -1390,7 +1442,7 @@
     if (c.status === 'Open') {
       if (c.joined) {
         html += '<div class="success">✓ Kamu sudah daftar di list ini.</div>';
-        html += '<button class="btn secondary" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
+        html += '<button id="btn-withdraw-' + c.campaignId + '" class="btn secondary" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
       } else {
         html += '<div class="card" style="background:#f9f9f9;border:1px solid #eee;margin-top:8px;">';
         html += '<label style="margin-top:0;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto;"> Saya ingin donasi dengan nominal khusus</label>';
@@ -1405,7 +1457,7 @@
         html += '<input id="input-alias-' + c.campaignId + '" type="text" placeholder="Contoh: Hamba Allah">';
         html += '</div>';
 
-        html += '<button class="btn" style="margin-top:12px;" onclick="joinCampaign(\'' + c.campaignId + '\')">Gabung Donasi untuk ' + escapeHtml(c.targetName) + '</button>';
+        html += '<button id="btn-join-' + c.campaignId + '" class="btn" style="margin-top:12px;" onclick="joinCampaign(\'' + c.campaignId + '\')">Gabung Donasi untuk ' + escapeHtml(c.targetName) + '</button>';
         html += '</div>';
       }
     } else if (c.status === 'Closed') {
@@ -1466,9 +1518,29 @@
       }
     }
 
+    const btn = document.getElementById('btn-join-' + campaignId);
+    let originalText = '';
+    if (btn) {
+      originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+    }
+
     callQueued('joinCampaign', campaignId, user.name, user.whatsapp, customAmount, alias)
-      .then(refreshCampaignList)
-      .catch(e => showInfoModal(e.message || String(e), 'Error'));
+      .then(res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        refreshCampaignList();
+      })
+      .catch(e => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        showInfoModal(e.message || String(e), 'Error');
+      });
   }
 
   function toggleCustomAmount(campaignId) {
@@ -1480,9 +1552,28 @@
 
   function withdraw(campaignId) {
     const user = JSON.parse(safeGet('donor_user') || 'null');
+    const btn = document.getElementById('btn-withdraw-' + campaignId);
+    let originalText = '';
+    if (btn) {
+      originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+    }
     call('withdrawCampaign', campaignId, user.whatsapp)
-      .then(refreshCampaignList)
-      .catch(e => showInfoModal(e.message || String(e), 'Error'));
+      .then(res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        refreshCampaignList();
+      })
+      .catch(e => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        showInfoModal(e.message || String(e), 'Error');
+      });
   }
 
   function submitProof(campaignId) {
@@ -1709,6 +1800,14 @@
     const errEl = document.getElementById('pc-error');
     errEl.textContent = '';
 
+    const btn = document.getElementById('btn-create-campaign');
+    let originalText = '';
+    if (btn) {
+      originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Membuat...';
+    }
+
     // Use parseRibuan here
     const rawAmount = parseRibuan(document.getElementById('pc-amount').value);
 
@@ -1720,8 +1819,18 @@
       deadline: document.getElementById('pc-deadline').value
     };
     call('createCampaign', currentToken(), data).then(detail => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
       loadPicDashboard();
-    }).catch(e => errEl.textContent = e.message || String(e));
+    }).catch(e => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+      errEl.textContent = e.message || String(e);
+    });
   }
 
   function renderPicDashboard(detail) {
@@ -1845,7 +1954,7 @@
     html += '<label style="display:flex; align-items:center; gap:8px; margin-top:10px; margin-bottom:10px;"><input type="checkbox" id="late-is-custom" onchange="document.getElementById(\'late-custom-wrap\').classList.toggle(\'hidden\')" style="width:auto; margin-top:0;"> Donasi Nominal Khusus (Bukan patungan rata)</label>';
     html += '<div id="late-custom-wrap" class="hidden"><label>Nominal (Rp)</label><input type="text" inputmode="numeric" id="late-custom-amount" placeholder="Contoh: 150.000" onkeyup="formatInputRibuan(event)"></div>';
     html += '<label>Alasan</label><input id="late-reason" placeholder="Contoh: Terlewat saat awal">';
-    html += '<button class="btn" onclick="submitLateDonor()">Kirim Pengajuan</button>';
+    html += '<button id="btn-submit-late-donor" class="btn" onclick="submitLateDonor()">Kirim Pengajuan</button>';
     html += '<div id="late-error" class="error"></div>';
     html += '</div>';
 
@@ -1932,6 +2041,22 @@
   function submitLateDonor() {
     const errEl = document.getElementById('late-error');
     errEl.textContent = 'Mengirim...';
+
+    const btn = document.getElementById('btn-submit-late-donor');
+    let originalText = '';
+    if (btn) {
+      originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Mengirim...';
+    }
+
+    const resetBtn = () => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    };
+
     const name = document.getElementById('late-name').value;
     const wa = document.getElementById('late-wa').value;
     const alias = document.getElementById('late-alias').value;
@@ -1939,19 +2064,27 @@
     const amount = isCustom ? parseRibuan(document.getElementById('late-custom-amount').value) : null;
     const reason = document.getElementById('late-reason').value;
 
-    if (!name || !wa || !reason) { errEl.textContent = 'Harap isi semua kolom.'; return; }
+    if (!name || !wa || !reason) {
+      errEl.textContent = 'Harap isi semua kolom.';
+      resetBtn();
+      return;
+    }
 
     const realToken = safeGet('deep_dive_return_token') || null;
     callQueued('requestLateDonor', currentToken(), name, wa, isCustom, amount, reason, realToken, alias).then(res => {
+      resetBtn();
       showToast('Pengajuan berhasil dikirim ke Admin!');
       errEl.textContent = '';
       document.getElementById('late-name').value = '';
       document.getElementById('late-wa').value = '';
       document.getElementById('late-alias').value = '';
       document.getElementById('late-reason').value = '';
-        document.getElementById('late-custom-amount').value = '';
+      document.getElementById('late-custom-amount').value = '';
       document.getElementById('late-donor-form').classList.add('hidden');
-    }).catch(e => errEl.textContent = e.message || String(e));
+    }).catch(e => {
+      resetBtn();
+      errEl.textContent = e.message || String(e);
+    });
   }
 
   // Store latest PIC campaign data so copyShareLink can build a rich message
@@ -2128,7 +2261,7 @@
   }
   function archiveThis() {
     showConfirmModal('Arsipkan campaign ini? Token PIC akan nonaktif.', () => {
-      call('archiveCampaign', currentToken()).then(() => {
+      return call('archiveCampaign', currentToken()).then(() => {
         showToast('Campaign berhasil diarsipkan.');
         if (safeGet('deep_dive_return_token')) {
           returnFromDeepDive();
@@ -2165,7 +2298,7 @@
         '<label>Nama pemilik rekening</label><input id="fin-holder" placeholder="Nama PIC">' +
         '<label>Link Barang / Hadiah (Opsional)</label><input id="fin-link" placeholder="https://tokopedia.com/...">' +
         '<label>Screenshot Total Harga (Opsional)</label><input id="fin-image" type="file" accept="image/*">' +
-        '<button class="btn blue" onclick="doFinalize()">Konfirmasi & finalisasi</button>' +
+        '<button id="btn-do-finalize" class="btn blue" onclick="doFinalize()">Konfirmasi & finalisasi</button>' +
         '<div id="fin-error" class="error"></div>';
     });
   }
@@ -2173,6 +2306,21 @@
   function doFinalize() {
     const errEl = document.getElementById('fin-error');
     errEl.textContent = 'Memproses...';
+
+    const btn = document.getElementById('btn-do-finalize');
+    let originalText = '';
+    if (btn) {
+      originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+    }
+
+    const resetBtn = () => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    };
 
     const rawFinalAmount = parseRibuan(document.getElementById('fin-amount').value);
 
@@ -2189,13 +2337,20 @@
     const doCall = (fileData) => {
       errEl.textContent = 'Menyimpan ke server...';
       call('finalizeCampaign', currentToken(), bankInfo, rawFinalAmount, fileData)
-        .then(renderAndShow)
-        .catch(e => errEl.textContent = escapeHtml(e.message || String(e)));
+        .then(res => {
+          resetBtn();
+          renderAndShow(res);
+        })
+        .catch(e => {
+          resetBtn();
+          errEl.textContent = escapeHtml(e.message || String(e));
+        });
     };
 
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         errEl.textContent = 'Ukuran gambar maksimal 2MB.';
+        resetBtn();
         return;
       }
       const reader = new FileReader();
@@ -2358,30 +2513,30 @@
   function verifyPaymentUI(campaignId, whatsapp, isValid) {
     const action = isValid ? 'konfirmasi' : 'tolak';
     showConfirmModal('Yakin ingin ' + action + ' bukti transfer donatur ini?', () => {
-      callQueued('picVerifyPayment', currentToken(), campaignId, whatsapp, isValid).then(res => {
+      return callQueued('picVerifyPayment', currentToken(), campaignId, whatsapp, isValid).then(res => {
         if (res.error) throw new Error(res.error);
         showToast('Bukti transfer berhasil di' + action + '.');
-        call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
+        return call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
       }).catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
   }
 
   function picVerifyAllUI(campaignId) {
     showConfirmModal('Yakin ingin menyetujui/mengonfirmasi SEMUA bukti transfer yang sudah diupload?', () => {
-      callQueued('picVerifyAllPayments', currentToken(), campaignId).then(count => {
+      return callQueued('picVerifyAllPayments', currentToken(), campaignId).then(count => {
         if (typeof count === 'object' && count.error) throw new Error(count.error);
         showToast('Berhasil mengonfirmasi ' + count + ' bukti transfer.');
-        call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
+        return call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
       }).catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
   }
 
   function markRefundedUI(campaignId, whatsapp) {
     showConfirmModal('Tandai refund sebagai sudah dikembalikan?', () => {
-      callQueued('picMarkRefunded', currentToken(), campaignId, whatsapp).then(res => {
+      return callQueued('picMarkRefunded', currentToken(), campaignId, whatsapp).then(res => {
         if (res.error) throw new Error(res.error);
         showToast('Refund berhasil ditandai selesai.');
-        call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
+        return call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
       }).catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
   }
@@ -2571,14 +2726,14 @@
 
   function handleApproveLateDonor(reqId, isApprove, elId) {
     if (isApprove) {
-      showConfirmModal('Peringatan: Menyetujui ini akan langsung mendaftarkan member (jika baru) dan MENGHITUNG ULANG tagihan donatur lain di campaign tersebut. Lanjutkan?', () => executeApproveLateDonor(reqId, isApprove, elId));
+      return showConfirmModal('Peringatan: Menyetujui ini akan langsung mendaftarkan member (jika baru) dan MENGHITUNG ULANG tagihan donatur lain di campaign tersebut. Lanjutkan?', () => executeApproveLateDonor(reqId, isApprove, elId));
     } else {
-      executeApproveLateDonor(reqId, isApprove, elId);
+      return executeApproveLateDonor(reqId, isApprove, elId);
     }
   }
 
   function executeApproveLateDonor(reqId, isApprove, elId) {
-    call('approveLateDonor', currentToken(), reqId, isApprove).then(() => {
+    return call('approveLateDonor', currentToken(), reqId, isApprove).then(() => {
       refreshLateRequests(elId);
       refreshSummary(elId.startsWith('sa-') ? 'sa-summary' : 'admin-summary');
     }).catch(e => showInfoModal(e.message || String(e), 'Error'));

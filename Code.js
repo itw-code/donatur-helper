@@ -1137,23 +1137,37 @@ function withdrawCampaign(campaignId, whatsapp) {
  * fileData: { base64: string, mimeType: string, fileName: string }
  */
 function submitPaymentProof(campaignId, whatsapp, fileData) {
-  whatsapp = normalizePhone_(whatsapp);
-  const existing = getRows_(SHEETS.DONORS).find(d =>
-    d.CampaignID === campaignId && normalizePhone_(d.WhatsApp) === whatsapp && d.DonorStatus === 'Pledged');
-  if (!existing) throw new Error('Anda tidak terdaftar di campaign ini.');
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+    whatsapp = normalizePhone_(whatsapp);
+    const existing = getRows_(SHEETS.DONORS).find(d =>
+      d.CampaignID === campaignId && normalizePhone_(d.WhatsApp) === whatsapp && d.DonorStatus === 'Pledged');
+    if (!existing) throw new Error('Anda tidak terdaftar di campaign ini.');
 
-  const folderId = getSetting('ProofsFolderId');
-  const folder = DriveApp.getFolderById(folderId);
-  const blob = Utilities.newBlob(Utilities.base64Decode(fileData.base64), fileData.mimeType, fileData.fileName);
-  const file = folder.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    // Idempotency: if they already uploaded proof, just return the existing proof URL
+    if (String(existing.Paid).toUpperCase() === 'TRUE' && existing.ProofLink) {
+      return existing.ProofLink;
+    }
 
-  const sh = sheet_(SHEETS.DONORS);
-  sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Paid') + 1).setValue('TRUE');
-  sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'ProofLink') + 1).setValue(file.getUrl());
-  sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'PaidAt') + 1).setValue(new Date());
-  sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'AmountPaid') + 1).setValue(existing.AmountDue || 0); // Snapshot original bill
-  return file.getUrl();
+    const folderId = getSetting('ProofsFolderId');
+    const folder = DriveApp.getFolderById(folderId);
+    const blob = Utilities.newBlob(Utilities.base64Decode(fileData.base64), fileData.mimeType, fileData.fileName);
+    const file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    const sh = sheet_(SHEETS.DONORS);
+    sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Paid') + 1).setValue('TRUE');
+    sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'ProofLink') + 1).setValue(file.getUrl());
+    sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'PaidAt') + 1).setValue(new Date());
+    sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'AmountPaid') + 1).setValue(existing.AmountDue || 0); // Snapshot original bill
+    SpreadsheetApp.flush();
+    return file.getUrl();
+  } catch (e) {
+    throw new Error(e.message || String(e));
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function submitCombinedPaymentProof(campaignIds, whatsapp, fileData) {
@@ -1199,26 +1213,46 @@ function submitCombinedPaymentProof(campaignIds, whatsapp, fileData) {
 // ====================== LATE DONOR REQUESTS ======================
 
 function requestLateDonor(picToken, donorName, donorWhatsApp, isCustom, customAmount, reason, realRequestorToken, donorAlias) {
-  const tok = requirePicCampaign_(picToken);
-  const campaignId = tok.LinkedCampaignID;
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    const tok = requirePicCampaign_(picToken);
+    const campaignId = tok.LinkedCampaignID;
+    const phone = normalizePhone_(donorWhatsApp);
 
-  // By default, assume it's just the PIC submitting
-  let picAlias = 'PIC';
-  const campObj = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);
-  if (campObj) picAlias = 'PIC (' + campObj.TargetName + ')';
+    // Check duplicate pending request
+    const existing = getRows_(SHEETS.LATE_REQUESTS).find(r =>
+      r.CampaignID === campaignId &&
+      normalizePhone_(r.DonorWhatsApp) === phone &&
+      r.Status === 'Pending'
+    );
+    if (existing) {
+      throw new Error('Pengajuan donatur susulan untuk nomor WhatsApp ini sudah ada dan sedang diproses.');
+    }
 
-  // If Deep Dive is active, the frontend sends the real token
-  if (realRequestorToken) {
-    const rTok = findToken_(realRequestorToken, 'SuperAdmin') || findToken_(realRequestorToken, 'Admin');
-    if (rTok) picAlias = rTok.Role === 'SuperAdmin' ? 'SuperAdmin' : 'Admin (' + (rTok.Alias || 'No Alias') + ')';
+    // By default, assume it's just the PIC submitting
+    let picAlias = 'PIC';
+    const campObj = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);
+    if (campObj) picAlias = 'PIC (' + campObj.TargetName + ')';
+
+    // If Deep Dive is active, the frontend sends the real token
+    if (realRequestorToken) {
+      const rTok = findToken_(realRequestorToken, 'SuperAdmin') || findToken_(realRequestorToken, 'Admin');
+      if (rTok) picAlias = rTok.Role === 'SuperAdmin' ? 'SuperAdmin' : 'Admin (' + (rTok.Alias || 'No Alias') + ')';
+    }
+
+    const sh = sheet_(SHEETS.LATE_REQUESTS);
+    const reqId = 'REQ-' + Utilities.getUuid().split('-')[0].toUpperCase();
+    const cAmt = isCustom ? (Number(customAmount) || 0) : '';
+
+    sh.appendRow([reqId, campaignId, picAlias, donorName.trim(), phone, isCustom ? 'TRUE' : 'FALSE', cAmt, reason.trim(), 'Pending', new Date(), donorAlias || '']);
+    SpreadsheetApp.flush();
+    return { success: true, reqId: reqId };
+  } catch (e) {
+    throw new Error(e.message || String(e));
+  } finally {
+    lock.releaseLock();
   }
-
-  const sh = sheet_(SHEETS.LATE_REQUESTS);
-  const reqId = 'REQ-' + Utilities.getUuid().split('-')[0].toUpperCase();
-  const cAmt = isCustom ? (Number(customAmount) || 0) : '';
-
-  sh.appendRow([reqId, campaignId, picAlias, donorName.trim(), normalizePhone_(donorWhatsApp), isCustom ? 'TRUE' : 'FALSE', cAmt, reason.trim(), 'Pending', new Date(), donorAlias || '']);
-  return { success: true, reqId: reqId };
 }
 
 function fixLateRequestsDB() {
