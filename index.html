@@ -2042,11 +2042,22 @@
         return;
       }
       if (parentCard) parentCard.classList.remove('hidden');
-      let html = '<div class="table-responsive"><table><tr><th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
+
+      let html = '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
+      html += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
+      html += '<button class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
+      html += '</div>';
+
+      html += '<div class="table-responsive"><table><tr>';
+      html += '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-pending-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"></th>';
+      html += '<th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
+      
       list.forEach((m, idx) => {
         let defaultStatus = 'active';
         if (m.AddedBy && String(m.AddedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
-        html += '<tr><td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
+        html += '<tr>';
+        html += '<td style="text-align: center;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"></td>';
+        html += '<td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
         html += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
         html += '<td><button class="btn green" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
         html += '<button class="btn danger" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
@@ -2058,6 +2069,34 @@
 
   function approvePending(wa, newStatus, elId) {
     call('adminUpdateMemberStatus', currentToken(), wa, newStatus).then(() => {
+      refreshPendingMembers(elId);
+      refreshMembers();
+      refreshSummary(elId === 'sa-pending-members' ? 'sa-summary' : 'admin-summary');
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function toggleSelectAllPending(master, elId) {
+    document.querySelectorAll('.pending-checkbox-' + elId).forEach(cb => cb.checked = master.checked);
+  }
+
+  function bulkApprovePending(action, elId) {
+    const selected = [];
+    document.querySelectorAll('.pending-checkbox-' + elId + ':checked').forEach(cb => {
+      selected.push({ whatsapp: cb.value, defaultStatus: cb.getAttribute('data-status') });
+    });
+    if (!selected.length) {
+      showInfoModal('Pilih minimal satu member terlebih dahulu.', 'Info');
+      return;
+    }
+
+    const isRejection = action === 'reject';
+    const updates = selected.map(s => ({
+      whatsapp: s.whatsapp,
+      status: isRejection ? 'rejected' : s.defaultStatus
+    }));
+
+    call('adminBulkUpdateMemberStatus', currentToken(), updates).then(() => {
+      showToast('Status member terpilih berhasil diperbarui.');
       refreshPendingMembers(elId);
       refreshMembers();
       refreshSummary(elId === 'sa-pending-members' ? 'sa-summary' : 'admin-summary');

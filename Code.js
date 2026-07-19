@@ -2043,6 +2043,42 @@ function adminUpdateMemberStatus(adminToken, whatsapp, newStatus) {
   }
 }
 
+function adminBulkUpdateMemberStatus(adminToken, updates) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
+    if (!Array.isArray(updates)) throw new Error('Updates tidak valid.');
+    
+    const sh = sheet_(SHEETS.MEMBERS);
+    const rows = getRows_(SHEETS.MEMBERS);
+    const alias = getAdminAlias_(adminToken);
+    const modifiedByCol = headerIndex_(SHEETS.MEMBERS, 'ModifiedBy') + 1;
+    const modifiedAtCol = headerIndex_(SHEETS.MEMBERS, 'ModifiedAt') + 1;
+    const statusCol = headerIndex_(SHEETS.MEMBERS, 'Status') + 1;
+
+    updates.forEach(u => {
+      const cleanWa = normalizePhone_(u.whatsapp);
+      const existing = rows.find(m => normalizePhone_(m.WhatsApp) === cleanWa);
+      if (existing) {
+        const statusLower = String(u.status).toLowerCase();
+        let finalStatus = 'active';
+        if (statusLower === 'ex') finalStatus = 'ex';
+        if (statusLower === 'pending') finalStatus = 'pending';
+        if (statusLower === 'deleted' || statusLower === 'rejected') finalStatus = statusLower;
+
+        sh.getRange(existing._row, statusCol).setValue(finalStatus);
+        if (modifiedByCol > 0) sh.getRange(existing._row, modifiedByCol).setValue(alias);
+        if (modifiedAtCol > 0) sh.getRange(existing._row, modifiedAtCol).setValue(new Date());
+      }
+    });
+    SpreadsheetApp.flush();
+    return true;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 // 5. Seamless: Generate PIC token directly for an Approved Member
 function generateSeamlessPicToken(whatsapp) {
   const lock = LockService.getScriptLock();
