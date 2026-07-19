@@ -1041,6 +1041,40 @@ function joinCampaign(campaignId, name, whatsapp, customAmount, alias) {
   }
 }
 
+function memberBulkJoinCampaigns(campaignIds, name, whatsapp) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    if (!Array.isArray(campaignIds) || !campaignIds.length) throw new Error('Daftar campaign tidak valid.');
+    whatsapp = normalizePhone_(whatsapp);
+    
+    const campaigns = getRows_(SHEETS.CAMPAIGNS);
+    const donors = getRows_(SHEETS.DONORS);
+    const sh = sheet_(SHEETS.DONORS);
+    const statusCol = headerIndex_(SHEETS.DONORS, 'DonorStatus') + 1;
+    
+    campaignIds.forEach(id => {
+      const campaign = campaigns.find(c => c.CampaignID === id);
+      if (campaign && campaign.Status === 'Open') {
+        const existing = donors.find(d => d.CampaignID === id && normalizePhone_(d.WhatsApp) === whatsapp);
+        if (existing) {
+          if (existing.DonorStatus !== 'Pledged') {
+            sh.getRange(existing._row, statusCol).setValue('Pledged');
+          }
+        } else {
+          const newRow = [id, name, whatsapp, new Date(), 'Pledged', '', 'FALSE', '', '', '', '', 'FALSE', 'FALSE', ''];
+          sh.appendRow(newRow);
+        }
+      }
+    });
+    
+    SpreadsheetApp.flush();
+    return true;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function withdrawCampaign(campaignId, whatsapp) {
   whatsapp = normalizePhone_(whatsapp);
   const campaign = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);

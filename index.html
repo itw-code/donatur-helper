@@ -1121,6 +1121,18 @@
         html += '<div class="split-right">';
         if (others.length > 0) {
           html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
+          const joinable = others.filter(c => c.status === 'Open' && !c.joined);
+          if (joinable.length > 1) {
+            let bulkJoinHtml = '<div class="card" style="background:#f4fbf7; border: 1px solid #cceadb; margin-bottom: 16px; padding: 12px 16px;">';
+            bulkJoinHtml += '<h4 style="margin-top:0; color:#0f766e; font-size:14px; margin-bottom:4px;">📝 Gabung Banyak Campaign</h4>';
+            bulkJoinHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Centang campaign di bawah, lalu klik tombol ini untuk gabung sekaligus.</p>';
+            bulkJoinHtml += '<div style="display:flex; align-items:center; gap:8px;">';
+            bulkJoinHtml += '<label style="margin:0; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="bulk-join-select-all" onclick="toggleSelectAllBulkJoin(this)" style="width:auto; margin:0; cursor:pointer;"> Pilih Semua</label>';
+            bulkJoinHtml += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px; margin-left:auto;" onclick="bulkJoinCampaignsUI()">Gabung Campaign Terpilih</button>';
+            bulkJoinHtml += '</div>';
+            bulkJoinHtml += '</div>';
+            html += bulkJoinHtml;
+          }
           html += others.map(c => renderCampaignCard(c, user, false)).join('');
         } else {
           html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
@@ -1148,6 +1160,37 @@
     refreshCampaignList();
   }
 
+  function toggleSelectAllBulkJoin(master) {
+    document.querySelectorAll('.bulk-join-checkbox').forEach(cb => cb.checked = master.checked);
+  }
+
+  function bulkJoinCampaignsUI() {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    if (!user) return;
+
+    const checkboxes = document.querySelectorAll('.bulk-join-checkbox:checked');
+    const selectedIds = [];
+    const selectedNames = [];
+    checkboxes.forEach(cb => {
+      selectedIds.push(cb.value);
+      selectedNames.push(cb.getAttribute('data-name'));
+    });
+
+    if (!selectedIds.length) {
+      showInfoModal('Pilih minimal satu campaign terlebih dahulu.', 'Info');
+      return;
+    }
+
+    showConfirmModal('Apakah Anda yakin ingin bergabung di ' + selectedIds.length + ' campaign ini sekaligus?\n\n' + selectedNames.join('\n'), () => {
+      call('memberBulkJoinCampaigns', selectedIds, user.name, user.whatsapp)
+        .then(() => {
+          showToast('Berhasil bergabung di ' + selectedIds.length + ' campaign.');
+          refreshCampaignList();
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
   function getDeadlineBadge(deadlineStr) {
     if (!deadlineStr) return '';
     const diffDays = Math.ceil((new Date(deadlineStr) - new Date()) / (1000 * 60 * 60 * 24));
@@ -1162,9 +1205,14 @@
   }
 
   function renderCampaignCard(c, user, isPending) {
+    let checkboxHtml = '';
+    if (c.status === 'Open' && !c.joined) {
+      checkboxHtml = '<input type="checkbox" class="bulk-join-checkbox" value="' + c.campaignId + '" data-name="' + escapeHtml(c.targetName) + '" style="width:16px; height:16px; margin-right:8px; cursor:pointer; vertical-align:middle;"> ';
+    }
+
     let html = '<div class="card" id="card-' + c.campaignId + '">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
-    html += '<strong>' + escapeHtml(c.targetName) + '</strong>';
+    html += '<div style="display:flex;align-items:center;">' + checkboxHtml + '<strong>' + escapeHtml(c.targetName) + '</strong></div>';
     if (isPending) {
       html += '<div>' + statusBadge(c.status) + getDeadlineBadge(c.deadline) + '</div>';
     } else {
