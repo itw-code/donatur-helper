@@ -2273,6 +2273,14 @@
   function adminView(campaignId) {
     call('getCampaignDetailAdmin', currentToken(), campaignId)
       .then(detail => {
+        return call('fetchAllMembers', currentToken()).then(members => {
+          return { detail: detail, members: members };
+        });
+      })
+      .then(res => {
+        const detail = res.detail;
+        const members = res.members.filter(m => String(m.Status).toLowerCase() === 'active');
+
         let html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;">';
         html += '<div class="card" style="width:100%;max-width:600px;max-height:90vh;overflow-y:auto;">';
         html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
@@ -2343,6 +2351,23 @@
           html += '<p class="muted">Belum ada donatur.</p>';
         }
 
+        if (c.Status !== 'Archived') {
+          let transferHtml = '<div style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin-bottom: 12px;">';
+          transferHtml += '<h3 style="margin-top:0; font-size: 14px; color:var(--text);">🔄 Transfer Kepemilikan Campaign</h3>';
+          transferHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Pindahkan hak PIC campaign ini ke member lain. Token PIC lama akan kedaluwarsa secara otomatis.</p>';
+          transferHtml += '<div style="display:flex; gap:8px;">';
+          transferHtml += '<select id="transfer-pic-select" style="flex:1; padding:6px; font-size:13px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--text);">';
+          transferHtml += '<option value="">-- Pilih PIC Baru --</option>';
+          members.forEach(m => {
+            transferHtml += '<option value="' + escapeHtml(m.WhatsApp) + '">' + escapeHtml(m.Name) + ' (' + escapeHtml(m.WhatsApp) + ')</option>';
+          });
+          transferHtml += '</select>';
+          transferHtml += '<button class="btn blue btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="adminTransferOwnershipUI(\'' + c.CampaignID + '\')">Transfer</button>';
+          transferHtml += '</div>';
+          transferHtml += '</div>';
+          html += transferHtml;
+        }
+
         html += '</div></div>';
 
         let modalContainer = document.getElementById('admin-modal');
@@ -2363,6 +2388,31 @@
         .then(() => {
           showToast('Kalkulasi ulang berhasil.');
           adminView(campaignId); // Refresh the UI to show updated AmountDue
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function adminTransferOwnershipUI(campaignId) {
+    const select = document.getElementById('transfer-pic-select');
+    const targetWhatsapp = select ? select.value : '';
+    if (!targetWhatsapp) {
+      showInfoModal('Pilih member target terlebih dahulu.', 'Info');
+      return;
+    }
+    
+    showConfirmModal('Yakin ingin mentransfer kepemilikan campaign ini? PIC lama akan kehilangan akses dan campaign akan dipindahkan ke PIC baru.', () => {
+      call('transferCampaignOwnershipAdmin', currentToken(), campaignId, targetWhatsapp)
+        .then(newToken => {
+          showInfoModal('Transfer kepemilikan berhasil!\nToken PIC Baru: ' + newToken + '\n\nCampaign ini otomatis muncul di dashboard member yang bersangkutan.', 'Sukses');
+          document.getElementById('admin-modal').innerHTML = ''; // Close modal
+          
+          const role = safeGet('auth_role');
+          if (role === 'SuperAdmin') {
+            refreshSACampaigns();
+          } else {
+            refreshAdminCampaigns();
+          }
         })
         .catch(e => showInfoModal(e.message || String(e), 'Error'));
     });

@@ -2079,6 +2079,50 @@ function adminBulkUpdateMemberStatus(adminToken, updates) {
   }
 }
 
+function transferCampaignOwnershipAdmin(adminToken, campaignId, targetWhatsapp) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    if (!checkAdmin_(adminToken)) throw new Error('Not authorized');
+    
+    const cleanTarget = normalizePhone_(targetWhatsapp);
+    const member = getRows_(SHEETS.MEMBERS).find(m => normalizePhone_(m.WhatsApp) === cleanTarget);
+    if (!member || member.Status !== 'active') {
+      throw new Error('Target PIC harus merupakan Member aktif.');
+    }
+
+    const campaign = getRows_(SHEETS.CAMPAIGNS).find(c => c.CampaignID === campaignId);
+    if (!campaign) throw new Error('Campaign tidak ditemukan.');
+
+    const sh = sheet_(SHEETS.TOKENS);
+    const tokens = getRows_(SHEETS.TOKENS);
+
+    // Expire old PIC tokens linked to this campaign
+    tokens.forEach(t => {
+      if (t.LinkedCampaignID === campaignId && t.Role === 'PIC') {
+        sh.getRange(t._row, headerIndex_(SHEETS.TOKENS, 'Status') + 1).setValue('Expired');
+      }
+    });
+
+    // Create new PIC token linked to this campaign
+    const newTokenId = 'PIC-' + Utilities.getUuid().split('-')[0].toUpperCase();
+    sh.appendRow([
+      newTokenId,
+      'PIC',
+      'Active',
+      campaignId,
+      cleanTarget,
+      new Date(),
+      member.Name
+    ]);
+
+    SpreadsheetApp.flush();
+    return newTokenId;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 // 5. Seamless: Generate PIC token directly for an Approved Member
 function generateSeamlessPicToken(whatsapp) {
   const lock = LockService.getScriptLock();
