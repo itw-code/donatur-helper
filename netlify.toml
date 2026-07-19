@@ -1,9 +1,9 @@
-# Netlify configuration to redirect all traffic from the Netlify site to the Cloudflare Pages site, avoiding redirect loops.
-# Redirect only when the request host matches the Netlify domain.
+# Netlify configuration to permanently redirect all traffic to Cloudflare Pages.
+# This file only exists/runs on Netlify — Cloudflare Pages never reads it,
+# so there is no redirect loop risk.
 
 [[redirects]]
   from = "/*"
   to = "https://don4tpro.pages.dev/:splat"
   status = 301
   force = true
-  conditions = { Host = ["don4tpro.netlify.app"] }

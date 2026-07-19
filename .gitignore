@@ -3,4 +3,6 @@ node_modules/
 .DS_Store
 # Optional: .clasp.json is usually safe to commit (it only contains scriptId and rootDir), 
 # but if you use custom authentication tokens, ignore it.
-.worktrees/
+.worktrees/
+# Local Netlify folder
+.netlify
