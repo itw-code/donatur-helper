@@ -1212,7 +1212,9 @@
         html += '<div class="card" style="background:#e6f1fb;border:none;">';
         html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin-bottom:12px;">';
         html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
-        html += '<div style="font-size:24px; font-weight:bold; color:var(--blue);">' + formatIDR(c.amountDue) + '</div>';
+        html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(c.amountDue);
+        html += ' <button class="link-btn" style="font-size:14px; padding: 2px 6px;" onclick="copyDonorAmount(\'' + c.amountDue + '\')">📋 Copy</button>';
+        html += '</div>';
         html += '</div>';
         html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount);
         html += ' <button class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(c.bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">📋 Copy</button>';
@@ -1947,6 +1949,21 @@
       document.execCommand('copy');
       showToast('Pesan berhasil di-copy!');
     }
+  }
+
+  function copyDonorAmount(amount) {
+    const rawAmount = String(amount).replace(/[^0-9]/g, '');
+    navigator.clipboard.writeText(rawAmount).then(() => {
+      showToast('Nominal transfer ' + formatIDR(amount) + ' berhasil disalin!');
+    }).catch(() => {
+      const textArea = document.createElement("textarea");
+      textArea.value = rawAmount;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      showToast('Nominal transfer ' + formatIDR(amount) + ' berhasil disalin!');
+    });
   }
 
   function verifyPaymentUI(campaignId, whatsapp, isValid) {
