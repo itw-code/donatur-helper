@@ -1111,6 +1111,44 @@ function submitPaymentProof(campaignId, whatsapp, fileData) {
   return file.getUrl();
 }
 
+function submitCombinedPaymentProof(whatsapp, campaignIds, bankAccount, fileData) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    if (!Array.isArray(campaignIds) || !campaignIds.length) throw new Error('Daftar campaign tidak valid.');
+    whatsapp = normalizePhone_(whatsapp);
+
+    const folderId = getSetting('ProofsFolderId');
+    const folder = DriveApp.getFolderById(folderId);
+    const blob = Utilities.newBlob(Utilities.base64Decode(fileData.base64), fileData.mimeType, fileData.fileName);
+    const file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    const fileUrl = file.getUrl();
+
+    const sh = sheet_(SHEETS.DONORS);
+    const rows = getRows_(SHEETS.DONORS);
+
+    campaignIds.forEach(cid => {
+      const existing = rows.find(d =>
+        d.CampaignID === cid &&
+        normalizePhone_(d.WhatsApp) === whatsapp &&
+        d.DonorStatus === 'Pledged'
+      );
+      if (existing) {
+        sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Paid') + 1).setValue('TRUE');
+        sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'ProofLink') + 1).setValue(fileUrl);
+        sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'PaidAt') + 1).setValue(new Date());
+        sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'AmountPaid') + 1).setValue(existing.AmountDue || 0);
+      }
+    });
+
+    SpreadsheetApp.flush();
+    return fileUrl;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 // ====================== LATE DONOR REQUESTS ======================
 
 function requestLateDonor(picToken, donorName, donorWhatsApp, isCustom, customAmount, reason, realRequestorToken, donorAlias) {

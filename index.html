@@ -1111,7 +1111,22 @@
         html += '<div class="split-left">';
         if (pending.length > 0) {
           html += '<h3 style="margin-top:0;color:var(--red);">⚠️ Menunggu Pembayaran</h3>';
-          html += pending.map(c => renderCampaignCard(c, user, true)).join('');
+          const grouped = {};
+          pending.forEach(c => {
+            const key = String(c.bankName || '').trim() + ' - ' + String(c.bankAccount || '').trim();
+            if (!grouped[key]) {
+              grouped[key] = [];
+            }
+            grouped[key].push(c);
+          });
+          Object.keys(grouped).forEach(key => {
+            const groupList = grouped[key];
+            if (groupList.length === 1) {
+              html += renderCampaignCard(groupList[0], user, true);
+            } else {
+              html += renderCombinedCampaignCard(groupList, key, user);
+            }
+          });
         } else {
           html += '<h3 style="margin-top:0;">Menunggu Pembayaran</h3>';
           html += '<div class="card muted">Tidak ada tagihan tertunda.</div>';
@@ -1202,6 +1217,58 @@
     else if (diffDays <= 5) { color = '#ca8a04'; text = diffDays + ' hari lagi'; }
 
     return '<span class="badge" style="background:' + color + '22; color:' + color + '; margin-left:8px;">⏳ ' + text + '</span>';
+  }
+
+  function renderCombinedCampaignCard(groupList, bankKey, user) {
+    const first = groupList[0];
+    const bankName = first.bankName || '';
+    const bankAccount = first.bankAccount || '';
+    const accountHolder = first.accountHolder || '';
+    
+    let totalDue = 0;
+    const campaignIds = [];
+    const campaignNames = [];
+    
+    groupList.forEach(c => {
+      totalDue += (Number(c.amountDue) || 0);
+      campaignIds.push(c.campaignId);
+      campaignNames.push(c.targetName);
+    });
+    
+    const cIdsStr = campaignIds.join(',');
+    
+    let html = '<div class="card" style="border-left: 4px solid var(--blue); background: #f0f7ff; margin-bottom:16px;">';
+    html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
+    html += '<strong style="color:var(--blue); font-size:15px;">Combined Payment (' + groupList.length + ' Campaign)</strong>';
+    html += '<span class="badge" style="background:var(--blue-light); color:var(--blue);">⏳ Menunggu Pembayaran</span>';
+    html += '</div>';
+    
+    html += '<p style="margin:4px 0; font-size:13px; line-height:1.4;">Menggabungkan patungan untuk:<br>';
+    groupList.forEach(c => {
+      html += ' &middot; <strong>' + escapeHtml(c.targetName) + '</strong> (' + formatIDR(c.amountDue) + ')<br>';
+    });
+    html += '</p>';
+    
+    html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin: 12px 0;">';
+    html += '<div style="font-size:12px; color:var(--text);">Total nominal gabungan yang harus ditransfer:</div>';
+    html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(totalDue);
+    html += ' <button class="link-btn" style="font-size:12px; padding: 2px 6px;" onclick="copyDonorAmount(\'' + totalDue + '\')">📋 Copy</button>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '<p class="muted" style="margin:8px 0; font-size:12px;">Ke: ' + escapeHtml(bankName) + ' ' + escapeHtml(bankAccount);
+    html += ' <button class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">📋 Copy</button>';
+    html += ' a.n. ' + escapeHtml(accountHolder) + '</p>';
+    
+    html += '<div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:12px;">';
+    html += '<label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">Upload satu bukti transfer untuk semua campaign di atas</label>';
+    html += '<input type="file" id="combined-proof-' + bankAccount + '" accept="image/*,application/pdf" style="font-size:12px; padding:4px; width:100%; box-sizing:border-box;">';
+    html += '<button id="btn-submit-combined-' + bankAccount + '" class="btn blue" style="margin-top:8px; width:100%; font-size:12px; padding:8px;" onclick="submitCombinedProof(\'' + bankAccount + '\', \'' + cIdsStr + '\')">Kirim Bukti Transfer Gabungan</button>';
+    html += '<div id="combined-error-' + bankAccount + '" class="error" style="font-size:11px; margin-top:4px;"></div>';
+    html += '</div>';
+    
+    html += '</div>';
+    return html;
   }
 
   function renderCampaignCard(c, user, isPending) {
@@ -1395,6 +1462,83 @@
       };
       img.onerror = function () { 
         errEl.textContent = 'Gagal membaca gambar, coba file lain.'; 
+        resetBtn();
+      };
+      img.src = event.target.result;
+    };
+  }
+
+  function submitCombinedProof(bankAccount, campaignIdsStr) {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    if (!user) return;
+
+    const fileInput = document.getElementById('combined-proof-' + bankAccount);
+    const errEl = document.getElementById('combined-error-' + bankAccount);
+    const submitBtn = document.getElementById('btn-submit-combined-' + bankAccount);
+    if (errEl) errEl.textContent = '';
+    const file = fileInput.files[0];
+    if (!file) { if (errEl) errEl.textContent = 'Pilih file bukti transfer dulu.'; return; }
+
+    if (submitBtn) {
+      submitBtn.textContent = 'Mengunggah...';
+      submitBtn.disabled = true;
+    }
+
+    const resetBtn = () => {
+      if (submitBtn) {
+        submitBtn.textContent = 'Kirim Bukti Transfer Gabungan';
+        submitBtn.disabled = false;
+      }
+    };
+
+    const campaignIds = campaignIdsStr.split(',');
+
+    if (file.type === 'application/pdf') {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const base64 = event.target.result.split(',')[1];
+        call('submitCombinedPaymentProof', user.whatsapp, campaignIds, bankAccount, {
+          base64: base64, mimeType: 'application/pdf', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.pdf`
+        }).then(() => {
+          showToast('Bukti transfer gabungan berhasil dikirim.');
+          refreshCampaignList();
+        }).catch(e => {
+          if (errEl) errEl.textContent = e.message || String(e);
+          resetBtn();
+        });
+      };
+      reader.onerror = function() { if (errEl) errEl.textContent = 'Gagal membaca file PDF.'; resetBtn(); };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onerror = function() { if (errEl) errEl.textContent = 'Gagal membaca file gambar.'; resetBtn(); };
+    reader.onload = function (event) {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scaleSize = Math.min(1, MAX_WIDTH / img.width);
+        canvas.width = img.width * scaleSize;
+        canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        const base64 = compressedDataUrl.split(',')[1];
+        call('submitCombinedPaymentProof', user.whatsapp, campaignIds, bankAccount, {
+          base64: base64, mimeType: 'image/jpeg', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.jpg`
+        }).then(() => {
+          showToast('Bukti transfer gabungan berhasil dikirim.');
+          refreshCampaignList();
+        }).catch(e => {
+          if (errEl) errEl.textContent = e.message || String(e);
+          resetBtn();
+        });
+      };
+      img.onerror = function () { 
+        if (errEl) errEl.textContent = 'Gagal membaca gambar, coba file lain.'; 
         resetBtn();
       };
       img.src = event.target.result;
