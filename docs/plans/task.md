@@ -6,6 +6,6 @@
 | task-4 | Implement PIC Auto Confirm All Bukti | completed |  |
 | task-5 | Implement Member Copy Amount | completed |  |
 | task-6 | Implement Member Bulk Join | completed |  |
-| task-7 | Implement Member Combined Payment | pending |  |
+| task-7 | Implement Member Combined Payment | completed |  |
 | task-8 | Implement Admin Dashboard and Email Notifications for signups | pending |  |
 
