@@ -581,6 +581,7 @@
 
   <div id="view-admin-dashboard" class="hidden">
     <h2>Dashboard Admin</h2>
+    <div id="admin-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <div id="admin-summary" class="card"></div>
     <div class="card">
       <h2 style="margin-top:0">Semua campaign</h2>
@@ -609,6 +610,7 @@
 
   <div id="view-superadmin-dashboard" class="hidden">
     <h2>Dashboard Super Admin</h2>
+    <div id="sa-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <div id="sa-summary" class="card"></div>
 
     <div class="card">
@@ -997,6 +999,12 @@
   }
 
   function logoutToken() {
+    if (pollIntervalId) {
+      clearInterval(pollIntervalId);
+      pollIntervalId = null;
+    }
+    lastNotifiedCount = 0;
+    updateTabTitle(0);
     safeRemove('auth_token');
     safeRemove('auth_role');
     safeRemove('deep_dive_return_token');
@@ -1111,7 +1119,22 @@
         html += '<div class="split-left">';
         if (pending.length > 0) {
           html += '<h3 style="margin-top:0;color:var(--red);">⚠️ Menunggu Pembayaran</h3>';
-          html += pending.map(c => renderCampaignCard(c, user, true)).join('');
+          const grouped = {};
+          pending.forEach(c => {
+            const key = String(c.bankName || '').trim() + '_' + String(c.bankAccount || '').trim() + '_' + String(c.accountHolder || '').trim();
+            if (!grouped[key]) {
+              grouped[key] = [];
+            }
+            grouped[key].push(c);
+          });
+          Object.keys(grouped).forEach(key => {
+            const groupList = grouped[key];
+            if (groupList.length === 1) {
+              html += renderCampaignCard(groupList[0], user, true);
+            } else {
+              html += renderCombinedCampaignCard(groupList, key, user);
+            }
+          });
         } else {
           html += '<h3 style="margin-top:0;">Menunggu Pembayaran</h3>';
           html += '<div class="card muted">Tidak ada tagihan tertunda.</div>';
@@ -1121,6 +1144,18 @@
         html += '<div class="split-right">';
         if (others.length > 0) {
           html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
+          const joinable = others.filter(c => c.status === 'Open' && !c.joined);
+          if (joinable.length > 1) {
+            let bulkJoinHtml = '<div class="card" style="background:#f4fbf7; border: 1px solid #cceadb; margin-bottom: 16px; padding: 12px 16px;">';
+            bulkJoinHtml += '<h4 style="margin-top:0; color:#0f766e; font-size:14px; margin-bottom:4px;">📝 Gabung Banyak Campaign</h4>';
+            bulkJoinHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Centang campaign di bawah, lalu klik tombol ini untuk gabung sekaligus.</p>';
+            bulkJoinHtml += '<div style="display:flex; align-items:center; gap:8px;">';
+            bulkJoinHtml += '<label style="margin:0; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="bulk-join-select-all" onclick="toggleSelectAllBulkJoin(this)" style="width:auto; margin:0; cursor:pointer;"> Pilih Semua</label>';
+            bulkJoinHtml += '<button id="bulk-join-btn" class="btn green btn-auto" style="display:none; margin:0; padding:6px 12px; font-size:12px; margin-left:auto;" onclick="openBulkJoinModal()">Ikut Patungan Massal</button>';
+            bulkJoinHtml += '</div>';
+            bulkJoinHtml += '</div>';
+            html += bulkJoinHtml;
+          }
           html += others.map(c => renderCampaignCard(c, user, false)).join('');
         } else {
           html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
@@ -1148,6 +1183,117 @@
     refreshCampaignList();
   }
 
+  function toggleSelectAllBulkJoin(master) {
+    document.querySelectorAll('.bulk-join-checkbox').forEach(cb => cb.checked = master.checked);
+    updateBulkJoinBtnVisibility();
+  }
+
+  function updateBulkJoinBtnVisibility() {
+    const btn = document.getElementById('bulk-join-btn');
+    if (!btn) return;
+    const selectedCount = document.querySelectorAll('.bulk-join-checkbox:checked').length;
+    if (selectedCount > 0) {
+      btn.style.display = 'block';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  function openBulkJoinModal() {
+    const checkboxes = document.querySelectorAll('.bulk-join-checkbox:checked');
+    const selectedIds = [];
+    const selectedNames = [];
+    checkboxes.forEach(cb => {
+      selectedIds.push(cb.value);
+      selectedNames.push(cb.getAttribute('data-name'));
+    });
+
+    if (!selectedIds.length) {
+      showInfoModal('Pilih minimal satu campaign terlebih dahulu.', 'Info');
+      return;
+    }
+
+    let modal = document.getElementById('custom-bulk-join-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'custom-bulk-join-modal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="card" style="width:90%; max-width:450px; background:white; padding:20px; border-radius:12px; position:relative; box-shadow:var(--shadow-lg); border:none;">
+        <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">&times;</button>
+        <h3 style="margin-top:0; color:var(--blue); font-size:18px; font-weight:bold; margin-bottom:8px;">Ikut Patungan Massal</h3>
+        <p style="font-size:13px; color:var(--text); margin-bottom:16px; line-height:1.4;">Anda memilih untuk bergabung ke <strong>\${selectedIds.length} campaign</strong> sekaligus.</p>
+        
+        <div style="margin-bottom:16px;">
+          <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:8px;">Tipe Patungan:</label>
+          <div style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <input type="radio" id="bj-type-rata" name="bj-type" value="rata" checked onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
+            <label for="bj-type-rata" style="font-size:13px; cursor:pointer; margin:0;">Patungan Rata (bagi rata tagihan nanti)</label>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="radio" id="bj-type-bebas" name="bj-type" value="bebas" onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
+            <label for="bj-type-bebas" style="font-size:13px; cursor:pointer; margin:0;">Nominal Bebas (tulis nominal sendiri)</label>
+          </div>
+        </div>
+        
+        <div id="bj-custom-amount-wrap" class="hidden" style="margin-bottom:16px;">
+          <label for="bj-custom-amount" style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">Nominal Per Campaign (Rp):</label>
+          <input type="number" id="bj-custom-amount" placeholder="Contoh: 50000" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label for="bj-alias" style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">Nama Alias (Opsional, jika ingin nama disamarkan):</label>
+          <input type="text" id="bj-alias" placeholder="Contoh: Hamba Allah" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button class="btn secondary" style="margin:0; padding:8px 16px; font-size:13px;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">Batal</button>
+          <button class="btn blue" style="margin:0; padding:8px 16px; font-size:13px;" onclick="submitBulkJoin('\${selectedIds.join(\u0027,\u0027)}')">Gabung</button>
+        </div>
+      </div>
+    `;
+
+    modal.style.display = 'flex';
+  }
+
+  function toggleBulkJoinFields() {
+    const isBebas = document.getElementById('bj-type-bebas').checked;
+    const wrap = document.getElementById('bj-custom-amount-wrap');
+    if (isBebas) {
+      wrap.classList.remove('hidden');
+    } else {
+      wrap.classList.add('hidden');
+    }
+  }
+
+  function submitBulkJoin(campaignIdsStr) {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    if (!user) return;
+
+    const campaignIds = campaignIdsStr.split(',');
+    const isBebas = document.getElementById('bj-type-bebas').checked;
+    let customAmount = '';
+    if (isBebas) {
+      customAmount = document.getElementById('bj-custom-amount').value;
+      if (!customAmount || Number(customAmount) <= 0) {
+        showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
+        return;
+      }
+    }
+    const alias = document.getElementById('bj-alias').value.trim();
+
+    call('joinCampaignsBulk', campaignIds, user.name, user.whatsapp, customAmount, alias)
+      .then(() => {
+        document.getElementById('custom-bulk-join-modal').style.display = 'none';
+        showToast('Berhasil bergabung di ' + campaignIds.length + ' campaign.');
+        refreshCampaignList();
+      })
+      .catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
   function getDeadlineBadge(deadlineStr) {
     if (!deadlineStr) return '';
     const diffDays = Math.ceil((new Date(deadlineStr) - new Date()) / (1000 * 60 * 60 * 24));
@@ -1161,10 +1307,67 @@
     return '<span class="badge" style="background:' + color + '22; color:' + color + '; margin-left:8px;">⏳ ' + text + '</span>';
   }
 
+  function renderCombinedCampaignCard(groupList, bankKey, user) {
+    const first = groupList[0];
+    const bankName = first.bankName || '';
+    const bankAccount = first.bankAccount || '';
+    const accountHolder = first.accountHolder || '';
+    
+    let totalDue = 0;
+    const campaignIds = [];
+    const campaignNames = [];
+    
+    groupList.forEach(c => {
+      totalDue += (Number(c.amountDue) || 0);
+      campaignIds.push(c.campaignId);
+      campaignNames.push(c.targetName);
+    });
+    
+    const cIdsStr = campaignIds.join(',');
+    
+    let html = '<div class="card" style="border-left: 4px solid var(--blue); background: #f0f7ff; margin-bottom:16px;">';
+    html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
+    html += '<strong style="color:var(--blue); font-size:15px;">Combined Payment (' + groupList.length + ' Campaign)</strong>';
+    html += '<span class="badge" style="background:var(--blue-light); color:var(--blue);">⏳ Menunggu Pembayaran</span>';
+    html += '</div>';
+    
+    html += '<p style="margin:4px 0; font-size:13px; line-height:1.4;">Menggabungkan patungan untuk:<br>';
+    groupList.forEach(c => {
+      html += ' &middot; <strong>' + escapeHtml(c.targetName) + '</strong> (' + formatIDR(c.amountDue) + ')<br>';
+    });
+    html += '</p>';
+    
+    html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin: 12px 0;">';
+    html += '<div style="font-size:12px; color:var(--text);">Total nominal gabungan yang harus ditransfer:</div>';
+    html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(totalDue);
+    html += ' <span class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">📋 Salin</span>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '<p class="muted" style="margin:8px 0; font-size:12px;">Ke: ' + escapeHtml(bankName) + ' ' + escapeHtml(bankAccount);
+    html += ' <button class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">📋 Copy</button>';
+    html += ' a.n. ' + escapeHtml(accountHolder) + '</p>';
+    
+    html += '<div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:12px;">';
+    html += '<label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">Upload satu bukti transfer untuk semua campaign di atas</label>';
+    html += '<input type="file" id="combined-proof-' + bankAccount + '" accept="image/*,application/pdf" style="font-size:12px; padding:4px; width:100%; box-sizing:border-box;">';
+    html += '<button id="btn-submit-combined-' + bankAccount + '" class="btn blue" style="margin-top:8px; width:100%; font-size:12px; padding:8px;" onclick="submitCombinedProof(\'' + bankAccount + '\', \'' + cIdsStr + '\')">Konfirmasi Transfer</button>';
+    html += '<div id="combined-error-' + bankAccount + '" class="error" style="font-size:11px; margin-top:4px;"></div>';
+    html += '</div>';
+    
+    html += '</div>';
+    return html;
+  }
+
   function renderCampaignCard(c, user, isPending) {
+    let checkboxHtml = '';
+    if (c.status === 'Open' && !c.joined) {
+      checkboxHtml = '<input type="checkbox" class="bulk-join-checkbox" value="' + c.campaignId + '" data-name="' + escapeHtml(c.targetName) + '" onchange="updateBulkJoinBtnVisibility()" style="width:16px; height:16px; margin-right:8px; cursor:pointer; vertical-align:middle;"> ';
+    }
+
     let html = '<div class="card" id="card-' + c.campaignId + '">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
-    html += '<strong>' + escapeHtml(c.targetName) + '</strong>';
+    html += '<div style="display:flex;align-items:center;">' + checkboxHtml + '<strong>' + escapeHtml(c.targetName) + '</strong></div>';
     if (isPending) {
       html += '<div>' + statusBadge(c.status) + getDeadlineBadge(c.deadline) + '</div>';
     } else {
@@ -1212,7 +1415,9 @@
         html += '<div class="card" style="background:#e6f1fb;border:none;">';
         html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin-bottom:12px;">';
         html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
-        html += '<div style="font-size:24px; font-weight:bold; color:var(--blue);">' + formatIDR(c.amountDue) + '</div>';
+        html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(c.amountDue);
+        html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">📋 Salin</span>';
+        html += '</div>';
         html += '</div>';
         html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount);
         html += ' <button class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(c.bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">📋 Copy</button>';
@@ -1345,6 +1550,83 @@
       };
       img.onerror = function () { 
         errEl.textContent = 'Gagal membaca gambar, coba file lain.'; 
+        resetBtn();
+      };
+      img.src = event.target.result;
+    };
+  }
+
+  function submitCombinedProof(bankAccount, campaignIdsStr) {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    if (!user) return;
+
+    const fileInput = document.getElementById('combined-proof-' + bankAccount);
+    const errEl = document.getElementById('combined-error-' + bankAccount);
+    const submitBtn = document.getElementById('btn-submit-combined-' + bankAccount);
+    if (errEl) errEl.textContent = '';
+    const file = fileInput.files[0];
+    if (!file) { if (errEl) errEl.textContent = 'Pilih file bukti transfer dulu.'; return; }
+
+    if (submitBtn) {
+      submitBtn.textContent = 'Mengunggah...';
+      submitBtn.disabled = true;
+    }
+
+    const resetBtn = () => {
+      if (submitBtn) {
+        submitBtn.textContent = 'Konfirmasi Transfer';
+        submitBtn.disabled = false;
+      }
+    };
+
+    const campaignIds = campaignIdsStr.split(',');
+
+    if (file.type === 'application/pdf') {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const base64 = event.target.result.split(',')[1];
+        call('submitCombinedPaymentProof', campaignIds, user.whatsapp, {
+          base64: base64, mimeType: 'application/pdf', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.pdf`
+        }).then(() => {
+          showToast('Bukti transfer gabungan berhasil dikirim.');
+          refreshCampaignList();
+        }).catch(e => {
+          if (errEl) errEl.textContent = e.message || String(e);
+          resetBtn();
+        });
+      };
+      reader.onerror = function() { if (errEl) errEl.textContent = 'Gagal membaca file PDF.'; resetBtn(); };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onerror = function() { if (errEl) errEl.textContent = 'Gagal membaca file gambar.'; resetBtn(); };
+    reader.onload = function (event) {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scaleSize = Math.min(1, MAX_WIDTH / img.width);
+        canvas.width = img.width * scaleSize;
+        canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        const base64 = compressedDataUrl.split(',')[1];
+        call('submitCombinedPaymentProof', campaignIds, user.whatsapp, {
+          base64: base64, mimeType: 'image/jpeg', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.jpg`
+        }).then(() => {
+          showToast('Bukti transfer gabungan berhasil dikirim.');
+          refreshCampaignList();
+        }).catch(e => {
+          if (errEl) errEl.textContent = e.message || String(e);
+          resetBtn();
+        });
+      };
+      img.onerror = function () { 
+        if (errEl) errEl.textContent = 'Gagal membaca gambar, coba file lain.'; 
         resetBtn();
       };
       img.src = event.target.result;
@@ -1539,6 +1821,10 @@
         html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
       }
 
+      const hasUnverified = detail.donors.some(d => String(d.Paid).toUpperCase() === 'TRUE' && String(d.Verified).toUpperCase() !== 'TRUE');
+      if (hasUnverified) {
+        html += '<button class="btn green" style="margin-bottom:8px; margin-right:8px;" onclick="picVerifyAllUI(\'' + c.CampaignID + '\')">✓ Setujui Semua Bukti</button>';
+      }
       if (!isAchieved) {
         html += '<button class="btn secondary" style="margin-bottom:8px; margin-right:8px;" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
       }
@@ -1663,13 +1949,122 @@
       document.getElementById('late-wa').value = '';
       document.getElementById('late-alias').value = '';
       document.getElementById('late-reason').value = '';
-      document.getElementById('late-custom-amount').value = '';
+        document.getElementById('late-custom-amount').value = '';
       document.getElementById('late-donor-form').classList.add('hidden');
     }).catch(e => errEl.textContent = e.message || String(e));
   }
 
   // Store latest PIC campaign data so copyShareLink can build a rich message
   let _picCampaignData = null;
+  let originalTitle = document.title || 'Donatur Helper';
+  let activePendingCount = 0;
+
+  function updateTabTitle(pendingCount) {
+    activePendingCount = pendingCount;
+    if (pendingCount > 0) {
+      document.title = '(' + pendingCount + ') Pendaftaran Baru | ' + originalTitle;
+    } else {
+      document.title = originalTitle;
+    }
+  }
+
+  let lastNotifiedCount = 0;
+
+  function playAlertChime() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      
+      // Ding
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.4);
+
+      // Dong
+      setTimeout(() => {
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.frequency.setValueAtTime(440, ctx.currentTime); // A4
+        gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+        osc2.start(ctx.currentTime);
+        osc2.stop(ctx.currentTime + 0.6);
+      }, 150);
+    } catch(e) {
+      console.log('Audio chime blocked or unsupported:', e);
+    }
+  }
+
+  let pollIntervalId = null;
+  let visibilityListenerRegistered = false;
+
+  function startAdminPolling() {
+    if (pollIntervalId) return;
+    
+    function runCheck() {
+      const token = currentToken();
+      if (!token) return;
+      const role = safeGet('auth_role');
+      if (role !== 'Admin' && role !== 'SuperAdmin') return;
+
+      call('getPendingMembers', token).then(list => {
+        const currentCount = list.length;
+        updateTabTitle(currentCount);
+
+        if (currentCount > lastNotifiedCount) {
+          playAlertChime();
+          showToast('Ada ' + currentCount + ' pendaftaran member baru menunggu persetujuan!');
+          
+          // Trigger updates of target elements if visible
+          const activePendingEl = document.getElementById('admin-pending-members') || document.getElementById('sa-pending-members');
+          if (activePendingEl) {
+            refreshPendingMembers(activePendingEl.id);
+          }
+          // Also refresh dashboard summary stats and campaigns/late requests
+          if (role === 'Admin') {
+            refreshSummary('admin-summary');
+            refreshLateRequests('admin-late-donors');
+          } else if (role === 'SuperAdmin') {
+            refreshSummary('sa-summary');
+            refreshLateRequests('sa-late-donors');
+          }
+        } else if (currentCount < lastNotifiedCount) {
+          const activePendingEl = document.getElementById('admin-pending-members') || document.getElementById('sa-pending-members');
+          if (activePendingEl) {
+            refreshPendingMembers(activePendingEl.id);
+          }
+        }
+        lastNotifiedCount = currentCount;
+      }).catch(e => console.log('Polling check failed:', e));
+    }
+
+    runCheck();
+    pollIntervalId = setInterval(runCheck, 60000);
+
+    // Watch tab visibility (only register listener once)
+    if (!visibilityListenerRegistered) {
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (pollIntervalId) {
+            clearInterval(pollIntervalId);
+            pollIntervalId = null;
+          }
+        } else {
+          startAdminPolling();
+        }
+      });
+      visibilityListenerRegistered = true;
+    }
+  }
 
   function copyShareLink() {
     const c = _picCampaignData;
@@ -1945,12 +2340,37 @@
     }
   }
 
+  function copyAmount(amount, formattedText) {
+    const raw = String(amount).replace(/[^0-9]/g, '');
+    navigator.clipboard.writeText(raw).then(() => {
+      showToast('Nominal Rp ' + formattedText + ' berhasil disalin untuk m-banking!');
+    }).catch(() => {
+      const textArea = document.createElement("textarea");
+      textArea.value = raw;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      showToast('Nominal Rp ' + formattedText + ' berhasil disalin untuk m-banking!');
+    });
+  }
+
   function verifyPaymentUI(campaignId, whatsapp, isValid) {
     const action = isValid ? 'konfirmasi' : 'tolak';
     showConfirmModal('Yakin ingin ' + action + ' bukti transfer donatur ini?', () => {
       callQueued('picVerifyPayment', currentToken(), campaignId, whatsapp, isValid).then(res => {
         if (res.error) throw new Error(res.error);
         showToast('Bukti transfer berhasil di' + action + '.');
+        call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function picVerifyAllUI(campaignId) {
+    showConfirmModal('Yakin ingin menyetujui/mengonfirmasi SEMUA bukti transfer yang sudah diupload?', () => {
+      callQueued('picVerifyAllPayments', currentToken(), campaignId).then(count => {
+        if (typeof count === 'object' && count.error) throw new Error(count.error);
+        showToast('Berhasil mengonfirmasi ' + count + ' bukti transfer.');
         call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
       }).catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
@@ -2027,6 +2447,7 @@
     refreshLateRequests('admin-late-donors');
     refreshAdminCampaigns();
     refreshMembers();
+    startAdminPolling();
   }
 
   // Smart function that updates whichever dashboard is currently open
@@ -2036,17 +2457,38 @@
       if (!el) return;
       // Auto-show/hide the parent card
       const parentCard = elId === 'sa-pending-members' ? document.getElementById('sa-pending-card') : null;
+      const bannerId = elId === 'sa-pending-members' ? 'sa-notify-banner' : 'admin-notify-banner';
+      const bannerEl = document.getElementById(bannerId);
+
       if (!list.length) {
         el.innerHTML = '<p class="muted">Tidak ada pendaftaran baru.</p>';
         if (parentCard) parentCard.classList.add('hidden');
+        if (bannerEl) bannerEl.classList.add('hidden');
         return;
       }
       if (parentCard) parentCard.classList.remove('hidden');
-      let html = '<div class="table-responsive"><table><tr><th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
+
+      if (bannerEl) {
+        bannerEl.innerHTML = '<span>🔔 Ada ' + list.length + ' pendaftaran member baru yang memerlukan persetujuan!</span>' +
+                              '<button class="link-btn" onclick="scrollToPending(\'' + elId + '\')" style="color:white; font-size:12px; text-decoration:underline;">Lihat Detail</button>';
+        bannerEl.classList.remove('hidden');
+      }
+
+      let html = '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
+      html += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
+      html += '<button class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
+      html += '</div>';
+
+      html += '<div class="table-responsive"><table><tr>';
+      html += '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-pending-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"></th>';
+      html += '<th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
+      
       list.forEach((m, idx) => {
         let defaultStatus = 'active';
         if (m.AddedBy && String(m.AddedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
-        html += '<tr><td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
+        html += '<tr>';
+        html += '<td style="text-align: center;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"></td>';
+        html += '<td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
         html += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
         html += '<td><button class="btn green" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
         html += '<button class="btn danger" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
@@ -2056,8 +2498,43 @@
     });
   }
 
+  function scrollToPending(elId) {
+    const el = document.getElementById(elId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   function approvePending(wa, newStatus, elId) {
     call('adminUpdateMemberStatus', currentToken(), wa, newStatus).then(() => {
+      refreshPendingMembers(elId);
+      refreshMembers();
+      refreshSummary(elId === 'sa-pending-members' ? 'sa-summary' : 'admin-summary');
+    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }
+
+  function toggleSelectAllPending(master, elId) {
+    document.querySelectorAll('.pending-checkbox-' + elId).forEach(cb => cb.checked = master.checked);
+  }
+
+  function bulkApprovePending(action, elId) {
+    const selected = [];
+    document.querySelectorAll('.pending-checkbox-' + elId + ':checked').forEach(cb => {
+      selected.push({ whatsapp: cb.value, defaultStatus: cb.getAttribute('data-status') });
+    });
+    if (!selected.length) {
+      showInfoModal('Pilih minimal satu member terlebih dahulu.', 'Info');
+      return;
+    }
+
+    const isRejection = action === 'reject';
+    const updates = selected.map(s => ({
+      whatsapp: s.whatsapp,
+      status: isRejection ? 'rejected' : s.defaultStatus
+    }));
+
+    call('adminBulkUpdateMemberStatus', currentToken(), updates).then(() => {
+      showToast('Status member terpilih berhasil diperbarui.');
       refreshPendingMembers(elId);
       refreshMembers();
       refreshSummary(elId === 'sa-pending-members' ? 'sa-summary' : 'admin-summary');
@@ -2234,6 +2711,14 @@
   function adminView(campaignId) {
     call('getCampaignDetailAdmin', currentToken(), campaignId)
       .then(detail => {
+        return call('fetchAllMembers', currentToken()).then(members => {
+          return { detail: detail, members: members };
+        });
+      })
+      .then(res => {
+        const detail = res.detail;
+        const members = res.members.filter(m => String(m.Status).toLowerCase() === 'active');
+
         let html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;">';
         html += '<div class="card" style="width:100%;max-width:600px;max-height:90vh;overflow-y:auto;">';
         html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
@@ -2304,6 +2789,23 @@
           html += '<p class="muted">Belum ada donatur.</p>';
         }
 
+        if (c.Status !== 'Archived') {
+          let transferHtml = '<div style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin-bottom: 12px;">';
+          transferHtml += '<h3 style="margin-top:0; font-size: 14px; color:var(--text);">🔄 Transfer Kepemilikan Campaign</h3>';
+          transferHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Pindahkan hak PIC campaign ini ke member lain. Token PIC lama akan kedaluwarsa secara otomatis.</p>';
+          transferHtml += '<div style="display:flex; gap:8px;">';
+          transferHtml += '<select id="transfer-pic-select" style="flex:1; padding:6px; font-size:13px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--text);">';
+          transferHtml += '<option value="">-- Pilih PIC Baru --</option>';
+          members.forEach(m => {
+            transferHtml += '<option value="' + escapeHtml(m.WhatsApp) + '">' + escapeHtml(m.Name) + ' (' + escapeHtml(m.WhatsApp) + ')</option>';
+          });
+          transferHtml += '</select>';
+          transferHtml += '<button class="btn blue btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="adminTransferOwnershipUI(\'' + c.CampaignID + '\')">Transfer</button>';
+          transferHtml += '</div>';
+          transferHtml += '</div>';
+          html += transferHtml;
+        }
+
         html += '</div></div>';
 
         let modalContainer = document.getElementById('admin-modal');
@@ -2324,6 +2826,31 @@
         .then(() => {
           showToast('Kalkulasi ulang berhasil.');
           adminView(campaignId); // Refresh the UI to show updated AmountDue
+        })
+        .catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+
+  function adminTransferOwnershipUI(campaignId) {
+    const select = document.getElementById('transfer-pic-select');
+    const targetWhatsapp = select ? select.value : '';
+    if (!targetWhatsapp) {
+      showInfoModal('Pilih member target terlebih dahulu.', 'Info');
+      return;
+    }
+    
+    showConfirmModal('Yakin ingin mentransfer kepemilikan campaign ini? PIC lama akan kehilangan akses dan campaign akan dipindahkan ke PIC baru.', () => {
+      call('transferCampaignOwnershipAdmin', currentToken(), campaignId, targetWhatsapp)
+        .then(newToken => {
+          showInfoModal('Transfer kepemilikan berhasil!\nToken PIC Baru: ' + newToken + '\n\nCampaign ini otomatis muncul di dashboard member yang bersangkutan.', 'Sukses');
+          document.getElementById('admin-modal').innerHTML = ''; // Close modal
+          
+          const role = safeGet('auth_role');
+          if (role === 'SuperAdmin') {
+            refreshSACampaigns();
+          } else {
+            refreshAdminCampaigns();
+          }
         })
         .catch(e => showInfoModal(e.message || String(e), 'Error'));
     });
@@ -2492,6 +3019,7 @@
     refreshPendingMembers('sa-pending-members'); // NEW: Load SA Pending List
     refreshLateRequests('sa-late-donors'); // NEW: Load SA Late Donors
     refreshSACampaigns();
+    startAdminPolling();
   }
 
   function runDataSweep() {
