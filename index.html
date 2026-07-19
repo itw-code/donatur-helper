@@ -999,10 +999,12 @@
   }
 
   function logoutToken() {
-    if (_pollingInterval) {
-      clearInterval(_pollingInterval);
-      _pollingInterval = null;
+    if (pollIntervalId) {
+      clearInterval(pollIntervalId);
+      pollIntervalId = null;
     }
+    lastNotifiedCount = 0;
+    updateTabTitle(0);
     safeRemove('auth_token');
     safeRemove('auth_role');
     safeRemove('deep_dive_return_token');
@@ -1119,7 +1121,7 @@
           html += '<h3 style="margin-top:0;color:var(--red);">⚠️ Menunggu Pembayaran</h3>';
           const grouped = {};
           pending.forEach(c => {
-            const key = String(c.bankName || '').trim() + ' - ' + String(c.bankAccount || '').trim();
+            const key = String(c.bankName || '').trim() + '_' + String(c.bankAccount || '').trim() + '_' + String(c.accountHolder || '').trim();
             if (!grouped[key]) {
               grouped[key] = [];
             }
@@ -1149,7 +1151,7 @@
             bulkJoinHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Centang campaign di bawah, lalu klik tombol ini untuk gabung sekaligus.</p>';
             bulkJoinHtml += '<div style="display:flex; align-items:center; gap:8px;">';
             bulkJoinHtml += '<label style="margin:0; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="bulk-join-select-all" onclick="toggleSelectAllBulkJoin(this)" style="width:auto; margin:0; cursor:pointer;"> Pilih Semua</label>';
-            bulkJoinHtml += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px; margin-left:auto;" onclick="bulkJoinCampaignsUI()">Gabung Campaign Terpilih</button>';
+            bulkJoinHtml += '<button id="bulk-join-btn" class="btn green btn-auto" style="display:none; margin:0; padding:6px 12px; font-size:12px; margin-left:auto;" onclick="openBulkJoinModal()">Ikut Patungan Massal</button>';
             bulkJoinHtml += '</div>';
             bulkJoinHtml += '</div>';
             html += bulkJoinHtml;
@@ -1183,12 +1185,21 @@
 
   function toggleSelectAllBulkJoin(master) {
     document.querySelectorAll('.bulk-join-checkbox').forEach(cb => cb.checked = master.checked);
+    updateBulkJoinBtnVisibility();
   }
 
-  function bulkJoinCampaignsUI() {
-    const user = JSON.parse(safeGet('donor_user') || 'null');
-    if (!user) return;
+  function updateBulkJoinBtnVisibility() {
+    const btn = document.getElementById('bulk-join-btn');
+    if (!btn) return;
+    const selectedCount = document.querySelectorAll('.bulk-join-checkbox:checked').length;
+    if (selectedCount > 0) {
+      btn.style.display = 'block';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
 
+  function openBulkJoinModal() {
     const checkboxes = document.querySelectorAll('.bulk-join-checkbox:checked');
     const selectedIds = [];
     const selectedNames = [];
@@ -1202,14 +1213,85 @@
       return;
     }
 
-    showConfirmModal('Apakah Anda yakin ingin bergabung di ' + selectedIds.length + ' campaign ini sekaligus?\n\n' + selectedNames.join('\n'), () => {
-      call('memberBulkJoinCampaigns', selectedIds, user.name, user.whatsapp)
-        .then(() => {
-          showToast('Berhasil bergabung di ' + selectedIds.length + ' campaign.');
-          refreshCampaignList();
-        })
-        .catch(e => showInfoModal(e.message || String(e), 'Error'));
-    });
+    let modal = document.getElementById('custom-bulk-join-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'custom-bulk-join-modal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="card" style="width:90%; max-width:450px; background:white; padding:20px; border-radius:12px; position:relative; box-shadow:var(--shadow-lg); border:none;">
+        <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">&times;</button>
+        <h3 style="margin-top:0; color:var(--blue); font-size:18px; font-weight:bold; margin-bottom:8px;">Ikut Patungan Massal</h3>
+        <p style="font-size:13px; color:var(--text); margin-bottom:16px; line-height:1.4;">Anda memilih untuk bergabung ke <strong>\${selectedIds.length} campaign</strong> sekaligus.</p>
+        
+        <div style="margin-bottom:16px;">
+          <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:8px;">Tipe Patungan:</label>
+          <div style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <input type="radio" id="bj-type-rata" name="bj-type" value="rata" checked onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
+            <label for="bj-type-rata" style="font-size:13px; cursor:pointer; margin:0;">Patungan Rata (bagi rata tagihan nanti)</label>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="radio" id="bj-type-bebas" name="bj-type" value="bebas" onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
+            <label for="bj-type-bebas" style="font-size:13px; cursor:pointer; margin:0;">Nominal Bebas (tulis nominal sendiri)</label>
+          </div>
+        </div>
+        
+        <div id="bj-custom-amount-wrap" class="hidden" style="margin-bottom:16px;">
+          <label for="bj-custom-amount" style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">Nominal Per Campaign (Rp):</label>
+          <input type="number" id="bj-custom-amount" placeholder="Contoh: 50000" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label for="bj-alias" style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">Nama Alias (Opsional, jika ingin nama disamarkan):</label>
+          <input type="text" id="bj-alias" placeholder="Contoh: Hamba Allah" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button class="btn secondary" style="margin:0; padding:8px 16px; font-size:13px;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">Batal</button>
+          <button class="btn blue" style="margin:0; padding:8px 16px; font-size:13px;" onclick="submitBulkJoin('\${selectedIds.join(\u0027,\u0027)}')">Gabung</button>
+        </div>
+      </div>
+    `;
+
+    modal.style.display = 'flex';
+  }
+
+  function toggleBulkJoinFields() {
+    const isBebas = document.getElementById('bj-type-bebas').checked;
+    const wrap = document.getElementById('bj-custom-amount-wrap');
+    if (isBebas) {
+      wrap.classList.remove('hidden');
+    } else {
+      wrap.classList.add('hidden');
+    }
+  }
+
+  function submitBulkJoin(campaignIdsStr) {
+    const user = JSON.parse(safeGet('donor_user') || 'null');
+    if (!user) return;
+
+    const campaignIds = campaignIdsStr.split(',');
+    const isBebas = document.getElementById('bj-type-bebas').checked;
+    let customAmount = '';
+    if (isBebas) {
+      customAmount = document.getElementById('bj-custom-amount').value;
+      if (!customAmount || Number(customAmount) <= 0) {
+        showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
+        return;
+      }
+    }
+    const alias = document.getElementById('bj-alias').value.trim();
+
+    call('joinCampaignsBulk', campaignIds, user.name, user.whatsapp, customAmount, alias)
+      .then(() => {
+        document.getElementById('custom-bulk-join-modal').style.display = 'none';
+        showToast('Berhasil bergabung di ' + campaignIds.length + ' campaign.');
+        refreshCampaignList();
+      })
+      .catch(e => showInfoModal(e.message || String(e), 'Error'));
   }
 
   function getDeadlineBadge(deadlineStr) {
@@ -1258,7 +1340,7 @@
     html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin: 12px 0;">';
     html += '<div style="font-size:12px; color:var(--text);">Total nominal gabungan yang harus ditransfer:</div>';
     html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(totalDue);
-    html += ' <button class="link-btn" style="font-size:12px; padding: 2px 6px;" onclick="copyDonorAmount(\'' + totalDue + '\')">📋 Copy</button>';
+    html += ' <span class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">📋 Salin</span>';
     html += '</div>';
     html += '</div>';
     
@@ -1280,7 +1362,7 @@
   function renderCampaignCard(c, user, isPending) {
     let checkboxHtml = '';
     if (c.status === 'Open' && !c.joined) {
-      checkboxHtml = '<input type="checkbox" class="bulk-join-checkbox" value="' + c.campaignId + '" data-name="' + escapeHtml(c.targetName) + '" style="width:16px; height:16px; margin-right:8px; cursor:pointer; vertical-align:middle;"> ';
+      checkboxHtml = '<input type="checkbox" class="bulk-join-checkbox" value="' + c.campaignId + '" data-name="' + escapeHtml(c.targetName) + '" onchange="updateBulkJoinBtnVisibility()" style="width:16px; height:16px; margin-right:8px; cursor:pointer; vertical-align:middle;"> ';
     }
 
     let html = '<div class="card" id="card-' + c.campaignId + '">';
@@ -1334,7 +1416,7 @@
         html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin-bottom:12px;">';
         html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
         html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(c.amountDue);
-        html += ' <button class="link-btn" style="font-size:14px; padding: 2px 6px;" onclick="copyDonorAmount(\'' + c.amountDue + '\')">📋 Copy</button>';
+        html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">📋 Salin</span>';
         html += '</div>';
         html += '</div>';
         html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount);
@@ -1503,7 +1585,7 @@
       const reader = new FileReader();
       reader.onload = function (event) {
         const base64 = event.target.result.split(',')[1];
-        call('submitCombinedPaymentProof', user.whatsapp, campaignIds, bankAccount, {
+        call('submitCombinedPaymentProof', campaignIds, user.whatsapp, {
           base64: base64, mimeType: 'application/pdf', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.pdf`
         }).then(() => {
           showToast('Bukti transfer gabungan berhasil dikirim.');
@@ -1533,7 +1615,7 @@
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
         const base64 = compressedDataUrl.split(',')[1];
-        call('submitCombinedPaymentProof', user.whatsapp, campaignIds, bankAccount, {
+        call('submitCombinedPaymentProof', campaignIds, user.whatsapp, {
           base64: base64, mimeType: 'image/jpeg', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.jpg`
         }).then(() => {
           showToast('Bukti transfer gabungan berhasil dikirim.');
@@ -1867,34 +1949,121 @@
       document.getElementById('late-wa').value = '';
       document.getElementById('late-alias').value = '';
       document.getElementById('late-reason').value = '';
-      document.getElementById('late-custom-amount').value = '';
+        document.getElementById('late-custom-amount').value = '';
       document.getElementById('late-donor-form').classList.add('hidden');
     }).catch(e => errEl.textContent = e.message || String(e));
   }
 
   // Store latest PIC campaign data so copyShareLink can build a rich message
   let _picCampaignData = null;
-  let _pollingInterval = null;
+  let originalTitle = document.title || 'Donatur Helper';
+  let activePendingCount = 0;
 
-  function startDashboardPolling() {
-    if (_pollingInterval) clearInterval(_pollingInterval);
-    
-    const pollFunc = () => {
-      if (document.hidden) return;
+  function updateTabTitle(pendingCount) {
+    activePendingCount = pendingCount;
+    if (pendingCount > 0) {
+      document.title = '(' + pendingCount + ') Pendaftaran Baru | ' + originalTitle;
+    } else {
+      document.title = originalTitle;
+    }
+  }
+
+  let lastNotifiedCount = 0;
+
+  function playAlertChime() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
       
-      const role = safeGet('auth_role');
-      if (role === 'Admin') {
-        refreshPendingMembers('admin-pending-members');
-        refreshSummary('admin-summary');
-        refreshLateRequests('admin-late-donors');
-      } else if (role === 'SuperAdmin') {
-        refreshPendingMembers('sa-pending-members');
-        refreshSummary('sa-summary');
-        refreshLateRequests('sa-late-donors');
-      }
-    };
+      // Ding
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.4);
+
+      // Dong
+      setTimeout(() => {
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.frequency.setValueAtTime(440, ctx.currentTime); // A4
+        gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+        osc2.start(ctx.currentTime);
+        osc2.stop(ctx.currentTime + 0.6);
+      }, 150);
+    } catch(e) {
+      console.log('Audio chime blocked or unsupported:', e);
+    }
+  }
+
+  let pollIntervalId = null;
+  let visibilityListenerRegistered = false;
+
+  function startAdminPolling() {
+    if (pollIntervalId) return;
     
-    _pollingInterval = setInterval(pollFunc, 60000);
+    function runCheck() {
+      const token = currentToken();
+      if (!token) return;
+      const role = safeGet('auth_role');
+      if (role !== 'Admin' && role !== 'SuperAdmin') return;
+
+      call('getPendingMembers', token).then(list => {
+        const currentCount = list.length;
+        updateTabTitle(currentCount);
+
+        if (currentCount > lastNotifiedCount) {
+          playAlertChime();
+          showToast('Ada ' + currentCount + ' pendaftaran member baru menunggu persetujuan!');
+          
+          // Trigger updates of target elements if visible
+          const activePendingEl = document.getElementById('admin-pending-members') || document.getElementById('sa-pending-members');
+          if (activePendingEl) {
+            refreshPendingMembers(activePendingEl.id);
+          }
+          // Also refresh dashboard summary stats and campaigns/late requests
+          if (role === 'Admin') {
+            refreshSummary('admin-summary');
+            refreshLateRequests('admin-late-donors');
+          } else if (role === 'SuperAdmin') {
+            refreshSummary('sa-summary');
+            refreshLateRequests('sa-late-donors');
+          }
+        } else if (currentCount < lastNotifiedCount) {
+          const activePendingEl = document.getElementById('admin-pending-members') || document.getElementById('sa-pending-members');
+          if (activePendingEl) {
+            refreshPendingMembers(activePendingEl.id);
+          }
+        }
+        lastNotifiedCount = currentCount;
+      }).catch(e => console.log('Polling check failed:', e));
+    }
+
+    runCheck();
+    pollIntervalId = setInterval(runCheck, 60000);
+
+    // Watch tab visibility (only register listener once)
+    if (!visibilityListenerRegistered) {
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (pollIntervalId) {
+            clearInterval(pollIntervalId);
+            pollIntervalId = null;
+          }
+        } else {
+          startAdminPolling();
+        }
+      });
+      visibilityListenerRegistered = true;
+    }
   }
 
   function copyShareLink() {
@@ -2171,18 +2340,18 @@
     }
   }
 
-  function copyDonorAmount(amount) {
-    const rawAmount = String(amount).replace(/[^0-9]/g, '');
-    navigator.clipboard.writeText(rawAmount).then(() => {
-      showToast('Nominal transfer ' + formatIDR(amount) + ' berhasil disalin!');
+  function copyAmount(amount, formattedText) {
+    const raw = String(amount).replace(/[^0-9]/g, '');
+    navigator.clipboard.writeText(raw).then(() => {
+      showToast('Nominal Rp ' + formattedText + ' berhasil disalin untuk m-banking!');
     }).catch(() => {
       const textArea = document.createElement("textarea");
-      textArea.value = rawAmount;
+      textArea.value = raw;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
       document.body.removeChild(textArea);
-      showToast('Nominal transfer ' + formatIDR(amount) + ' berhasil disalin!');
+      showToast('Nominal Rp ' + formattedText + ' berhasil disalin untuk m-banking!');
     });
   }
 
@@ -2278,7 +2447,7 @@
     refreshLateRequests('admin-late-donors');
     refreshAdminCampaigns();
     refreshMembers();
-    startDashboardPolling();
+    startAdminPolling();
   }
 
   // Smart function that updates whichever dashboard is currently open
@@ -2850,7 +3019,7 @@
     refreshPendingMembers('sa-pending-members'); // NEW: Load SA Pending List
     refreshLateRequests('sa-late-donors'); // NEW: Load SA Late Donors
     refreshSACampaigns();
-    startDashboardPolling();
+    startAdminPolling();
   }
 
   function runDataSweep() {
