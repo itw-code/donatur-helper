@@ -1,3 +1,5 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Flatpickr CSS & JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -337,6 +339,88 @@
     white-space: nowrap;
   }
 
+  /* Donor card reflow (mobile) */
+  .donor-cards {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .donor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .donor-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .donor-card-name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .donor-card-wa {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .donor-card-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 13px;
+  }
+
+  .donor-card-body .label {
+    color: var(--muted);
+    font-size: 11px;
+    display: block;
+  }
+
+  .donor-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .donor-card-total {
+    background: #f5f7fa;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: right;
+  }
+
+  @media (max-width: 767px) {
+    #pic-donor-list .table-responsive {
+      display: none;
+    }
+
+    #pic-donor-list .donor-cards {
+      display: flex;
+    }
+  }
+
+  @media (min-width: 768px) {
+    #pic-donor-list .donor-cards {
+      display: none;
+    }
+  }
+
   td .btn,
   th .btn {
     width: auto;
@@ -351,19 +435,89 @@
     gap: 6px;
   }
 
-  @media (max-width: 767px) {
+  /* === Tier 1: Phones (≤480px) === */
+  @media (max-width: 480px) {
+    body {
+      padding: 16px 12px;
+    }
+
+    .btn,
+    button,
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      min-height: 44px;
+    }
 
     td .btn,
     th .btn {
       padding: 10px 14px !important;
-      /* Larger tap targets */
       font-size: 13px !important;
     }
 
     select {
       padding: 10px 12px !important;
       font-size: 16px !important;
-      /* Prevents iOS auto-zoom */
+    }
+
+    .row {
+      flex-direction: column;
+    }
+
+    #toast {
+      left: 12px;
+      right: 12px;
+      transform: translateY(20px);
+      min-width: unset;
+      border-radius: var(--radius);
+      text-align: left;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+    }
+
+    .card [style*="justify-content:space-between"] {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .table-responsive {
+      max-height: none;
+    }
+
+    .table-responsive select {
+      font-size: 16px;
+      min-height: 44px;
+    }
+  }
+
+  /* === Tier 2: Large phones / small tablets (481–767px) === */
+  @media (min-width: 481px) and (max-width: 767px) {
+    .wrap {
+      max-width: 480px;
+    }
+
+    .btn,
+    button,
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      min-height: 44px;
+    }
+
+    td .btn,
+    th .btn {
+      padding: 10px 14px !important;
+      font-size: 13px !important;
+    }
+
+    select {
+      font-size: 16px !important;
+    }
+
+    .row {
+      flex-direction: column;
     }
   }
 
@@ -377,7 +531,37 @@
     backdrop-filter: blur(8px);
   }
 
-  @media (min-width: 768px) {
+  /* === Tier 3: Tablets (768–1023px) === */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .wrap {
+      max-width: 720px;
+      padding: 28px;
+    }
+
+    .split-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .split-left,
+    .split-right {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row > * {
+      flex: 1;
+    }
+  }
+
+  /* === Tier 4: Desktop (≥1024px) === */
+  @media (min-width: 1024px) {
     .wrap {
       max-width: 1200px;
       padding: 32px;
@@ -393,6 +577,159 @@
     .split-right {
       flex: 1;
       min-width: 0;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row > * {
+      flex: 1;
+    }
+  }
+
+  /* === Bottom sheet modals on mobile === */
+  @keyframes slideUpSheet {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  @media (max-width: 767px) {
+    #custom-info-modal,
+    #custom-confirm-modal,
+    #custom-bulk-join-modal,
+    #edit-gift-modal,
+    #edit-amount-modal {
+      align-items: flex-end !important;
+    }
+
+    #admin-modal > div {
+      align-items: flex-end !important;
+      padding: 0 !important;
+    }
+
+    #custom-info-modal > .card,
+    #custom-confirm-modal > .card,
+    #custom-bulk-join-modal > .card,
+    #edit-gift-modal > .card,
+    #edit-amount-modal > .card,
+    #admin-modal .card {
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      border-radius: 16px 16px 0 0 !important;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-actions {
+      flex-direction: column !important;
+    }
+
+    .modal-actions .btn {
+      width: 100%;
+      min-height: 44px;
+    }
+  }
+
+  /* === Admin / SuperAdmin responsive (≤767px) === */
+  @media (max-width: 767px) {
+    #admin-notify-banner,
+    #sa-notify-banner {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 8px;
+    }
+
+    #view-admin-dashboard [style*="display:flex"][style*="justify-content:space-between"],
+    #view-superadmin-dashboard [style*="display:flex"][style*="justify-content:space-between"] {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    #view-superadmin-dashboard [style*="min-width:300px"] {
+      min-width: 0 !important;
+    }
+
+    /* Pending members card reflow */
+    .pending-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pending-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pending-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pending-card-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .pending-card-wa {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pending-card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pending-card-actions .btn {
+      flex: 1;
+      min-height: 44px;
+    }
+
+    #admin-pending-members .pending-table-view,
+    #sa-pending-members .pending-table-view {
+      display: none;
+    }
+
+    #admin-pending-members .pending-cards,
+    #sa-pending-members .pending-cards {
+      display: flex;
+    }
+
+    .pending-bulk-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .pending-bulk-actions .btn {
+      flex: 1;
+      min-height: 44px;
+      font-size: 13px !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .pending-cards {
+      display: none !important;
+    }
+
+    .pending-bulk-actions {
+      display: none !important;
+    }
+
+    .pending-table-view {
+      display: block;
     }
   }
 
@@ -506,20 +843,26 @@
       <div id="u-register-fields" class="hidden"
         style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
         <div style="font-weight:600; font-size:15px; margin-bottom:16px; color:var(--text);">Pendaftaran Baru</div>
-        <label>Nama Lengkap</label>
-        <input id="u-name" placeholder="Nama kamu">
-        <div
-          style="font-size: 12px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; margin-bottom: 16px;">
-          <span style="font-size: 14px; line-height: 1;">ℹ️</span>
-          <span style="line-height: 1.3;">Gunakan nama asli agar PIC mudah mengenali Anda saat mendata donasi.</span>
+        <div class="form-row">
+          <div>
+            <label>Nama Lengkap</label>
+            <input id="u-name" placeholder="Nama kamu">
+            <div
+              style="font-size: 12px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; margin-bottom: 16px;">
+              <span style="font-size: 14px; line-height: 1;">ℹ️</span>
+              <span style="line-height: 1.3;">Gunakan nama asli agar PIC mudah mengenali Anda saat mendata donasi.</span>
+            </div>
+          </div>
+          <div>
+            <label>Status Karyawan</label>
+            <select id="u-status"
+              style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#fff;">
+              <option value="" disabled selected>-- Pilih Status --</option>
+              <option value="active">Active (Karyawan Saat Ini)</option>
+              <option value="ex">Ex (Alumni / Resign)</option>
+            </select>
+          </div>
         </div>
-        <label>Status Karyawan</label>
-        <select id="u-status"
-          style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#fff;">
-          <option value="" disabled selected>-- Pilih Status --</option>
-          <option value="active">Active (Karyawan Saat Ini)</option>
-          <option value="ex">Ex (Alumni / Resign)</option>
-        </select>
       </div>
 
       <button id="btn-u-login" class="btn" onclick="userLogin()">Lanjut</button>
@@ -549,16 +892,28 @@
   <div id="view-pic-create" class="hidden">
     <h2>Buat campaign donasi baru</h2>
     <div class="card">
-      <label>Nama target (yang resign)</label>
-      <input id="pc-target" placeholder="contoh: Ihsan Wanda">
+      <div class="form-row">
+        <div>
+          <label>Nama target (yang resign)</label>
+          <input id="pc-target" placeholder="contoh: Ihsan Wanda">
+        </div>
+        <div>
+          <label>Total nilai hadiah (IDR)</label>
+          <input id="pc-amount" type="text" inputmode="numeric" placeholder="1.000.000" onkeyup="formatInputRibuan(event)">
+        </div>
+      </div>
       <label>Alasan / catatan (opsional)</label>
       <textarea id="pc-reason" rows="2" placeholder="contoh: resign per 1 Juli 2026"></textarea>
-      <label>Total nilai hadiah (IDR)</label>
-      <input id="pc-amount" type="text" inputmode="numeric" placeholder="1.000.000" onkeyup="formatInputRibuan(event)">
-      <label>Tanggal mulai (opsional)</label>
-      <input id="pc-start" type="date">
-      <label>Deadline donasi</label>
-      <input id="pc-deadline" type="date">
+      <div class="form-row">
+        <div>
+          <label>Tanggal mulai (opsional)</label>
+          <input id="pc-start" type="date">
+        </div>
+        <div>
+          <label>Deadline donasi</label>
+          <input id="pc-deadline" type="date">
+        </div>
+      </div>
       <button id="btn-create-campaign" class="btn" onclick="createCampaign()">Buat campaign</button>
       <button class="btn secondary" onclick="cancelPicCreate()">Keluar / Batal</button>
       <div id="pc-error" class="error"></div>
@@ -776,7 +1131,7 @@
           <button id="custom-confirm-close" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeConfirmModal()">&times;</button>
           <h3 style="margin-top:0;">Konfirmasi</h3>
           <p id="custom-confirm-message"></p>
-          <div style="display:flex;gap:8px;margin-top:16px;">
+          <div class="modal-actions" style="display:flex;gap:8px;margin-top:16px;">
             <button class="btn secondary" id="custom-confirm-cancel" onclick="closeConfirmModal()">Batal</button>
             <button class="btn danger" id="custom-confirm-ok">Ya, Lanjutkan</button>
           </div>
@@ -1283,7 +1638,7 @@
           <input type="text" id="bj-alias" placeholder="Contoh: Hamba Allah" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px;">
           <button class="btn secondary" style="margin:0; padding:8px 16px; font-size:13px;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">Batal</button>
           <button id="btn-submit-bulk-join" class="btn blue" style="margin:0; padding:8px 16px; font-size:13px;" onclick="submitBulkJoin('\${selectedIds.join(\u0027,\u0027)}')">Gabung</button>
         </div>
@@ -1447,13 +1802,13 @@
         html += '<button id="btn-withdraw-' + c.campaignId + '" class="btn secondary" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
       } else {
         html += '<div class="card" style="background:#f9f9f9;border:1px solid #eee;margin-top:8px;">';
-        html += '<label style="margin-top:0;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto;"> Saya ingin donasi dengan nominal khusus</label>';
+        html += '<label style="margin-top:0; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto; min-height:unset;"> Saya ingin donasi dengan nominal khusus</label>';
         html += '<div id="wrap-custom-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
         html += '<label>Nominal Khusus (IDR)</label>';
         html += '<input id="input-custom-' + c.campaignId + '" type="text" inputmode="numeric" placeholder="Contoh: 100.000" onkeyup="formatInputRibuan(event)">';
         html += '</div>';
 
-        html += '<label style="margin-top:12px;"><input type="checkbox" id="check-alias-' + c.campaignId + '" onchange="document.getElementById(\'wrap-alias-\' + \'' + c.campaignId + '\').classList.toggle(\'hidden\')" style="width:auto;"> Sembunyikan Nama Asli (Gunakan Alias)</label>';
+        html += '<label style="margin-top:12px; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-alias-' + c.campaignId + '" onchange="document.getElementById(\'wrap-alias-\' + \'' + c.campaignId + '\').classList.toggle(\'hidden\')" style="width:auto; min-height:unset;"> Sembunyikan Nama Asli (Gunakan Alias)</label>';
         html += '<div id="wrap-alias-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
         html += '<label>Nama Alias / Samaran</label>';
         html += '<input id="input-alias-' + c.campaignId + '" type="text" placeholder="Contoh: Hamba Allah">';
@@ -1481,7 +1836,7 @@
           if (c.proofLink) html += '<a class="link-btn" href="' + c.proofLink + '" target="_blank">Lihat bukti transfer</a>';
         } else {
           html += '<label>Upload bukti transfer</label>';
-          html += '<input type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf">';
+          html += '<input type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf" style="width:100%; box-sizing:border-box;">';
           html += '<button id="btn-submit-proof-' + c.campaignId + '" class="btn" onclick="submitProof(\'' + c.campaignId + '\')">Sudah transfer, kirim bukti</button>';
           html += '<div id="proof-error-' + c.campaignId + '" class="error"></div>';
         }
@@ -2386,18 +2741,28 @@
       return bDue - aDue;
     });
 
-    let html = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>';
-    detail.donors.forEach(d => {
-      html += '<tr>';
-      const displayName = d.Alias ? d.Alias : d.Name;
-      html += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
+    let tableHtml = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>';
+    let cardHtml = '<div class="donor-cards">';
 
+    detail.donors.forEach(d => {
+      const displayName = d.Alias ? d.Alias : d.Name;
       const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
       const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
       const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
       const picName = d.ModifiedBy ? escapeHtml(d.ModifiedBy) : '';
       const picLabel = picName ? ' (' + picName + ')' : '';
 
+      // --- Status badge (shared) ---
+      let statusBadge = '';
+      if (isVerified) {
+        statusBadge = '<span class="badge success">✅ Verified</span>';
+      } else if (isPaid) {
+        statusBadge = '<span class="badge warning" style="background:#fff3cd;color:#856404;">⏳ Perlu Cek</span>';
+      } else {
+        statusBadge = '<span class="badge warning" style="background:#faeeda;color:var(--amber);">Belum trf</span>';
+      }
+
+      // --- Timeline (shared) ---
       let timeHtml = '<div class="milestone-stack">';
       timeHtml += '<div class="milestone-item"><span class="milestone-dot daftar"></span><span class="milestone-label">Daftar:</span><span class="milestone-time">' + formatTime(d.JoinedAt) + '</span></div>';
       if (isPaid) {
@@ -2414,28 +2779,15 @@
       }
       timeHtml += '</div>';
 
-      html += '<td>' + timeHtml + '</td>';
-
-      let statusBadge = '';
-      if (isVerified) {
-        statusBadge = '<span class="badge success">✅ Verified</span>';
-      } else if (isPaid) {
-        statusBadge = '<span class="badge warning" style="background:#fff3cd;color:#856404;">⏳ Perlu Cek</span>';
-      } else {
-        statusBadge = '<span class="badge warning" style="background:#faeeda;color:var(--amber);">Belum trf</span>';
-      }
-      html += '<td>' + statusBadge + '</td>';
-
+      // --- Amount ---
       let amountHtml = d.AmountDue ? formatIDR(d.AmountDue) : '-';
       if (isPaid) {
         amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
       }
-      html += '<td>' + amountHtml + '</td>';
 
-      // Dedicated Refund Column
+      // --- Refund ---
       let refundHtml = '-';
       let needsRefund = false;
-
       if (isPaid && d.AmountPaid) {
         const diff = Number(d.AmountPaid) - Number(d.AmountDue);
         if (diff > 0) {
@@ -2447,9 +2799,8 @@
           }
         }
       }
-      html += '<td>' + refundHtml + '</td>';
 
-      // Bukti & Verifikasi Column
+      // --- Verification actions ---
       let verificationHtml = '-';
       if (isPaid && d.ProofLink) {
         verificationHtml = '<a href="' + escapeHtml(d.ProofLink) + '" target="_blank" class="link-btn" style="font-size:11px; padding:2px 4px; display:inline-block; margin-bottom:4px;">Lihat Bukti</a><br>';
@@ -2467,23 +2818,49 @@
         const msg = encodeURIComponent("Halo " + d.Name + ", ini reminder untuk patungan *" + detail.campaign.TargetName + "*. Tagihan kamu: " + formatIDR(d.AmountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
         verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" class="btn secondary" style="padding:2px 4px; font-size:11px;">Kirim Reminder WA</a>';
       }
-      html += '<td>' + verificationHtml + '</td>';
 
-      html += '</tr>';
+      // === TABLE ROW ===
+      tableHtml += '<tr>';
+      tableHtml += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
+      tableHtml += '<td>' + timeHtml + '</td>';
+      tableHtml += '<td>' + statusBadge + '</td>';
+      tableHtml += '<td>' + amountHtml + '</td>';
+      tableHtml += '<td>' + refundHtml + '</td>';
+      tableHtml += '<td>' + verificationHtml + '</td>';
+      tableHtml += '</tr>';
+
+      // === MOBILE CARD ===
+      cardHtml += '<div class="donor-card">';
+      cardHtml += '<div class="donor-card-header"><div><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div>' + statusBadge + '</div>';
+      cardHtml += '<div class="donor-card-body">';
+      cardHtml += '<div><span class="label">Tagihan</span>' + amountHtml + '</div>';
+      if (needsRefund) cardHtml += '<div><span class="label">Refund</span>' + refundHtml + '</div>';
+      cardHtml += '<div>' + timeHtml + '</div>';
+      cardHtml += '</div>';
+      if (verificationHtml !== '-') {
+        cardHtml += '<div class="donor-card-actions">' + verificationHtml + '</div>';
+      }
+      cardHtml += '</div>';
     });
 
-    // Add total tagihan row
+    // Total
     let totalTagihan = 0;
     detail.donors.forEach(d => {
       totalTagihan += (Number(d.AmountDue) || 0);
     });
 
-    html += '</tbody>';
+    tableHtml += '</tbody>';
     if (totalTagihan > 0) {
-      html += '<tfoot style="background:#f5f7fa; font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
+      tableHtml += '<tfoot style="background:#f5f7fa; font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
     }
-    html += '</table></div>';
-    el.innerHTML = html;
+    tableHtml += '</table></div>';
+
+    if (totalTagihan > 0) {
+      cardHtml += '<div class="donor-card-total">Total Tagihan: ' + formatIDR(totalTagihan) + '</div>';
+    }
+    cardHtml += '</div>';
+
+    el.innerHTML = cardHtml + tableHtml;
   }
 
 
@@ -2631,27 +3008,57 @@
         bannerEl.classList.remove('hidden');
       }
 
-      let html = '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
-      html += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
-      html += '<button class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
-      html += '</div>';
+      // === MOBILE CARD LAYOUT ===
+      let cardHtml = '<div class="pending-bulk-actions">';
+      cardHtml += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><input type="checkbox" id="select-all-pending-mobile-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"> Pilih Semua</label>';
+      cardHtml += '<button class="btn green" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui</button>';
+      cardHtml += '<button class="btn danger" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak</button>';
+      cardHtml += '</div>';
+      cardHtml += '<div class="pending-cards">';
 
-      html += '<div class="table-responsive"><table><tr>';
-      html += '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-pending-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"></th>';
-      html += '<th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
-      
-      list.forEach((m, idx) => {
+      list.forEach((m) => {
         let defaultStatus = 'active';
         if (m.AddedBy && String(m.AddedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
-        html += '<tr>';
-        html += '<td style="text-align: center;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"></td>';
-        html += '<td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
-        html += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
-        html += '<td><button class="btn green" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
-        html += '<button class="btn danger" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
+        const statusLabel = defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)';
+
+        cardHtml += '<div class="pending-card">';
+        cardHtml += '<div class="pending-card-header">';
+        cardHtml += '<label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"><span class="pending-card-name">' + escapeHtml(m.Name) + '</span></label>';
+        cardHtml += '<span class="badge" style="font-size:11px;">' + statusLabel + '</span>';
+        cardHtml += '</div>';
+        cardHtml += '<span class="pending-card-wa">' + escapeHtml(m.WhatsApp) + '</span>';
+        cardHtml += '<div class="pending-card-actions">';
+        cardHtml += '<button class="btn green" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
+        cardHtml += '<button class="btn danger" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button>';
+        cardHtml += '</div>';
+        cardHtml += '</div>';
       });
-      html += '</table></div>';
-      el.innerHTML = html;
+      cardHtml += '</div>';
+
+      // === DESKTOP TABLE LAYOUT ===
+      let tableHtml = '<div class="pending-table-view">';
+      tableHtml += '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
+      tableHtml += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
+      tableHtml += '<button class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
+      tableHtml += '</div>';
+
+      tableHtml += '<div class="table-responsive"><table><tr>';
+      tableHtml += '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-pending-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"></th>';
+      tableHtml += '<th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
+
+      list.forEach((m) => {
+        let defaultStatus = 'active';
+        if (m.AddedBy && String(m.AddedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
+        tableHtml += '<tr>';
+        tableHtml += '<td style="text-align: center;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"></td>';
+        tableHtml += '<td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
+        tableHtml += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
+        tableHtml += '<td><button class="btn green" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
+        tableHtml += '<button class="btn danger" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
+      });
+      tableHtml += '</table></div></div>';
+
+      el.innerHTML = cardHtml + tableHtml;
     });
   }
 
@@ -2826,7 +3233,7 @@
       return createdA - createdB;
     });
 
-    let html = '<table><tr><th>Target</th><th>Status</th><th>Sisa Waktu</th><th>PIC</th><th>Donatur</th><th>Terakhir Diupdate</th><th>Aksi</th></tr>';
+    let html = '<div class="table-responsive"><table><tr><th>Target</th><th>Status</th><th>Sisa Waktu</th><th>PIC</th><th>Donatur</th><th>Terakhir Diupdate</th><th>Aksi</th></tr>';
     list.forEach(c => {
       let durationHtml = '-';
       if (c.Deadline && c.Status !== 'Archived') {
@@ -2861,7 +3268,7 @@
 
       html += '</td></tr>';
     });
-    html += '</table>';
+    html += '</table></div>';
     return html;
   }
 
@@ -2913,7 +3320,7 @@
         if (c.Reason) html += '<p class="muted">' + escapeHtml(c.Reason) + '</p>';
 
         if (detail.donors.length) {
-          html += '<table><tr><th>Nama</th><th>WA</th><th>Tagihan</th><th>Nominal Transfer</th><th>Terakhir Diupdate</th>';
+          html += '<div class="table-responsive"><table><tr><th>Nama</th><th>WA</th><th>Tagihan</th><th>Nominal Transfer</th><th>Terakhir Diupdate</th>';
           if (role === 'Admin' || role === 'SuperAdmin') {
             html += '<th>Aksi</th>';
           }
@@ -2941,7 +3348,7 @@
             }
             html += '</tr>';
           });
-          html += '</table>';
+          html += '</table></div>';
         } else {
           html += '<p class="muted">Belum ada donatur.</p>';
         }
@@ -3031,7 +3438,7 @@
           <p class="muted">Masukkan nominal Total Hadiah baru (IDR):</p>
           <label>Total Hadiah</label>
           <input type="text" id="edit-gift-input" inputmode="numeric" onkeyup="formatInputRibuan(event)" placeholder="Contoh: 1.000.000">
-          <div style="display:flex;gap:8px;margin-top:16px;">
+          <div class="modal-actions" style="display:flex;gap:8px;margin-top:16px;">
             <button class="btn secondary" onclick="closeEditGiftModal()">Batal</button>
             <button class="btn blue" id="edit-gift-save">Simpan</button>
           </div>
@@ -3104,7 +3511,7 @@
           <p class="muted" id="edit-amount-desc"></p>
           <label>Nominal Aktual (IDR)</label>
           <input type="text" id="edit-amount-input" inputmode="numeric" onkeyup="formatInputRibuan(event)" placeholder="Contoh: 1.000.000">
-          <div style="display:flex;gap:8px;margin-top:16px;">
+          <div class="modal-actions" style="display:flex;gap:8px;margin-top:16px;">
             <button class="btn secondary" onclick="closeEditAmountModal()">Batal</button>
             <button class="btn blue" id="edit-amount-save">Simpan</button>
           </div>
