@@ -510,6 +510,19 @@ function setCampaignField_(campaignId, field, value) {
   }
 }
 
+function setCampaignTextField_(campaignId, field, value) {
+  const sh = sheet_(SHEETS.CAMPAIGNS);
+  const col = headerIndex_(SHEETS.CAMPAIGNS, field) + 1;
+  const idCol = headerIndex_(SHEETS.CAMPAIGNS, 'CampaignID');
+  const data = sh.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][idCol] === campaignId) {
+      sh.getRange(i + 1, col).setNumberFormat('@').setValue(String(value));
+      return;
+    }
+  }
+}
+
 function closeCampaignList(picToken) {
   const tok = requirePicCampaign_(picToken);
   const detail = getCampaignDetail_(tok.LinkedCampaignID);
@@ -609,7 +622,7 @@ function finalizeCampaign(picToken, bankInfo, finalGiftAmount, fileData) {
     setCampaignField_(campaign.CampaignID, 'Status', 'Finalized');
     setCampaignField_(campaign.CampaignID, 'GiftAmount', finalGiftAmount); // Update the master record
     setCampaignField_(campaign.CampaignID, 'BankName', bankInfo.bankName);
-    setCampaignField_(campaign.CampaignID, 'BankAccount', bankInfo.bankAccount);
+    setCampaignTextField_(campaign.CampaignID, 'BankAccount', bankInfo.bankAccount);
     setCampaignField_(campaign.CampaignID, 'AccountHolder', bankInfo.accountHolder);
     setCampaignField_(campaign.CampaignID, 'RoundingUsed', enableRounding);
     setCampaignField_(campaign.CampaignID, 'RoundTo', roundTo);
