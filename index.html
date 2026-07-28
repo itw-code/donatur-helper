@@ -1241,7 +1241,14 @@
         'Content-Type': 'text/plain;charset=utf-8'
       }
     })
-      .then(response => response.json())
+      .then(async response => {
+        const text = await response.text();
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          throw new Error("Respons server bukan JSON (mungkin error atau diblokir). Detail: " + text.substring(0, 80));
+        }
+      })
       .then(res => {
         if (res.status === 'error') throw new Error(res.message);
         if (res.data && typeof res.data === 'object' && res.data.error) {
