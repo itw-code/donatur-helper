@@ -1457,6 +1457,7 @@
   }
 
   function logoutUser() {
+    closeProfileModal();
     safeRemove('donor_user');
     showView('landing');
   }
