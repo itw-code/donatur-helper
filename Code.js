@@ -711,6 +711,35 @@ function deleteCampaign(picToken) {
 }
 
 /**
+ * Deletes a Draft PIC token (token with no linked campaign).
+ * Used when a user wants to remove a draft campaign from their list.
+ */
+function deleteDraftPicToken(picToken) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const tokens = getRows_(SHEETS.TOKENS);
+    const tok = tokens.find(t => t.TokenID === picToken);
+    
+    if (!tok) {
+      throw new Error('Token tidak ditemukan.');
+    }
+    
+    // Verify this is a Draft (no LinkedCampaignID)
+    if (String(tok.LinkedCampaignID || '').trim()) {
+      throw new Error('Token ini sudah terhubung ke campaign. Gunakan fitur hapus campaign.');
+    }
+    
+    // Delete the token row
+    sheet_(SHEETS.TOKENS).deleteRow(tok._row);
+    
+    return true;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
  * Returns a ready-to-copy bulk reminder message for the WhatsApp group, plus
  * per-person wa.me deep links for unpaid donors only.
  */

@@ -1557,7 +1557,12 @@
         picList.forEach(p => {
           picHtml += '<div class="card" style="border-left:4px solid var(--primary); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; gap: 16px;">';
           picHtml += '<div style="flex: 1;"><strong>' + escapeHtml(p.targetName) + '</strong><br><small>' + statusBadge(p.status) + '</small></div>';
-          picHtml += '<button class="btn blue btn-auto" style="margin:0; font-size:12px; padding:6px 12px; flex-shrink: 0;" onclick="seamlessLoginAsPic(\'' + p.picToken + '\')">Kelola</button>';
+          // For Draft campaigns, show Hapus button
+          if (p.status === 'Draft') {
+            picHtml += '<button class="btn danger btn-auto" style="margin:0; font-size:12px; padding:6px 12px; flex-shrink: 0;" onclick="deleteDraftCampaign(\'' + p.picToken + '\')">Hapus</button>';
+          } else {
+            picHtml += '<button class="btn blue btn-auto" style="margin:0; font-size:12px; padding:6px 12px; flex-shrink: 0;" onclick="seamlessLoginAsPic(\'' + p.picToken + '\')">Kelola</button>';
+          }
           picHtml += '</div>';
         });
       }
@@ -3895,6 +3900,15 @@
     safeSet('auth_token', token);
     safeSet('auth_role', 'PIC');
     loadPicDashboard();
+  }
+
+  function deleteDraftCampaign(picToken) {
+    showConfirmModal('Hapus draft campaign ini? Tindakan ini tidak bisa dibatalkan.', () => {
+      call('deleteDraftPicToken', picToken).then(() => {
+        showToast('Draft campaign berhasil dihapus.');
+        loadUserDashboard();
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
   }
 
   function returnToMemberDashboard() {
