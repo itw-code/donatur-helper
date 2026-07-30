@@ -671,6 +671,46 @@ function archiveCampaign(picToken) {
 }
 
 /**
+ * Deletes a campaign (PIC only). Only allowed for Open or Closed campaigns.
+ * Finalized and Archived campaigns cannot be deleted by PIC.
+ */
+function deleteCampaign(picToken) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const tok = requirePicCampaign_(picToken);
+    const campaignId = tok.LinkedCampaignID;
+    const campaign = getRows_(SHEETS.CAMPAIGNS).find(c => String(c.CampaignID || '').trim() === campaignId);
+    
+    if (!campaign) {
+      throw new Error('Campaign tidak ditemukan.');
+    }
+    
+    const status = String(campaign.Status || '').trim();
+    if (status === 'Finalized') {
+      throw new Error('Campaign yang sudah Finalized tidak bisa dihapus. Silakan arsipkan saja.');
+    }
+    if (status === 'Archived') {
+      throw new Error('Campaign yang sudah diarsipkan tidak bisa dihapus.');
+    }
+    
+    // Delete campaign and related data
+    deleteRowsWhere_(SHEETS.CAMPAIGNS, 'CampaignID', campaignId);
+    deleteRowsWhere_(SHEETS.DONORS, 'CampaignID', campaignId);
+    deleteRowsWhere_(SHEETS.LATE_REQUESTS, 'CampaignID', campaignId);
+    
+    // Clear and expire the PIC token
+    const sh = sheet_(SHEETS.TOKENS);
+    sh.getRange(tok._row, headerIndex_(SHEETS.TOKENS, 'LinkedCampaignID') + 1).setValue('');
+    sh.getRange(tok._row, headerIndex_(SHEETS.TOKENS, 'Status') + 1).setValue('Expired');
+    
+    return true;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
  * Returns a ready-to-copy bulk reminder message for the WhatsApp group, plus
  * per-person wa.me deep links for unpaid donors only.
  */

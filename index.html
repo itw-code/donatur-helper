@@ -2299,8 +2299,19 @@
 
     const dangerZone = document.getElementById('pic-danger-zone');
     if (c.Status !== 'Archived') {
-      dangerZone.innerHTML = '<h3 style="margin-top:0; color:var(--red);">Danger Zone</h3>' +
-        '<button class="btn danger" onclick="archiveThis()">Arsipkan campaign</button>';
+      let dangerHtml = '<h3 style="margin-top:0; color:var(--red);">Danger Zone</h3>';
+      
+      // Delete button for Open/Closed campaigns only
+      if (c.Status === 'Open' || c.Status === 'Closed') {
+        dangerHtml += '<button class="btn danger" style="margin-right:8px;" onclick="deleteThis()">Hapus campaign</button>';
+      }
+      
+      // Archive button for Finalized campaigns
+      if (c.Status === 'Finalized') {
+        dangerHtml += '<button class="btn danger" onclick="archiveThis()">Arsipkan campaign</button>';
+      }
+      
+      dangerZone.innerHTML = dangerHtml;
       dangerZone.classList.remove('hidden');
     } else {
       dangerZone.classList.add('hidden');
@@ -2700,6 +2711,22 @@
     showConfirmModal('Arsipkan campaign ini? Token PIC akan nonaktif.', () => {
       return call('archiveCampaign', currentToken()).then(() => {
         showToast('Campaign berhasil diarsipkan.');
+        if (safeGet('deep_dive_return_token')) {
+          returnFromDeepDive();
+        } else if (safeGet('donor_user')) {
+          returnToMemberDashboard();
+        } else {
+          safeRemove('auth_token');
+          safeRemove('auth_role');
+          showView('landing');
+        }
+      }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    });
+  }
+  function deleteThis() {
+    showConfirmModal('Hapus campaign ini? Semua data campaign dan donatur akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.', () => {
+      return call('deleteCampaign', currentToken()).then(() => {
+        showToast('Campaign berhasil dihapus.');
         if (safeGet('deep_dive_return_token')) {
           returnFromDeepDive();
         } else if (safeGet('donor_user')) {
