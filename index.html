@@ -1517,7 +1517,7 @@
     }
 
     const el = document.getElementById('campaign-list');
-    el.innerHTML = '<div id="actual-campaign-list" class="muted">Memuat daftar...</div>';
+    el.innerHTML = '<div id="actual-campaign-list" style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div>';
 
     document.getElementById('pic-create-btn-container').innerHTML = picBtnHtml;
 
@@ -1548,7 +1548,7 @@
     if (!user) return;
 
     const el = document.getElementById('actual-campaign-list');
-    el.innerHTML = '<div class="muted">Memuat daftar...</div>'; // Visual loading state
+    el.innerHTML = '<div style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div>'; // Visual loading state
 
     let picHtml = '';
     call('getUserPicCampaigns', user.whatsapp).then(picList => {
