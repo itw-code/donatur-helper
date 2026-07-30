@@ -26,7 +26,7 @@ const SHEETS = {
 
 const HEADERS = {
   Settings: ['Key', 'Value'],
-  Members: ['Name', 'WhatsApp', 'Status', 'AddedBy', 'AddedAt', 'Role', 'ModifiedBy', 'ModifiedAt'],
+  Members: ['Name', 'WhatsApp', 'Status', 'AddedBy', 'AddedAt', 'Role', 'ModifiedBy', 'ModifiedAt', 'Email'],
   Tokens: ['TokenID', 'Role', 'Status', 'LinkedCampaignID', 'CreatedBy', 'CreatedAt', 'Alias'],
   Campaigns: ['CampaignID', 'TargetName', 'Reason', 'GiftAmount', 'Status', 'StartDate',
     'Deadline', 'BankName', 'BankAccount', 'AccountHolder', 'RoundingUsed',
@@ -902,10 +902,47 @@ function checkDonorWhatsApp(whatsapp) {
       }
     }
     // Successfully verified / logged in
-    return { exists: true, name: existingMember.Name, whatsapp: whatsapp, verified: true, status: existingMember.Status };
+    return { exists: true, name: existingMember.Name, email: existingMember.Email || '', whatsapp: whatsapp, verified: true, status: existingMember.Status };
   }
 
   return { exists: false };
+}
+
+function updateMemberProfile(whatsapp, name, email) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    whatsapp = normalizePhone_(whatsapp);
+    name = String(name || '').trim();
+    email = String(email || '').trim();
+
+    if (!whatsapp) throw new Error('WhatsApp identifier missing.');
+    if (!name) throw new Error('Nama tidak boleh kosong.');
+
+    const sh = sheet_(SHEETS.MEMBERS);
+    const members = getRows_(SHEETS.MEMBERS);
+    const memberRow = members.find(m => normalizePhone_(m.WhatsApp) === whatsapp);
+
+    if (!memberRow) {
+      throw new Error('Member tidak ditemukan.');
+    }
+
+    const nameCol = headerIndex_(SHEETS.MEMBERS, 'Name') + 1;
+    const emailCol = headerIndex_(SHEETS.MEMBERS, 'Email') + 1;
+    const modifiedByCol = headerIndex_(SHEETS.MEMBERS, 'ModifiedBy') + 1;
+    const modifiedAtCol = headerIndex_(SHEETS.MEMBERS, 'ModifiedAt') + 1;
+
+    // We assume the row in the sheet is memberRow._row
+    sh.getRange(memberRow._row, nameCol).setValue(name);
+    if (emailCol > 0) sh.getRange(memberRow._row, emailCol).setValue(email);
+    
+    if (modifiedByCol > 0) sh.getRange(memberRow._row, modifiedByCol).setValue(whatsapp);
+    if (modifiedAtCol > 0) sh.getRange(memberRow._row, modifiedAtCol).setValue(new Date());
+
+    return { success: true, name: name, email: email };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function registerUser(name, whatsapp, empStatus = 'active') {
