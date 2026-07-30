@@ -1115,6 +1115,17 @@ function sendBillingReminderEmail_(donor, campaign, memberEmail) {
   if (!memberEmail) return false;
   
   try {
+    // Get the web app URL for the campaign link
+    let webAppUrl;
+    try {
+      webAppUrl = ScriptApp.getService().getUrl();
+    } catch(e) {
+      webAppUrl = "https://script.google.com/macros/s/AKfycbzt4dyTtpTZhAXYleHJ6bC0na7jAfJpJft_sIfN0nReNtC9751ltMGKE07zMqAr-9rQZA/exec";
+    }
+    
+    // Build campaign-specific URL
+    const campaignUrl = webAppUrl + '?c=' + campaign.CampaignID;
+    
     const emailSubject = `[Donatur Helper] Tagihan Donasi untuk ${campaign.TargetName}`;
     const emailBody = `Halo ${donor.Name},
 
@@ -1139,7 +1150,9 @@ function sendBillingReminderEmail_(donor, campaign, memberEmail) {
       (campaign.Deadline ? `📅 Batas Transfer: ${campaign.Deadline}
 
 ` : '\n') +
-      `Mohon lakukan transfer sesuai jumlah di atas, lalu konfirmasi pembayaran melalui aplikasi.
+      `Mohon lakukan transfer sesuai jumlah di atas, lalu konfirmasi pembayaran melalui link berikut:
+` +
+      `${campaignUrl}
 
 ` +
       `Terima kasih atas partisipasi Anda!
