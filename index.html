@@ -1048,6 +1048,8 @@
             style="width:auto;"> Wajib cocok dengan daftar Members (validasi WhatsApp)</label>
         <label>Email Notifikasi Pendaftaran (pisahkan dengan koma)</label>
         <input id="sa-notification-emails" type="text" placeholder="admin1@example.com, admin2@example.com">
+        <label>URL Aplikasi (untuk link di email reminder)</label>
+        <input id="sa-app-url" type="text" placeholder="https://don4pro.com">
         <button class="btn" style="margin-top:8px;" onclick="saveSettings()">Simpan pengaturan</button>
         <div id="sa-settings-msg"></div>
       </div>
@@ -3690,6 +3692,7 @@
       document.getElementById('sa-roundto').value = s.RoundToNearest || 500;
       document.getElementById('sa-validation').checked = String(s.RequireMemberValidation).toUpperCase() === 'TRUE';
       document.getElementById('sa-notification-emails').value = s.AdminNotificationEmails || '';
+      document.getElementById('sa-app-url').value = s.AppUrl || '';
     });
     refreshMembers();
     refreshAdmins(); // NEW: Load Admin List
@@ -3716,7 +3719,8 @@
       EnableRounding: document.getElementById('sa-rounding').checked ? 'TRUE' : 'FALSE',
       RoundToNearest: document.getElementById('sa-roundto').value || '500',
       RequireMemberValidation: document.getElementById('sa-validation').checked ? 'TRUE' : 'FALSE',
-      AdminNotificationEmails: document.getElementById('sa-notification-emails').value.trim()
+      AdminNotificationEmails: document.getElementById('sa-notification-emails').value.trim(),
+      AppUrl: document.getElementById('sa-app-url').value.trim()
     };
     call('updateSettings', currentToken(), settings).then(() => {
       document.getElementById('sa-settings-msg').innerHTML = '<div class="success">Pengaturan disimpan.</div>';

@@ -40,7 +40,8 @@ const DEFAULT_SETTINGS = {
   EnableRounding: 'FALSE',
   RoundToNearest: '500',
   RequireMemberValidation: 'FALSE',
-  ProofsFolderId: ''
+  ProofsFolderId: '',
+  AppUrl: ''
 };
 
 // ====================== SETUP ======================
@@ -1115,16 +1116,18 @@ function sendBillingReminderEmail_(donor, campaign, memberEmail) {
   if (!memberEmail) return false;
   
   try {
-    // Get the web app URL for the campaign link
-    let webAppUrl;
-    try {
-      webAppUrl = ScriptApp.getService().getUrl();
-    } catch(e) {
-      webAppUrl = "https://script.google.com/macros/s/AKfycbzt4dyTtpTZhAXYleHJ6bC0na7jAfJpJft_sIfN0nReNtC9751ltMGKE07zMqAr-9rQZA/exec";
+    // Get the app URL from settings (custom domain) or fallback to Apps Script URL
+    let webAppUrl = getSetting('AppUrl');
+    if (!webAppUrl) {
+      try {
+        webAppUrl = ScriptApp.getService().getUrl();
+      } catch(e) {
+        webAppUrl = "https://script.google.com/macros/s/AKfycbzt4dyTtpTZhAXYleHJ6bC0na7jAfJpJft_sIfN0nReNtC9751ltMGKE07zMqAr-9rQZA/exec";
+      }
     }
     
-    // Build campaign-specific URL
-    const campaignUrl = webAppUrl + '?c=' + campaign.CampaignID;
+    // Build campaign-specific URL with hash fragment (same format as share links)
+    const campaignUrl = webAppUrl + '#c=' + campaign.CampaignID;
     
     const emailSubject = `[Donatur Helper] Tagihan Donasi untuk ${campaign.TargetName}`;
     const emailBody = `Halo ${donor.Name},
@@ -2312,7 +2315,8 @@ function getSettingsForSuperAdmin(token) {
     EnableRounding: String(getSetting('EnableRounding')).toUpperCase() === 'TRUE',
     RoundToNearest: Number(getSetting('RoundToNearest')) || 500,
     RequireMemberValidation: String(getSetting('RequireMemberValidation')).toUpperCase() === 'TRUE',
-    AdminNotificationEmails: getSetting('AdminNotificationEmails') || ''
+    AdminNotificationEmails: getSetting('AdminNotificationEmails') || '',
+    AppUrl: getSetting('AppUrl') || ''
   };
 }
 
@@ -2326,6 +2330,7 @@ function updateSettings(token, settings) {
     if (settings.RoundToNearest !== undefined) setSetting('RoundToNearest', settings.RoundToNearest);
     if (settings.RequireMemberValidation !== undefined) setSetting('RequireMemberValidation', settings.RequireMemberValidation);
     if (settings.AdminNotificationEmails !== undefined) setSetting('AdminNotificationEmails', settings.AdminNotificationEmails);
+    if (settings.AppUrl !== undefined) setSetting('AppUrl', settings.AppUrl);
 
     return true;
   } finally {
