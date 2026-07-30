@@ -792,6 +792,7 @@ function getReminderInfo(picToken, baseUrl) {
 }
 
 function generatePreRegistrationMessage_(campaign, donors, webUrl) {
+  const donorNames = donors.map(d => d.Alias ? d.Alias : d.Name);
   const deadlineText = campaign.Deadline || '-';
   
   const lines = [
@@ -806,12 +807,8 @@ function generatePreRegistrationMessage_(campaign, donors, webUrl) {
     `Rekan-rekan yang sudah gabung (${donors.length} orang):`
   ];
   
-  if (donors.length) {
-    donors.forEach(d => {
-      const displayName = d.Alias ? d.Alias : d.Name;
-      const waMention = '@+' + normalizePhone_(d.WhatsApp);
-      lines.push(`- ${waMention} ${displayName}`);
-    });
+  if (donorNames.length) {
+    donorNames.forEach(name => lines.push(`- ${name}`));
   } else {
     lines.push(`(belum ada, yuk jadi yang pertama!)`);
   }
@@ -823,8 +820,7 @@ function generateGroupBillingReminder_(campaign, donors, webUrl) {
   const unpaid = donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
   const unpaidLines = unpaid.map(d => {
     const displayName = d.Alias ? d.Alias : d.Name;
-    const waMention = '@+' + normalizePhone_(d.WhatsApp);
-    return `* ${waMention} ${displayName}`;
+    return `* ${displayName}`;
   });
 
   const totalGift = Number(campaign.GiftAmount) || 0;
@@ -885,6 +881,7 @@ function generateGroupBillingReminder_(campaign, donors, webUrl) {
 
 function generateGratitudeMessage_(campaign, donors) {
   const totalGift = Number(campaign.GiftAmount) || 0;
+  const donorNames = donors.map(d => d.Alias ? d.Alias : d.Name);
   
   const customDonors = donors.filter(d => Number(d.CustomAmount) > 0);
   const customSum = customDonors.reduce((sum, d) => sum + Number(d.CustomAmount), 0);
@@ -901,12 +898,8 @@ function generateGratitudeMessage_(campaign, donors) {
   }
 
   lines.push(`Terima kasih banyak atas ketulusan dan partisipasi dari ${donors.length} rekan-rekan donatur:`);
-  if (donors.length) {
-    donors.forEach(d => {
-      const displayName = d.Alias ? d.Alias : d.Name;
-      const waMention = '@+' + normalizePhone_(d.WhatsApp);
-      lines.push(`- ${waMention} ${displayName}`);
-    });
+  if (donorNames.length) {
+    donorNames.forEach(name => lines.push(`- ${name}`));
   } else {
     lines.push(`- (tidak ada donatur)`);
   }
