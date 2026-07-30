@@ -1126,8 +1126,8 @@ function sendBillingReminderEmail_(donor, campaign, memberEmail) {
       }
     }
     
-    // Build campaign-specific URL with hash fragment (same format as share links)
-    const campaignUrl = webAppUrl + '#c=' + campaign.CampaignID;
+    // Build campaign-specific URL with query parameter (same format as share links)
+    const campaignUrl = webAppUrl + '?c=' + campaign.CampaignID;
     
     const emailSubject = `[Donatur Helper] Tagihan Donasi untuk ${campaign.TargetName}`;
     const emailBody = `Halo ${donor.Name},
