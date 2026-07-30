@@ -32,7 +32,7 @@ const HEADERS = {
     'Deadline', 'BankName', 'BankAccount', 'AccountHolder', 'RoundingUsed',
     'RoundTo', 'CreatedAt', 'FinalizedAt', 'GiftLink', 'GiftImage', 'ModifiedBy', 'ModifiedAt'],
   Donors: ['CampaignID', 'Name', 'WhatsApp', 'JoinedAt', 'DonorStatus', 'AmountDue',
-    'Paid', 'ProofLink', 'PaidAt', 'CustomAmount', 'AmountPaid', 'Verified', 'Refunded', 'Alias', 'ModifiedBy', 'ModifiedAt'],
+    'Paid', 'ProofLink', 'PaidAt', 'CustomAmount', 'AmountPaid', 'Verified', 'Refunded', 'Alias', 'ModifiedBy', 'ModifiedAt', 'LastReminderSentAt'],
   LateRequests: ['RequestID', 'CampaignID', 'PIC_Alias', 'DonorName', 'DonorWhatsApp', 'IsCustom', 'CustomAmount', 'Reason', 'Status', 'CreatedAt', 'DonorAlias']
 };
 
@@ -630,6 +630,10 @@ function finalizeCampaign(picToken, bankInfo, finalGiftAmount, fileData) {
     setCampaignField_(campaign.CampaignID, 'GiftLink', bankInfo.giftLink || '');
     if (imageUrl) setCampaignField_(campaign.CampaignID, 'GiftImage', imageUrl);
 
+    // Send billing reminder emails to all pledged donors
+    const emailsSent = sendFinalizationEmails_(campaign, allDonorRows);
+    console.log(`Finalization complete. ${emailsSent} billing reminder emails sent.`);
+
     return getCampaignDetail_(campaign.CampaignID);
   } finally {
     lock.releaseLock();
@@ -1032,6 +1036,215 @@ function sendAdminSignupAlert_(name, whatsapp, empStatus) {
   } catch (e) {
     console.error('Gagal mengirim email notifikasi pendaftaran: ' + e.message);
   }
+}
+
+/**
+ * Sends a billing reminder email to a donor.
+ * Returns true if email was sent, false otherwise.
+ */
+function sendBillingReminderEmail_(donor, campaign, memberEmail) {
+  if (!memberEmail) return false;
+  
+  try {
+    const emailSubject = `[Donatur Helper] Tagihan Donasi untuk ${campaign.TargetName}`;
+    const emailBody = `Halo ${donor.Name},
+
+` +
+      `Campaign "${campaign.TargetName}" telah difinalisasi. Berikut detail tagihan Anda:
+
+` +
+      `👤 Untuk: ${campaign.TargetName}
+` +
+      (campaign.Reason ? `💬 Alasan: ${campaign.Reason}
+` : '') +
+      `💰 Jumlah Tagihan: Rp${formatNumber_(donor.AmountDue)}
+
+` +
+      `Bank: ${campaign.BankName}
+` +
+      `No. Rekening: ${campaign.BankAccount}
+` +
+      `Atas Nama: ${campaign.AccountHolder}
+
+` +
+      (campaign.Deadline ? `📅 Batas Transfer: ${campaign.Deadline}
+
+` : '\n') +
+      `Mohon lakukan transfer sesuai jumlah di atas, lalu konfirmasi pembayaran melalui aplikasi.
+
+` +
+      `Terima kasih atas partisipasi Anda!
+
+` +
+      `Salam,
+System Donatur Helper`;
+
+    GmailApp.sendEmail(memberEmail, emailSubject, emailBody);
+    return true;
+  } catch (e) {
+    console.error('Gagal mengirim email tagihan ke ' + donor.Name + ': ' + e.message);
+    return false;
+  }
+}
+
+/**
+ * Updates the LastReminderSentAt field for a donor.
+ */
+function setDonorLastReminderSent_(donorRow, timestamp) {
+  const col = headerIndex_(SHEETS.DONORS, 'LastReminderSentAt') + 1;
+  if (col > 0) {
+    sheet_(SHEETS.DONORS).getRange(donorRow, col).setValue(timestamp);
+  }
+}
+
+/**
+ * Sends billing reminder emails to all donors in a finalized campaign.
+ * Called when a campaign is finalized.
+ */
+function sendFinalizationEmails_(campaign, donors) {
+  const members = getRows_(SHEETS.MEMBERS);
+  const now = new Date();
+  let emailsSent = 0;
+
+  donors.forEach(donor => {
+    if (donor.DonorStatus !== 'Pledged') return;
+    
+    const member = members.find(m => normalizePhone_(m.WhatsApp) === normalizePhone_(donor.WhatsApp));
+    const memberEmail = member ? (member.Email || '') : '';
+    
+    if (sendBillingReminderEmail_(donor, campaign, memberEmail)) {
+      setDonorLastReminderSent_(donor._row, now);
+      emailsSent++;
+    }
+  });
+
+  return emailsSent;
+}
+
+/**
+ * Processes automated email reminders for all finalized campaigns.
+ * Should be called by a time-driven trigger every morning.
+ * 
+ * Logic:
+ * - If > 3 days before deadline, send only if LastReminderSentAt is > 48 hours ago.
+ * - If <= 3 days before deadline OR Overdue, send daily (if LastReminderSentAt > 24 hours ago).
+ * - If > 14 days past deadline, skip entirely (give up).
+ */
+function processEmailReminders() {
+  const campaigns = getRows_(SHEETS.CAMPAIGNS).filter(c => String(c.Status) === 'Finalized' && c.CampaignID);
+  const donors = getRows_(SHEETS.DONORS).filter(d => d.CampaignID);
+  const members = getRows_(SHEETS.MEMBERS);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  let emailsSent = 0;
+
+  campaigns.forEach(campaign => {
+    const campaignDonors = donors.filter(d => d.CampaignID === campaign.CampaignID && d.DonorStatus === 'Pledged');
+    
+    // Skip unpaid donors only
+    const unpaidDonors = campaignDonors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
+    
+    unpaidDonors.forEach(donor => {
+      // Look up member email
+      const member = members.find(m => normalizePhone_(m.WhatsApp) === normalizePhone_(donor.WhatsApp));
+      const memberEmail = member ? (member.Email || '') : '';
+      
+      // Skip if no email
+      if (!memberEmail) return;
+      
+      // Parse deadline
+      let deadline = null;
+      if (campaign.Deadline) {
+        if (campaign.Deadline instanceof Date) {
+          deadline = new Date(campaign.Deadline.getFullYear(), campaign.Deadline.getMonth(), campaign.Deadline.getDate());
+        } else {
+          const parsed = new Date(campaign.Deadline);
+          if (!isNaN(parsed.getTime())) {
+            deadline = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+          }
+        }
+      }
+      
+      // Calculate days until deadline (negative if overdue)
+      let daysUntilDeadline = Infinity;
+      if (deadline) {
+        const diffMs = deadline.getTime() - today.getTime();
+        daysUntilDeadline = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      }
+      
+      // Skip if > 14 days past deadline
+      if (daysUntilDeadline < -14) return;
+      
+      // Check when last reminder was sent
+      let lastReminderSentAt = null;
+      if (donor.LastReminderSentAt) {
+        if (donor.LastReminderSentAt instanceof Date) {
+          lastReminderSentAt = donor.LastReminderSentAt;
+        } else {
+          const parsed = new Date(donor.LastReminderSentAt);
+          if (!isNaN(parsed.getTime())) {
+            lastReminderSentAt = parsed;
+          }
+        }
+      }
+      
+      // Calculate hours since last reminder
+      let hoursSinceLastReminder = Infinity;
+      if (lastReminderSentAt) {
+        const diffMs = now.getTime() - lastReminderSentAt.getTime();
+        hoursSinceLastReminder = diffMs / (1000 * 60 * 60);
+      }
+      
+      // Determine if we should send
+      let shouldSend = false;
+      if (daysUntilDeadline > 3) {
+        // Far from deadline: send every 48 hours
+        if (hoursSinceLastReminder >= 48) {
+          shouldSend = true;
+        }
+      } else {
+        // <= 3 days or overdue: send daily
+        if (hoursSinceLastReminder >= 24) {
+          shouldSend = true;
+        }
+      }
+      
+      if (shouldSend) {
+        if (sendBillingReminderEmail_(donor, campaign, memberEmail)) {
+          setDonorLastReminderSent_(donor._row, now);
+          emailsSent++;
+        }
+      }
+    });
+  });
+
+  console.log(`processEmailReminders completed. ${emailsSent} emails sent.`);
+  return emailsSent;
+}
+
+/**
+ * Creates a time-driven trigger for processEmailReminders.
+ * Runs every morning at 8 AM.
+ * Call this function once from the Apps Script editor to set up the trigger.
+ */
+function setupEmailReminderTrigger() {
+  // Remove any existing triggers for processEmailReminders
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => {
+    if (trigger.getHandlerFunction() === 'processEmailReminders') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+
+  // Create a new trigger to run every day at 8 AM
+  ScriptApp.newTrigger('processEmailReminders')
+    .timeBased()
+    .atHour(8)
+    .everyDays(1)
+    .create();
+
+  Logger.log('Email reminder trigger created. Will run daily at 8 AM.');
 }
 
 function listActiveCampaigns(whatsapp) {

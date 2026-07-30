@@ -6,12 +6,12 @@ The system automatically wakes up every morning to nag unpaid donors based on ho
 **Blocked by:** 
 02 — Immediate Email on Campaign Finalization
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] A new `processEmailReminders()` backend function exists to loop over all Finalized campaigns and their unpaid, Pledged donors.
-- [ ] The function correctly skips donors who have no email on file.
-- [ ] Logic: If > 3 days before deadline, send only if `LastReminderSentAt` is > 48 hours ago.
-- [ ] Logic: If <= 3 days before deadline OR Overdue, send daily (if `LastReminderSentAt` > 24 hours ago).
-- [ ] Logic: If > 14 days past deadline, skip entirely (give up).
-- [ ] When an email is sent, the `LastReminderSentAt` column is updated.
-- [ ] A time-driven trigger is configured in Apps Script to run this function every morning.
+- [x] A new `processEmailReminders()` backend function exists to loop over all Finalized campaigns and their unpaid, Pledged donors.
+- [x] The function correctly skips donors who have no email on file.
+- [x] Logic: If > 3 days before deadline, send only if `LastReminderSentAt` is > 48 hours ago.
+- [x] Logic: If <= 3 days before deadline OR Overdue, send daily (if `LastReminderSentAt` > 24 hours ago).
+- [x] Logic: If > 14 days past deadline, skip entirely (give up).
+- [x] When an email is sent, the `LastReminderSentAt` column is updated.
+- [x] A time-driven trigger is configured in Apps Script to run this function every morning.
