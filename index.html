@@ -1074,6 +1074,129 @@
     color: inherit;
   }
 
+  .admin-action-queue {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border-color: #bbf7d0;
+  }
+
+  .admin-dashboard-heading {
+    margin-bottom: 16px;
+  }
+
+  .admin-dashboard-heading h2 {
+    margin: 4px 0;
+  }
+
+  .admin-dashboard-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .admin-action-queue-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .admin-action-queue-heading h3 {
+    margin: 4px 0 4px;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .admin-action-queue-heading p {
+    max-width: 560px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .admin-queue-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .admin-queue-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .admin-queue-row:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  .admin-queue-row:focus-visible {
+    outline: 3px solid var(--primary-transparent-20);
+    outline-offset: 2px;
+  }
+
+  .admin-queue-icon {
+    display: inline-flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: #047857;
+    background: #dcfce7;
+  }
+
+  .admin-queue-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .admin-queue-main {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .admin-queue-main strong {
+    overflow-wrap: anywhere;
+    font-size: 14px;
+  }
+
+  .admin-queue-main > span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .admin-queue-review {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #047857;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .admin-queue-empty {
+    margin: 12px 0 0;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -1115,6 +1238,25 @@
 
     .admin-detail-donor-table {
       display: block;
+    }
+  }
+
+  @media (max-width: 559px) {
+    .admin-action-queue-heading {
+      display: block;
+    }
+
+    .admin-action-queue-heading .semantic-status {
+      margin-top: 12px;
+    }
+
+    .admin-queue-row {
+      align-items: flex-start;
+    }
+
+    .admin-queue-review {
+      padding-right: 0;
+      padding-left: 4px;
     }
   }
 
@@ -1320,8 +1462,62 @@
   </div>
 
   <div id="view-admin-dashboard" class="hidden">
-    <h2>Dashboard Admin</h2>
+    <div class="admin-dashboard-heading">
+      <span class="admin-data-card-label">ADMIN · OPERATIONS</span>
+      <h2 id="admin-dashboard-title">Perlu ditinjau</h2>
+      <p id="admin-dashboard-greeting">Persetujuan dan pengecualian campaign berada di urutan teratas.</p>
+    </div>
     <div id="admin-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
+    <section id="admin-action-queue" class="card admin-action-queue" aria-labelledby="admin-action-queue-title">
+      <div class="admin-action-queue-heading">
+        <div>
+          <span class="admin-data-card-label">ADMIN · OPERATIONS</span>
+          <h3 id="admin-action-queue-title">Perlu ditinjau</h3>
+          <p>Persetujuan dan pengecualian tampil lebih dulu supaya tindakan berikutnya selalu jelas.</p>
+        </div>
+        <span id="admin-action-queue-total" class="semantic-status warning" role="status">
+          <span>Memuat antrean...</span>
+        </span>
+      </div>
+      <div class="admin-queue-list">
+        <a id="admin-queue-pending" class="admin-queue-row hidden" href="#admin-pending-card">
+          <span class="admin-queue-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 21a8 8 0 0 1 16 0"></path>
+            </svg>
+          </span>
+          <span class="admin-queue-main">
+            <strong><span data-queue-count>0</span> pendaftaran member</strong>
+            <span>Periksa status Active atau Ex sebelum menyetujui.</span>
+          </span>
+          <span class="admin-queue-review">Review</span>
+        </a>
+        <a id="admin-queue-late" class="admin-queue-row hidden" href="#admin-late-card">
+          <span class="admin-queue-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <path d="M14 2v6h6"></path>
+              <path d="m8 13 2.5 2.5L16 10"></path>
+            </svg>
+          </span>
+          <span class="admin-queue-main">
+            <strong><span data-queue-count>0</span> donatur susulan</strong>
+            <span>Persetujuan akan menghitung ulang tagihan campaign.</span>
+          </span>
+          <span class="admin-queue-review">Review</span>
+        </a>
+      </div>
+      <p id="admin-action-queue-empty" class="muted admin-queue-empty hidden">Tidak ada item yang perlu ditinjau.</p>
+    </section>
+    <div id="admin-pending-card" class="card">
+      <h2 style="margin-top:0">Menunggu Persetujuan Member</h2>
+      <div id="admin-pending-members"></div>
+    </div>
+    <div id="admin-late-card" class="card">
+      <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
+      <div id="admin-late-donors"></div>
+    </div>
     <div id="admin-summary" class="card"></div>
     <div class="card">
       <h2 style="margin-top:0">Semua campaign</h2>
@@ -1350,14 +1546,6 @@
     <div class="card">
       <button class="btn" onclick="genPicToken()">Generate token PIC baru</button>
       <div id="admin-new-token"></div>
-    </div>
-    <div class="card">
-      <h2 style="margin-top:0">Menunggu Persetujuan Member</h2>
-      <div id="admin-pending-members"></div>
-    </div>
-    <div class="card">
-      <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
-      <div id="admin-late-donors"></div>
     </div>
     <div class="card">
       <h2 style="margin-top:0">Daftar Members</h2>
@@ -3577,13 +3765,59 @@
 
 
   // ---------- ADMIN FLOW ----------
+  let adminActionQueueState = { pending: null, late: null };
+
+  function resetAdminActionQueue() {
+    adminActionQueueState = { pending: null, late: null };
+    const totalEl = document.getElementById('admin-action-queue-total');
+    const emptyEl = document.getElementById('admin-action-queue-empty');
+    if (totalEl) {
+      totalEl.className = 'semantic-status warning';
+      totalEl.innerHTML = '<span>Memuat antrean...</span>';
+    }
+    if (emptyEl) emptyEl.classList.add('hidden');
+    document.querySelectorAll('#admin-action-queue [id^="admin-queue-"]').forEach(row => {
+      if (row.classList.contains('admin-queue-row')) row.classList.add('hidden');
+    });
+  }
+
+  function updateAdminActionQueue(kind, count) {
+    if (kind !== 'pending' && kind !== 'late') return;
+    adminActionQueueState[kind] = typeof count === 'number' ? count : null;
+
+    const row = document.getElementById('admin-queue-' + kind);
+    const countEl = row ? row.querySelector('[data-queue-count]') : null;
+    if (row) {
+      row.classList.toggle('hidden', count === 0);
+      if (count === null) row.classList.remove('hidden');
+    }
+    if (countEl) countEl.textContent = count === null ? '—' : String(count);
+
+    const pendingCount = adminActionQueueState.pending;
+    const lateCount = adminActionQueueState.late;
+    const totalEl = document.getElementById('admin-action-queue-total');
+    const emptyEl = document.getElementById('admin-action-queue-empty');
+    if (!totalEl || !emptyEl) return;
+
+    if (pendingCount === null || lateCount === null) {
+      totalEl.className = 'semantic-status warning';
+      totalEl.innerHTML = paymentStatusIcon('review') + '<span>Antrean belum lengkap</span>';
+      emptyEl.classList.add('hidden');
+      return;
+    }
+
+    const total = pendingCount + lateCount;
+    totalEl.className = 'semantic-status ' + (total ? 'warning' : 'success');
+    totalEl.innerHTML = paymentStatusIcon(total ? 'review' : 'verified') + '<span>' + total + ' item perlu tindakan</span>';
+    emptyEl.classList.toggle('hidden', total !== 0);
+  }
+
   function loadAdminDashboard() {
     showView('admin-dashboard');
+    resetAdminActionQueue();
     const alias = safeGet('auth_alias');
-    const titleEl = document.querySelector('#view-admin-dashboard h2');
-    if (titleEl) {
-      titleEl.textContent = alias ? 'Dashboard Admin (Halo, ' + alias + ')' : 'Dashboard Admin';
-    }
+    const greetingEl = document.getElementById('admin-dashboard-greeting');
+    if (greetingEl && alias) greetingEl.textContent = 'Halo, ' + alias + '. Persetujuan dan pengecualian campaign berada di urutan teratas.';
     refreshSummary('admin-summary');
     refreshPendingMembers('admin-pending-members');
     refreshLateRequests('admin-late-donors');
@@ -3597,8 +3831,11 @@
     call('getPendingMembers', currentToken()).then(list => {
       const el = document.getElementById(elId);
       if (!el) return;
+      if (elId === 'admin-pending-members') updateAdminActionQueue('pending', list.length);
       // Auto-show/hide the parent card
-      const parentCard = elId === 'sa-pending-members' ? document.getElementById('sa-pending-card') : null;
+      const parentCard = elId === 'sa-pending-members'
+        ? document.getElementById('sa-pending-card')
+        : (elId === 'admin-pending-members' ? document.getElementById('admin-pending-card') : null);
       const bannerId = elId === 'sa-pending-members' ? 'sa-notify-banner' : 'admin-notify-banner';
       const bannerEl = document.getElementById(bannerId);
 
@@ -3668,8 +3905,11 @@
 
       el.innerHTML = cardHtml + tableHtml;
     }).catch(e => {
+      if (elId === 'admin-pending-members') updateAdminActionQueue('pending', null);
       const el = document.getElementById(elId);
-      const parentCard = elId === 'sa-pending-members' ? document.getElementById('sa-pending-card') : null;
+      const parentCard = elId === 'sa-pending-members'
+        ? document.getElementById('sa-pending-card')
+        : (elId === 'admin-pending-members' ? document.getElementById('admin-pending-card') : null);
       if (parentCard) parentCard.classList.remove('hidden');
       if (el) el.innerHTML = '<p class="error" role="alert">Pendaftaran belum dapat dimuat. <button type="button" class="retry-action" onclick="refreshPendingMembers(\'' + elId + '\')">Coba lagi</button></p>';
       console.error('Pending members error:', e);
@@ -3727,8 +3967,11 @@
     call('getPendingLateRequests', currentToken()).then(list => {
       const el = document.getElementById(elId);
       if (!el) return;
+      if (elId === 'admin-late-donors') updateAdminActionQueue('late', list.length);
       // Auto-show/hide the parent card
-      const parentCard = elId === 'sa-late-donors' ? document.getElementById('sa-late-card') : null;
+      const parentCard = elId === 'sa-late-donors'
+        ? document.getElementById('sa-late-card')
+        : (elId === 'admin-late-donors' ? document.getElementById('admin-late-card') : null);
       if (!list.length) {
         el.innerHTML = '<p class="muted">Tidak ada pengajuan donatur susulan.</p>';
         if (parentCard) parentCard.classList.add('hidden');
@@ -3755,7 +3998,12 @@
       table += '</table></div></div>';
       el.innerHTML = cards + table;
     }).catch(e => {
+      if (elId === 'admin-late-donors') updateAdminActionQueue('late', null);
       const el = document.getElementById(elId);
+      const parentCard = elId === 'sa-late-donors'
+        ? document.getElementById('sa-late-card')
+        : (elId === 'admin-late-donors' ? document.getElementById('admin-late-card') : null);
+      if (parentCard) parentCard.classList.remove('hidden');
       if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat pengajuan. <button type="button" class="link-btn" onclick="refreshLateRequests(\'' + elId + '\')">Coba lagi</button></p>';
       console.error('Error fetching late requests:', e);
     });
