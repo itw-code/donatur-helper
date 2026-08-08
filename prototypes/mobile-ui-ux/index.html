@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donatur Helper — Mobile UI/UX Prototype</title>
+  <style>
+    :root {
+      --page:#eef2f6; --surface:#fff; --soft:#f8fafc; --ink:#0f172a; --muted:#526176;
+      --line:#d6dee8; --primary:#047857; --primary-strong:#065f46; --primary-soft:#ecfdf5;
+      --info:#0369a1; --warning:#a16207; --warning-soft:#fffbeb; --focus:#1d4ed8;
+      --shadow:0 12px 30px rgba(15,23,42,.12); --r-lg:22px; --r-md:16px; --r-sm:11px;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--page)}
+    body{margin:0;color:var(--ink);background:radial-gradient(circle at 10% -10%,rgba(4,120,87,.12),transparent 34rem),var(--page);font:16px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+    button{font:inherit;cursor:pointer;touch-action:manipulation}
+    button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+    .ribbon{position:sticky;top:0;z-index:10;padding:7px 14px;color:#422006;background:#fef3c7;border-bottom:1px solid #f59e0b;text-align:center;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .app{width:min(1440px,100%);margin:auto;padding:44px 24px 120px}
+    .intro{max-width:850px;margin:0 auto 30px;text-align:center}
+    .eyebrow,.screen-eyebrow,.panel-label{color:var(--primary);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .intro h1{max-width:760px;margin:8px auto 12px;font-size:clamp(2rem,5vw,4.2rem);line-height:1.03;letter-spacing:-.055em}
+    .intro p{max-width:720px;margin:auto;color:var(--muted);font-size:16px}
+    .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px}
+    .chip{display:inline-flex;align-items:center;min-height:32px;padding:5px 10px;color:#164e63;background:#ecfeff;border:1px solid #a5f3fc;border-radius:999px;font-size:12px;font-weight:700}
+    .variant-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;max-width:1280px;margin:0 auto 16px}
+    .variant-heading h2{margin:4px 0 0;font-size:clamp(1.35rem,3vw,2rem);letter-spacing:-.03em}
+    .variant-heading p{max-width:520px;margin:0;color:var(--muted);font-size:14px}
+    .comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:1280px;margin:auto}
+    .panel{min-width:0;padding:16px;background:rgba(255,255,255,.66);border:1px solid rgba(148,163,184,.42);border-radius:var(--r-lg)}
+    .panel.proposed{background:#e9f8f1;border-color:#86efac}
+    .panel-label{display:flex;justify-content:space-between;gap:10px;min-height:28px;margin:2px 4px 12px}
+    .panel-label span:last-child{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:0;text-transform:none}
+    .screen{min-height:690px;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 2px 8px rgba(15,23,42,.08)}
+    .screen.current{--screen-primary:#10b981;--screen-muted:#64748b}
+    .screen.proposed{--screen-primary:var(--primary);--screen-muted:var(--muted);background:#fbfefc}
+    .screen-top{padding:22px 20px 8px}.screen.current .screen-top{background:var(--soft)}
+    .brand{font-size:22px;font-weight:800;letter-spacing:-.04em}
+    .current-title{margin:4px 0 18px;font-size:18px;font-weight:700}
+    .body{display:grid;gap:12px;padding:12px 20px 24px}
+    .screen h3,.screen h4,.screen p{margin-top:0}.screen h3{margin-bottom:4px;font-size:20px;line-height:1.15;letter-spacing:-.03em}.screen h4{margin-bottom:4px;font-size:15px}.screen p{margin-bottom:0}
+    .base-card,.proposed-card{padding:16px;border:1px solid var(--line);border-radius:12px}.base-card{box-shadow:0 1px 2px rgba(15,23,42,.06)}.base-card+.base-card,.proposed-card+.proposed-card{margin-top:12px}
+    .row,.appbar,.topline,.metrics,.section-heading,.queue-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row{align-items:flex-start}.row>div{min-width:0}
+    .base-card strong{font-size:15px}.base-card small,.current .muted{color:var(--screen-muted);font-size:12px}.base-card p{margin-top:4px;color:var(--screen-muted);font-size:13px}
+    .base-btn,.secondary,.primary,.text-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border-radius:9px;font-size:13px;font-weight:750}
+    .base-btn{width:100%;margin-top:14px;border:0;background:var(--screen-primary);color:#fff}.secondary{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink)}
+    .badge,.status{display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:800}.status{white-space:normal;line-height:1.35;text-align:left}
+    .open,.success{color:#166534;background:#dcfce7}.final,.info{color:#1d4ed8;background:#dbeafe}.warning{color:#854d0e;background:#fef3c7}
+    .base-list{display:grid;gap:10px;padding:0;margin:0;list-style:none}.base-list li{padding-bottom:10px;border-bottom:1px solid var(--line);font-size:13px}.base-list li:last-child{padding-bottom:0;border:0}
+    .appbar{min-height:70px;padding:14px 18px;border-bottom:1px solid var(--line)}.appbar-copy{flex:1;min-width:0}.appbar h3{margin:2px 0 0;font-size:17px}.screen-eyebrow{color:var(--screen-muted);font-size:10px}
+    .icon-btn{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:0;color:var(--ink);background:transparent;border:1px solid transparent;border-radius:12px}.icon-btn:hover{background:var(--soft);border-color:var(--line)}
+    .attention{display:flex;align-items:flex-start;gap:12px;padding:14px;color:#854d0e;background:var(--warning-soft);border:1px solid #fde68a;border-radius:var(--r-md)}.attention strong{display:block;color:#713f12;font-size:14px}.attention p{margin-top:3px;color:#92400e;font-size:12px}
+    .attention-icon,.queue-icon{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;color:#92400e;background:#fde68a;border-radius:10px}
+    .primary-card{padding:18px;background:#fff;border:1px solid #bbf7d0;border-left:4px solid var(--primary);border-radius:var(--r-md);box-shadow:0 2px 8px rgba(15,23,42,.08)}.primary-card h3{margin:8px 0 3px}.primary-card p,.proposed-card p{color:var(--muted);font-size:13px}
+    .metrics{align-items:end;padding:14px 0;margin-top:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.metrics span{display:block;color:var(--muted);font-size:11px}.metrics strong{display:block;margin-top:2px;font-size:20px;letter-spacing:-.03em}
+    .primary,.secondary{width:100%;margin-top:14px;border:1px solid transparent}.primary{color:#fff;background:var(--primary)}.primary:hover{background:var(--primary-strong)}.secondary{color:var(--ink);background:#fff;border-color:var(--line)}
+    .text-btn{min-height:44px;padding:4px 0;color:var(--info);background:transparent;border:0}
+    .section-heading{margin-top:12px}.section-heading h4{margin:0;font-size:14px}.section-heading span{color:var(--muted);font-size:11px}
+    .mini{padding:13px 14px;background:var(--soft);border:1px solid var(--line);border-radius:12px}.mini strong{font-size:13px}.mini small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+    .meta-stack{display:grid;gap:4px;min-width:0}.meta-stack strong{display:block;font-size:13px}.meta-stack small{display:block;color:var(--muted);font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+    .donor-meta{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding-top:12px;margin-top:12px;border-top:1px solid var(--line)}.meta-block{display:grid;gap:4px;min-width:0}.meta-label{color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.meta-block>strong{font-size:15px;overflow-wrap:anywhere}.status-block .status{max-width:100%}
+    .progress{height:8px;margin:12px 0 8px;overflow:hidden;background:#dbe5df;border-radius:999px}.progress span{display:block;width:68%;height:100%;background:var(--primary);border-radius:inherit}
+    .queue{display:grid;gap:10px}.queue-row{align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}.queue-row:last-child{border:0}.queue-main{display:flex;align-items:flex-start;gap:10px;min-width:0}.queue-main>div:last-child{min-width:0}.queue-icon{color:var(--primary);background:var(--primary-soft)}.queue-row p{margin:2px 0 0;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.queue-action{flex:0 0 auto;min-height:44px;padding:8px 12px;color:var(--primary-strong);background:var(--primary-soft);border:1px solid #bbf7d0;border-radius:9px;font-size:13px;font-weight:800}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{padding:12px;background:var(--soft);border:1px solid var(--line);border-radius:12px}.stat span{display:block;color:var(--muted);font-size:10px}.stat strong{display:block;margin-top:3px;font-size:18px;letter-spacing:-.03em}
+    .delta{padding:14px 16px;margin-top:14px;color:#334155;background:rgba(255,255,255,.74);border:1px dashed #94a3b8;border-radius:14px;font-size:12px}.delta strong{color:var(--ink)}.delta ul{display:grid;gap:4px;padding-left:18px;margin:7px 0 0}
+    .note{max-width:800px;padding:18px;margin:28px auto 0;color:var(--muted);background:rgba(255,255,255,.66);border:1px solid rgba(148,163,184,.42);border-radius:16px;font-size:13px;text-align:center}
+    .switcher{position:fixed;right:50%;bottom:18px;z-index:20;display:flex;align-items:center;gap:8px;min-height:58px;padding:7px 8px;color:#f8fafc;background:#0f172a;border:1px solid #334155;border-radius:999px;box-shadow:0 14px 30px rgba(15,23,42,.28);transform:translateX(50%)}
+    .switcher button{display:inline-grid;place-items:center;min-width:44px;min-height:44px;padding:0 10px;color:#f8fafc;background:#1e293b;border:1px solid #475569;border-radius:999px}.switcher button:hover{background:#334155}
+    .indicator{min-width:150px;padding:0 6px;text-align:center}.indicator strong{display:block;font-size:12px}.indicator span{display:block;color:#94a3b8;font-size:10px}
+    @media(min-width:560px){.donor-meta{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}}
+    @media(max-width:820px){.app{padding:32px 14px 118px}.comparison{grid-template-columns:1fr}.panel{padding:12px}.screen{min-height:0}.variant-heading{display:block;margin-bottom:14px}.variant-heading p{margin-top:6px}}
+    @media(max-width:480px){.ribbon{font-size:10px}.intro{text-align:left}.intro h1{font-size:2.35rem}.intro p{font-size:15px}.chips{justify-content:flex-start}.screen-top{padding:18px 16px 8px}.body{padding:10px 16px 18px}.switcher{right:12px;left:12px;bottom:calc(10px + env(safe-area-inset-bottom));justify-content:space-between;transform:none}.indicator{flex:1}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="ribbon">Prototype only · comparison artifact · not production</div>
+  <main class="app">
+    <header class="intro">
+      <div class="eyebrow">Donatur Helper · mobile-first UX</div>
+      <h1>Current UI → a clearer next action</h1>
+      <p>Compare the current card-and-table direction with the agreed role-first design: urgent work first, one primary action, accessible status, and no mobile horizontal scroll.</p>
+      <div class="chips" aria-label="Agreed design decisions"><span class="chip">44px touch targets</span><span class="chip">Indonesian-first</span><span class="chip">WCAG 2.2 AA</span><span class="chip">No bottom navigation</span></div>
+    </header>
+    <section id="variant-heading" class="variant-heading" aria-live="polite"></section>
+    <section id="comparison-stage" aria-label="Current and proposed UI comparison"></section>
+    <p class="note">Read-only representative data. The left screen mirrors the current pattern; the right screen demonstrates the agreed implementation direction. Use the bottom switcher to inspect Donor, PIC, and Admin/SuperAdmin priorities.</p>
+  </main>
+  <nav class="switcher" aria-label="Prototype variant switcher">
+    <button id="previous" type="button" aria-label="Previous role variant"></button>
+    <div class="indicator"><strong id="variant-name"></strong><span id="variant-counter"></span></div>
+    <button id="next" type="button" aria-label="Next role variant"></button>
+  </nav>
+  <script>
+    const icon = {
+      arrowLeft:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>',
+      arrowRight:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>',
+      arrowUpRight:'<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>',
+      bell:'<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>',
+      check:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg>',
+      clock:'<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>',
+      copy:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+      fileCheck:'<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="m8 15 2 2 5-5"></path></svg>',
+      filter:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></svg>',
+      menu:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>',
+      person:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>',
+      search:'<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>'
+    };
+
+    const iconTokens = {
+      __ICON_ARROWLEFT__:icon.arrowLeft, __ICON_ARROWRIGHT__:icon.arrowRight, __ICON_ARROWUPRIGHT__:icon.arrowUpRight,
+      __ICON_BELL__:icon.bell, __ICON_CHECK__:icon.check, __ICON_CLOCK__:icon.clock, __ICON_COPY__:icon.copy,
+      __ICON_FILECHECK__:icon.fileCheck, __ICON_FILTER__:icon.filter, __ICON_MENU__:icon.menu, __ICON_PERSON__:icon.person,
+      __ICON_SEARCH__:icon.search
+    };
+
+    function withIcons(markup) {
+      Object.keys(iconTokens).forEach(function (token) { markup = markup.split(token).join(iconTokens[token]); });
+      return markup;
+    }
+
+    function donorCurrent() { return `
+      <div class="screen-top"><div class="brand">Donation Helper</div><div class="current-title">Halo, Budi Santoso 👋</div></div>
+      <div class="body">
+        <div class="base-card"><div class="row"><div><strong>Ihsan Wanda</strong><br><small>Resign per 1 Juli 2026</small></div><span class="badge open">Terbuka</span></div><button class="base-btn" type="button">Gabung Donasi</button></div>
+        <div class="base-card"><div class="row"><strong>Campaign Lainnya</strong><span class="badge final">Final</span></div><p>Informasi campaign dan tindakan tampil dengan bobot yang hampir sama.</p></div>
+        <div class="base-card"><div class="row"><strong>Profil</strong><span class="muted">Akun</span></div><button class="secondary" type="button">Ganti nama / nomor</button></div>
+      </div>
+    `; }
+
+    function donorProposed() { return `
+      <div class="appbar"><button class="icon-btn" type="button" aria-label="Buka menu">__ICON_MENU__</button><div class="appbar-copy"><div class="screen-eyebrow">DONOR</div><h3>Perlu tindakan</h3></div><button class="icon-btn" type="button" aria-label="Buka profil">__ICON_PERSON__</button></div>
+      <div class="body">
+        <div class="attention"><div class="attention-icon">__ICON_CLOCK__</div><div><strong>1 pembayaran menunggu</strong><p>Bayar sebelum deadline agar campaign selesai tepat waktu.</p></div></div>
+        <div class="primary-card"><div class="topline"><span class="status warning">__ICON_CLOCK__ Hari ini</span><span class="screen-eyebrow">CAMPAIGN</span></div><h3>Ihsan Wanda</h3><p>Resign per 1 Juli 2026 · rekening tujuan sudah tersedia.</p><div class="metrics"><div><span>Tagihan Anda</span><strong>Rp125.000</strong></div><div><span>Peserta</span><strong>12</strong></div></div><button class="primary" type="button">Bayar sekarang __ICON_ARROWRIGHT__</button><button class="text-btn" type="button">Lihat detail campaign __ICON_ARROWUPRIGHT__</button></div>
+        <div class="section-heading"><h4>Campaign lainnya</h4><span>2 tersedia</span></div>
+        <div class="mini"><div class="row"><div><strong>Perpisahan Budi</strong><small>Terbuka · deadline 12 Jul</small></div><span class="status success">__ICON_CHECK__ Gabung</span></div></div>
+        <div class="mini"><div class="row"><div><strong>Hadiah kelahiran</strong><small>Terbuka · deadline 20 Jul</small></div><span class="status success">__ICON_CHECK__ Gabung</span></div></div>
+      </div>
+    `; }
+
+    function picCurrent() { return `
+      <div class="screen-top"><div class="brand">Donation Helper</div><div class="current-title">Dashboard PIC</div></div>
+      <div class="body">
+        <div class="base-card"><div class="row"><strong>Ihsan Wanda</strong><span class="badge open">Terbuka</span></div><p>Target hadiah · Rp2.000.000</p><p>Deadline: 12 Jul · 12 donatur terdaftar</p></div>
+        <div class="base-card"><strong>Bagikan Undangan Patungan</strong><p>Salin pesan undangan beserta daftar peserta.</p><button class="base-btn" type="button">📋 Copy Undangan Patungan</button><button class="secondary" type="button">Tutup pendaftaran</button><button class="base-btn" type="button">Selesaikan &amp; input rekening</button></div>
+        <div class="base-card"><div class="row"><strong>Daftar Donatur</strong><span class="muted">12 orang</span></div><ul class="base-list"><li>Rina · Belum trf · Rp166.667</li><li>Dimas · Perlu cek · Rp166.667</li><li>Sari · Verified · Rp166.667</li></ul></div>
+      </div>
+    `; }
+
+    function picProposed() { return `
+      <div class="appbar"><button class="icon-btn" type="button" aria-label="Kembali">__ICON_ARROWLEFT__</button><div class="appbar-copy"><div class="screen-eyebrow">PIC · CAMPAIGN</div><h3>Ihsan Wanda</h3></div><button class="icon-btn" type="button" aria-label="Bagikan campaign">__ICON_COPY__</button></div>
+      <div class="body">
+        <div class="primary-card"><div class="topline"><span class="status success">__ICON_CHECK__ Terbuka</span><span class="screen-eyebrow">12 DONATUR</span></div><h3>Rp1.333.336 terkumpul</h3><p>Target hadiah Rp2.000.000 · deadline 12 Jul</p><div class="progress" aria-label="Progress 68 persen"><span></span></div><div class="metrics"><div><span>Perlu ditindaklanjuti</span><strong>4</strong></div><div><span>Sudah diverifikasi</span><strong>8</strong></div></div><button class="primary" type="button">Lihat tindakan berikutnya __ICON_ARROWRIGHT__</button></div>
+        <div class="section-heading"><h4>Donatur perlu tindakan</h4><span>4 item</span></div>
+        <div class="proposed-card"><div class="meta-stack"><strong>Rina</strong></div><div class="donor-meta"><div class="meta-block"><span class="meta-label">Tagihan</span><strong>Rp166.667</strong></div><div class="meta-block status-block"><span class="meta-label">Status</span><span class="status warning" role="status">__ICON_CLOCK__ <span>Belum upload Bukti Transfer</span></span></div></div><button class="secondary" type="button">Kirim reminder</button></div>
+        <div class="proposed-card"><div class="meta-stack"><strong>Dimas</strong></div><div class="donor-meta"><div class="meta-block"><span class="meta-label">Tagihan</span><strong>Rp166.667</strong></div><div class="meta-block status-block"><span class="meta-label">Status</span><span class="status info" role="status">__ICON_FILECHECK__ <span>Bukti Transfer menunggu verifikasi</span></span></div></div><button class="secondary" type="button">Tinjau bukti</button></div>
+        <button class="text-btn" type="button">Lihat semua donatur __ICON_ARROWUPRIGHT__</button>
+      </div>
+    `; }
+
+    function adminCurrent() { return `
+      <div class="screen-top"><div class="brand">Donation Helper</div><div class="current-title">Dashboard Admin</div></div>
+      <div class="body">
+        <div class="base-card"><strong>Ringkasan</strong><div class="stats" style="margin-top:12px"><div class="stat"><span>Terbuka</span><strong>2</strong></div><div class="stat"><span>Final</span><strong>5</strong></div><div class="stat"><span>Donatur</span><strong>42</strong></div></div></div>
+        <div class="base-card"><strong>Generate token PIC baru</strong><button class="base-btn" type="button">Generate token</button></div>
+        <div class="base-card"><strong>Menunggu Persetujuan Member</strong><p>Section terlihat kosong sampai data dimuat.</p></div>
+        <div class="base-card"><strong>Semua campaign</strong><p>Target · Status · Donatur · Terkumpul</p></div>
+        <div class="base-card"><strong>Daftar Members</strong><p>🔍 Cari nama atau nomor WA...</p></div>
+      </div>
+    `; }
+
+    function adminProposed() { return `
+      <div class="appbar"><button class="icon-btn" type="button" aria-label="Buka menu">__ICON_MENU__</button><div class="appbar-copy"><div class="screen-eyebrow">ADMIN · OPERATIONS</div><h3>Perlu ditinjau</h3></div><button class="icon-btn" type="button" aria-label="Buka notifikasi">__ICON_BELL__</button></div>
+      <div class="body">
+        <div class="attention"><div class="attention-icon">__ICON_BELL__</div><div><strong>5 item perlu tindakan</strong><p>2 pendaftaran member · 3 pengajuan donatur susulan.</p></div></div>
+        <div class="proposed-card"><div class="section-heading" style="margin-top:0"><h4>Approval queue</h4><span>Actionable first</span></div><div class="queue">
+          <div class="queue-row"><div class="queue-main"><div class="queue-icon">__ICON_PERSON__</div><div><strong>2 pendaftaran member</strong><p>Periksa status Active atau Ex sebelum menyetujui.</p></div></div><button class="queue-action" type="button">Review</button></div>
+          <div class="queue-row"><div class="queue-main"><div class="queue-icon">__ICON_FILECHECK__</div><div><strong>3 donatur susulan</strong><p>Persetujuan akan menghitung ulang tagihan.</p></div></div><button class="queue-action" type="button">Review</button></div>
+        </div></div>
+        <div class="section-heading"><h4>Ringkasan sistem</h4><span>Terakhir diperbarui 2m lalu</span></div>
+        <div class="stats"><div class="stat"><span>Campaign aktif</span><strong>2</strong></div><div class="stat"><span>Terkumpul</span><strong>Rp5jt</strong></div><div class="stat"><span>Member aktif</span><strong>42</strong></div></div>
+        <div class="proposed-card"><div class="row"><div class="meta-stack"><strong>Campaign &amp; member</strong><small>Search dan filter tersedia sebelum data ditampilkan.</small></div><span class="status info">__ICON_FILTER__ <span>Filter tersedia</span></span></div><button class="secondary" type="button">__ICON_SEARCH__ Cari data</button></div>
+        <button class="text-btn" type="button">Buka pengaturan dan maintenance __ICON_ARROWUPRIGHT__</button>
+      </div>
+    `; }
+
+    const variants = [
+      {key:'donor',name:'Donor · Urgent-first',description:'The donor sees an unpaid campaign first, with the amount, deadline, and one clear payment action.',current:donorCurrent(),proposed:donorProposed(),delta:['Urgent payment moves above general campaign browsing.','Emoji/status ambiguity becomes text plus semantic status.','The primary action is one obvious, touch-sized next step.']},
+      {key:'pic',name:'PIC · Next-action workspace',description:'The PIC sees campaign progress, the next required operation, and donor verification without a button wall.',current:picCurrent(),proposed:picProposed(),delta:['Campaign status and next action become the first visual block.','Donor rows become cards with one action per item.','Secondary copy/share and danger actions move out of the primary path.']},
+      {key:'admin',name:'Admin · Action queue',description:'Admin and SuperAdmin views put approvals and exceptions ahead of summaries, settings, and dense data.',current:adminCurrent(),proposed:adminProposed(),delta:['Pending approvals and exceptions move above reporting.','Wide tables become action-oriented cards on phones.','Search/filter controls stay reachable while settings remain secondary.']}
+    ];
+
+    function renderVariant(index) {
+      const variant = variants[index];
+      document.getElementById('variant-heading').innerHTML = '<div><div class="eyebrow">Variant '+(index+1)+' / '+variants.length+'</div><h2>'+variant.name+'</h2></div><p>'+variant.description+'</p>';
+      document.getElementById('comparison-stage').innerHTML = '<div class="comparison"><article class="panel"><div class="panel-label"><span>Current baseline</span><span>As implemented today</span></div><div class="screen current">'+variant.current+'</div></article><article class="panel proposed"><div class="panel-label"><span>Proposed direction</span><span>Based on ADRs + plan</span></div><div class="screen proposed">'+withIcons(variant.proposed)+'</div><div class="delta"><strong>What changes</strong><ul>'+variant.delta.map(function(item){return '<li>'+item+'</li>';}).join('')+'</ul></div></article></div>';
+      document.getElementById('variant-name').textContent = variant.name;
+      document.getElementById('variant-counter').textContent = 'Use ← / → or the buttons to compare roles';
+      document.title = 'Prototype · '+variant.name;
+      window.history.replaceState({},'', '?variant='+variant.key);
+    }
+
+    function currentIndex() {
+      const key = new URLSearchParams(window.location.search).get('variant') || 'donor';
+      const index = variants.findIndex(function(variant){return variant.key === key;});
+      return index === -1 ? 0 : index;
+    }
+
+    function moveVariant(delta) { renderVariant((currentIndex()+delta+variants.length)%variants.length); }
+    document.getElementById('previous').innerHTML = icon.arrowLeft;
+    document.getElementById('next').innerHTML = icon.arrowRight;
+    document.getElementById('previous').addEventListener('click',function(){moveVariant(-1);});
+    document.getElementById('next').addEventListener('click',function(){moveVariant(1);});
+    document.addEventListener('keydown',function(event){
+      const active=document.activeElement;
+      const editing=active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT'||active.isContentEditable);
+      if(editing)return;
+      if(event.key==='ArrowLeft')moveVariant(-1);
+      if(event.key==='ArrowRight')moveVariant(1);
+    });
+    renderVariant(currentIndex());
+  </script>
+</body>
+</html>

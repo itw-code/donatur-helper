@@ -110,6 +110,7 @@
   .btn-auto {
     width: auto;
     display: inline-block;
+    min-height: 44px;
   }
 
   .btn:hover:not(:disabled) {
@@ -191,6 +192,15 @@
     box-shadow: 0 0 0 3px var(--primary-transparent-15);
   }
 
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+  }
+
   input::placeholder,
   textarea::placeholder {
     color: #94a3b8;
@@ -224,6 +234,20 @@
     padding: 4px 10px;
     border-radius: 9999px;
     letter-spacing: 0.025em;
+  }
+
+  .payment-status-badge {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 6px;
+    max-width: 100%;
+  }
+
+  .payment-status-badge .status-icon {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
   }
 
   .badge.open {
@@ -327,7 +351,7 @@
   /* --- SCROLLABLE TABLE UPGRADES --- */
   .table-responsive {
     max-height: 400px;
-    overflow-y: auto;
+    overflow: auto;
     display: block;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -364,6 +388,22 @@
     gap: 8px;
   }
 
+  .donor-card-identity {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .donor-card-status {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .donor-card-status .payment-status-badge {
+    white-space: normal;
+    line-height: 1.35;
+    text-align: left;
+  }
+
   .donor-card-name {
     font-weight: 600;
     font-size: 14px;
@@ -375,10 +415,24 @@
   }
 
   .donor-card-body {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
     font-size: 13px;
+  }
+
+  .donor-card-body > * {
+    min-width: 0;
+  }
+
+  .donor-card-field {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .donor-card-value {
+    overflow-wrap: anywhere;
   }
 
   .donor-card-body .label {
@@ -388,11 +442,58 @@
   }
 
   .donor-card-actions {
+    display: block;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .verification-stack {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .verification-controls {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
+  }
+
+  .verification-controls .btn {
+    flex: 1 1 140px;
+    width: auto;
+    min-height: 44px;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .donor-proof-link,
+  .donor-reminder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  .donor-proof-link {
+    width: fit-content;
+  }
+
+  .donor-reminder {
+    width: 100%;
+  }
+
+  .verification-warning,
+  .verification-complete {
+    display: block;
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   .donor-card-total {
@@ -427,6 +528,7 @@
     display: inline-block;
     white-space: nowrap;
     margin: 0 !important;
+    min-height: 44px;
   }
 
   td .action-group {
@@ -447,6 +549,11 @@
     select,
     textarea {
       min-height: 44px;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]),
+    textarea {
+      font-size: 16px;
     }
 
     td .btn,
@@ -504,6 +611,11 @@
     select,
     textarea {
       min-height: 44px;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]),
+    textarea {
+      font-size: 16px;
     }
 
     td .btn,
@@ -733,6 +845,279 @@
     }
   }
 
+  /* === Admin / SuperAdmin data views === */
+  .admin-data-toolbar {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .admin-data-toolbar-fields {
+    display: grid;
+    gap: 8px;
+  }
+
+  .admin-data-toolbar label {
+    margin-top: 0;
+    font-size: 12px;
+  }
+
+  .admin-data-toolbar input,
+  .admin-data-toolbar select {
+    min-height: 44px;
+    margin-top: 4px;
+  }
+
+  .admin-data-toolbar-summary,
+  .admin-data-toolbar-hint {
+    margin: 0;
+    font-size: 12px;
+  }
+
+  .admin-data-toolbar-hint {
+    color: var(--muted);
+  }
+
+  .admin-campaign-cards,
+  .admin-member-cards,
+  .admin-account-cards,
+  .admin-late-cards {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .admin-campaign-card,
+  .admin-member-card,
+  .admin-account-card,
+  .admin-late-card {
+    min-width: 0;
+    padding: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .admin-data-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .admin-data-card-header > * {
+    min-width: 0;
+  }
+
+  .admin-data-card-title {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .admin-data-card-title strong {
+    overflow-wrap: anywhere;
+  }
+
+  .admin-data-card-label,
+  .admin-data-card-meta dt {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .admin-data-card-meta {
+    display: grid;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .admin-data-card-meta > div {
+    min-width: 0;
+  }
+
+  .admin-data-card-meta dt {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-data-card-meta dd {
+    margin: 2px 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-data-card-meta .muted {
+    font-size: 12px;
+  }
+
+  .admin-card-actions {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .admin-card-actions .btn {
+    min-height: 44px;
+    margin: 0;
+  }
+
+  .admin-card-actions .link-btn {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .admin-status-control {
+    min-height: 44px;
+    margin-top: 0;
+  }
+
+  .admin-data-empty {
+    margin: 12px 0 0;
+  }
+
+  .retry-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    margin-left: 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--blue);
+    background: var(--card);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .admin-filterable.is-filtered-out {
+    display: none !important;
+  }
+
+  .admin-campaign-table-view,
+  .admin-member-table-view,
+  .admin-account-table-view,
+  .admin-late-table-view {
+    display: none;
+  }
+
+  .admin-detail-donor-cards {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .admin-detail-donor-card {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .admin-detail-donor-table {
+    display: none;
+  }
+
+  .admin-inline-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .semantic-status {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 5px;
+    max-width: 100%;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .semantic-status .status-icon {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+  }
+
+  .semantic-status.success {
+    color: #047857;
+  }
+
+  .semantic-status.warning {
+    color: #b45309;
+  }
+
+  .semantic-status.danger {
+    color: var(--red);
+  }
+
+  .admin-notify-banner .link-btn {
+    min-height: 44px;
+    padding: 10px 0;
+  }
+
+  .admin-notify-banner .semantic-status {
+    color: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  @media (min-width: 560px) and (max-width: 767px) {
+    .admin-data-card-meta {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 768px) {
+    .admin-data-toolbar-fields {
+      grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.6fr);
+    }
+
+    .admin-campaign-cards,
+    .admin-member-cards,
+    .admin-account-cards,
+    .admin-late-cards {
+      display: none;
+    }
+
+    .admin-campaign-table-view,
+    .admin-member-table-view,
+    .admin-account-table-view,
+    .admin-late-table-view {
+      display: block;
+    }
+
+    .admin-detail-donor-cards {
+      display: none;
+    }
+
+    .admin-detail-donor-table {
+      display: block;
+    }
+  }
+
   /* Modern Toast Notification */
   #toast {
     visibility: hidden;
@@ -940,6 +1325,26 @@
     <div id="admin-summary" class="card"></div>
     <div class="card">
       <h2 style="margin-top:0">Semua campaign</h2>
+      <div class="admin-data-toolbar">
+        <div class="admin-data-toolbar-fields">
+          <label for="admin-campaign-search">Cari campaign
+            <input id="admin-campaign-search" type="search" placeholder="Target atau nama PIC..."
+              oninput="filterAdminCampaigns('admin-campaign-list', 'admin-campaign-search', 'admin-campaign-status-filter', 'admin-campaign-filter-summary')">
+          </label>
+          <label for="admin-campaign-status-filter">Filter status
+            <select id="admin-campaign-status-filter"
+              onchange="filterAdminCampaigns('admin-campaign-list', 'admin-campaign-search', 'admin-campaign-status-filter', 'admin-campaign-filter-summary')">
+              <option value="all">Semua status</option>
+              <option value="open">Terbuka</option>
+              <option value="closed">Ditutup</option>
+              <option value="finalized">Final</option>
+              <option value="archived">Selesai</option>
+            </select>
+          </label>
+        </div>
+        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
+        <p id="admin-campaign-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat campaign...</p>
+      </div>
       <div id="admin-campaign-list"></div>
     </div>
     <div class="card">
@@ -956,9 +1361,26 @@
     </div>
     <div class="card">
       <h2 style="margin-top:0">Daftar Members</h2>
-      <input id="admin-search-member" placeholder="🔍 Cari nama atau nomor WA..."
-        onkeyup="filterMembers('admin-member-list', 'admin-search-member')">
-      <div id="admin-member-list" class="table-responsive"></div>
+      <div class="admin-data-toolbar">
+        <div class="admin-data-toolbar-fields">
+          <label for="admin-search-member">Cari member
+            <input id="admin-search-member" type="search" placeholder="Nama atau nomor WhatsApp..."
+              oninput="filterMembers('admin-member-list', 'admin-search-member', 'admin-member-status-filter', 'admin-member-filter-summary')">
+          </label>
+          <label for="admin-member-status-filter">Filter status
+            <select id="admin-member-status-filter"
+              onchange="filterMembers('admin-member-list', 'admin-search-member', 'admin-member-status-filter', 'admin-member-filter-summary')">
+              <option value="all">Semua status</option>
+              <option value="active">Active</option>
+              <option value="ex">Ex</option>
+              <option value="pending">Pending</option>
+            </select>
+          </label>
+        </div>
+        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
+        <p id="admin-member-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat member...</p>
+      </div>
+      <div id="admin-member-list"></div>
     </div>
     <button class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button> <!-- ADD THIS -->
   </div>
@@ -970,6 +1392,26 @@
 
     <div class="card">
       <h2 style="margin-top:0">Semua Campaign</h2>
+      <div class="admin-data-toolbar">
+        <div class="admin-data-toolbar-fields">
+          <label for="sa-campaign-search">Cari campaign
+            <input id="sa-campaign-search" type="search" placeholder="Target atau nama PIC..."
+              oninput="filterAdminCampaigns('sa-campaign-list', 'sa-campaign-search', 'sa-campaign-status-filter', 'sa-campaign-filter-summary')">
+          </label>
+          <label for="sa-campaign-status-filter">Filter status
+            <select id="sa-campaign-status-filter"
+              onchange="filterAdminCampaigns('sa-campaign-list', 'sa-campaign-search', 'sa-campaign-status-filter', 'sa-campaign-filter-summary')">
+              <option value="all">Semua status</option>
+              <option value="open">Terbuka</option>
+              <option value="closed">Ditutup</option>
+              <option value="finalized">Final</option>
+              <option value="archived">Selesai</option>
+            </select>
+          </label>
+        </div>
+        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
+        <p id="sa-campaign-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat campaign...</p>
+      </div>
       <div id="sa-campaign-list"></div>
     </div>
 
@@ -1002,7 +1444,25 @@
         <button class="btn" style="margin-top:8px;" onclick="genAdminToken()">Generate token Admin baru</button>
         <div id="sa-new-token"></div>
       </div>
-      <div id="sa-admin-list" class="table-responsive"></div>
+      <div class="admin-data-toolbar">
+        <div class="admin-data-toolbar-fields">
+          <label for="sa-admin-search">Cari admin
+            <input id="sa-admin-search" type="search" placeholder="Alias atau nomor WhatsApp..."
+              oninput="filterAdminAccounts('sa-admin-list', 'sa-admin-search', 'sa-admin-status-filter', 'sa-admin-filter-summary')">
+          </label>
+          <label for="sa-admin-status-filter">Filter status
+            <select id="sa-admin-status-filter"
+              onchange="filterAdminAccounts('sa-admin-list', 'sa-admin-search', 'sa-admin-status-filter', 'sa-admin-filter-summary')">
+              <option value="all">Semua status</option>
+              <option value="active">Aktif</option>
+              <option value="revoked">Nonaktif</option>
+            </select>
+          </label>
+        </div>
+        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
+        <p id="sa-admin-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat admin...</p>
+      </div>
+      <div id="sa-admin-list"></div>
     </div>
 
     <!-- Members Management -->
@@ -1012,9 +1472,26 @@
         <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
           onclick="document.getElementById('sa-add-member-form').classList.toggle('hidden')">+ Tambah Member</button>
       </div>
-      <input id="sa-search-member" placeholder="🔍 Cari nama atau nomor WA..."
-        onkeyup="filterMembers('sa-member-list', 'sa-search-member')">
-      <div id="sa-member-list" class="table-responsive"></div>
+      <div class="admin-data-toolbar">
+        <div class="admin-data-toolbar-fields">
+          <label for="sa-search-member">Cari member
+            <input id="sa-search-member" type="search" placeholder="Nama atau nomor WhatsApp..."
+              oninput="filterMembers('sa-member-list', 'sa-search-member', 'sa-member-status-filter', 'sa-member-filter-summary')">
+          </label>
+          <label for="sa-member-status-filter">Filter status
+            <select id="sa-member-status-filter"
+              onchange="filterMembers('sa-member-list', 'sa-search-member', 'sa-member-status-filter', 'sa-member-filter-summary')">
+              <option value="all">Semua status</option>
+              <option value="active">Active</option>
+              <option value="ex">Ex</option>
+              <option value="pending">Pending</option>
+            </select>
+          </label>
+        </div>
+        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
+        <p id="sa-member-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat member...</p>
+      </div>
+      <div id="sa-member-list"></div>
 
       <div id="sa-add-member-form" class="hidden"
         style="background:#f9f9f9; padding:12px; border-radius:8px; margin-top:12px; position:relative;">
@@ -1129,7 +1606,7 @@
           <h3 style="margin-top:0; font-size:18px; color:var(--text);" id="custom-info-title">Informasi</h3>
           <p id="custom-info-message" style="color:var(--muted); line-height:1.5; font-size:14px; margin-bottom:24px;"></p>
           <div style="display:flex;justify-content:center;">
-            <button class="btn blue" style="width:100%; font-size:14px; padding:10px;" onclick="document.getElementById('custom-info-modal').style.display='none'">Mengerti</button>
+            <button type="button" class="btn blue" style="width:100%; font-size:14px; padding:10px;" onclick="document.getElementById('custom-info-modal').style.display='none'">Mengerti</button>
           </div>
         </div>
       `;
@@ -1153,12 +1630,12 @@
       modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
       modal.innerHTML = `
         <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
-          <button id="custom-confirm-close" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeConfirmModal()">&times;</button>
+          <button type="button" id="custom-confirm-close" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeConfirmModal()">&times;</button>
           <h3 style="margin-top:0;">Konfirmasi</h3>
           <p id="custom-confirm-message"></p>
           <div class="modal-actions" style="display:flex;gap:8px;margin-top:16px;">
-            <button class="btn secondary" id="custom-confirm-cancel" onclick="closeConfirmModal()">Batal</button>
-            <button class="btn danger" id="custom-confirm-ok">Ya, Lanjutkan</button>
+            <button type="button" class="btn secondary" id="custom-confirm-cancel" onclick="closeConfirmModal()">Batal</button>
+            <button type="button" class="btn danger" id="custom-confirm-ok">Ya, Lanjutkan</button>
           </div>
         </div>
       `;
@@ -1230,6 +1707,17 @@
     return '<span class="badge ' + cls + '">' + (labelMap[status] || status) + '</span>';
   }
 
+  function paymentStatusIcon(kind) {
+    const attrs = 'class="status-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+    if (kind === 'verified') {
+      return '<svg ' + attrs + '><path d="m5 12 4 4L19 6"></path></svg>';
+    }
+    if (kind === 'review') {
+      return '<svg ' + attrs + '><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>';
+    }
+    return '<svg ' + attrs + '><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5"></path><path d="M12 16h.01"></path></svg>';
+  }
+
   function renderSummaryCard(s) {
     let html = '<h2 style="margin-top:0">Ringkasan</h2>';
     html += '<div class="row">';
@@ -1251,10 +1739,15 @@
   }
 
   function refreshSummary(elId) {
-    document.getElementById(elId).innerHTML = '<div class="muted" style="padding:16px;text-align:center;">⏳ Memuat ringkasan...</div>';
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat ringkasan...</div>';
     call('getDashboardSummary', currentToken()).then(s => {
-      document.getElementById(elId).innerHTML = renderSummaryCard(s);
-    }).catch(e => console.error(e));
+      el.innerHTML = renderSummaryCard(s);
+    }).catch(e => {
+      el.innerHTML = '<p class="error" role="alert">Ringkasan belum dapat dimuat. <button type="button" class="retry-action" onclick="refreshSummary(\'' + elId + '\')">Coba lagi</button></p>';
+      console.error('Summary error:', e);
+    });
   }
 
   function fetchBackend(name, args) {
@@ -2869,11 +3362,11 @@
       // --- Status badge (shared) ---
       let statusBadge = '';
       if (isVerified) {
-        statusBadge = '<span class="badge success">✅ Verified</span>';
+        statusBadge = '<span class="badge success payment-status-badge">' + paymentStatusIcon('verified') + '<span>Verified</span></span>';
       } else if (isPaid) {
-        statusBadge = '<span class="badge warning" style="background:#fff3cd;color:#856404;">⏳ Perlu Cek</span>';
+        statusBadge = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Perlu Cek</span></span>';
       } else {
-        statusBadge = '<span class="badge warning" style="background:#faeeda;color:var(--amber);">Belum trf</span>';
+        statusBadge = '<span class="badge warning payment-status-badge" style="background:#faeeda;color:var(--amber);">' + paymentStatusIcon('unpaid') + '<span>Belum upload Bukti Transfer</span></span>';
       }
 
       // --- Timeline (shared) ---
@@ -2917,20 +3410,21 @@
       // --- Verification actions ---
       let verificationHtml = '-';
       if (isPaid && d.ProofLink) {
-        verificationHtml = '<a href="' + escapeHtml(d.ProofLink) + '" target="_blank" class="link-btn" style="font-size:11px; padding:2px 4px; display:inline-block; margin-bottom:4px;">Lihat Bukti</a><br>';
+        verificationHtml = '<div class="verification-stack"><a href="' + escapeHtml(d.ProofLink) + '" target="_blank" rel="noopener noreferrer" class="link-btn donor-proof-link">Lihat Bukti</a>';
         if (!isVerified) {
           if (needsRefund && !isRefunded) {
-            verificationHtml += '<span class="muted" style="font-size:11px; color:var(--red);">⚠️ Selesaikan refund dulu sebelum verifikasi.</span>';
+            verificationHtml += '<span class="muted verification-warning" style="color:var(--red);">Selesaikan refund dulu sebelum verifikasi.</span>';
           } else {
-            verificationHtml += '<button class="btn green" style="padding:2px 4px; font-size:11px; margin-right:4px;" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', true)">Konfirmasi</button>';
-            verificationHtml += '<button class="btn danger" style="padding:2px 4px; font-size:11px;" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', false)">Tolak</button>';
+            verificationHtml += '<div class="verification-controls"><button class="btn green" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', true)">Konfirmasi</button>';
+            verificationHtml += '<button class="btn danger" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', false)">Tolak</button></div>';
           }
         } else {
-          verificationHtml += '<span class="muted" style="font-size:11px;">Sudah dikonfirmasi</span>';
+          verificationHtml += '<span class="muted verification-complete">Sudah dikonfirmasi</span>';
         }
+        verificationHtml += '</div>';
       } else if (!isPaid && detail.campaign.Status === 'Finalized') {
         const msg = encodeURIComponent("Halo " + d.Name + ", ini reminder untuk patungan *" + detail.campaign.TargetName + "*. Tagihan kamu: " + formatIDR(d.AmountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
-        verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" class="btn secondary" style="padding:2px 4px; font-size:11px;">Kirim Reminder WA</a>';
+        verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim Reminder WA</a>';
       }
 
       // === TABLE ROW ===
@@ -2945,11 +3439,11 @@
 
       // === MOBILE CARD ===
       cardHtml += '<div class="donor-card">';
-      cardHtml += '<div class="donor-card-header"><div><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div>' + statusBadge + '</div>';
+      cardHtml += '<div class="donor-card-header"><div class="donor-card-identity"><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div><div class="donor-card-status">' + statusBadge + '</div></div>';
       cardHtml += '<div class="donor-card-body">';
-      cardHtml += '<div><span class="label">Tagihan</span>' + amountHtml + '</div>';
-      if (needsRefund) cardHtml += '<div><span class="label">Refund</span>' + refundHtml + '</div>';
-      cardHtml += '<div>' + timeHtml + '</div>';
+      cardHtml += '<div class="donor-card-field donor-card-amount"><span class="label">Tagihan</span><strong class="donor-card-value">' + amountHtml + '</strong></div>';
+      if (needsRefund) cardHtml += '<div class="donor-card-field"><span class="label">Refund</span><div class="donor-card-value">' + refundHtml + '</div></div>';
+      cardHtml += '<div class="donor-card-timeline">' + timeHtml + '</div>';
       cardHtml += '</div>';
       if (verificationHtml !== '-') {
         cardHtml += '<div class="donor-card-actions">' + verificationHtml + '</div>';
@@ -3117,16 +3611,16 @@
       if (parentCard) parentCard.classList.remove('hidden');
 
       if (bannerEl) {
-        bannerEl.innerHTML = '<span>🔔 Ada ' + list.length + ' pendaftaran member baru yang memerlukan persetujuan!</span>' +
-                              '<button class="link-btn" onclick="scrollToPending(\'' + elId + '\')" style="color:white; font-size:12px; text-decoration:underline;">Lihat Detail</button>';
+        bannerEl.innerHTML = '<span class="semantic-status" style="color:inherit;">' + paymentStatusIcon('review') + '<span>Ada ' + list.length + ' pendaftaran member baru yang memerlukan persetujuan!</span></span>' +
+                              '<button type="button" class="link-btn" aria-label="Lihat detail pendaftaran member baru" onclick="scrollToPending(\'' + elId + '\')" style="color:white; font-size:12px; text-decoration:underline;">Lihat Detail</button>';
         bannerEl.classList.remove('hidden');
       }
 
       // === MOBILE CARD LAYOUT ===
       let cardHtml = '<div class="pending-bulk-actions">';
       cardHtml += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><input type="checkbox" id="select-all-pending-mobile-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"> Pilih Semua</label>';
-      cardHtml += '<button class="btn green" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui</button>';
-      cardHtml += '<button class="btn danger" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak</button>';
+      cardHtml += '<button type="button" class="btn green" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui</button>';
+      cardHtml += '<button type="button" class="btn danger" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak</button>';
       cardHtml += '</div>';
       cardHtml += '<div class="pending-cards">';
 
@@ -3142,8 +3636,8 @@
         cardHtml += '</div>';
         cardHtml += '<span class="pending-card-wa">' + escapeHtml(m.WhatsApp) + '</span>';
         cardHtml += '<div class="pending-card-actions">';
-        cardHtml += '<button class="btn green" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
-        cardHtml += '<button class="btn danger" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button>';
+        cardHtml += '<button type="button" class="btn green" aria-label="Setujui pendaftaran ' + escapeHtml(m.Name) + '" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
+        cardHtml += '<button type="button" class="btn danger" aria-label="Tolak pendaftaran ' + escapeHtml(m.Name) + '" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button>';
         cardHtml += '</div>';
         cardHtml += '</div>';
       });
@@ -3152,8 +3646,8 @@
       // === DESKTOP TABLE LAYOUT ===
       let tableHtml = '<div class="pending-table-view">';
       tableHtml += '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
-      tableHtml += '<button class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
-      tableHtml += '<button class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
+      tableHtml += '<button type="button" class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
+      tableHtml += '<button type="button" class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
       tableHtml += '</div>';
 
       tableHtml += '<div class="table-responsive"><table><tr>';
@@ -3167,19 +3661,26 @@
         tableHtml += '<td style="text-align: center;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"></td>';
         tableHtml += '<td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
         tableHtml += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
-        tableHtml += '<td><button class="btn green" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
-        tableHtml += '<button class="btn danger" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
+        tableHtml += '<td><button type="button" class="btn green" aria-label="Setujui pendaftaran ' + escapeHtml(m.Name) + '" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
+        tableHtml += '<button type="button" class="btn danger" aria-label="Tolak pendaftaran ' + escapeHtml(m.Name) + '" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
       });
       tableHtml += '</table></div></div>';
 
       el.innerHTML = cardHtml + tableHtml;
+    }).catch(e => {
+      const el = document.getElementById(elId);
+      const parentCard = elId === 'sa-pending-members' ? document.getElementById('sa-pending-card') : null;
+      if (parentCard) parentCard.classList.remove('hidden');
+      if (el) el.innerHTML = '<p class="error" role="alert">Pendaftaran belum dapat dimuat. <button type="button" class="retry-action" onclick="refreshPendingMembers(\'' + elId + '\')">Coba lagi</button></p>';
+      console.error('Pending members error:', e);
     });
   }
 
   function scrollToPending(elId) {
     const el = document.getElementById(elId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
     }
   }
 
@@ -3197,7 +3698,10 @@
 
   function bulkApprovePending(action, elId) {
     const selected = [];
+    const selectedWhatsApp = new Set();
     document.querySelectorAll('.pending-checkbox-' + elId + ':checked').forEach(cb => {
+      if (selectedWhatsApp.has(cb.value)) return;
+      selectedWhatsApp.add(cb.value);
       selected.push({ whatsapp: cb.value, defaultStatus: cb.getAttribute('data-status') });
     });
     if (!selected.length) {
@@ -3231,20 +3735,30 @@
         return;
       }
       if (parentCard) parentCard.classList.remove('hidden');
-      let html = '<div class="table-responsive"><table><tr><th>Campaign (PIC)</th><th>Donatur Susulan</th><th>Nominal</th><th>Alasan</th><th>Aksi</th></tr>';
+      let cards = '<div class="admin-late-cards">';
+      let table = '<div class="admin-late-table-view"><div class="table-responsive"><table><tr><th>Campaign (PIC)</th><th>Donatur Susulan</th><th>Nominal</th><th>Alasan</th><th>Aksi</th></tr>';
       list.forEach(r => {
-        html += '<tr>';
-        html += '<td><strong>' + escapeHtml(r.targetName) + '</strong><br><small class="muted">PIC: ' + escapeHtml(r.pic) + '</small></td>';
-        html += '<td>' + escapeHtml(r.donorName) + '<br><small class="muted">' + escapeHtml(r.donorWhatsApp) + '</small></td>';
-        html += '<td>' + (r.isCustom ? '<span class="badge blue">Khusus: ' + formatIDR(r.customAmount) + '</span>' : '<span class="badge green">Patungan Rata</span>') + '</td>';
-        html += '<td class="muted">' + escapeHtml(r.reason) + '</td>';
-        html += '<td><button class="btn blue" style="padding:4px 8px; font-size:12px; margin-bottom:4px;" onclick="handleApproveLateDonor(\'' + r.reqId + '\', true, \'' + elId + '\')">Setujui</button>';
-        html += '<br><button class="btn danger" style="padding:4px 8px; font-size:12px;" onclick="handleApproveLateDonor(\'' + r.reqId + '\', false, \'' + elId + '\')">Tolak</button></td>';
-        html += '</tr>';
+        const targetName = escapeHtml(r.targetName);
+        const donorName = escapeHtml(r.donorName);
+        const amount = r.isCustom ? '<span class="badge blue">Khusus: ' + formatIDR(r.customAmount) + '</span>' : '<span class="badge green">Patungan Rata</span>';
+        cards += '<article class="admin-late-card">';
+        cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Campaign</span><strong>' + targetName + '</strong><span class="muted">PIC: ' + escapeHtml(r.pic) + '</span></div><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Perlu ditinjau</span></span></div>';
+        cards += '<dl class="admin-data-card-meta"><div><dt>Donatur susulan</dt><dd>' + donorName + '<br><span class="muted">' + escapeHtml(r.donorWhatsApp) + '</span></dd></div>';
+        cards += '<div><dt>Nominal</dt><dd>' + amount + '</dd></div><div><dt>Alasan</dt><dd class="muted">' + escapeHtml(r.reason) + '</dd></div></dl>';
+        cards += '<div class="admin-card-actions"><button type="button" class="btn blue" aria-label="Setujui pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', true, \'' + elId + '\')">Setujui</button><button type="button" class="btn danger" aria-label="Tolak pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', false, \'' + elId + '\')">Tolak</button></div></article>';
+
+        table += '<tr><td><strong>' + targetName + '</strong><br><small class="muted">PIC: ' + escapeHtml(r.pic) + '</small></td>';
+        table += '<td>' + donorName + '<br><small class="muted">' + escapeHtml(r.donorWhatsApp) + '</small></td><td>' + amount + '</td><td class="muted">' + escapeHtml(r.reason) + '</td>';
+        table += '<td><div class="action-group"><button type="button" class="btn blue" aria-label="Setujui pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', true, \'' + elId + '\')">Setujui</button><button type="button" class="btn danger" aria-label="Tolak pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', false, \'' + elId + '\')">Tolak</button></div></td></tr>';
       });
-      html += '</table></div>';
-      el.innerHTML = html;
-    }).catch(e => console.error('Error fetching late requests:', e));
+      cards += '</div>';
+      table += '</table></div></div>';
+      el.innerHTML = cards + table;
+    }).catch(e => {
+      const el = document.getElementById(elId);
+      if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat pengajuan. <button type="button" class="link-btn" onclick="refreshLateRequests(\'' + elId + '\')">Coba lagi</button></p>';
+      console.error('Error fetching late requests:', e);
+    });
   }
 
   function handleApproveLateDonor(reqId, isApprove, elId) {
@@ -3265,27 +3779,116 @@
   function refreshAdmins() {
     call('listAdmins', currentToken()).then(list => {
       const el = document.getElementById('sa-admin-list');
-      if (!list.length) {
-        el.innerHTML = '<p class="muted">Belum ada Admin terdaftar.</p>';
-        return;
+      if (!el) return;
+      el.innerHTML = renderAdminAccounts(list);
+      filterAdminAccounts('sa-admin-list', 'sa-admin-search', 'sa-admin-status-filter', 'sa-admin-filter-summary');
+    }).catch(e => {
+      const el = document.getElementById('sa-admin-list');
+      if (el) el.innerHTML = '<p class="error" role="alert">Daftar admin belum dapat dimuat. <button type="button" class="retry-action" onclick="refreshAdmins()">Coba lagi</button></p>';
+      const summaryEl = document.getElementById('sa-admin-filter-summary');
+      if (summaryEl) summaryEl.textContent = 'Admin belum dapat dimuat.';
+      console.error('Admin list error:', e);
+    });
+  }
+
+  function adminFilterText(value) {
+    return String(value == null ? '' : value).trim().toLowerCase();
+  }
+
+  function filterAdminItems(listId, searchId, statusId, summaryId, itemSelector, entityLabel) {
+    const root = document.getElementById(listId);
+    if (!root) return;
+
+    const searchEl = document.getElementById(searchId);
+    const statusEl = document.getElementById(statusId);
+    const query = adminFilterText(searchEl ? searchEl.value : '');
+    const selectedStatus = adminFilterText(statusEl ? statusEl.value : 'all') || 'all';
+    const items = Array.from(root.querySelectorAll(itemSelector));
+
+    items.forEach(item => {
+      const searchable = adminFilterText(item.getAttribute('data-search'));
+      const itemStatus = adminFilterText(item.getAttribute('data-status'));
+      const matchesSearch = !query || searchable.includes(query);
+      const matchesStatus = selectedStatus === 'all' || itemStatus === selectedStatus;
+      item.classList.toggle('is-filtered-out', !(matchesSearch && matchesStatus));
+    });
+
+    const canonicalItems = Array.from(root.querySelectorAll(itemSelector + '.admin-filter-canonical'));
+    const countableItems = canonicalItems.length ? canonicalItems : items;
+    const visibleCount = countableItems.filter(item => !item.classList.contains('is-filtered-out')).length;
+    const summaryEl = document.getElementById(summaryId);
+    if (summaryEl) {
+      summaryEl.textContent = visibleCount === countableItems.length
+        ? visibleCount + ' ' + entityLabel + '.'
+        : visibleCount + ' dari ' + countableItems.length + ' ' + entityLabel + ' ditampilkan.';
+    }
+
+    root.querySelectorAll('[data-filter-empty]').forEach(emptyEl => {
+      emptyEl.classList.toggle('hidden', visibleCount !== 0 || countableItems.length === 0);
+    });
+  }
+
+  function filterAdminCampaigns(listId, searchId, statusId, summaryId) {
+    filterAdminItems(listId, searchId, statusId, summaryId, '[data-admin-campaign-item]', 'campaign');
+  }
+
+  function filterAdminAccounts(listId, searchId, statusId, summaryId) {
+    filterAdminItems(listId, searchId, statusId, summaryId, '[data-admin-account-item]', 'admin');
+  }
+
+  function filterMembers(listId, searchId, statusId, summaryId) {
+    const isSuperAdmin = String(listId).startsWith('sa-');
+    filterAdminItems(
+      listId,
+      searchId,
+      statusId || (isSuperAdmin ? 'sa-member-status-filter' : 'admin-member-status-filter'),
+      summaryId || (isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary'),
+      '[data-admin-member-item]',
+      'member'
+    );
+  }
+
+  function renderAdminAccounts(list) {
+    if (!list.length) return '<p class="muted admin-data-empty">Belum ada Admin terdaftar.</p>';
+
+    let cards = '<div class="admin-account-cards">';
+    let table = '<div class="admin-account-table-view"><div class="table-responsive"><table><tr><th>Alias</th><th>WhatsApp</th><th>Token</th><th>Status</th><th>Aksi</th></tr>';
+
+    list.forEach(a => {
+      const waStr = String(a.CreatedBy || '');
+      const wa = (waStr && (waStr.startsWith('62') || waStr.startsWith('08'))) ? waStr : '-';
+      const statusValue = String(a.Status) === 'Active' ? 'active' : 'revoked';
+      const searchText = adminFilterText([a.Alias, wa, a.TokenID, a.Status].join(' '));
+      const dataAttrs = ' data-admin-account-item data-search="' + escapeHtml(searchText) + '" data-status="' + statusValue + '"';
+      const identity = escapeHtml(a.Alias || '-');
+
+      cards += '<article class="admin-account-card admin-filterable admin-filter-canonical"' + dataAttrs + '>';
+      cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Admin</span><strong>' + identity + '</strong></div>' + statusBadge(a.Status) + '</div>';
+      cards += '<dl class="admin-data-card-meta">';
+      cards += '<div><dt>WhatsApp</dt><dd>' + escapeHtml(wa) + '</dd></div>';
+      cards += '<div><dt>Token</dt><dd class="token-box">' + escapeHtml(a.TokenID) + '</dd></div>';
+      cards += '</dl>';
+      cards += '<div class="admin-card-actions">';
+      if (a.Status === 'Active') {
+        cards += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button>';
+      } else {
+        cards += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button>';
       }
-      let html = '<table><tr><th>Alias</th><th>WhatsApp</th><th>Token</th><th>Status</th><th>Aksi</th></tr>';
-      list.forEach(a => {
-        const waStr = String(a.CreatedBy || '');
-        const wa = (waStr && (waStr.startsWith('62') || waStr.startsWith('08'))) ? waStr : '-';
-        html += '<tr><td>' + escapeHtml(a.Alias || '-') + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace;">' + escapeHtml(a.TokenID) + '</td><td>' + statusBadge(a.Status) + '</td>';
-        html += '<td style="white-space:nowrap;">';
-        if (a.Status === 'Active') {
-          html += '<button class="btn secondary" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button>';
-        } else {
-          html += '<button class="btn green" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button>';
-        }
-        html += '<button class="btn danger" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="deleteAdmin(\'' + a.TokenID + '\')">Hapus</button>';
-        html += '</td></tr>';
-      });
-      html += '</table>';
-      el.innerHTML = html;
-    }).catch(e => console.error('Admin list error:', e));
+      cards += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + a.TokenID + '\')">Hapus</button>';
+      cards += '</div></article>';
+
+      table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + identity + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace; overflow-wrap:anywhere;">' + escapeHtml(a.TokenID) + '</td><td>' + statusBadge(a.Status) + '</td><td><div class="action-group">';
+      if (a.Status === 'Active') {
+        table += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button>';
+      } else {
+        table += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button>';
+      }
+      table += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + a.TokenID + '\')">Hapus</button></div></td></tr>';
+    });
+
+    cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada admin yang sesuai filter.</p></div>';
+    table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada admin yang sesuai filter.</p></div>';
+    return cards + table;
   }
 
   function revokeAdmin(id) {
@@ -3320,70 +3923,107 @@
   }
 
   function refreshAdminCampaigns() {
-    document.getElementById('admin-campaign-list').innerHTML = '<div class="muted" style="padding:16px;text-align:center;">⏳ Memuat daftar campaign...</div>';
+    const listEl = document.getElementById('admin-campaign-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat daftar campaign...</div>';
+    const summaryEl = document.getElementById('admin-campaign-filter-summary');
+    if (summaryEl) summaryEl.textContent = 'Memuat campaign...';
     call('listAllCampaigns', currentToken()).then(list => {
-      document.getElementById('admin-campaign-list').innerHTML = renderAdminCampaignTable(list);
+      listEl.innerHTML = renderAdminCampaignViews(list);
+      filterAdminCampaigns('admin-campaign-list', 'admin-campaign-search', 'admin-campaign-status-filter', 'admin-campaign-filter-summary');
+    }).catch(e => {
+      listEl.innerHTML = '<p class="error" role="alert">Gagal memuat campaign. <button type="button" class="link-btn" onclick="refreshAdminCampaigns()">Coba lagi</button></p>';
+      if (summaryEl) summaryEl.textContent = 'Campaign belum dapat dimuat.';
+      console.error('Campaign list error:', e);
     });
   }
 
-  function renderAdminCampaignTable(list) {
-    const role = safeGet('auth_role');
-    if (!list.length) return '<p class="muted">Belum ada campaign.</p>';
+  function renderAdminCampaignDeadline(c) {
+    if (!c.Deadline || c.Status === 'Archived') return '<span class="muted">-</span>';
 
-    list.sort((a, b) => {
-      // 1. Group by active vs completed
+    const diffDays = Math.ceil((new Date(c.Deadline) - new Date()) / (1000 * 60 * 60 * 24));
+    let label = '';
+    let kind = 'verified';
+    let className = 'success';
+    if (diffDays < 0) {
+      label = 'Terlewat ' + Math.abs(diffDays) + ' hari';
+      kind = 'alert';
+      className = 'danger';
+    } else if (diffDays <= 2) {
+      label = diffDays === 0 ? 'Hari ini' : diffDays + ' hari lagi';
+      kind = 'review';
+      className = 'warning';
+    } else {
+      label = diffDays + ' hari lagi';
+    }
+    return '<span class="semantic-status ' + className + '">' + paymentStatusIcon(kind) + '<span>' + label + '</span></span>';
+  }
+
+  function renderAdminCampaignActions(c, role) {
+    let html = '<div class="admin-card-actions">';
+    html += '<button type="button" class="btn blue" aria-label="Lihat detail campaign ' + escapeHtml(c.TargetName) + '" onclick="adminView(\'' + c.CampaignID + '\')">Lihat detail</button>';
+    if (c.Status !== 'Archived') {
+      html += '<button type="button" class="btn secondary" aria-label="Arsipkan campaign ' + escapeHtml(c.TargetName) + '" onclick="adminArchive(\'' + c.CampaignID + '\')">Arsipkan</button>';
+    }
+    if (role === 'SuperAdmin') {
+      html += '<button type="button" class="btn danger" aria-label="Hapus campaign ' + escapeHtml(c.TargetName) + '" onclick="adminDelete(\'' + c.CampaignID + '\')">Hapus campaign</button>';
+    }
+    return html + '</div>';
+  }
+
+  function renderAdminCampaignViews(list) {
+    const role = safeGet('auth_role');
+    if (!list.length) return '<p class="muted admin-data-empty">Belum ada campaign.</p>';
+
+    const sortedList = list.slice().sort((a, b) => {
       const isActiveA = (a.Status === 'Open' || a.Status === 'Closed') ? 1 : 0;
       const isActiveB = (b.Status === 'Open' || b.Status === 'Closed') ? 1 : 0;
       if (isActiveA !== isActiveB) return isActiveB - isActiveA;
 
-      // 2. Sort by Deadline within the same group
       const deadlineA = a.Deadline ? new Date(a.Deadline).getTime() : Infinity;
       const deadlineB = b.Deadline ? new Date(b.Deadline).getTime() : Infinity;
       if (deadlineA !== deadlineB) return deadlineA - deadlineB;
 
-      // 3. Fallback to CreatedAt
       const createdA = a.CreatedAt ? new Date(a.CreatedAt).getTime() : Infinity;
       const createdB = b.CreatedAt ? new Date(b.CreatedAt).getTime() : Infinity;
       return createdA - createdB;
     });
 
-    let html = '<div class="table-responsive"><table><tr><th>Target</th><th>Status</th><th>Sisa Waktu</th><th>PIC</th><th>Donatur</th><th>Terakhir Diupdate</th><th>Aksi</th></tr>';
-    list.forEach(c => {
-      let durationHtml = '-';
-      if (c.Deadline && c.Status !== 'Archived') {
-        const diffDays = Math.ceil((new Date(c.Deadline) - new Date()) / (1000 * 60 * 60 * 24));
-        if (diffDays < 0) {
-          durationHtml = '<span style="color:var(--red); font-weight:bold;">🔴 Terlewat ' + Math.abs(diffDays) + ' hari</span>';
-        } else if (diffDays <= 2) {
-          durationHtml = '<span style="color:var(--amber); font-weight:bold;">🟠 ' + (diffDays === 0 ? 'Hari ini!' : diffDays + ' hari lagi') + '</span>';
-        } else {
-          durationHtml = '<span style="color:var(--green);">🟢 ' + diffDays + ' hari lagi</span>';
-        }
-      }
+    let cards = '<div class="admin-campaign-cards">';
+    let table = '<div class="admin-campaign-table-view"><div class="table-responsive"><table><tr><th>Target</th><th>Status</th><th>Sisa Waktu</th><th>PIC</th><th>Donatur</th><th>Terakhir Diupdate</th><th>Aksi</th></tr>';
 
-      html += '<tr><td>' + escapeHtml(c.TargetName) + '</td><td>' + statusBadge(c.Status) + '</td>';
-      html += '<td style="white-space:nowrap;">' + durationHtml + '</td>';
-      html += '<td>' + escapeHtml(c.picName || '-') + '</td>';
-      html += '<td>' + c.paidCount + '/' + c.donorCount + '</td>';
-
+    sortedList.forEach(c => {
+      const statusValue = adminFilterText(c.Status);
+      const searchText = adminFilterText([c.TargetName, c.picName, c.Status].join(' '));
+      const dataAttrs = ' data-admin-campaign-item data-search="' + escapeHtml(searchText) + '" data-status="' + escapeHtml(statusValue) + '"';
+      const targetName = escapeHtml(c.TargetName);
       const updateText = c.ModifiedBy ? (formatTime(c.ModifiedAt) + '<br><small>oleh ' + escapeHtml(c.ModifiedBy) + '</small>') : '-';
-      html += '<td class="muted">' + updateText + '</td>';
-      html += '<td style="white-space:nowrap;">';
 
-      html += '<button class="btn secondary" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="adminView(\'' + c.CampaignID + '\')">Lihat</button> ';
+      cards += '<article class="admin-campaign-card admin-filterable admin-filter-canonical"' + dataAttrs + '>';
+      cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Target</span><strong>' + targetName + '</strong></div>' + statusBadge(c.Status) + '</div>';
+      cards += '<dl class="admin-data-card-meta">';
+      cards += '<div><dt>Sisa waktu</dt><dd>' + renderAdminCampaignDeadline(c) + '</dd></div>';
+      cards += '<div><dt>PIC</dt><dd>' + escapeHtml(c.picName || '-') + '</dd></div>';
+      cards += '<div><dt>Donatur</dt><dd>' + String(c.paidCount) + '/' + String(c.donorCount) + ' sudah bayar</dd></div>';
+      cards += '<div><dt>Terakhir diupdate</dt><dd class="muted">' + updateText + '</dd></div>';
+      cards += '</dl>' + renderAdminCampaignActions(c, role) + '</article>';
 
+      table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + targetName + '</td><td>' + statusBadge(c.Status) + '</td>';
+      table += '<td>' + renderAdminCampaignDeadline(c) + '</td><td>' + escapeHtml(c.picName || '-') + '</td><td>' + String(c.paidCount) + '/' + String(c.donorCount) + '</td>';
+      table += '<td class="muted">' + updateText + '</td><td><div class="action-group">';
+      table += '<button type="button" class="btn blue" aria-label="Lihat detail campaign ' + targetName + '" onclick="adminView(\'' + c.CampaignID + '\')">Lihat</button>';
       if (c.Status !== 'Archived') {
-        html += '<button class="btn amber" style="padding:4px 8px; font-size:12px; margin:2px;" onclick="adminArchive(\'' + c.CampaignID + '\')">Arsipkan</button> ';
+        table += '<button type="button" class="btn amber" aria-label="Arsipkan campaign ' + targetName + '" onclick="adminArchive(\'' + c.CampaignID + '\')">Arsipkan</button>';
       }
-
       if (role === 'SuperAdmin') {
-        html += '<button class="btn danger" style="padding:4px 8px; margin:0; font-size:12px;" onclick="adminDelete(\'' + c.CampaignID + '\')">Hapus</button>';
+        table += '<button type="button" class="btn danger" aria-label="Hapus campaign ' + targetName + '" onclick="adminDelete(\'' + c.CampaignID + '\')">Hapus</button>';
       }
-
-      html += '</td></tr>';
+      table += '</div></td></tr>';
     });
-    html += '</table></div>';
-    return html;
+
+    cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada campaign yang sesuai filter.</p></div>';
+    table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada campaign yang sesuai filter.</p></div>';
+    return cards + table;
   }
 
   function adminView(campaignId) {
@@ -3434,35 +4074,44 @@
         if (c.Reason) html += '<p class="muted">' + escapeHtml(c.Reason) + '</p>';
 
         if (detail.donors.length) {
-          html += '<div class="table-responsive"><table><tr><th>Nama</th><th>WA</th><th>Tagihan</th><th>Nominal Transfer</th><th>Terakhir Diupdate</th>';
+          let donorCards = '<div class="admin-detail-donor-cards">';
+          let donorTable = '<div class="admin-detail-donor-table"><div class="table-responsive"><table><tr><th>Nama</th><th>WA</th><th>Tagihan</th><th>Nominal Transfer</th><th>Terakhir Diupdate</th>';
           if (role === 'Admin' || role === 'SuperAdmin') {
-            html += '<th>Aksi</th>';
+            donorTable += '<th>Aksi</th>';
           }
-          html += '</tr>';
+          donorTable += '</tr>';
           detail.donors.forEach(d => {
             const displayName = d.Alias ? d.Name + ' (Alias: ' + d.Alias + ')' : d.Name;
-            let statusHtml = String(d.Paid).toUpperCase() === 'TRUE' ? '<span style="color:var(--green);">Lunas</span>' : '<span style="color:var(--amber);">Belum</span>';
-            if (role === 'Admin' || role === 'SuperAdmin') {
-              const newPaidStatus = String(d.Paid).toUpperCase() === 'TRUE' ? 'FALSE' : 'TRUE';
-              statusHtml += ' <button class="link-btn" style="font-size:12px; margin-left:4px;" onclick="adminTogglePaidUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + newPaidStatus + '\')">🔄</button>';
-            }
-            html += '<tr><td>' + escapeHtml(displayName) + '<br><small>' + statusHtml + '</small></td>';
-            html += '<td>' + escapeHtml(d.WhatsApp) + '</td>';
-            html += '<td>' + formatIDR(d.AmountDue) + '</td>';
-
-            let paidText = d.AmountPaid ? formatIDR(d.AmountPaid) : '(Kosong)';
-            html += '<td>' + paidText + ' <button class="link-btn" style="font-size:12px; margin-left:4px;" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">✏️</button></td>';
-
+            const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
+            const statusHtml = isPaid
+              ? '<span class="semantic-status success">' + paymentStatusIcon('verified') + '<span>Lunas</span></span>'
+              : '<span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Belum</span></span>';
+            const displayNameHtml = escapeHtml(displayName);
+            const paidText = d.AmountPaid ? formatIDR(d.AmountPaid) : '(Kosong)';
             const updateText = d.ModifiedBy ? (formatTime(d.ModifiedAt) + '<br><small>oleh ' + escapeHtml(d.ModifiedBy) + '</small>') : '-';
-            html += '<td class="muted">' + updateText + '</td>';
-            
+            const newPaidStatus = isPaid ? 'FALSE' : 'TRUE';
+
+            donorCards += '<article class="admin-detail-donor-card"><div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Donatur</span><strong>' + displayNameHtml + '</strong></div>' + statusHtml + '</div>';
+            donorCards += '<dl class="admin-data-card-meta"><div><dt>WhatsApp</dt><dd>' + escapeHtml(d.WhatsApp) + '</dd></div><div><dt>Tagihan</dt><dd>' + formatIDR(d.AmountDue) + '</dd></div><div><dt>Nominal transfer</dt><dd>' + paidText + '</dd></div><div><dt>Terakhir diupdate</dt><dd class="muted">' + updateText + '</dd></div></dl>';
             if (role === 'Admin' || role === 'SuperAdmin') {
-              let deleteDonorBtn = '<button class="link-btn" style="font-size:12px; color:var(--red);" onclick="adminDeleteDonorUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\')">🗑️</button>';
-              html += '<td>' + deleteDonorBtn + '</td>';
+              donorCards += '<div class="admin-card-actions"><button type="button" class="btn secondary" aria-label="Tandai ' + displayNameHtml + ' sebagai ' + (isPaid ? 'belum lunas' : 'lunas') + '" onclick="adminTogglePaidUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + newPaidStatus + '\')">Tandai ' + (isPaid ? 'belum lunas' : 'lunas') + '</button>';
+              donorCards += '<button type="button" class="btn secondary" aria-label="Edit nominal transfer ' + displayNameHtml + '" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">Edit nominal transfer</button>';
+              donorCards += '<button type="button" class="btn danger" aria-label="Hapus donatur ' + displayNameHtml + '" onclick="adminDeleteDonorUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\')">Hapus donatur</button></div>';
             }
-            html += '</tr>';
+            donorCards += '</article>';
+
+            donorTable += '<tr><td>' + displayNameHtml + '<br>' + statusHtml + '</td><td>' + escapeHtml(d.WhatsApp) + '</td><td>' + formatIDR(d.AmountDue) + '</td>';
+            donorTable += '<td>' + paidText;
+            donorTable += '<button type="button" class="link-btn admin-inline-action" aria-label="Edit nominal transfer ' + displayNameHtml + '" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">Edit</button></td>';
+            donorTable += '<td class="muted">' + updateText + '</td>';
+            if (role === 'Admin' || role === 'SuperAdmin') {
+              donorTable += '<td><div class="action-group"><button type="button" class="btn secondary" aria-label="Tandai ' + displayNameHtml + ' sebagai ' + (isPaid ? 'belum lunas' : 'lunas') + '" onclick="adminTogglePaidUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + newPaidStatus + '\')">' + (isPaid ? 'Belum lunas' : 'Lunas') + '</button><button type="button" class="btn danger" aria-label="Hapus donatur ' + displayNameHtml + '" onclick="adminDeleteDonorUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\')">Hapus</button></div></td>';
+            }
+            donorTable += '</tr>';
           });
-          html += '</table></div>';
+          donorCards += '</div>';
+          donorTable += '</table></div></div>';
+          html += donorCards + donorTable;
         } else {
           html += '<p class="muted">Belum ada donatur.</p>';
         }
@@ -3693,6 +4342,9 @@
       document.getElementById('sa-validation').checked = String(s.RequireMemberValidation).toUpperCase() === 'TRUE';
       document.getElementById('sa-notification-emails').value = s.AdminNotificationEmails || '';
       document.getElementById('sa-app-url').value = s.AppUrl || '';
+    }).catch(e => {
+      document.getElementById('sa-settings-msg').innerHTML = '<p class="error" role="alert">Pengaturan belum dapat dimuat. <button type="button" class="retry-action" onclick="loadSuperAdminDashboard()">Coba lagi</button></p>';
+      console.error('SuperAdmin settings error:', e);
     });
     refreshMembers();
     refreshAdmins(); // NEW: Load Admin List
@@ -3754,71 +4406,105 @@
 
   function refreshMembers() {
     call('fetchAllMembers', currentToken()).then(list => {
-      // Filter out deleted members so they are hidden from the UI
       const activeList = list.filter(m => {
         const st = String(m.Status).toLowerCase();
         return st !== 'deleted' && st !== 'rejected';
       });
-
-      let html = '';
-      if (!activeList.length) {
-        html = '<p class="muted">Belum ada member terdaftar.</p>';
-      } else {
-        const isSuperAdmin = safeGet('auth_role') === 'SuperAdmin';
-        html = '<table><tr><th>Nama</th><th>WA</th><th>Role</th><th>Status</th><th>Terakhir Diupdate</th>' + (isSuperAdmin ? '<th>Aksi</th>' : '') + '</tr>';
-        activeList.forEach(m => {
-          html += '<tr><td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
-          html += '<td><span class="badge">' + escapeHtml(m.Role || 'Member') + '</span></td><td>';
-          html += '<select id="status-' + m.WhatsApp + '" style="margin-top:0;" onchange="updateMemberStatusUI(\'' + m.WhatsApp + '\')">';
-          ['Active', 'Ex', 'Pending'].forEach(st => {
-            html += '<option value="' + st.toLowerCase() + '"' + (String(m.Status).toLowerCase() === st.toLowerCase() ? ' selected' : '') + '>' + st + '</option>';
-          });
-          html += '</select></td>';
-
-          const updateText = m.ModifiedBy ? (formatTime(m.ModifiedAt) + '<br><small>oleh ' + escapeHtml(m.ModifiedBy) + '</small>') : '-';
-          html += '<td class="muted">' + updateText + '</td>';
-
-          if (isSuperAdmin) {
-            html += '<td><div class="action-group">';
-            html += '<button class="btn danger" onclick="removeMemberUI(\'' + m.WhatsApp + '\')" style="padding:6px 10px; font-size:11px;" title="Hapus Member">Hapus</button>';
-            if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
-              html += '<button class="btn green" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')" style="padding:6px 10px; font-size:11px;" title="Jadikan Admin">+ Admin</button>';
-            }
-            if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
-              html += '<button class="btn blue" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')" style="padding:6px 10px; font-size:11px;" title="Jadikan PIC">+ PIC</button>';
-            }
-            html += '</div></td>';
-          }
-          html += '</tr>';
-        });
-        html += '</table>';
-      }
-
       const role = safeGet('auth_role');
-      if (role === 'Admin') {
-        const elAdmin = document.getElementById('admin-member-list');
-        if (elAdmin) elAdmin.innerHTML = html;
-      } else if (role === 'SuperAdmin') {
-        const elSA = document.getElementById('sa-member-list');
-        if (elSA) elSA.innerHTML = html;
-      }
-    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      const isSuperAdmin = role === 'SuperAdmin';
+      const listId = isSuperAdmin ? 'sa-member-list' : 'admin-member-list';
+      const searchId = isSuperAdmin ? 'sa-search-member' : 'admin-search-member';
+      const statusId = isSuperAdmin ? 'sa-member-status-filter' : 'admin-member-status-filter';
+      const summaryId = isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary';
+      const el = document.getElementById(listId);
+      if (!el) return;
+      el.innerHTML = renderMembersView(activeList, isSuperAdmin);
+      filterMembers(listId, searchId, statusId, summaryId);
+    }).catch(e => {
+      const role = safeGet('auth_role');
+      const el = document.getElementById(role === 'SuperAdmin' ? 'sa-member-list' : 'admin-member-list');
+      if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat member. <button type="button" class="link-btn" onclick="refreshMembers()">Coba lagi</button></p>';
+      showInfoModal(e.message || String(e), 'Error');
+    });
   }
 
-  function updateMemberStatusUI(wa) {
-    const sel = document.getElementById('status-' + wa);
-    if (!sel) return;
-    const newStatus = sel.value;
-    sel.disabled = true; // Block UI until queued action resolves
+  function renderMemberStatusControl(m) {
+    const wa = escapeHtml(m.WhatsApp);
+    const currentStatus = String(m.Status).toLowerCase();
+    let html = '<select class="admin-status-control member-status-control" data-member-wa="' + wa + '" aria-label="Status member ' + escapeHtml(m.Name) + '" onchange="updateMemberStatusUI(this)">';
+    ['Active', 'Ex', 'Pending'].forEach(st => {
+      html += '<option value="' + st.toLowerCase() + '"' + (currentStatus === st.toLowerCase() ? ' selected' : '') + '>' + st + '</option>';
+    });
+    return html + '</select>';
+  }
+
+  function renderMemberActions(m) {
+    let html = '<div class="admin-card-actions">';
+    if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
+      html += '<button type="button" class="btn blue" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')">Jadikan Admin</button>';
+    }
+    if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
+      html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')">Jadikan PIC</button>';
+    }
+    html += '<button type="button" class="btn danger" aria-label="Hapus member ' + escapeHtml(m.Name) + '" onclick="removeMemberUI(\'' + m.WhatsApp + '\')">Hapus member</button>';
+    return html + '</div>';
+  }
+
+  function renderMembersView(activeList, isSuperAdmin) {
+    if (!activeList.length) return '<p class="muted admin-data-empty">Belum ada member terdaftar.</p>';
+
+    let cards = '<div class="admin-member-cards">';
+    let table = '<div class="admin-member-table-view"><div class="table-responsive"><table><tr><th>Nama</th><th>WA</th><th>Role</th><th>Status</th><th>Terakhir Diupdate</th>' + (isSuperAdmin ? '<th>Aksi</th>' : '') + '</tr>';
+    activeList.forEach(m => {
+      const statusValue = adminFilterText(m.Status);
+      const searchText = adminFilterText([m.Name, m.WhatsApp, m.Role, m.Status, m.ModifiedBy].join(' '));
+      const dataAttrs = ' data-admin-member-item data-search="' + escapeHtml(searchText) + '" data-status="' + escapeHtml(statusValue) + '"';
+      const name = escapeHtml(m.Name);
+      const updateText = m.ModifiedBy ? (formatTime(m.ModifiedAt) + '<br><small>oleh ' + escapeHtml(m.ModifiedBy) + '</small>') : '-';
+
+      cards += '<article class="admin-member-card admin-filterable admin-filter-canonical"' + dataAttrs + '>';
+      cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Member</span><strong>' + name + '</strong></div><span class="badge">' + escapeHtml(m.Role || 'Member') + '</span></div>';
+      cards += '<dl class="admin-data-card-meta">';
+      cards += '<div><dt>WhatsApp</dt><dd>' + escapeHtml(m.WhatsApp) + '</dd></div>';
+      cards += '<div><dt>Status</dt><dd>' + renderMemberStatusControl(m) + '</dd></div>';
+      cards += '<div><dt>Terakhir diupdate</dt><dd class="muted">' + updateText + '</dd></div>';
+      cards += '</dl>' + (isSuperAdmin ? renderMemberActions(m) : '') + '</article>';
+
+      table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + name + '</td><td>' + escapeHtml(m.WhatsApp) + '</td><td><span class="badge">' + escapeHtml(m.Role || 'Member') + '</span></td><td>' + renderMemberStatusControl(m) + '</td><td class="muted">' + updateText + '</td>';
+      if (isSuperAdmin) {
+        table += '<td><div class="action-group">';
+        if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
+          table += '<button type="button" class="btn blue" aria-label="Jadikan ' + name + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')">+ Admin</button>';
+        }
+        if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
+          table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')">+ PIC</button>';
+        }
+        table += '<button type="button" class="btn danger" aria-label="Hapus member ' + name + '" onclick="removeMemberUI(\'' + m.WhatsApp + '\')">Hapus</button></div></td>';
+      }
+      table += '</tr>';
+    });
+    cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
+    table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
+    return cards + table;
+  }
+
+  function updateMemberStatusUI(source) {
+    const sel = source && source.nodeType ? source : null;
+    const wa = sel ? sel.getAttribute('data-member-wa') : String(source || '');
+    const controls = Array.from(document.querySelectorAll('.member-status-control')).filter(control => control.getAttribute('data-member-wa') === wa);
+    const activeControl = sel || controls[0];
+    if (!activeControl) return;
+    const newStatus = activeControl.value;
+    controls.forEach(control => control.disabled = true);
     callQueued('adminUpdateMemberStatus', currentToken(), wa, newStatus)
       .then(() => {
-        sel.disabled = false;
+        controls.forEach(control => control.disabled = false);
         showToast('Status berhasil diupdate.');
         refreshMembers();
         refreshPendingMembers(safeGet('auth_role') === 'SuperAdmin' ? 'sa-pending-members' : 'admin-pending-members');
       })
       .catch(e => {
-        sel.disabled = false;
+        controls.forEach(control => control.disabled = false);
         showInfoModal(e.message || String(e), 'Error');
       });
   }
@@ -3833,20 +4519,6 @@
           if (role === 'Admin') refreshAdmins();
         })
         .catch(e => showInfoModal(e.message || String(e), 'Error'));
-    });
-  }
-
-  // NEW: Instantly filter the table without calling the backend
-  function filterMembers(listId, searchId) {
-    const input = document.getElementById(searchId).value.toLowerCase();
-
-    // Grab all rows in the member table EXCEPT the header row
-    const rows = document.querySelectorAll('#' + listId + ' table tr:not(:first-child)');
-
-    rows.forEach(row => {
-      const text = row.innerText.toLowerCase();
-      // If the row contains the typed text, show it. Otherwise, hide it.
-      row.style.display = text.includes(input) ? '' : 'none';
     });
   }
 
@@ -3872,9 +4544,18 @@
   }
 
   function refreshSACampaigns() {
-    document.getElementById('sa-campaign-list').innerHTML = '<div class="muted" style="padding:16px;text-align:center;">⏳ Memuat daftar campaign...</div>';
+    const listEl = document.getElementById('sa-campaign-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat daftar campaign...</div>';
+    const summaryEl = document.getElementById('sa-campaign-filter-summary');
+    if (summaryEl) summaryEl.textContent = 'Memuat campaign...';
     call('listAllCampaigns', currentToken()).then(list => {
-      document.getElementById('sa-campaign-list').innerHTML = renderAdminCampaignTable(list);
+      listEl.innerHTML = renderAdminCampaignViews(list);
+      filterAdminCampaigns('sa-campaign-list', 'sa-campaign-search', 'sa-campaign-status-filter', 'sa-campaign-filter-summary');
+    }).catch(e => {
+      listEl.innerHTML = '<p class="error" role="alert">Gagal memuat campaign. <button type="button" class="link-btn" onclick="refreshSACampaigns()">Coba lagi</button></p>';
+      if (summaryEl) summaryEl.textContent = 'Campaign belum dapat dimuat.';
+      console.error('SuperAdmin campaign list error:', e);
     });
   }
 

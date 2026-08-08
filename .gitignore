@@ -6,3 +6,5 @@ node_modules/
 .worktrees/
 # Local Netlify folder
 .netlify
+_skill-stage/
+.scratch/
