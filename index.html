@@ -506,6 +506,183 @@
     text-align: right;
   }
 
+  .role-dashboard-heading {
+    margin-bottom: 16px;
+  }
+
+  .role-eyebrow {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .role-dashboard-heading h2 {
+    margin: 4px 0;
+  }
+
+  .role-dashboard-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .donor-dashboard-attention {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius);
+    background: #fffbeb;
+  }
+
+  .donor-dashboard-attention-icon {
+    display: inline-flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: #b45309;
+    background: #fef3c7;
+  }
+
+  .donor-dashboard-attention-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .donor-dashboard-attention-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .donor-dashboard-attention-copy strong {
+    font-size: 14px;
+  }
+
+  .donor-dashboard-attention-copy span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .donor-dashboard-attention .link-btn {
+    min-height: 44px;
+    padding: 10px 0 10px 8px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .donor-campaign-card.donor-primary-card {
+    border-color: #93c5fd;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  }
+
+  .pic-progress-card {
+    padding: 4px;
+  }
+
+  .pic-progress-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .pic-progress-header h3 {
+    margin: 4px 0;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .pic-progress-copy {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .pic-progress-total {
+    margin: 16px 0 4px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .pic-progress-track {
+    height: 8px;
+    margin: 12px 0 16px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e2e8f0;
+  }
+
+  .pic-progress-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+  }
+
+  .pic-progress-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .pic-progress-metric {
+    display: grid;
+    gap: 3px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+
+  .pic-progress-metric span {
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .pic-progress-metric strong {
+    font-size: 18px;
+  }
+
+  .pic-next-action {
+    margin-top: 0;
+  }
+
+  .pic-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .pic-section-heading h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .pic-section-heading span {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .donor-card-needs-action {
+    border-color: #fcd34d;
+  }
+
   @media (max-width: 767px) {
     #pic-donor-list .table-responsive {
       display: none;
@@ -519,6 +696,30 @@
   @media (min-width: 768px) {
     #pic-donor-list .donor-cards {
       display: none;
+    }
+  }
+
+  @media (max-width: 559px) {
+    .donor-dashboard-attention {
+      align-items: flex-start;
+    }
+
+    .donor-dashboard-attention .link-btn {
+      padding-right: 0;
+    }
+
+    .pic-progress-header,
+    .pic-section-heading {
+      align-items: flex-start;
+    }
+
+    .pic-progress-header {
+      display: block;
+    }
+
+    .pic-progress-header .badge {
+      display: inline-flex;
+      margin-top: 8px;
     }
   }
 
@@ -1399,7 +1600,11 @@
   </div>
 
   <div id="view-user-dashboard" class="hidden">
-    <h2>Halo, <span id="u-display-name"></span> 👋</h2>
+    <div class="role-dashboard-heading">
+      <span class="role-eyebrow">DONOR</span>
+      <h2>Perlu tindakan</h2>
+      <p>Halo, <span id="u-display-name"></span></p>
+    </div>
     <div id="campaign-list"></div>
     <div id="pic-create-btn-container"></div>
     <button class="btn secondary" onclick="openProfileModal()">Profil</button>
@@ -1448,7 +1653,11 @@
   </div>
 
   <div id="view-pic-dashboard" class="hidden">
-    <h2>Dashboard PIC</h2>
+    <div class="role-dashboard-heading">
+      <span class="role-eyebrow">PIC · CAMPAIGN</span>
+      <h2 id="pic-dashboard-title">Dashboard PIC</h2>
+      <p id="pic-dashboard-subtitle">Lihat progres campaign dan tindakan berikutnya.</p>
+    </div>
     <div id="pic-campaign-info" class="card"></div>
     <div id="pic-actions" class="card"></div>
     <div id="pic-donor-list" class="card"></div>
@@ -2251,9 +2460,9 @@
       }
       return call('listActiveCampaigns', user.whatsapp);
     }).then(list => {
-      let html = picHtml;
+      let html = '';
       if (!list || !list.length) {
-        el.innerHTML = html + '<div class="card muted">Belum ada campaign aktif saat ini.</div>';
+        el.innerHTML = picHtml + '<div class="card muted">Belum ada campaign aktif saat ini.</div>';
         return;
       }
 
@@ -2270,6 +2479,18 @@
       } else {
         const pending = list.filter(c => c.status === 'Finalized' && c.joined && !c.paid);
         const others = list.filter(c => !(c.status === 'Finalized' && c.joined && !c.paid));
+
+        if (pending.length > 0) {
+          const attentionTarget = pending.length === 1
+            ? '#card-' + escapeHtml(pending[0].campaignId)
+            : '#actual-campaign-list';
+          const attentionAction = pending.length === 1 ? 'Lihat tagihan' : 'Lihat tagihan gabungan';
+          html += '<div class="donor-dashboard-attention" role="status">';
+          html += '<span class="donor-dashboard-attention-icon">' + paymentStatusIcon('review') + '</span>';
+          html += '<span class="donor-dashboard-attention-copy"><strong>' + pending.length + ' pembayaran menunggu</strong><span>Bayar sebelum deadline agar campaign selesai tepat waktu.</span></span>';
+          html += '<a class="link-btn" href="' + attentionTarget + '">' + attentionAction + '</a>';
+          html += '</div>';
+        }
 
         html += '<div class="split-layout">';
 
@@ -2323,6 +2544,7 @@
         html += '</div>';
       }
 
+      html += picHtml;
       el.innerHTML = html;
     }).catch(e => {
       // EXPOSE THE ERROR: If the backend crashes, tell the user exactly why
@@ -2502,7 +2724,7 @@
     
     const cIdsStr = campaignIds.join(',');
     
-    let html = '<div class="card" style="border-left: 4px solid var(--blue); background: #f0f7ff; margin-bottom:16px;">';
+    let html = '<div class="card donor-campaign-card donor-primary-card" style="border-left: 4px solid var(--blue); background: #f0f7ff; margin-bottom:16px;">';
     html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
     html += '<strong style="color:var(--blue); font-size:15px;">Combined Payment (' + groupList.length + ' Campaign)</strong>';
     html += '<span class="badge" style="background:var(--blue-light); color:var(--blue);">⏳ Menunggu Pembayaran</span>';
@@ -2542,7 +2764,8 @@
       checkboxHtml = '<input type="checkbox" class="bulk-join-checkbox" value="' + c.campaignId + '" data-name="' + escapeHtml(c.targetName) + '" onchange="updateBulkJoinBtnVisibility()" style="width:16px; height:16px; margin-right:8px; cursor:pointer; vertical-align:middle;"> ';
     }
 
-    let html = '<div class="card" id="card-' + c.campaignId + '">';
+    const cardClass = isPending ? 'card donor-campaign-card donor-primary-card' : 'card donor-campaign-card';
+    let html = '<div class="' + cardClass + '" id="card-' + c.campaignId + '">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
     html += '<div style="display:flex;align-items:center;">' + checkboxHtml + '<strong>' + escapeHtml(c.targetName) + '</strong></div>';
     if (isPending) {
@@ -2958,23 +3181,71 @@
     });
   }
 
+  function getPicProgress(detail) {
+    const donors = detail.donors || [];
+    const verifiedDonors = donors.filter(d => String(d.Verified).toUpperCase() === 'TRUE');
+    const actionableDonors = donors.filter(d => String(d.Verified).toUpperCase() !== 'TRUE');
+    const collected = donors.reduce((total, donor) => {
+      if (String(donor.Paid).toUpperCase() !== 'TRUE') return total;
+      const amountPaid = Number(donor.AmountPaid);
+      const fallbackAmount = String(donor.Verified).toUpperCase() === 'TRUE' ? Number(donor.AmountDue) || 0 : 0;
+      return total + (Number.isFinite(amountPaid) && amountPaid > 0 ? amountPaid : fallbackAmount);
+    }, 0);
+    const target = Number(detail.campaign.GiftAmount) || 0;
+    const percent = target > 0 ? Math.min(100, Math.round((collected / target) * 100)) : 0;
+
+    return {
+      collected,
+      percent,
+      verifiedCount: verifiedDonors.length,
+      actionableCount: actionableDonors.length
+    };
+  }
+
+  function scrollToPicActions() {
+    const el = document.getElementById('pic-actions');
+    if (el) {
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+
+  function renderPicNextAction(detail, progress) {
+    const c = detail.campaign;
+    let label = 'Lihat tindakan berikutnya';
+    let action = 'scrollToPicActions()';
+    if (c.Status === 'Closed') {
+      label = 'Input rekening';
+      action = 'showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')';
+    } else if (c.Status === 'Finalized' && progress.actionableCount > 0) {
+      label = 'Tinjau bukti transfer';
+    } else if (c.Status === 'Finalized') {
+      label = 'Lihat daftar donatur';
+    }
+    return '<button type="button" class="btn blue pic-next-action" onclick="' + action + '">' + label + ' →</button>';
+  }
+
   function renderPicDashboard(detail) {
     const c = detail.campaign;
     _picCampaignData = c; // Store for copyShareLink
     const infoEl = document.getElementById('pic-campaign-info');
+    const titleEl = document.getElementById('pic-dashboard-title');
+    const subtitleEl = document.getElementById('pic-dashboard-subtitle');
+    const progress = getPicProgress(detail);
+
+    if (titleEl) titleEl.textContent = c.TargetName || 'Dashboard PIC';
+    if (subtitleEl) subtitleEl.textContent = (c.Reason || 'Kelola progres campaign dan tindakan berikutnya.') + (c.Deadline ? ' · deadline ' + c.Deadline : '');
 
     // Handle the zero-state gracefully
     const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Belum ditentukan';
 
-    infoEl.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-      '<h2 style="margin:0;">' + escapeHtml(c.TargetName) + '</h2>' + statusBadge(c.Status) + '</div>' +
-      (c.Reason ? '<p class="muted" style="margin-top:4px;">' + escapeHtml(c.Reason) + '</p>' : '') +
-      '<div style="background:var(--blue-light); padding:16px; border-radius:8px; margin: 16px 0; border: 1px solid var(--border);">' +
-      '<span style="display:block; font-size:12px; font-weight:bold; color:var(--blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Target Hadiah</span>' +
-      '<span style="font-size:28px; font-weight:bold; color:var(--text);">' + giftText + '</span>' +
-      '</div>' +
-      '<p class="muted">Deadline: ' + (c.Deadline || '-') + ' &middot; ' + detail.donors.length + ' donatur terdaftar</p>';
+    infoEl.innerHTML = '<div class="pic-progress-card">' +
+      '<div class="pic-progress-header"><div><span class="role-eyebrow">PROGRESS CAMPAIGN</span><h3>' + formatIDR(progress.collected) + ' terkumpul</h3></div>' + statusBadge(c.Status) + '</div>' +
+      '<p class="pic-progress-copy">Target hadiah ' + giftText + ' &middot; deadline ' + (c.Deadline || '-') + '</p>' +
+      '<div class="pic-progress-track" role="progressbar" aria-label="Progress campaign ' + progress.percent + ' persen" aria-valuenow="' + progress.percent + '" aria-valuemin="0" aria-valuemax="100"><span style="width:' + progress.percent + '%"></span></div>' +
+      '<div class="pic-progress-metrics"><div class="pic-progress-metric"><span>Perlu ditindaklanjuti</span><strong>' + progress.actionableCount + '</strong></div><div class="pic-progress-metric"><span>Sudah diverifikasi</span><strong>' + progress.verifiedCount + '</strong></div></div>' +
+      renderPicNextAction(detail, progress) +
+      '</div>';
 
     renderPicActions(detail);
     renderDonorTable(detail);
@@ -3009,7 +3280,7 @@
   function renderPicActions(detail) {
     const c = detail.campaign;
     const el = document.getElementById('pic-actions');
-    let html = '';
+    let html = '<div class="pic-section-heading"><div><span class="role-eyebrow">PIC · WORKSPACE</span><h3>Tindakan berikutnya</h3></div><span>Actionable first</span></div>';
 
     // Calculate achieved state
     let isAchieved = true;
@@ -3522,7 +3793,7 @@
   function renderDonorTable(detail) {
     const el = document.getElementById('pic-donor-list');
     if (!detail.donors || !detail.donors.length) {
-      el.innerHTML = '<p class="muted">Belum ada donatur.</p>';
+      el.innerHTML = '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>0 item</span></div><p class="muted">Belum ada donatur.</p>';
       return;
     }
 
@@ -3538,6 +3809,8 @@
 
     let tableHtml = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>';
     let cardHtml = '<div class="donor-cards">';
+    const actionableCount = detail.donors.filter(d => String(d.Verified).toUpperCase() !== 'TRUE').length;
+    const headingHtml = '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>' + actionableCount + ' item</span></div>';
 
     detail.donors.forEach(d => {
       const displayName = d.Alias ? d.Alias : d.Name;
@@ -3626,7 +3899,7 @@
       tableHtml += '</tr>';
 
       // === MOBILE CARD ===
-      cardHtml += '<div class="donor-card">';
+      cardHtml += '<div class="donor-card' + (!isVerified ? ' donor-card-needs-action' : '') + '">';
       cardHtml += '<div class="donor-card-header"><div class="donor-card-identity"><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div><div class="donor-card-status">' + statusBadge + '</div></div>';
       cardHtml += '<div class="donor-card-body">';
       cardHtml += '<div class="donor-card-field donor-card-amount"><span class="label">Tagihan</span><strong class="donor-card-value">' + amountHtml + '</strong></div>';
@@ -3656,7 +3929,7 @@
     }
     cardHtml += '</div>';
 
-    el.innerHTML = cardHtml + tableHtml;
+    el.innerHTML = headingHtml + cardHtml + tableHtml;
   }
 
 
