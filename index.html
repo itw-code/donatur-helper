@@ -634,7 +634,7 @@
 
   .pic-progress-metrics {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
     margin-bottom: 16px;
   }
@@ -659,6 +659,87 @@
 
   .pic-next-action {
     margin-top: 0;
+  }
+
+  .pic-action-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .pic-action-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+
+  .pic-action-item.primary {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+  }
+
+  .pic-action-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .pic-action-copy strong {
+    font-size: 14px;
+  }
+
+  .pic-action-copy span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .pic-action-item .btn {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    margin: 0;
+  }
+
+  .action-arrow-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pic-complete-state {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    color: #047857;
+    background: #f0fdf4;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .pic-complete-state .status-icon {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+  }
+
+  .pic-donor-target-highlight {
+    scroll-margin-top: 16px;
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px var(--primary-transparent-20);
   }
 
   .pic-section-heading {
@@ -720,6 +801,19 @@
     .pic-progress-header .badge {
       display: inline-flex;
       margin-top: 8px;
+    }
+
+    .pic-progress-metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .pic-action-item {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .pic-action-item .btn {
+      width: 100%;
     }
   }
 
@@ -1700,7 +1794,7 @@
             <strong><span data-queue-count>0</span> pendaftaran member</strong>
             <span>Periksa status Active atau Ex sebelum menyetujui.</span>
           </span>
-          <span class="admin-queue-review">Review</span>
+          <span class="admin-queue-review">Tinjau</span>
         </a>
         <a id="admin-queue-late" class="admin-queue-row hidden" href="#admin-late-card">
           <span class="admin-queue-icon" aria-hidden="true">
@@ -1714,7 +1808,7 @@
             <strong><span data-queue-count>0</span> donatur susulan</strong>
             <span>Persetujuan akan menghitung ulang tagihan campaign.</span>
           </span>
-          <span class="admin-queue-review">Review</span>
+          <span class="admin-queue-review">Tinjau</span>
         </a>
       </div>
       <p id="admin-action-queue-empty" class="muted admin-queue-empty hidden">Tidak ada item yang perlu ditinjau.</p>
@@ -3184,7 +3278,10 @@
   function getPicProgress(detail) {
     const donors = detail.donors || [];
     const verifiedDonors = donors.filter(d => String(d.Verified).toUpperCase() === 'TRUE');
-    const actionableDonors = donors.filter(d => String(d.Verified).toUpperCase() !== 'TRUE');
+    const reminderDonors = donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
+    const reviewDonors = donors.filter(d =>
+      String(d.Paid).toUpperCase() === 'TRUE' && String(d.Verified).toUpperCase() !== 'TRUE'
+    );
     const collected = donors.reduce((total, donor) => {
       if (String(donor.Paid).toUpperCase() !== 'TRUE') return total;
       const amountPaid = Number(donor.AmountPaid);
@@ -3198,7 +3295,9 @@
       collected,
       percent,
       verifiedCount: verifiedDonors.length,
-      actionableCount: actionableDonors.length
+      reminderCount: reminderDonors.length,
+      reviewCount: reviewDonors.length,
+      totalDonorCount: donors.length
     };
   }
 
@@ -3210,19 +3309,86 @@
     }
   }
 
+  function actionArrowIcon() {
+    return '<svg class="action-arrow-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>';
+  }
+
+  function isVisiblePicActionTarget(el) {
+    if (!el || el.classList.contains('hidden')) return false;
+    return Boolean(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+  }
+
+  function scrollToPicDonorAction(actionType) {
+    const selector = '#pic-donor-list [data-pic-action="' + actionType + '"]';
+    const targets = Array.from(document.querySelectorAll(selector));
+    const target = targets.find(isVisiblePicActionTarget) || targets[0];
+    if (!target) {
+      scrollToPicActions();
+      return;
+    }
+
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.classList.remove('pic-donor-target-highlight');
+    target.classList.add('pic-donor-target-highlight');
+    target.setAttribute('tabindex', '-1');
+    target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+
+    const focusTarget = () => {
+      if (typeof target.focus !== 'function') return;
+      try {
+        target.focus({ preventScroll: true });
+      } catch (e) {
+        target.focus();
+      }
+    };
+    if (reduceMotion) focusTarget();
+    else window.setTimeout(focusTarget, 150);
+    window.setTimeout(() => target.classList.remove('pic-donor-target-highlight'), reduceMotion ? 1200 : 2200);
+  }
+
+  function renderPicActionItem(type, count, isPrimary) {
+    const isReminder = type === 'reminder';
+    const label = isReminder ? 'Kirim pengingat WA' : 'Tinjau Bukti Transfer';
+    const description = isReminder
+      ? count + ' Donor belum upload Bukti Transfer.'
+      : count + ' Bukti Transfer menunggu verifikasi.';
+    const className = isPrimary ? 'btn blue' : 'btn secondary';
+    return '<div class="pic-action-item' + (isPrimary ? ' primary' : '') + '">' +
+      '<div class="pic-action-copy"><strong>' + label + '</strong><span>' + description + '</span></div>' +
+      '<button type="button" class="' + className + ' pic-next-action" onclick="scrollToPicDonorAction(\'' + type + '\')">' + label + ' ' + actionArrowIcon() + '</button>' +
+      '</div>';
+  }
+
+  function renderPicActionQueue(detail, progress) {
+    if (detail.campaign.Status !== 'Finalized') return '';
+
+    let html = '<div class="pic-action-list" aria-label="Tindakan pembayaran">';
+    if (progress.reminderCount > 0) {
+      html += renderPicActionItem('reminder', progress.reminderCount, true);
+    }
+    if (progress.reviewCount > 0) {
+      html += renderPicActionItem('review', progress.reviewCount, progress.reminderCount === 0);
+    }
+    if (progress.reminderCount === 0 && progress.reviewCount === 0) {
+      const message = progress.totalDonorCount > 0
+        ? 'Semua pembayaran terverifikasi.'
+        : 'Belum ada tindakan pembayaran.';
+      html += '<div class="pic-complete-state" role="status">' + paymentStatusIcon('verified') + '<span>' + message + '</span></div>';
+    }
+    return html + '</div>';
+  }
+
   function renderPicNextAction(detail, progress) {
     const c = detail.campaign;
+    if (c.Status === 'Finalized') return renderPicActionQueue(detail, progress);
+
     let label = 'Lihat tindakan berikutnya';
     let action = 'scrollToPicActions()';
     if (c.Status === 'Closed') {
       label = 'Input rekening';
       action = 'showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')';
-    } else if (c.Status === 'Finalized' && progress.actionableCount > 0) {
-      label = 'Tinjau bukti transfer';
-    } else if (c.Status === 'Finalized') {
-      label = 'Lihat daftar donatur';
     }
-    return '<button type="button" class="btn blue pic-next-action" onclick="' + action + '">' + label + ' →</button>';
+    return '<button type="button" class="btn blue pic-next-action" onclick="' + action + '">' + label + ' ' + actionArrowIcon() + '</button>';
   }
 
   function renderPicDashboard(detail) {
@@ -3240,21 +3406,15 @@
     const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Belum ditentukan';
 
     infoEl.innerHTML = '<div class="pic-progress-card">' +
-      '<div class="pic-progress-header"><div><span class="role-eyebrow">PROGRESS CAMPAIGN</span><h3>' + formatIDR(progress.collected) + ' terkumpul</h3></div>' + statusBadge(c.Status) + '</div>' +
+      '<div class="pic-progress-header"><div><span class="role-eyebrow">PROGRES CAMPAIGN</span><h3>' + formatIDR(progress.collected) + ' terkumpul</h3></div>' + statusBadge(c.Status) + '</div>' +
       '<p class="pic-progress-copy">Target hadiah ' + giftText + ' &middot; deadline ' + (c.Deadline || '-') + '</p>' +
-      '<div class="pic-progress-track" role="progressbar" aria-label="Progress campaign ' + progress.percent + ' persen" aria-valuenow="' + progress.percent + '" aria-valuemin="0" aria-valuemax="100"><span style="width:' + progress.percent + '%"></span></div>' +
-      '<div class="pic-progress-metrics"><div class="pic-progress-metric"><span>Perlu ditindaklanjuti</span><strong>' + progress.actionableCount + '</strong></div><div class="pic-progress-metric"><span>Sudah diverifikasi</span><strong>' + progress.verifiedCount + '</strong></div></div>' +
+      '<div class="pic-progress-track" role="progressbar" aria-label="Progres campaign ' + progress.percent + ' persen" aria-valuenow="' + progress.percent + '" aria-valuemin="0" aria-valuemax="100"><span style="width:' + progress.percent + '%"></span></div>' +
+      '<div class="pic-progress-metrics"><div class="pic-progress-metric"><span>Pengingat pembayaran</span><strong>' + progress.reminderCount + '</strong></div><div class="pic-progress-metric"><span>Bukti Transfer perlu ditinjau</span><strong>' + progress.reviewCount + '</strong></div><div class="pic-progress-metric"><span>Sudah diverifikasi</span><strong>' + progress.verifiedCount + '</strong></div></div>' +
       renderPicNextAction(detail, progress) +
       '</div>';
 
     renderPicActions(detail);
     renderDonorTable(detail);
-
-    // Removed bulk reminder
-    const isAchieved = detail.donors && detail.donors.length > 0 && detail.donors.every(d => String(d.Verified).toUpperCase() === 'TRUE');
-    if (c.Status === 'Finalized' && isAchieved) {
-      infoEl.innerHTML += '<div class="success" style="margin-top:12px;">🎉 Target Tercapai! Semua donatur sudah bayar dan terverifikasi.</div>';
-    }
 
     const dangerZone = document.getElementById('pic-danger-zone');
     if (c.Status !== 'Archived') {
@@ -3280,7 +3440,7 @@
   function renderPicActions(detail) {
     const c = detail.campaign;
     const el = document.getElementById('pic-actions');
-    let html = '<div class="pic-section-heading"><div><span class="role-eyebrow">PIC · WORKSPACE</span><h3>Tindakan berikutnya</h3></div><span>Actionable first</span></div>';
+    let html = '<div class="pic-section-heading"><div><span class="role-eyebrow">PIC · WORKSPACE</span><h3>Tindakan berikutnya</h3></div><span>Prioritaskan tindakan</span></div>';
 
     // Calculate achieved state
     let isAchieved = true;
@@ -3337,8 +3497,17 @@
         html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
       }
 
-      const hasUnverified = detail.donors.some(d => String(d.Paid).toUpperCase() === 'TRUE' && String(d.Verified).toUpperCase() !== 'TRUE');
-      if (hasUnverified) {
+      const hasReviewableProof = detail.donors.some(d =>
+        String(d.Paid).toUpperCase() === 'TRUE' &&
+        String(d.Verified).toUpperCase() !== 'TRUE' &&
+        Boolean(String(d.ProofLink || '').trim())
+      );
+      const hasMissingProof = detail.donors.some(d =>
+        String(d.Paid).toUpperCase() === 'TRUE' &&
+        String(d.Verified).toUpperCase() !== 'TRUE' &&
+        !String(d.ProofLink || '').trim()
+      );
+      if (hasReviewableProof && !hasMissingProof) {
         html += '<button class="btn green" style="margin-bottom:8px; margin-right:8px;" onclick="picVerifyAllUI(\'' + c.CampaignID + '\')">✓ Setujui Semua Bukti</button>';
       }
       if (!isAchieved) {
@@ -3809,14 +3978,25 @@
 
     let tableHtml = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>';
     let cardHtml = '<div class="donor-cards">';
-    const actionableCount = detail.donors.filter(d => String(d.Verified).toUpperCase() !== 'TRUE').length;
-    const headingHtml = '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>' + actionableCount + ' item</span></div>';
+    const reminderCount = detail.donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE').length;
+    const reviewCount = detail.donors.filter(d =>
+      String(d.Paid).toUpperCase() === 'TRUE' && String(d.Verified).toUpperCase() !== 'TRUE'
+    ).length;
+    const headingSummary = [];
+    if (reminderCount > 0) headingSummary.push(reminderCount + ' pengingat');
+    if (reviewCount > 0) headingSummary.push(reviewCount + ' tinjau');
+    const headingHtml = '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>' + (headingSummary.join(' · ') || '0 item') + '</span></div>';
 
     detail.donors.forEach(d => {
       const displayName = d.Alias ? d.Alias : d.Name;
       const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
       const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
       const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
+      const hasProof = Boolean(String(d.ProofLink || '').trim());
+      const actionType = detail.campaign.Status === 'Finalized'
+        ? (!isPaid ? 'reminder' : (!isVerified ? 'review' : ''))
+        : '';
+      const actionAttribute = actionType ? ' data-pic-action="' + actionType + '" tabindex="-1"' : '';
       const picName = d.ModifiedBy ? escapeHtml(d.ModifiedBy) : '';
       const picLabel = picName ? ' (' + picName + ')' : '';
 
@@ -3870,7 +4050,7 @@
 
       // --- Verification actions ---
       let verificationHtml = '-';
-      if (isPaid && d.ProofLink) {
+      if (isPaid && hasProof) {
         verificationHtml = '<div class="verification-stack"><a href="' + escapeHtml(d.ProofLink) + '" target="_blank" rel="noopener noreferrer" class="link-btn donor-proof-link">Lihat Bukti</a>';
         if (!isVerified) {
           if (needsRefund && !isRefunded) {
@@ -3883,13 +4063,15 @@
           verificationHtml += '<span class="muted verification-complete">Sudah dikonfirmasi</span>';
         }
         verificationHtml += '</div>';
+      } else if (isPaid && !isVerified) {
+        verificationHtml = '<div class="verification-stack"><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Bukti Transfer belum tersedia</span></span><span class="muted verification-warning">Minta Donor upload ulang sebelum verifikasi.</span></div>';
       } else if (!isPaid && detail.campaign.Status === 'Finalized') {
         const msg = encodeURIComponent("Halo " + d.Name + ", ini reminder untuk patungan *" + detail.campaign.TargetName + "*. Tagihan kamu: " + formatIDR(d.AmountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
-        verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim Reminder WA</a>';
+        verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim pengingat WA</a>';
       }
 
       // === TABLE ROW ===
-      tableHtml += '<tr>';
+      tableHtml += '<tr' + actionAttribute + '>';
       tableHtml += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
       tableHtml += '<td>' + timeHtml + '</td>';
       tableHtml += '<td>' + statusBadge + '</td>';
@@ -3899,7 +4081,7 @@
       tableHtml += '</tr>';
 
       // === MOBILE CARD ===
-      cardHtml += '<div class="donor-card' + (!isVerified ? ' donor-card-needs-action' : '') + '">';
+      cardHtml += '<div class="donor-card' + (actionType ? ' donor-card-needs-action' : '') + '"' + actionAttribute + '>';
       cardHtml += '<div class="donor-card-header"><div class="donor-card-identity"><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div><div class="donor-card-status">' + statusBadge + '</div></div>';
       cardHtml += '<div class="donor-card-body">';
       cardHtml += '<div class="donor-card-field donor-card-amount"><span class="label">Tagihan</span><strong class="donor-card-value">' + amountHtml + '</strong></div>';
@@ -4088,15 +4270,23 @@
   function loadAdminDashboard() {
     showView('admin-dashboard');
     resetAdminActionQueue();
-    const alias = safeGet('auth_alias');
-    const greetingEl = document.getElementById('admin-dashboard-greeting');
-    if (greetingEl && alias) greetingEl.textContent = 'Halo, ' + alias + '. Persetujuan dan pengecualian campaign berada di urutan teratas.';
     refreshSummary('admin-summary');
     refreshPendingMembers('admin-pending-members');
     refreshLateRequests('admin-late-donors');
     refreshAdminCampaigns();
     refreshMembers();
     startAdminPolling();
+  }
+
+  function getAdminParentCard(elId) {
+    const parentCardIds = {
+      'sa-pending-members': 'sa-pending-card',
+      'admin-pending-members': 'admin-pending-card',
+      'sa-late-donors': 'sa-late-card',
+      'admin-late-donors': 'admin-late-card'
+    };
+    const parentCardId = parentCardIds[elId];
+    return parentCardId ? document.getElementById(parentCardId) : null;
   }
 
   // Smart function that updates whichever dashboard is currently open
@@ -4106,9 +4296,7 @@
       if (!el) return;
       if (elId === 'admin-pending-members') updateAdminActionQueue('pending', list.length);
       // Auto-show/hide the parent card
-      const parentCard = elId === 'sa-pending-members'
-        ? document.getElementById('sa-pending-card')
-        : (elId === 'admin-pending-members' ? document.getElementById('admin-pending-card') : null);
+      const parentCard = getAdminParentCard(elId);
       const bannerId = elId === 'sa-pending-members' ? 'sa-notify-banner' : 'admin-notify-banner';
       const bannerEl = document.getElementById(bannerId);
 
@@ -4180,9 +4368,7 @@
     }).catch(e => {
       if (elId === 'admin-pending-members') updateAdminActionQueue('pending', null);
       const el = document.getElementById(elId);
-      const parentCard = elId === 'sa-pending-members'
-        ? document.getElementById('sa-pending-card')
-        : (elId === 'admin-pending-members' ? document.getElementById('admin-pending-card') : null);
+      const parentCard = getAdminParentCard(elId);
       if (parentCard) parentCard.classList.remove('hidden');
       if (el) el.innerHTML = '<p class="error" role="alert">Pendaftaran belum dapat dimuat. <button type="button" class="retry-action" onclick="refreshPendingMembers(\'' + elId + '\')">Coba lagi</button></p>';
       console.error('Pending members error:', e);
@@ -4242,9 +4428,7 @@
       if (!el) return;
       if (elId === 'admin-late-donors') updateAdminActionQueue('late', list.length);
       // Auto-show/hide the parent card
-      const parentCard = elId === 'sa-late-donors'
-        ? document.getElementById('sa-late-card')
-        : (elId === 'admin-late-donors' ? document.getElementById('admin-late-card') : null);
+      const parentCard = getAdminParentCard(elId);
       if (!list.length) {
         el.innerHTML = '<p class="muted">Tidak ada pengajuan donatur susulan.</p>';
         if (parentCard) parentCard.classList.add('hidden');
@@ -4273,9 +4457,7 @@
     }).catch(e => {
       if (elId === 'admin-late-donors') updateAdminActionQueue('late', null);
       const el = document.getElementById(elId);
-      const parentCard = elId === 'sa-late-donors'
-        ? document.getElementById('sa-late-card')
-        : (elId === 'admin-late-donors' ? document.getElementById('admin-late-card') : null);
+      const parentCard = getAdminParentCard(elId);
       if (parentCard) parentCard.classList.remove('hidden');
       if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat pengajuan. <button type="button" class="link-btn" onclick="refreshLateRequests(\'' + elId + '\')">Coba lagi</button></p>';
       console.error('Error fetching late requests:', e);

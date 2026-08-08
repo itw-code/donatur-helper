@@ -24,6 +24,14 @@ _Avoid_: Contributor, participant
 An image or document uploaded by a Donor as proof of payment to the campaign's bank account.
 _Avoid_: Receipt, transfer slip
 
+**Bukti Transfer perlu ditinjau**:
+A Bukti Transfer submitted by a paid Donor that the PIC has not yet accepted or rejected.
+_Avoid_: Unpaid Donor, payment reminder
+
+**Pengingat pembayaran**:
+A follow-up for a Donor who has not uploaded Bukti Transfer; it is separate from reviewing submitted proof.
+_Avoid_: Proof review, verification
+
 **Combined Payment**:
 A single payment transaction covering multiple campaign donations that share the same destination bank account.
 _Avoid_: Bulk payment, mass transfer
