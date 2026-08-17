@@ -129,7 +129,7 @@ test('formatUserErrorMessage converts network, timeout, and raw errors into calm
   // Timeout / abort
   assert.equal(
     formatUserErrorMessage(new Error('Request timeout after 15000ms')),
-    'Waktu permintaan habis. Silakan coba beberapa saat lagi.'
+    'Permintaan memakan waktu lebih lama dari biasanya. Silakan coba lagi.'
   );
 
   // Session / unauthorized

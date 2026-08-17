@@ -33,13 +33,14 @@ export function formatUserErrorMessage(err) {
   if (!err) return 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.';
   const msg = typeof err === 'string' ? err : (err.message || String(err));
   const trimmed = msg.trim();
-  if (!trimmed) return 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.';
-
-  if (/network|fetch|failed to fetch|err_internet_disconnected|offline/i.test(trimmed)) {
-    return 'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.';
+  if (err && err.isTimeout) {
+    return 'Permintaan memakan waktu lebih lama dari biasanya. Silakan coba lagi.';
   }
-  if (/timeout|abort/i.test(trimmed)) {
-    return 'Waktu permintaan habis. Silakan coba beberapa saat lagi.';
+  if (/timeout|abort|lebih lama dari biasanya|waktu habis/i.test(trimmed)) {
+    return 'Permintaan memakan waktu lebih lama dari biasanya. Silakan coba lagi.';
+  }
+  if (/network|fetch|failed to fetch|err_internet_disconnected|offline|koneksi/i.test(trimmed)) {
+    return 'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.';
   }
   if (/unauthorized|invalid token|expired token|sesi/i.test(trimmed)) {
     return 'Sesi akses Anda telah berakhir. Silakan masuk kembali.';
