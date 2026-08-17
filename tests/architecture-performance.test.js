@@ -100,3 +100,35 @@ test('Task 2: JavaScript files exist and are modularized into ES Modules', () =>
     }
   }
 });
+
+test('Task 3: Responsive and optimized image delivery utilities and layout shift protection', () => {
+  const { createBrowserHarness } = require('./test-harness');
+  const harness = createBrowserHarness();
+  const { renderOptimizedImage } = harness.context;
+
+  assert.strictEqual(typeof renderOptimizedImage, 'function', 'renderOptimizedImage must be a function');
+
+  // Test lazy loading & async decoding defaults
+  const normalImg = renderOptimizedImage('https://example.com/receipt.jpg', 'Bukti Transfer Budi', { className: 'proof-preview-img' });
+  assert.match(normalImg, /loading="lazy"/, 'Default loading should be lazy');
+  assert.match(normalImg, /decoding="async"/, 'Default decoding should be async');
+  assert.match(normalImg, /src="https:\/\/example\.com\/receipt\.jpg"/, 'Image source should match');
+  assert.match(normalImg, /alt="Bukti Transfer Budi"/, 'Image alt should be escaped');
+  assert.match(normalImg, /class="proof-preview-img"/, 'Class should be set');
+
+  // Test custom options (width, height, eager loading for hero)
+  const heroImg = renderOptimizedImage('https://example.com/hero.jpg', 'Hero Banner', { loading: 'eager', width: 800, height: 400 });
+  assert.match(heroImg, /loading="eager"/, 'Custom loading option honored');
+  assert.match(heroImg, /width="800"/, 'Width attribute present');
+  assert.match(heroImg, /height="400"/, 'Height attribute present');
+
+  // Test dangerous URL suppression
+  const maliciousImg = renderOptimizedImage('javascript:alert(1)', 'Hack');
+  assert.strictEqual(maliciousImg, '', 'Dangerous image protocols must return empty string');
+
+  // Verify CSS contains layout shift rules
+  const css = fs.readFileSync(path.join(__dirname, '..', 'css', 'components.css'), 'utf8');
+  assert.match(css, /\.img-responsive\s*\{[^}]*max-width:\s*100%/i, 'img-responsive class must set max-width: 100%');
+  assert.match(css, /\.proof-preview-img/i, 'proof-preview-img must be styled for layout stability');
+  assert.match(css, /\.gift-preview-img/i, 'gift-preview-img must be styled for layout stability');
+});
