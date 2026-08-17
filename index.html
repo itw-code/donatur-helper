@@ -4230,9 +4230,9 @@
         if (isVerified) {
           badgeHtml = '<span class="badge green payment-status-badge donor-queue-badge">' + paymentStatusIcon('verified') + '<span>' + (isFinalized ? 'Terverifikasi' : 'Terdaftar') + '</span></span>';
         } else if (isPaid && hasProof) {
-          badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Perlu Cek</span></span>';
+          badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Perlu Ditinjau</span></span>';
         } else if (isPaid) {
-          badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Bukti Belum Ada</span></span>';
+          badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Bukti Belum Diunggah</span></span>';
         } else {
           badgeHtml = '<span class="badge warning payment-status-badge" style="background:#faeeda;color:var(--amber);">' + paymentStatusIcon('unpaid') + '<span>Belum Bayar</span></span>';
         }
