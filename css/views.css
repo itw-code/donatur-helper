@@ -1,0 +1,1147 @@
+/* Role Views & Page-Specific Styles */
+
+/* --- DONOR VIEW --- */
+.donor-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.donor-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.donor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.donor-card-identity {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.donor-card-status {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.donor-card-status .payment-status-badge {
+  white-space: normal;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.donor-card-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.donor-card-wa {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.donor-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  font-size: 13px;
+}
+
+.donor-card-body > * {
+  min-width: 0;
+}
+
+.donor-card-field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.donor-card-value {
+  overflow-wrap: anywhere;
+}
+
+.donor-card-body .label {
+  color: var(--muted);
+  font-size: 11px;
+  display: block;
+}
+
+.donor-card-actions {
+  display: block;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.verification-stack {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.verification-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.verification-controls .btn {
+  flex: 1 1 140px;
+  width: auto;
+  min-height: 44px;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+}
+
+.donor-proof-link,
+.donor-reminder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.donor-proof-link {
+  width: fit-content;
+}
+
+.donor-reminder {
+  width: 100%;
+}
+
+.verification-warning,
+.verification-complete {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.donor-card-settled {
+  background: #ffffff;
+  opacity: 0.95;
+  border: 1px solid var(--border);
+}
+
+.donor-card-settled .donor-queue-badge {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.verification-complete {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-weight: 500;
+}
+
+.donor-card-total {
+  background: #f5f7fa;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: right;
+}
+
+.role-dashboard-heading {
+  margin-bottom: 16px;
+}
+
+.role-eyebrow {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.role-dashboard-heading h2 {
+  margin: 4px 0;
+}
+
+.role-dashboard-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.donor-dashboard-attention {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  background: #fffbeb;
+}
+
+.donor-dashboard-attention-icon {
+  display: inline-flex;
+  flex: 0 0 36px;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.donor-dashboard-attention-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.donor-dashboard-attention-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.donor-dashboard-attention-copy strong {
+  font-size: 14px;
+}
+
+.donor-dashboard-attention-copy span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.donor-dashboard-attention .link-btn {
+  min-height: 44px;
+  padding: 10px 0 10px 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.donor-campaign-card.donor-primary-card {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+
+/* --- PIC VIEW --- */
+.pic-progress-card {
+  padding: 4px;
+}
+
+.pic-progress-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pic-progress-header h3 {
+  margin: 4px 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.pic-progress-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pic-progress-total {
+  margin: 16px 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.pic-progress-track {
+  height: 8px;
+  margin: 12px 0 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.pic-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.pic-progress-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pic-progress-metric {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.pic-progress-metric span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pic-progress-metric strong {
+  font-size: 18px;
+}
+
+.pic-next-action {
+  margin-top: 0;
+}
+
+.pic-action-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pic-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.pic-action-item.primary {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.pic-action-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pic-action-copy strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pic-action-copy span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+
+.pic-action-item .btn {
+  display: inline-flex;
+  width: auto;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 16px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.action-arrow-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.pic-complete-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #047857;
+  background: #f0fdf4;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.pic-complete-state .status-icon {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+
+.pic-donor-target-highlight {
+  scroll-margin-top: 16px;
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--primary-transparent-20);
+}
+
+.pic-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.pic-section-heading h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.pic-section-heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.donor-card-needs-action {
+  border-color: #fcd34d;
+}
+
+
+/* --- ADMIN & SUPERADMIN VIEW --- */
+.admin-nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-nav-link {
+  text-decoration: none;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav-link:hover {
+  background: #f1f5f9;
+}
+
+.admin-nav-link:active {
+  background: #e2e8f0;
+}
+
+.admin-nav-logout {
+  margin-left: auto;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.admin-nav-logout:hover {
+  background: #fef2f2;
+}
+
+.admin-section {
+  scroll-margin-top: 72px;
+}
+
+.pending-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pending-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pending-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pending-card-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pending-card-wa {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pending-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pending-card-actions .btn {
+  flex: 1;
+  min-height: 44px;
+}
+
+.pending-bulk-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pending-bulk-actions .btn {
+  flex: 1;
+  min-height: 44px;
+  font-size: 13px !important;
+}
+
+.admin-data-toolbar {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.admin-data-toolbar-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-data-toolbar label {
+  margin-top: 0;
+  font-size: 12px;
+}
+
+.admin-data-toolbar input,
+.admin-data-toolbar select {
+  min-height: 44px;
+  margin-top: 4px;
+}
+
+.admin-data-toolbar-summary,
+.admin-data-toolbar-hint {
+  margin: 0;
+  font-size: 12px;
+}
+
+.admin-data-toolbar-hint {
+  color: var(--muted);
+}
+
+.admin-campaign-cards,
+.admin-member-cards,
+.admin-account-cards,
+.admin-late-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-campaign-card,
+.admin-member-card,
+.admin-account-card,
+.admin-late-card {
+  min-width: 0;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.admin-data-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-data-card-header > * {
+  min-width: 0;
+}
+
+.admin-data-card-title {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-data-card-title strong {
+  overflow-wrap: anywhere;
+}
+
+.admin-data-card-label,
+.admin-data-card-meta dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-data-card-meta {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.admin-data-card-meta > div {
+  min-width: 0;
+}
+
+.admin-data-card-meta dt {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-data-card-meta dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-data-card-meta .muted {
+  font-size: 12px;
+}
+
+.admin-card-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.admin-card-actions .btn {
+  min-height: 44px;
+  margin: 0;
+}
+
+.admin-card-actions .link-btn {
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.admin-status-control {
+  min-height: 44px;
+  margin-top: 0;
+}
+
+.admin-data-empty {
+  margin: 12px 0 0;
+}
+
+.admin-filterable.is-filtered-out {
+  display: none !important;
+}
+
+.admin-campaign-table-view,
+.admin-member-table-view,
+.admin-account-table-view,
+.admin-late-table-view {
+  display: none;
+}
+
+.admin-detail-donor-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-detail-donor-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.admin-detail-donor-table {
+  display: none;
+}
+
+.admin-inline-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.admin-notify-banner .link-btn {
+  min-height: 44px;
+  padding: 10px 0;
+}
+
+.admin-notify-banner .semantic-status {
+  color: inherit;
+}
+
+.admin-action-queue {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  border-color: #bbf7d0;
+}
+
+.admin-dashboard-heading {
+  margin-bottom: 16px;
+}
+
+.admin-dashboard-heading h2 {
+  margin: 4px 0;
+}
+
+.admin-dashboard-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-action-queue-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-action-queue-heading h3 {
+  margin: 4px 0 4px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.admin-action-queue-heading p {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-queue-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.admin-queue-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.admin-queue-row:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.admin-queue-row:focus-visible {
+  outline: 3px solid var(--primary-transparent-20);
+  outline-offset: 2px;
+}
+
+.admin-queue-icon {
+  display: inline-flex;
+  flex: 0 0 36px;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #047857;
+  background: #dcfce7;
+}
+
+.admin-queue-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.admin-queue-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-queue-main strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.admin-queue-main > span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.admin-queue-review {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #047857;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-queue-empty {
+  margin: 12px 0 0;
+}
+
+
+/* --- RESPONSIVE BREAKPOINTS & TIERS --- */
+
+@media (max-width: 767px) {
+  #pic-donor-list .table-responsive {
+    display: none;
+  }
+
+  #pic-donor-list .donor-cards {
+    display: flex;
+  }
+
+  #admin-notify-banner,
+  #sa-notify-banner {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+
+  #view-admin-dashboard [style*="display:flex"][style*="justify-content:space-between"],
+  #view-superadmin-dashboard [style*="display:flex"][style*="justify-content:space-between"] {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #view-superadmin-dashboard [style*="min-width:300px"] {
+    min-width: 0 !important;
+  }
+
+  #admin-pending-members .pending-table-view,
+  #sa-pending-members .pending-table-view {
+    display: none;
+  }
+
+  #admin-pending-members .pending-cards,
+  #sa-pending-members .pending-cards {
+    display: flex;
+  }
+}
+
+@media (min-width: 768px) {
+  #pic-donor-list .donor-cards {
+    display: none;
+  }
+
+  .pending-cards {
+    display: none !important;
+  }
+
+  .pending-bulk-actions {
+    display: none !important;
+  }
+
+  .pending-table-view {
+    display: block;
+  }
+}
+
+@media (max-width: 559px) {
+  .donor-dashboard-attention {
+    align-items: flex-start;
+  }
+
+  .donor-dashboard-attention .link-btn {
+    padding-right: 0;
+  }
+
+  .pic-progress-header,
+  .pic-section-heading {
+    align-items: flex-start;
+  }
+
+  .pic-progress-header {
+    display: block;
+  }
+
+  .pic-progress-header .badge {
+    display: inline-flex;
+    margin-top: 8px;
+  }
+
+  .pic-progress-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .pic-action-item {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pic-action-item .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .admin-action-queue-heading {
+    display: block;
+  }
+
+  .admin-action-queue-heading .semantic-status {
+    margin-top: 12px;
+  }
+
+  .admin-queue-row {
+    align-items: flex-start;
+  }
+
+  .admin-queue-review {
+    padding-right: 0;
+    padding-left: 4px;
+  }
+}
+
+/* Tier 1: Phones (≤480px) */
+@media (max-width: 480px) {
+  body {
+    padding: 16px 12px;
+  }
+
+  .btn,
+  button,
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea {
+    font-size: 16px;
+  }
+
+  td .btn,
+  th .btn {
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+
+  select {
+    padding: 10px 12px !important;
+    font-size: 16px !important;
+  }
+
+  .row {
+    flex-direction: column;
+  }
+
+  #toast {
+    left: 12px;
+    right: 12px;
+    transform: translateY(20px);
+    min-width: unset;
+    border-radius: var(--radius);
+    text-align: left;
+  }
+
+  #toast.show {
+    transform: translateY(0);
+  }
+
+  .card [style*="justify-content:space-between"] {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .table-responsive {
+    max-height: none;
+  }
+
+  .table-responsive select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+
+/* Tier 2: Large phones / small tablets (481–767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+  .wrap {
+    max-width: 480px;
+  }
+
+  .btn,
+  button,
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea {
+    font-size: 16px;
+  }
+
+  td .btn,
+  th .btn {
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+
+  select {
+    font-size: 16px !important;
+  }
+
+  .row {
+    flex-direction: column;
+  }
+}
+
+/* Tier 3: Tablets (768–1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .wrap {
+    max-width: 720px;
+    padding: 28px;
+  }
+
+  .split-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .split-left,
+  .split-right {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .form-row > * {
+    flex: 1;
+  }
+}
+
+/* Tier 4: Desktop (≥1024px) */
+@media (min-width: 1024px) {
+  .wrap {
+    max-width: 1200px;
+    padding: 32px;
+  }
+
+  .split-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .split-left,
+  .split-right {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .form-row > * {
+    flex: 1;
+  }
+}
+
+@media (min-width: 560px) and (max-width: 767px) {
+  .admin-data-card-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .admin-data-toolbar-fields {
+    grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.6fr);
+  }
+
+  .admin-campaign-cards,
+  .admin-member-cards,
+  .admin-account-cards,
+  .admin-late-cards {
+    display: none;
+  }
+
+  .admin-campaign-table-view,
+  .admin-member-table-view,
+  .admin-account-table-view,
+  .admin-late-table-view {
+    display: block;
+  }
+
+  .admin-detail-donor-cards {
+    display: none;
+  }
+
+  .admin-detail-donor-table {
+    display: block;
+  }
+}

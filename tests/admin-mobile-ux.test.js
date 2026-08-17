@@ -161,6 +161,10 @@ async function settle() {
 
 test('Admin sticky navigation bar and section anchors are present in HTML', () => {
   const html = getIndexHtml();
+  const viewsCssPath = path.join(__dirname, '..', 'css', 'views.css');
+  const viewsCss = fs.existsSync(viewsCssPath) ? fs.readFileSync(viewsCssPath, 'utf8') : '';
+  const allStyles = html + '\n' + viewsCss;
+
   assert.match(html, /class="admin-nav-bar"/);
   assert.match(html, /href="#admin-summary" class="admin-nav-link"/);
   assert.match(html, /href="#admin-section-campaigns" class="admin-nav-link"/);
@@ -170,7 +174,7 @@ test('Admin sticky navigation bar and section anchors are present in HTML', () =
   assert.match(html, /id="admin-section-campaigns" class="card admin-section"/);
   assert.match(html, /id="admin-section-members" class="card admin-section"/);
   assert.match(html, /id="admin-section-tools" class="card admin-section"/);
-  assert.match(html, /scroll-margin-top:\s*72px/);
+  assert.match(allStyles, /scroll-margin-top:\s*72px/);
 });
 
 test('SuperAdmin sticky navigation bar and section anchors are present in HTML', () => {
@@ -189,7 +193,10 @@ test('SuperAdmin sticky navigation bar and section anchors are present in HTML',
 
 test('Admin and SuperAdmin sticky navigation bar has solid opaque background styling', () => {
   const html = getIndexHtml();
-  assert.match(html, /\.admin-nav-bar\s*\{[^}]*background:\s*(#ffffff|var\(--card\)|#fff)/i);
+  const viewsCssPath = path.join(__dirname, '..', 'css', 'views.css');
+  const viewsCss = fs.existsSync(viewsCssPath) ? fs.readFileSync(viewsCssPath, 'utf8') : '';
+  const allStyles = html + '\n' + viewsCss;
+  assert.match(allStyles, /\.admin-nav-bar\s*\{[^}]*background:\s*(#ffffff|var\(--card\)|#fff)/i);
 });
 
 test('Admin member list paginates to maximum 20 initial records with Load More affordance', async () => {

@@ -1,0 +1,149 @@
+/* Base Styles, Design Tokens & Typography */
+:root {
+  --primary: #047857;
+  --primary-hover: #065f46;
+  --primary-rgb: 4, 120, 87;
+  --primary-transparent-20: rgba(4, 120, 87, 0.2);
+  --primary-transparent-15: rgba(4, 120, 87, 0.15);
+  --amber: #f59e0b;
+  --amber-hover: #d97706;
+  --blue: #3b82f6;
+  --blue-hover: #2563eb;
+  --red: #ef4444;
+  --red-hover: #dc2626;
+  --gray: #6b7280;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --bg-card: #ffffff;
+  --border: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --text: #0f172a;
+  --muted: #64748b;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+
+  /* Spacing Tokens */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --card-pad: 16px;
+  --section-gap: 24px;
+  --control-h: 44px;
+
+  /* Map old variables to new variables for HTML elements that hardcoded old styles */
+  --green: var(--primary);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 10000;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 16px;
+  outline: 3px solid var(--blue);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 24px 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.wrap {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 8px 0 8px;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 8px 0 16px;
+  letter-spacing: -0.015em;
+}
+
+p.sub {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error {
+  color: var(--red);
+  font-size: 13px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.success {
+  color: var(--primary);
+  font-size: 13px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
