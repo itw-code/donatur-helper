@@ -5,11 +5,10 @@ import { call } from '../api.js';
 import { currentToken } from '../state.js';
 import { refreshSummary, refreshMembers, refreshAdmins, refreshPendingMembers, refreshLateRequests, refreshSACampaigns } from './admin.js';
 import { startAdminPolling } from './auth.js';
+import { startViewTiming, endViewTiming } from '../perf.js';
 
-export function loadSuperAdminDashboard() {
-  showView('superadmin-dashboard');
-  refreshSummary('sa-summary');
-  call('getSettingsForSuperAdmin', currentToken()).then(s => {
+export function loadSuperAdminSettings() {
+  return call('getSettingsForSuperAdmin', currentToken()).then(s => {
     const roundingEl = document.getElementById('sa-rounding');
     const roundToEl = document.getElementById('sa-roundto');
     const validationEl = document.getElementById('sa-validation');
@@ -24,17 +23,35 @@ export function loadSuperAdminDashboard() {
   }).catch(e => {
     const msgEl = document.getElementById('sa-settings-msg');
     if (msgEl) {
-      msgEl.innerHTML = '<p class="error" role="alert">Pengaturan belum dapat dimuat. <button type="button" class="retry-action" onclick="loadSuperAdminDashboard()">Coba lagi</button></p>';
+      msgEl.innerHTML = '<p class="error" role="alert">Pengaturan belum dapat dimuat. <button type="button" class="btn secondary btn-auto retry-action" onclick="loadSuperAdminSettings()">Coba lagi</button></p>';
     }
     console.error('SuperAdmin settings error:', e);
   });
+}
 
-  refreshMembers();
-  refreshAdmins();
-  refreshPendingMembers('sa-pending-members');
-  refreshLateRequests('sa-late-donors');
-  refreshSACampaigns();
-  startAdminPolling();
+export function loadSuperAdminDashboard() {
+  showView('superadmin-dashboard');
+  startViewTiming('SuperAdmin');
+
+  // STAGE 1 (High Priority): Operational Summary & Approvals
+  const stage1 = Promise.allSettled([
+    refreshSummary('sa-summary'),
+    refreshPendingMembers('sa-pending-members'),
+    refreshLateRequests('sa-late-donors')
+  ]);
+
+  // STAGE 2 (Medium Priority): Campaigns, Members, Admins, Settings
+  stage1.finally(() => {
+    Promise.allSettled([
+      refreshSACampaigns(),
+      refreshMembers(),
+      refreshAdmins(),
+      loadSuperAdminSettings()
+    ]).finally(() => {
+      startAdminPolling();
+      endViewTiming('SuperAdmin');
+    });
+  });
 }
 
 export function runDataSweep() {

@@ -4,7 +4,8 @@ import { safeGet } from '../storage.js';
 import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, formatDate, formatTime, parseRibuan, formatInputRibuan, statusBadge, paymentStatusIcon } from '../utils.js';
 import { call, callQueued } from '../api.js';
 import { appState, currentToken } from '../state.js';
-import { deepDive, startAdminPolling } from './auth.js';
+import { deepDive, startAdminPolling, recordPendingFetchTime } from './auth.js';
+import { startViewTiming, markFetchStart, markFetchEnd, markRenderStart, markRenderEnd, endViewTiming } from '../perf.js';
 
 export function renderSummaryCard(s) {
   let html = '<h2 style="margin-top:0">Ringkasan Operasional</h2>';
@@ -31,12 +32,18 @@ export function renderSummaryCard(s) {
 
 export function refreshSummary(elId) {
   const el = document.getElementById(elId);
-  if (!el) return;
+  if (!el) return Promise.resolve();
   el.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat ringkasan...</div>';
-  call('getDashboardSummary', currentToken()).then(s => {
+  markFetchStart('Admin', 'getDashboardSummary');
+  return call('getDashboardSummary', currentToken()).then(s => {
+    markFetchEnd('Admin', 'getDashboardSummary', { recordCount: (s.totalDonors || 0) });
+    markRenderStart('Admin', 'summary');
     el.innerHTML = renderSummaryCard(s);
+    markRenderEnd('Admin', 'summary');
+    return s;
   }).catch(e => {
-    el.innerHTML = '<p class="error" role="alert">Ringkasan belum dapat dimuat. <button type="button" class="retry-action" onclick="refreshSummary(\'' + elId + '\')">Coba lagi</button></p>';
+    markFetchEnd('Admin', 'getDashboardSummary', { isError: true, isTimeout: e.isTimeout });
+    el.innerHTML = '<p class="error" role="alert">Ringkasan belum dapat dimuat. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshSummary(\'' + elId + '\')">Coba lagi</button></p>';
     console.error('Summary error:', e);
   });
 }
@@ -88,13 +95,26 @@ export function updateAdminActionQueue(kind, count) {
 
 export function loadAdminDashboard() {
   showView('admin-dashboard');
+  startViewTiming('Admin');
   resetAdminActionQueue();
-  refreshSummary('admin-summary');
-  refreshPendingMembers('admin-pending-members');
-  refreshLateRequests('admin-late-donors');
-  refreshAdminCampaigns();
-  refreshMembers();
-  startAdminPolling();
+
+  // STAGE 1 (High Priority): Operational Summary & Action Queues
+  const stage1 = Promise.allSettled([
+    refreshSummary('admin-summary'),
+    refreshPendingMembers('admin-pending-members'),
+    refreshLateRequests('admin-late-donors')
+  ]);
+
+  // STAGE 2 (Medium Priority): Campaigns & Members
+  stage1.finally(() => {
+    Promise.allSettled([
+      refreshAdminCampaigns(),
+      refreshMembers()
+    ]).finally(() => {
+      startAdminPolling();
+      endViewTiming('Admin');
+    });
+  });
 }
 
 export function getAdminParentCard(elId) {
@@ -109,9 +129,16 @@ export function getAdminParentCard(elId) {
 }
 
 export function refreshPendingMembers(elId) {
-  call('getPendingMembers', currentToken()).then(list => {
+  markFetchStart('Admin', 'getPendingMembers');
+  return call('getPendingMembers', currentToken()).then(list => {
+    recordPendingFetchTime();
+    markFetchEnd('Admin', 'getPendingMembers', { recordCount: list.length });
+    markRenderStart('Admin', 'pendingMembers');
     const el = document.getElementById(elId);
-    if (!el) return;
+    if (!el) {
+      markRenderEnd('Admin', 'pendingMembers');
+      return list;
+    }
     if (elId === 'admin-pending-members') updateAdminActionQueue('pending', list.length);
     const parentCard = getAdminParentCard(elId);
     const bannerId = elId === 'sa-pending-members' ? 'sa-notify-banner' : 'admin-notify-banner';
@@ -121,7 +148,8 @@ export function refreshPendingMembers(elId) {
       el.innerHTML = '<p class="muted">Tidak ada pendaftaran baru.</p>';
       if (parentCard) parentCard.classList.add('hidden');
       if (bannerEl) bannerEl.classList.add('hidden');
-      return;
+      markRenderEnd('Admin', 'pendingMembers');
+      return list;
     }
     if (parentCard) parentCard.classList.remove('hidden');
 
@@ -180,12 +208,15 @@ export function refreshPendingMembers(elId) {
     tableHtml += '</table></div></div>';
 
     el.innerHTML = cardHtml + tableHtml;
+    markRenderEnd('Admin', 'pendingMembers');
+    return list;
   }).catch(e => {
+    markFetchEnd('Admin', 'getPendingMembers', { isError: true, isTimeout: e.isTimeout });
     if (elId === 'admin-pending-members') updateAdminActionQueue('pending', null);
     const el = document.getElementById(elId);
     const parentCard = getAdminParentCard(elId);
     if (parentCard) parentCard.classList.remove('hidden');
-    if (el) el.innerHTML = '<p class="error" role="alert">Pendaftaran belum dapat dimuat. <button type="button" class="retry-action" onclick="refreshPendingMembers(\'' + elId + '\')">Coba lagi</button></p>';
+    if (el) el.innerHTML = '<p class="error" role="alert">Pendaftaran belum dapat dimuat. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshPendingMembers(\'' + elId + '\')">Coba lagi</button></p>';
     console.error('Pending members error:', e);
   });
 }
@@ -238,15 +269,22 @@ export function bulkApprovePending(action, elId) {
 }
 
 export function refreshLateRequests(elId) {
-  call('getPendingLateRequests', currentToken()).then(list => {
+  markFetchStart('Admin', 'getPendingLateRequests');
+  return call('getPendingLateRequests', currentToken()).then(list => {
+    markFetchEnd('Admin', 'getPendingLateRequests', { recordCount: list.length });
+    markRenderStart('Admin', 'lateRequests');
     const el = document.getElementById(elId);
-    if (!el) return;
+    if (!el) {
+      markRenderEnd('Admin', 'lateRequests');
+      return list;
+    }
     if (elId === 'admin-late-donors') updateAdminActionQueue('late', list.length);
     const parentCard = getAdminParentCard(elId);
     if (!list.length) {
       el.innerHTML = '<p class="muted">Tidak ada pengajuan donatur susulan.</p>';
       if (parentCard) parentCard.classList.add('hidden');
-      return;
+      markRenderEnd('Admin', 'lateRequests');
+      return list;
     }
     if (parentCard) parentCard.classList.remove('hidden');
     let cards = '<div class="admin-late-cards">';
@@ -268,12 +306,15 @@ export function refreshLateRequests(elId) {
     cards += '</div>';
     table += '</table></div></div>';
     el.innerHTML = cards + table;
+    markRenderEnd('Admin', 'lateRequests');
+    return list;
   }).catch(e => {
+    markFetchEnd('Admin', 'getPendingLateRequests', { isError: true, isTimeout: e.isTimeout });
     if (elId === 'admin-late-donors') updateAdminActionQueue('late', null);
     const el = document.getElementById(elId);
     const parentCard = getAdminParentCard(elId);
     if (parentCard) parentCard.classList.remove('hidden');
-    if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat pengajuan. <button type="button" class="link-btn" onclick="refreshLateRequests(\'' + elId + '\')">Coba lagi</button></p>';
+    if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat pengajuan. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshLateRequests(\'' + elId + '\')">Coba lagi</button></p>';
     console.error('Error fetching late requests:', e);
   });
 }
@@ -431,15 +472,21 @@ export function genPicToken() {
 
 export function refreshAdminCampaigns() {
   const listEl = document.getElementById('admin-campaign-list');
-  if (!listEl) return;
+  if (!listEl) return Promise.resolve();
   listEl.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat daftar campaign...</div>';
   const summaryEl = document.getElementById('admin-campaign-filter-summary');
   if (summaryEl) summaryEl.textContent = 'Memuat campaign...';
-  call('listAllCampaigns', currentToken()).then(list => {
+  markFetchStart('Admin', 'listAllCampaigns');
+  return call('listAllCampaigns', currentToken()).then(list => {
+    markFetchEnd('Admin', 'listAllCampaigns', { recordCount: list.length });
+    markRenderStart('Admin', 'campaigns');
     listEl.innerHTML = renderAdminCampaignViews(list);
     filterAdminCampaigns('admin-campaign-list', 'admin-campaign-search', 'admin-campaign-status-filter', 'admin-campaign-filter-summary');
+    markRenderEnd('Admin', 'campaigns');
+    return list;
   }).catch(e => {
-    listEl.innerHTML = '<p class="error" role="alert">Gagal memuat campaign. <button type="button" class="link-btn" onclick="refreshAdminCampaigns()">Coba lagi</button></p>';
+    markFetchEnd('Admin', 'listAllCampaigns', { isError: true, isTimeout: e.isTimeout });
+    listEl.innerHTML = '<p class="error" role="alert">Gagal memuat campaign. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshAdminCampaigns()">Coba lagi</button></p>';
     if (summaryEl) summaryEl.textContent = 'Campaign belum dapat dimuat.';
     console.error('Campaign list error:', e);
   });
@@ -900,7 +947,10 @@ export function filterMembers(listId, searchId, statusId, summaryId) {
 }
 
 export function refreshMembers() {
-  call('fetchAllMembers', currentToken()).then(list => {
+  markFetchStart('Admin', 'fetchAllMembers');
+  return call('fetchAllMembers', currentToken()).then(list => {
+    markFetchEnd('Admin', 'fetchAllMembers', { recordCount: list.length });
+    markRenderStart('Admin', 'members');
     const activeList = list.filter(m => {
       const st = String(m.Status).toLowerCase();
       return st !== 'deleted' && st !== 'rejected';
@@ -915,11 +965,14 @@ export function refreshMembers() {
     appState.allActiveMembers[scope] = activeList;
     appState.memberPageSize[scope] = 20;
     filterMembers(listId, searchId, statusId, summaryId);
+    markRenderEnd('Admin', 'members');
+    return activeList;
   }).catch(e => {
+    markFetchEnd('Admin', 'fetchAllMembers', { isError: true, isTimeout: e.isTimeout });
     const role = safeGet('auth_role');
     const el = document.getElementById(role === 'SuperAdmin' ? 'sa-member-list' : 'admin-member-list');
-    if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat member. <button type="button" class="link-btn" onclick="refreshMembers()">Coba lagi</button></p>';
-    showInfoModal(e.message || String(e), 'Error');
+    if (el) el.innerHTML = '<p class="error" role="alert">Gagal memuat member. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshMembers()">Coba lagi</button></p>';
+    console.error('Members fetch error:', e);
   });
 }
 

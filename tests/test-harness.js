@@ -72,7 +72,9 @@ function makeElement(id) {
     },
     focus() {},
     setAttribute() {},
-    getAttribute() { return null; }
+    getAttribute() { return null; },
+    querySelector() { return null; },
+    querySelectorAll() { return []; }
   };
 }
 
@@ -151,6 +153,10 @@ function createBrowserHarness(options = {}) {
     URLSearchParams,
     setTimeout,
     clearTimeout,
+    setInterval,
+    clearInterval,
+    AbortController: typeof AbortController !== 'undefined' ? AbortController : undefined,
+    performance: typeof performance !== 'undefined' ? performance : undefined,
     window,
     ...options.extraContext
   };

@@ -172,6 +172,7 @@ import {
 } from './views/admin.js';
 import {
   loadSuperAdminDashboard,
+  loadSuperAdminSettings,
   runDataSweep,
   saveSettings,
   genAdminToken
@@ -338,6 +339,7 @@ const globalBindings = {
   removeMemberUI,
   refreshSACampaigns,
   loadSuperAdminDashboard,
+  loadSuperAdminSettings,
   runDataSweep,
   saveSettings,
   genAdminToken,

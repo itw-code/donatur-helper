@@ -13,7 +13,10 @@ export function resetUserLoginForm() {
   const regFields = document.getElementById('u-register-fields');
   if (regFields) regFields.classList.add('hidden');
   const btn = document.getElementById('btn-u-login');
-  if (btn) btn.textContent = 'Lanjut';
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = 'Lanjut';
+  }
   const errEl = document.getElementById('u-login-error');
   if (errEl) errEl.textContent = '';
   const nameEl = document.getElementById('u-name');
@@ -36,6 +39,8 @@ export function userLogin() {
   const registerFields = document.getElementById('u-register-fields');
   const btn = document.getElementById('btn-u-login');
 
+  if (btn && btn.disabled) return;
+
   if (!wa) {
     if (errEl) errEl.textContent = 'Harap isi Nomor WhatsApp.';
     return;
@@ -44,14 +49,20 @@ export function userLogin() {
   // STEP 1: Check WhatsApp (Login Mode)
   if (registerFields && registerFields.classList.contains('hidden')) {
     if (errEl) errEl.textContent = 'Memeriksa nomor...';
-    if (btn) btn.disabled = true;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Memeriksa...';
+    }
     call('checkDonorWhatsApp', wa).then(res => {
       if (errEl) errEl.textContent = '';
       if (res.exists) {
         if (res.pending) {
           showInfoModal(res.message, 'Menunggu Persetujuan');
           if (waInput) waInput.value = '';
-          if (btn) btn.disabled = false;
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Lanjut';
+          }
           return;
         }
         // Log them in immediately!
@@ -67,8 +78,11 @@ export function userLogin() {
         }
       }
     }).catch(e => {
-      if (errEl) errEl.textContent = e.message || String(e);
-      if (btn) btn.disabled = false;
+      if (errEl) errEl.textContent = formatUserErrorMessage(e);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Lanjut';
+      }
     });
     return;
   }
@@ -89,10 +103,16 @@ export function userLogin() {
   }
 
   if (errEl) errEl.textContent = 'Memproses pendaftaran...';
-  if (btn) btn.disabled = true;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Mendaftarkan...';
+  }
   callQueued('registerUser', name, wa, empStatus).then(user => {
     if (errEl) errEl.textContent = '';
-    if (btn) btn.disabled = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Lanjut';
+    }
     if (user.pending) {
       showInfoModal(user.message, 'Pendaftaran Menunggu Persetujuan');
       resetUserLoginForm();
@@ -102,8 +122,11 @@ export function userLogin() {
     resetUserLoginForm();
     loadUserDashboard();
   }).catch(e => {
-    if (errEl) errEl.textContent = e.message || String(e);
-    if (btn) btn.disabled = false;
+    if (errEl) errEl.textContent = formatUserErrorMessage(e);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Selesaikan Pendaftaran';
+    }
   });
 }
 
@@ -161,7 +184,15 @@ export function tokenLogin(isDeepDive = false) {
   const tokenInput = document.getElementById('t-token');
   const token = tokenInput ? tokenInput.value.trim() : '';
   const errEl = document.getElementById('t-login-error');
+  const btn = document.getElementById('btn-t-login');
   if (errEl) errEl.textContent = '';
+
+  if (btn && btn.disabled) return;
+
+  if (!token) {
+    if (errEl) errEl.textContent = 'Harap isi token login.';
+    return;
+  }
 
   // Wipe any lingering deep dive states from previous un-logged-out sessions
   if (isDeepDive !== true) {
@@ -169,7 +200,16 @@ export function tokenLogin(isDeepDive = false) {
     safeRemove('deep_dive_return_role');
   }
 
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Memeriksa token...';
+  }
+
   call('loginWithToken', token).then(res => {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Lanjut';
+    }
     safeSet('auth_token', token);
     safeSet('auth_role', res.role);
     if (res.alias) safeSet('auth_alias', res.alias);
@@ -177,7 +217,11 @@ export function tokenLogin(isDeepDive = false) {
     else if (res.role === 'Admin') loadAdminDashboard();
     else if (res.role === 'SuperAdmin') loadSuperAdminDashboard();
   }).catch(e => {
-    if (errEl) errEl.textContent = e.message || String(e);
+    if (errEl) errEl.textContent = formatUserErrorMessage(e);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Lanjut';
+    }
   });
 }
 
@@ -246,6 +290,12 @@ export function playAlertChime() {
   }
 }
 
+let lastPendingFetchTime = 0;
+
+export function recordPendingFetchTime() {
+  lastPendingFetchTime = Date.now();
+}
+
 export function startAdminPolling() {
   if (appState.pollIntervalId) return;
   
@@ -255,7 +305,13 @@ export function startAdminPolling() {
     const role = safeGet('auth_role');
     if (role !== 'Admin' && role !== 'SuperAdmin') return;
 
+    // Guard: Skip check if getPendingMembers was fetched within last 5 seconds
+    if (Date.now() - lastPendingFetchTime < 5000) {
+      return;
+    }
+
     call('getPendingMembers', token).then(list => {
+      recordPendingFetchTime();
       const currentCount = list.length;
       updateTabTitle(currentCount);
 
@@ -288,6 +344,9 @@ export function startAdminPolling() {
 
   runCheck();
   appState.pollIntervalId = setInterval(runCheck, 60000);
+  if (appState.pollIntervalId && typeof appState.pollIntervalId.unref === 'function') {
+    appState.pollIntervalId.unref();
+  }
 
   // Watch tab visibility (only register listener once)
   if (!appState.visibilityListenerRegistered && typeof document !== 'undefined') {
