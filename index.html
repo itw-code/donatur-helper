@@ -1746,7 +1746,7 @@
         style="background: rgba(0, 123, 255, 0.06); color: #0056b3; padding: 12px; border-radius: 8px; margin-top: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; border: 1px solid rgba(0, 123, 255, 0.15);">
         <span style="font-size: 16px; line-height: 1.1;">🔒</span>
         <span style="line-height: 1.4;"><strong>Kami menjaga privasi Anda.</strong> Nomor WhatsApp hanya digunakan untuk
-          verifikasi akses dan pengingat donasi.</span>
+          verifikasi login dan pengingat patungan donasi.</span>
       </div>
 
       <div id="u-register-fields" class="hidden"
@@ -2182,6 +2182,21 @@
   function safeRemove(key) { try { localStorage.removeItem(key); } catch (e) { } }
 
   // ---------- Helpers ----------
+  function formatUserErrorMessage(err) {
+    if (!err) return 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.';
+    const msg = typeof err === 'string' ? err : (err.message || String(err));
+    if (/network|fetch|failed to fetch/i.test(msg)) {
+      return 'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.';
+    }
+    if (/timeout|abort/i.test(msg)) {
+      return 'Waktu permintaan habis. Silakan coba beberapa saat lagi.';
+    }
+    if (/unauthorized|invalid token|expired token|sesi/i.test(msg)) {
+      return 'Sesi akses Anda telah berakhir. Silakan masuk kembali.';
+    }
+    return escapeHtml(msg);
+  }
+
   function showInfoModal(message, title = 'Informasi') {
     let modal = document.getElementById('custom-info-modal');
     if (!modal) {
@@ -2199,8 +2214,10 @@
       `;
       document.body.appendChild(modal);
     }
-    document.getElementById('custom-info-title').textContent = title;
-    document.getElementById('custom-info-message').textContent = message;
+    const cleanTitle = (title === 'Error') ? 'Kendala Sistem' : title;
+    const cleanMessage = (typeof message === 'object' && message !== null) ? formatUserErrorMessage(message) : (message || '');
+    document.getElementById('custom-info-title').textContent = cleanTitle;
+    document.getElementById('custom-info-message').textContent = cleanMessage;
     modal.style.display = 'flex';
   }
 
@@ -3010,6 +3027,7 @@
     
     html += '<div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:12px;">';
     html += '<label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">Upload satu bukti transfer untuk semua campaign di atas</label>';
+    html += '<p class="muted" style="font-size:11px; margin:2px 0 6px 0;">Unggah bukti transfer (format JPG, PNG, atau PDF maks 2MB). Bukti hanya digunakan oleh PIC untuk verifikasi.</p>';
     html += '<input type="file" id="combined-proof-' + bankAccount + '" accept="image/*,application/pdf" style="font-size:12px; padding:4px; width:100%; box-sizing:border-box;">';
     html += '<button id="btn-submit-combined-' + bankAccount + '" class="btn blue" style="margin-top:8px; width:100%; font-size:12px; padding:8px;" onclick="submitCombinedProof(\'' + bankAccount + '\', \'' + cIdsStr + '\')">Konfirmasi Transfer</button>';
     html += '<div id="combined-error-' + bankAccount + '" class="error" style="font-size:11px; margin-top:4px;"></div>';
@@ -3084,6 +3102,7 @@
           if (c.proofLink) html += '<a class="link-btn" href="' + c.proofLink + '" target="_blank">Lihat bukti transfer</a>';
         } else {
           html += '<label>Upload bukti transfer</label>';
+          html += '<p class="muted" style="font-size:11px; margin:2px 0 6px 0;">Unggah bukti transfer (format JPG, PNG, atau PDF maks 2MB). Bukti hanya digunakan oleh PIC untuk verifikasi.</p>';
           html += '<input type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf" style="width:100%; box-sizing:border-box;">';
           html += '<button id="btn-submit-proof-' + c.campaignId + '" class="btn" onclick="submitProof(\'' + c.campaignId + '\')">Sudah transfer, kirim bukti</button>';
           html += '<div id="proof-error-' + c.campaignId + '" class="error"></div>';
