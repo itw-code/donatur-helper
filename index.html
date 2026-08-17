@@ -22,6 +22,7 @@
     --gray: #6b7280;
     --bg: #f8fafc;
     --card: #ffffff;
+    --bg-card: #ffffff;
     --border: #e2e8f0;
     --border-hover: #cbd5e1;
     --text: #0f172a;
@@ -497,8 +498,8 @@
   }
 
   .donor-card-settled {
-    background: var(--bg-card);
-    opacity: 0.92;
+    background: #ffffff;
+    opacity: 0.95;
     border: 1px solid var(--border);
   }
 
@@ -530,12 +531,17 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border);
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     display: flex;
+    align-items: center;
     gap: 8px;
     padding: 8px 12px;
+    margin-bottom: 16px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .admin-nav-link {
@@ -543,18 +549,28 @@
     color: var(--text);
     font-size: 13px;
     font-weight: 500;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
     white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
   }
 
   .admin-nav-link:hover {
-    background: var(--bg);
+    background: #f1f5f9;
+  }
+
+  .admin-nav-link:active {
+    background: #e2e8f0;
   }
 
   .admin-nav-logout {
     margin-left: auto;
     color: var(--red);
+    font-weight: 600;
+  }
+
+  .admin-nav-logout:hover {
+    background: #fef2f2;
   }
 
   .admin-section {
@@ -1973,11 +1989,19 @@
   </div>
 
   <div id="view-superadmin-dashboard" class="hidden">
+    <nav class="admin-nav-bar" aria-label="Navigasi super admin">
+      <a href="#sa-summary" class="admin-nav-link">Ringkasan</a>
+      <a href="#sa-section-campaigns" class="admin-nav-link">Campaign</a>
+      <a href="#sa-section-admins" class="admin-nav-link">Admin</a>
+      <a href="#sa-section-members" class="admin-nav-link">Members</a>
+      <a href="#sa-section-settings" class="admin-nav-link">Pengaturan</a>
+      <a href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
+    </nav>
     <h2>Dashboard Super Admin</h2>
     <div id="sa-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
-    <div id="sa-summary" class="card"></div>
+    <div id="sa-summary" class="card admin-section"></div>
 
-    <div class="card">
+    <div id="sa-section-campaigns" class="card admin-section">
       <h2 style="margin-top:0">Semua Campaign</h2>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
@@ -2015,7 +2039,7 @@
 
     <!-- Full Width Data Tables -->
     <!-- Admin Management -->
-    <div class="card">
+    <div id="sa-section-admins" class="card admin-section">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h2 style="margin-top:0; margin-bottom:12px;">Daftar Admin</h2>
         <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
@@ -2053,7 +2077,7 @@
     </div>
 
     <!-- Members Management -->
-    <div class="card">
+    <div id="sa-section-members" class="card admin-section">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h2 style="margin-top:0; margin-bottom:12px;">Daftar Members</h2>
         <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
@@ -2101,7 +2125,7 @@
     </div>
 
     <!-- Settings & Maintenance — at the bottom -->
-    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:24px;">
+    <div id="sa-section-settings" class="admin-section" style="display:flex; gap:24px; flex-wrap:wrap; margin-top:24px;">
       <div class="card" style="flex:1; min-width:300px; margin-top:0;">
         <h2 style="margin-top:0">Pengaturan</h2>
         <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-rounding"
