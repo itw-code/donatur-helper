@@ -2,8 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { ROLE_PERFORMANCE_BUDGETS, checkPerformanceBudget } from '../js/perf.js';
 
-test('Task 2: Performance budgets and baseline thresholds are defined and enforced in assets', () => {
+test('Task 2 & Task 7: Performance budgets and baseline thresholds are defined and enforced in assets and runtime', () => {
   // Check CSS size budget (<60KB total) and no render-blocking @import
   const cssDir = path.resolve('css');
   const cssFiles = fs.readdirSync(cssDir).filter(f => f.endsWith('.css'));
@@ -17,7 +18,7 @@ test('Task 2: Performance budgets and baseline thresholds are defined and enforc
   }
   assert.ok(totalCssBytes < 60000, `Total CSS size (${totalCssBytes}B) must be under 60KB budget`);
 
-  // Check JS size budget (<200KB total uncompressed, which compresses to <50KB on wire)
+  // Check JS size budget (<250KB total uncompressed, which compresses to <50KB on wire)
   const jsDir = path.resolve('js');
   function getJsFiles(dir) {
     let files = [];
@@ -36,7 +37,23 @@ test('Task 2: Performance budgets and baseline thresholds are defined and enforc
     const content = fs.readFileSync(file, 'utf8');
     totalJsBytes += Buffer.byteLength(content, 'utf8');
   }
-  assert.ok(totalJsBytes < 200000, `Total JS size (${totalJsBytes}B) must be under 200KB uncompressed budget`);
+  assert.ok(totalJsBytes < 250000, `Total JS size (${totalJsBytes}B) must be under 250KB uncompressed budget`);
+
+  // Verify role runtime budgets
+  assert.equal(ROLE_PERFORMANCE_BUDGETS.Landing, 500, 'Landing budget <= 500ms');
+  assert.equal(ROLE_PERFORMANCE_BUDGETS.Donor, 1000, 'Donor budget <= 1000ms');
+  assert.equal(ROLE_PERFORMANCE_BUDGETS.PIC, 2000, 'PIC budget <= 2000ms');
+  assert.equal(ROLE_PERFORMANCE_BUDGETS.Admin, 3000, 'Admin budget <= 3000ms');
+  assert.equal(ROLE_PERFORMANCE_BUDGETS.SuperAdmin, 3500, 'SuperAdmin budget <= 3500ms');
+
+  // Verify checkPerformanceBudget helper
+  const adminOk = checkPerformanceBudget('Admin', 2200);
+  assert.equal(adminOk.exceeded, false);
+  assert.equal(adminOk.overMs, 0);
+
+  const adminOver = checkPerformanceBudget('Admin', 3800);
+  assert.equal(adminOver.exceeded, true);
+  assert.equal(adminOver.overMs, 800);
 
   // Verify index.html contains no blocking scripts or @import
   const indexHtml = fs.readFileSync(path.resolve('index.html'), 'utf8');

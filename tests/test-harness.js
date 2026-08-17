@@ -7,6 +7,7 @@ const JS_FILES = [
   'js/storage.js',
   'js/utils.js',
   'js/perf.js',
+  'js/debug-panel.js',
   'js/state.js',
   'js/api.js',
   'js/views/auth.js',

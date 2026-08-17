@@ -36,6 +36,13 @@ import {
   checkPerformanceBudget,
   ROLE_PERFORMANCE_BUDGETS
 } from './perf.js';
+import {
+  isLocalhostDebugEnabled,
+  renderDebugPanelHtml,
+  toggleDebugPanel,
+  refreshDebugPanelUI,
+  mountDebugPanel
+} from './debug-panel.js';
 import { fetchBackend, run, callQueued, call, DEFAULT_TIMEOUT_MS, inFlightRequests } from './api.js';
 import { appState, initTargetCampaignId, currentToken, currentRole, currentUser } from './state.js';
 import {
@@ -354,7 +361,12 @@ const globalBindings = {
   getAllRoleMetrics,
   resetMetrics,
   checkPerformanceBudget,
-  ROLE_PERFORMANCE_BUDGETS
+  ROLE_PERFORMANCE_BUDGETS,
+  isLocalhostDebugEnabled,
+  renderDebugPanelHtml,
+  toggleDebugPanel,
+  refreshDebugPanelUI,
+  mountDebugPanel
 };
 
 if (typeof window !== 'undefined') {
@@ -377,6 +389,9 @@ export function initApp() {
   } else {
     showView('landing');
   }
+
+  // Mount localhost performance HUD if in dev environment
+  mountDebugPanel();
 
   // Initialize Flatpickr for date inputs if available
   if (typeof flatpickr !== 'undefined') {
