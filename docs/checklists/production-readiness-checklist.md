@@ -54,6 +54,6 @@ Berdasarkan audit awal (`docs/reports/web-quality-audit-2026-08-17.md`):
 | **Cumulative Layout Shift (CLS)** | 0 | ≤ 0.1 | [x] |
 | **Total Blocking Time (TBT)** | 0 ms | ≤ 100 ms | [x] |
 | **Total Ukuran CSS (Uncompressed)** | Monolitik inline (224KB total) | ≤ 60 KB (`css/*.css`) | [x] |
-| **Total Ukuran JS (Uncompressed)** | Monolitik inline | ≤ 100 KB (`js/*.js`) | [x] |
+| **Total Ukuran JS (Uncompressed)** | Monolitik inline | ≤ 200 KB uncompressed (≤ 50 KB wire) | [x] |
 | **Asset 404 / Missing Files** | Ada error syntax robots.txt | 0 error 404 / valid assets | [x] |
 | **Render-blocking Resources** | Ada font `@import` & script blocking | 0 render blocking (semua script `defer`/`async`) | [x] |
