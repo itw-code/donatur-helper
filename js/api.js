@@ -94,6 +94,46 @@ export function callQueued(name, ...args) {
   });
 }
 
+export const inFlightRequests = new Map();
+
+const MUTATING_ACTION_PREFIXES = [
+  'create',
+  'update',
+  'delete',
+  'record',
+  'admin',
+  'pic',
+  'submit',
+  'toggle',
+  'sweep',
+  'archive',
+  'approve',
+  'save',
+  'userlogin',
+  'tokenlogin'
+];
+
+function isMutatingAction(name) {
+  if (!name) return true;
+  const lower = name.toLowerCase();
+  return MUTATING_ACTION_PREFIXES.some(prefix => lower.startsWith(prefix));
+}
+
 export function call(name, ...args) {
-  return fetchBackend(name, args);
+  if (isMutatingAction(name)) {
+    return fetchBackend(name, args);
+  }
+
+  const key = name + ':' + JSON.stringify(args);
+  if (inFlightRequests.has(key)) {
+    return inFlightRequests.get(key);
+  }
+
+  const reqPromise = fetchBackend(name, args)
+    .finally(() => {
+      inFlightRequests.delete(key);
+    });
+
+  inFlightRequests.set(key, reqPromise);
+  return reqPromise;
 }

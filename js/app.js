@@ -36,7 +36,7 @@ import {
   checkPerformanceBudget,
   ROLE_PERFORMANCE_BUDGETS
 } from './perf.js';
-import { fetchBackend, run, callQueued, call, DEFAULT_TIMEOUT_MS } from './api.js';
+import { fetchBackend, run, callQueued, call, DEFAULT_TIMEOUT_MS, inFlightRequests } from './api.js';
 import { appState, initTargetCampaignId, currentToken, currentRole, currentUser } from './state.js';
 import {
   resetUserLoginForm,
@@ -209,6 +209,7 @@ const globalBindings = {
   callQueued,
   call,
   DEFAULT_TIMEOUT_MS,
+  inFlightRequests,
   appState,
   initTargetCampaignId,
   currentToken,
