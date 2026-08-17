@@ -23,6 +23,19 @@ import {
   actionArrowIcon,
   renderOptimizedImage
 } from './utils.js';
+import {
+  startViewTiming,
+  markFetchStart,
+  markFetchEnd,
+  markRenderStart,
+  markRenderEnd,
+  endViewTiming,
+  getRoleMetrics,
+  getAllRoleMetrics,
+  resetMetrics,
+  checkPerformanceBudget,
+  ROLE_PERFORMANCE_BUDGETS
+} from './perf.js';
 import { fetchBackend, run, callQueued, call } from './api.js';
 import { appState, initTargetCampaignId, currentToken, currentRole, currentUser } from './state.js';
 import {
@@ -326,7 +339,18 @@ const globalBindings = {
   loadSuperAdminDashboard,
   runDataSweep,
   saveSettings,
-  genAdminToken
+  genAdminToken,
+  startViewTiming,
+  markFetchStart,
+  markFetchEnd,
+  markRenderStart,
+  markRenderEnd,
+  endViewTiming,
+  getRoleMetrics,
+  getAllRoleMetrics,
+  resetMetrics,
+  checkPerformanceBudget,
+  ROLE_PERFORMANCE_BUDGETS
 };
 
 if (typeof window !== 'undefined') {

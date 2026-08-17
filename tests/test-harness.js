@@ -6,6 +6,7 @@ const JS_FILES = [
   'js/config.js',
   'js/storage.js',
   'js/utils.js',
+  'js/perf.js',
   'js/state.js',
   'js/api.js',
   'js/views/auth.js',
