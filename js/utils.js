@@ -32,16 +32,25 @@ export function sanitizeUrl(rawUrl, fallback = '#') {
 export function formatUserErrorMessage(err) {
   if (!err) return 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.';
   const msg = typeof err === 'string' ? err : (err.message || String(err));
-  if (/network|fetch|failed to fetch/i.test(msg)) {
+  const trimmed = msg.trim();
+  if (!trimmed) return 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.';
+
+  if (/network|fetch|failed to fetch|err_internet_disconnected|offline/i.test(trimmed)) {
     return 'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.';
   }
-  if (/timeout|abort/i.test(msg)) {
+  if (/timeout|abort/i.test(trimmed)) {
     return 'Waktu permintaan habis. Silakan coba beberapa saat lagi.';
   }
-  if (/unauthorized|invalid token|expired token|sesi/i.test(msg)) {
+  if (/unauthorized|invalid token|expired token|sesi/i.test(trimmed)) {
     return 'Sesi akses Anda telah berakhir. Silakan masuk kembali.';
   }
-  return escapeHtml(msg);
+  if (/respons server bukan json|error 500|server 502|503 service|<!doctype/i.test(trimmed)) {
+    return 'Respons server tidak dapat diproses. Silakan coba beberapa saat lagi.';
+  }
+  if (/cannot read properties|undefined|referenceerror|typeerror|syntaxerror|null is not an object|at doPost|at doGet|Code\.js|\.js:\d+/i.test(trimmed)) {
+    return 'Terjadi kendala saat memproses data. Silakan muat ulang halaman atau coba lagi.';
+  }
+  return escapeHtml(trimmed);
 }
 
 export function showToast(message) {

@@ -1,0 +1,46 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { formatUserErrorMessage } from '../js/utils.js';
+
+test('Task 5: formatUserErrorMessage converts network, timeout, auth, and raw errors into calm, user-safe Indonesian messages', () => {
+  // 1. Network failures
+  assert.equal(formatUserErrorMessage(new Error('Failed to fetch')), 'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.');
+  assert.equal(formatUserErrorMessage('TypeError: NetworkError when attempting to fetch resource.'), 'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.');
+  assert.equal(formatUserErrorMessage('net::ERR_INTERNET_DISCONNECTED'), 'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.');
+
+  // 2. Timeouts & Aborts
+  assert.equal(formatUserErrorMessage(new Error('The user aborted a request.')), 'Waktu permintaan habis. Silakan coba beberapa saat lagi.');
+  assert.equal(formatUserErrorMessage('timeout of 10000ms exceeded'), 'Waktu permintaan habis. Silakan coba beberapa saat lagi.');
+
+  // 3. Auth issues
+  assert.equal(formatUserErrorMessage(new Error('Unauthorized token')), 'Sesi akses Anda telah berakhir. Silakan masuk kembali.');
+  assert.equal(formatUserErrorMessage('Invalid token provided'), 'Sesi akses Anda telah berakhir. Silakan masuk kembali.');
+  assert.equal(formatUserErrorMessage('Sesi berakhir'), 'Sesi akses Anda telah berakhir. Silakan masuk kembali.');
+
+  // 4. Raw technical stack traces must be sanitized
+  const rawStack1 = 'Error: Cannot read properties of undefined (reading "id") at doPost (Code.js:145)';
+  const sanitized1 = formatUserErrorMessage(rawStack1);
+  assert.ok(!sanitized1.includes('doPost'), 'Must not leak internal function name doPost');
+  assert.ok(!sanitized1.includes('Code.js'), 'Must not leak internal filename Code.js');
+  assert.equal(sanitized1, 'Terjadi kendala saat memproses data. Silakan muat ulang halaman atau coba lagi.');
+
+  const rawStack2 = 'TypeError: Cannot read properties of null at refreshMembers (js/views/admin.js:204)';
+  const sanitized2 = formatUserErrorMessage(rawStack2);
+  assert.ok(!sanitized2.includes('admin.js'), 'Must not leak JS filename');
+  assert.equal(sanitized2, 'Terjadi kendala saat memproses data. Silakan muat ulang halaman atau coba lagi.');
+
+  // 5. Non-JSON server error response
+  const rawServerText = 'Respons server bukan JSON (mungkin error atau diblokir). Detail: <!DOCTYPE html><html><head><title>Error 500</title>';
+  const sanitizedServer = formatUserErrorMessage(rawServerText);
+  assert.ok(!sanitizedServer.includes('<!DOCTYPE'), 'Must not leak raw HTML in error');
+  assert.equal(sanitizedServer, 'Respons server tidak dapat diproses. Silakan coba beberapa saat lagi.');
+
+  // 6. Empty / null / undefined error handling
+  assert.equal(formatUserErrorMessage(null), 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.');
+  assert.equal(formatUserErrorMessage(undefined), 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.');
+  assert.equal(formatUserErrorMessage(''), 'Terjadi kendala saat memproses permintaan. Silakan coba lagi.');
+
+  // 7. Standard business error strings in Indonesian remain clean and escaped
+  assert.equal(formatUserErrorMessage('Nomor WhatsApp belum terdaftar sebagai member.'), 'Nomor WhatsApp belum terdaftar sebagai member.');
+  assert.equal(formatUserErrorMessage('Tentukan total hadiah dan nomor rekening terlebih dahulu.'), 'Tentukan total hadiah dan nomor rekening terlebih dahulu.');
+});
