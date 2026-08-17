@@ -132,3 +132,25 @@ test('Task 3: Responsive and optimized image delivery utilities and layout shift
   assert.match(css, /\.proof-preview-img/i, 'proof-preview-img must be styled for layout stability');
   assert.match(css, /\.gift-preview-img/i, 'gift-preview-img must be styled for layout stability');
 });
+
+test('Task 4: Caching headers in _headers and netlify.toml provide immutable caching and revalidation', () => {
+  const headersPath = path.join(__dirname, '..', '_headers');
+  assert.ok(fs.existsSync(headersPath), '_headers must exist at root');
+  const headers = fs.readFileSync(headersPath, 'utf8');
+
+  // Verify caching headers for assets and modules
+  assert.match(headers, /\/css\/\*\s*Cache-Control:\s*public,\s*max-age=\d+,\s*immutable/i, '_headers must configure immutable cache for css');
+  assert.match(headers, /\/js\/\*\s*Cache-Control:\s*public,\s*max-age=\d+,\s*immutable/i, '_headers must configure immutable cache for js modules');
+  assert.match(headers, /\/(index\.html)?\s*Cache-Control:\s*public,\s*max-age=0,\s*must-revalidate/i, '_headers must configure revalidation for HTML');
+
+  // Verify security headers remain intact
+  assert.match(headers, /X-Content-Type-Options:\s*nosniff/i, '_headers must retain nosniff');
+  assert.match(headers, /Content-Security-Policy-Report-Only:/i, '_headers must retain CSP Report-Only');
+
+  // Verify netlify.toml headers
+  const netlifyTomlPath = path.join(__dirname, '..', 'netlify.toml');
+  assert.ok(fs.existsSync(netlifyTomlPath), 'netlify.toml must exist');
+  const netlifyToml = fs.readFileSync(netlifyTomlPath, 'utf8');
+  assert.match(netlifyToml, /for\s*=\s*"\/css\/\*"/i, 'netlify.toml must specify /css/* headers');
+  assert.match(netlifyToml, /for\s*=\s*"\/js\/\*"/i, 'netlify.toml must specify /js/* headers');
+});
