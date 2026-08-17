@@ -9,4 +9,5 @@ node_modules/
 _skill-stage/
 .scratch/
 .cloudflareignore
+*.local.md
 

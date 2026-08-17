@@ -1,0 +1,7 @@
+# robots.txt for Donatur Helper (https://don4tpro.pages.dev)
+User-agent: *
+Allow: /
+Allow: /robots.txt
+Disallow: /*?token=*
+Disallow: /*#c=*
+Disallow: /api/

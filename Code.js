@@ -118,7 +118,7 @@ function rotateSuperAdminToken() {
 
 function doGet(e) {
   return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('Donation Helper')
+    .setTitle('Donatur Helper')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
