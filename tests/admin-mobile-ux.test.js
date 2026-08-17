@@ -140,8 +140,9 @@ function createBrowserHarness(responses = {}) {
     window
   };
 
-  const script = getIndexHtml().match(/<script>\s*([\s\S]*?)<\/script>/)[1];
-  vm.runInNewContext(script, context, { filename: 'index.html' });
+  const { getAppScript } = require('./test-harness');
+  const script = getAppScript();
+  vm.runInNewContext(script, context, { filename: 'bundle.js' });
 
   return {
     calls,

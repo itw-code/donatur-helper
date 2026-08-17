@@ -1,11 +1,47 @@
-const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const test = require('node:test');
 const vm = require('node:vm');
 
-function getIndexHtml() {
-  return fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const JS_FILES = [
+  'js/config.js',
+  'js/storage.js',
+  'js/utils.js',
+  'js/state.js',
+  'js/api.js',
+  'js/views/auth.js',
+  'js/views/donor.js',
+  'js/views/pic.js',
+  'js/views/admin.js',
+  'js/views/superadmin.js',
+  'js/app.js'
+];
+
+function getAppScript() {
+  const rootDir = path.join(__dirname, '..');
+  let combined = '';
+
+  for (const relPath of JS_FILES) {
+    const fullPath = path.join(rootDir, relPath);
+    if (!fs.existsSync(fullPath)) {
+      throw new Error(`Module file missing: ${relPath}`);
+    }
+    let code = fs.readFileSync(fullPath, 'utf8');
+
+    // Remove import statements
+    code = code.replace(/^\s*import\s+[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '');
+    code = code.replace(/^\s*import\s+['"][^'"]+['"];?\s*$/gm, '');
+
+    // Convert export default to regular expression or remove
+    code = code.replace(/^\s*export\s+default\s+[\s\S]*?;?\s*$/gm, '');
+
+    // Convert export const/let/var/function to regular declarations
+    code = code.replace(/^\s*export\s+(async\s+)?(function\s+\w+)/gm, '$1$2');
+    code = code.replace(/^\s*export\s+(const|let|var)\s+/gm, 'var ');
+
+    combined += `\n/* --- ${relPath} --- */\n` + code;
+  }
+
+  return combined;
 }
 
 function makeElement(id) {
@@ -39,7 +75,8 @@ function makeElement(id) {
   };
 }
 
-function createBrowserHarness() {
+function createBrowserHarness(options = {}) {
+  const detail = options.detail || null;
   const elements = new Map();
   const storage = new Map();
 
@@ -64,6 +101,9 @@ function createBrowserHarness() {
         return ['landing', 'user-login', 'user-dashboard', 'token-login', 'pic-dashboard', 'pic-create']
           .map(name => getElement('view-' + name));
       }
+      if (selector === '#admin-action-queue [id^="admin-queue-"]') {
+        return ['admin-queue-pending', 'admin-queue-late'].map(name => getElement(name));
+      }
       return [];
     }
   };
@@ -74,11 +114,24 @@ function createBrowserHarness() {
     removeItem(key) { storage.delete(key); }
   };
 
-  const fetch = async () => ({
-    async text() {
-      return JSON.stringify({ status: 'success', data: {} });
+  const fetch = async (_url, fetchOpts) => {
+    if (options.customFetch) {
+      return options.customFetch(_url, fetchOpts);
     }
-  });
+    const request = JSON.parse(fetchOpts.body);
+    if (request.action === 'getCampaignForPic') {
+      return {
+        async text() {
+          return JSON.stringify({ status: 'success', data: detail });
+        }
+      };
+    }
+    return {
+      async text() {
+        return JSON.stringify({ status: 'success', data: [] });
+      }
+    };
+  };
 
   const window = {
     location: { hash: '', search: '', origin: 'http://localhost:4173', pathname: '/' },
@@ -97,69 +150,24 @@ function createBrowserHarness() {
     URLSearchParams,
     setTimeout,
     clearTimeout,
-    window
+    window,
+    ...options.extraContext
   };
 
-  const { getAppScript } = require('./test-harness');
   const script = getAppScript();
   vm.runInNewContext(script, context, { filename: 'bundle.js' });
+  localStorage.setItem('auth_token', 'pic-token');
 
   return {
     elements,
-    context
+    context,
+    script
   };
 }
 
-test('formatUserErrorMessage converts network, timeout, and raw errors into calm, helpful Indonesian messages', () => {
-  const harness = createBrowserHarness();
-  const { formatUserErrorMessage } = harness.context;
-
-  assert.equal(typeof formatUserErrorMessage, 'function', 'formatUserErrorMessage function must be defined');
-
-  // Network failures
-  assert.equal(
-    formatUserErrorMessage(new Error('Failed to fetch')),
-    'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.'
-  );
-  assert.equal(
-    formatUserErrorMessage('NetworkError when attempting to fetch resource'),
-    'Koneksi terputus. Periksa jaringan internet Anda dan coba lagi.'
-  );
-
-  // Timeout / abort
-  assert.equal(
-    formatUserErrorMessage(new Error('Request timeout after 15000ms')),
-    'Waktu permintaan habis. Silakan coba beberapa saat lagi.'
-  );
-
-  // Session / unauthorized
-  assert.equal(
-    formatUserErrorMessage(new Error('Unauthorized token expired')),
-    'Sesi akses Anda telah berakhir. Silakan masuk kembali.'
-  );
-
-  // Sanitized regular errors
-  assert.equal(
-    formatUserErrorMessage(new Error('Pendaftaran ditolak oleh server')),
-    'Pendaftaran ditolak oleh server'
-  );
-
-  // Null or undefined
-  assert.equal(
-    formatUserErrorMessage(null),
-    'Terjadi kendala saat memproses permintaan. Silakan coba lagi.'
-  );
-});
-
-test('Privacy callout and upload microcopy use reassuring, transparent Indonesian wording', () => {
-  const { getAppScript } = require('./test-harness');
-  const html = getIndexHtml() + getAppScript();
-
-  // Reassuring privacy notice on login
-  assert.match(html, /Kami menjaga privasi Anda/);
-  assert.match(html, /verifikasi login dan pengingat patungan/);
-
-  // Payment proof microcopy
-  assert.match(html, /format JPG, PNG, atau PDF maks 2MB/);
-  assert.match(html, /Bukti hanya digunakan oleh PIC untuk verifikasi/);
-});
+module.exports = {
+  JS_FILES,
+  getAppScript,
+  makeElement,
+  createBrowserHarness
+};

@@ -52,3 +52,51 @@ test('Task 1: CSS files exist and are properly modularized', () => {
     }
   }
 });
+
+test('Task 2: JavaScript files exist and are modularized into ES Modules', () => {
+  const configJs = getFileContent('js/config.js');
+  const stateJs = getFileContent('js/state.js');
+  const storageJs = getFileContent('js/storage.js');
+  const utilsJs = getFileContent('js/utils.js');
+  const apiJs = getFileContent('js/api.js');
+  const authJs = getFileContent('js/views/auth.js');
+  const donorJs = getFileContent('js/views/donor.js');
+  const picJs = getFileContent('js/views/pic.js');
+  const adminJs = getFileContent('js/views/admin.js');
+  const superadminJs = getFileContent('js/views/superadmin.js');
+  const appJs = getFileContent('js/app.js');
+
+  assert.ok(configJs, 'js/config.js must exist');
+  assert.ok(stateJs, 'js/state.js must exist');
+  assert.ok(storageJs, 'js/storage.js must exist');
+  assert.ok(utilsJs, 'js/utils.js must exist');
+  assert.ok(apiJs, 'js/api.js must exist');
+  assert.ok(authJs, 'js/views/auth.js must exist');
+  assert.ok(donorJs, 'js/views/donor.js must exist');
+  assert.ok(picJs, 'js/views/pic.js must exist');
+  assert.ok(adminJs, 'js/views/admin.js must exist');
+  assert.ok(superadminJs, 'js/views/superadmin.js must exist');
+  assert.ok(appJs, 'js/app.js must exist');
+
+  // Check exports in utils
+  assert.match(utilsJs, /export\s+function\s+escapeHtml\b/, 'utils.js must export escapeHtml');
+  assert.match(utilsJs, /export\s+function\s+sanitizeUrl\b/, 'utils.js must export sanitizeUrl');
+  assert.match(utilsJs, /export\s+function\s+formatUserErrorMessage\b/, 'utils.js must export formatUserErrorMessage');
+  assert.match(utilsJs, /export\s+function\s+showToast\b/, 'utils.js must export showToast');
+  assert.match(utilsJs, /export\s+function\s+showInfoModal\b/, 'utils.js must export showInfoModal');
+
+  // Check app.js global bindings & script tag in index.html
+  assert.match(appJs, /(window\.\w+\s*=|Object\.assign\(window,\s*globalBindings\))/i, 'app.js must bind UI handlers to window for HTML onclick compatibility');
+
+  const html = getIndexHtml();
+  assert.match(html, /<script\s+type="module"\s+src="js\/app\.js"\s*defer>/i, 'index.html must load js/app.js as ES module');
+
+  // Ensure monolithic inline script is removed
+  const inlineScriptMatches = html.match(/<script(?![^>]*src=)[\s\S]*?>([\s\S]*?)<\/script>/gi);
+  if (inlineScriptMatches) {
+    for (const scriptTag of inlineScriptMatches) {
+      const lineCount = scriptTag.split('\n').length;
+      assert.ok(lineCount < 50, `Inline <script> tag too large (${lineCount} lines). Should be extracted to external JS modules.`);
+    }
+  }
+});

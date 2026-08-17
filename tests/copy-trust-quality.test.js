@@ -104,8 +104,9 @@ function createBrowserHarness(state = {}) {
     window
   };
 
-  const script = getIndexHtml().match(/<script>\s*([\s\S]*?)<\/script>/)[1];
-  vm.runInNewContext(script, context, { filename: 'index.html' });
+  const { getAppScript } = require('./test-harness');
+  const script = getAppScript();
+  vm.runInNewContext(script, context, { filename: 'bundle.js' });
 
   return {
     elements,
@@ -114,7 +115,8 @@ function createBrowserHarness(state = {}) {
 }
 
 test('HTML and JS strings do not contain legacy non-standard copy or English jargon', () => {
-  const html = getIndexHtml();
+  const { getAppScript } = require('./test-harness');
+  const html = getIndexHtml() + getAppScript();
 
   // Legacy copy checks
   assert.doesNotMatch(html, />\+ Generate token PIC baru</);

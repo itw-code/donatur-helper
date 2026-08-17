@@ -106,8 +106,9 @@ function createBrowserHarness(responses) {
     window
   };
 
-  const script = getIndexHtml().match(/<script>\s*([\s\S]*?)<\/script>/)[1];
-  vm.runInNewContext(script, context, { filename: 'index.html' });
+  const { getAppScript } = require('./test-harness');
+  const script = getAppScript();
+  vm.runInNewContext(script, context, { filename: 'bundle.js' });
 
   return {
     elements,
@@ -176,21 +177,23 @@ test('Indonesian labels are used across authenticated views and status SVGs incl
   assert.match(campaignListHtml, />Salin<\/button>|>📋 Salin<\/span>|>Salin<\/span>/);
   assert.doesNotMatch(campaignListHtml, />Copy<\/button>|>📋 Copy/);
 
-  const html = getIndexHtml();
+  const { getAppScript } = require('./test-harness');
+  const html = getIndexHtml() + getAppScript();
   assert.match(html, /Zona Berbahaya/);
   assert.doesNotMatch(html, /<h3>Danger Zone<\/h3>/);
   assert.match(html, /aria-hidden="true"/);
 });
 
 test('High-priority copy, brand header, and action buttons use standardized Indonesian terms', () => {
-  const html = getIndexHtml();
+  const { getAppScript } = require('./test-harness');
+  const html = getIndexHtml() + getAppScript();
 
   // 1. Brand header
   assert.match(html, /<h1>Donatur Helper<\/h1>/);
   assert.doesNotMatch(html, /<h1>Donation Helper<\/h1>/);
 
   // 2. Toast default
-  assert.match(html, /<div id="toast">Teks berhasil disalin!<\/div>/);
+  assert.match(html, /<div id="toast"[^>]*>Teks berhasil disalin!<\/div>/);
   assert.doesNotMatch(html, /Teks berhasil di-copy!/);
 
   // 3. Admin & SuperAdmin action labels

@@ -47,11 +47,10 @@ test('Task 1: Code.js doGet sets title to Donatur Helper', () => {
 });
 
 const vm = require('node:vm');
+const { getAppScript } = require('./test-harness');
 
 function extractInlineScript() {
-  const match = getIndexHtml().match(/<script>\s*([\s\S]*?)<\/script>/);
-  if (!match) throw new Error('Inline script not found in index.html');
-  return match[1];
+  return getAppScript();
 }
 
 function createVmScope() {
@@ -92,7 +91,7 @@ function createVmScope() {
   };
   context.window.window = context.window;
 
-  vm.runInNewContext(extractInlineScript(), context, { filename: 'index.html' });
+  vm.runInNewContext(extractInlineScript(), context, { filename: 'bundle.js' });
   return context;
 }
 
@@ -118,16 +117,16 @@ test('Task 2: sanitizeUrl helper allows safe schemes and blocks dangerous protoc
   assert.strictEqual(scope.sanitizeUrl(''), '#');
 });
 
-test('Task 2: index.html wraps dynamic links and images with sanitizeUrl and does not concatenate raw error objects into innerHTML', () => {
-  const html = getIndexHtml();
+test('Task 2: index.html and JS modules wrap dynamic links and images with sanitizeUrl and do not concatenate raw error objects into innerHTML', () => {
+  const code = getIndexHtml() + getAppScript();
 
   // Check proof and gift links use sanitizeUrl
-  assert.match(html, /sanitizeUrl\(d\.ProofLink\)/, 'ProofLink must pass through sanitizeUrl');
-  assert.match(html, /sanitizeUrl\(c\.GiftLink\)/, 'GiftLink must pass through sanitizeUrl');
-  assert.match(html, /sanitizeUrl\(c\.GiftImage\)/, 'GiftImage must pass through sanitizeUrl');
+  assert.match(code, /sanitizeUrl\(d\.ProofLink\)/, 'ProofLink must pass through sanitizeUrl');
+  assert.match(code, /sanitizeUrl\(c\.GiftLink\)/, 'GiftLink must pass through sanitizeUrl');
+  assert.match(code, /sanitizeUrl\(c\.GiftImage\)/, 'GiftImage must pass through sanitizeUrl');
 
   // Check that raw e.message or e is not inserted without escapeHtml or formatUserErrorMessage
-  assert.doesNotMatch(html, /innerHTML\s*=\s*['"][^'"]*['"]\s*\+\s*\(?e\.message\s*\|\|\s*e\)?\s*\+\s*['"]/, 'Raw e.message || e must not be concatenated directly into innerHTML');
+  assert.doesNotMatch(code, /innerHTML\s*=\s*['"][^'"]*['"]\s*\+\s*\(?e\.message\s*\|\|\s*e\)?\s*\+\s*['"]/, 'Raw e.message || e must not be concatenated directly into innerHTML');
 });
 
 test('Task 3: robots.txt exists at root and index.html has meta robots policy', () => {
