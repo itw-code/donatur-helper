@@ -496,6 +496,83 @@
     overflow-wrap: anywhere;
   }
 
+  .donor-card-settled {
+    background: var(--bg-card);
+    opacity: 0.92;
+    border: 1px solid var(--border);
+  }
+
+  .donor-card-settled .donor-queue-badge {
+    background: #ecfdf5;
+    color: #065f46;
+  }
+
+  .verification-complete {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 12px;
+    border-radius: var(--radius);
+    font-weight: 500;
+  }
+
+  .donor-card-total {
+    background: #f5f7fa;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: right;
+  }
+
+  .admin-nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    overflow-x: auto;
+  }
+
+  .admin-nav-link {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .admin-nav-link:hover {
+    background: var(--bg);
+  }
+
+  .admin-nav-logout {
+    margin-left: auto;
+    color: var(--red);
+  }
+
+  .admin-section {
+    scroll-margin-top: 72px;
+  }
+
+  .donor-reminder {
+    width: 100%;
+  }
+
+  .verification-warning,
+  .verification-complete {
+    display: block;
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
   .donor-card-total {
     background: #f5f7fa;
     border: 1px solid var(--border);
@@ -671,8 +748,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 12px;
+    gap: 16px;
+    padding: 12px 16px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: #f8fafc;
@@ -684,29 +761,37 @@
   }
 
   .pic-action-copy {
-    display: grid;
-    gap: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 auto;
     min-width: 0;
   }
 
   .pic-action-copy strong {
     font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
   }
 
   .pic-action-copy span {
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.4;
+    overflow-wrap: break-word;
   }
 
   .pic-action-item .btn {
     display: inline-flex;
+    width: auto;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-height: 44px;
+    min-height: 40px;
+    padding: 8px 16px;
     margin: 0;
+    white-space: nowrap;
   }
 
   .action-arrow-icon {
@@ -810,10 +895,12 @@
     .pic-action-item {
       align-items: stretch;
       flex-direction: column;
+      gap: 10px;
     }
 
     .pic-action-item .btn {
       width: 100%;
+      min-height: 44px;
     }
   }
 
@@ -1639,7 +1726,7 @@
 </style>
 
 <div class="wrap">
-  <h1>Donation Helper</h1>
+  <h1>Donatur Helper</h1>
 
   <div id="view-landing">
     <p class="sub">Bantu kumpulkan donasi untuk kolega yang resign, secara rapi dan transparan.</p>
@@ -1765,6 +1852,13 @@
   </div>
 
   <div id="view-admin-dashboard" class="hidden">
+    <nav class="admin-nav-bar" aria-label="Navigasi admin">
+      <a href="#admin-summary" class="admin-nav-link">Ringkasan</a>
+      <a href="#admin-section-campaigns" class="admin-nav-link">Campaign</a>
+      <a href="#admin-section-members" class="admin-nav-link">Members</a>
+      <a href="#admin-section-tools" class="admin-nav-link">Tools PIC</a>
+      <a href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
+    </nav>
     <div class="admin-dashboard-heading">
       <span class="admin-data-card-label">ADMIN · OPERATIONS</span>
       <h2 id="admin-dashboard-title">Perlu ditinjau</h2>
@@ -1821,8 +1915,8 @@
       <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
       <div id="admin-late-donors"></div>
     </div>
-    <div id="admin-summary" class="card"></div>
-    <div class="card">
+    <div id="admin-summary" class="card admin-section"></div>
+    <div id="admin-section-campaigns" class="card admin-section">
       <h2 style="margin-top:0">Semua campaign</h2>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
@@ -1846,11 +1940,7 @@
       </div>
       <div id="admin-campaign-list"></div>
     </div>
-    <div class="card">
-      <button class="btn" onclick="genPicToken()">Generate token PIC baru</button>
-      <div id="admin-new-token"></div>
-    </div>
-    <div class="card">
+    <div id="admin-section-members" class="card admin-section">
       <h2 style="margin-top:0">Daftar Members</h2>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
@@ -1872,6 +1962,12 @@
         <p id="admin-member-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat member...</p>
       </div>
       <div id="admin-member-list"></div>
+    </div>
+    <div id="admin-section-tools" class="card admin-section" style="background: #f8fafc; border: 1px dashed var(--border);">
+      <h3 style="margin-top:0; font-size:15px; color: var(--text);">Tools PIC</h3>
+      <p class="muted" style="margin: 0 0 12px 0; font-size: 13px;">Gunakan untuk membuat akses token PIC baru secara manual.</p>
+      <button class="btn secondary btn-auto" onclick="genPicToken()">+ Buat token PIC baru</button>
+      <div id="admin-new-token"></div>
     </div>
     <button class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button> <!-- ADD THIS -->
   </div>
@@ -1932,7 +2028,7 @@
           onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
         <label>Alias Admin</label>
         <input id="sa-admin-alias" placeholder="contoh: Bela EE">
-        <button class="btn" style="margin-top:8px;" onclick="genAdminToken()">Generate token Admin baru</button>
+        <button class="btn" style="margin-top:8px;" onclick="genAdminToken()">Buat token Admin baru</button>
         <div id="sa-new-token"></div>
       </div>
       <div class="admin-data-toolbar">
@@ -2023,8 +2119,8 @@
       </div>
       <div class="card" style="flex:1; min-width:300px; margin-top:0;">
         <h3 style="margin-top:0; font-size:14px; color:var(--muted);">Database Maintenance</h3>
-        <p class="muted">Pindahkan data "Archived" ke cold storage untuk mempercepat performa server.</p>
-        <button class="btn amber" onclick="runDataSweep()">Jalankan Sweep Data</button>
+        <p class="muted">Pindahkan data campaign yang sudah diarsipkan ke penyimpanan dingin untuk menjaga kecepatan sistem.</p>
+        <button class="btn amber" onclick="runDataSweep()">Bersihkan Arsip Data</button>
         <div id="sa-sweep-msg"></div>
       </div>
     </div>
@@ -2056,7 +2152,7 @@
   </div>
 </div>
 
-<div id="toast">Teks berhasil di-copy!</div>
+<div id="toast">Teks berhasil disalin!</div>
 
 <script>
   // Replace with your Google Apps Script /exec URL
@@ -2193,7 +2289,7 @@
 
   function statusBadge(status) {
     const map = { Open: 'open', Closed: 'closed', Finalized: 'finalized', Archived: 'archived' };
-    const labelMap = { Open: 'Terbuka', Closed: 'Ditutup', Finalized: 'Final', Archived: 'Selesai' };
+    const labelMap = { Open: 'Terbuka', Closed: 'Menunggu finalisasi', Finalized: 'Final', Archived: 'Selesai' };
     const cls = map[status] || 'archived';
     return '<span class="badge ' + cls + '">' + (labelMap[status] || status) + '</span>';
   }
@@ -2209,22 +2305,39 @@
     return '<svg ' + attrs + '><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5"></path><path d="M12 16h.01"></path></svg>';
   }
 
+  function actionArrowIcon() {
+    return '<svg class="action-arrow-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>';
+  }
+
+    function formatDate(dStr) {
+    if (!dStr) return '-';
+    try {
+      const d = new Date(dStr);
+      if (isNaN(d.getTime())) return dStr;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    } catch(e) { return dStr; }
+  }
+
   function renderSummaryCard(s) {
-    let html = '<h2 style="margin-top:0">Ringkasan</h2>';
+    let html = '<h2 style="margin-top:0">Ringkasan Operasional</h2>';
     html += '<div class="row">';
-    html += '<div><div class="muted">Campaign terbuka</div><strong>' + s.campaignsByStatus.Open + '</strong></div>';
-    html += '<div><div class="muted">Menunggu finalisasi</div><strong>' + s.campaignsByStatus.Closed + '</strong></div>';
-    html += '<div><div class="muted">Final</div><strong>' + s.campaignsByStatus.Finalized + '</strong></div>';
+    html += '<div><div class="muted">Campaign Terbuka</div><strong>' + (s.campaignsByStatus ? (s.campaignsByStatus.Open || 0) : 0) + '</strong></div>';
+    html += '<div><div class="muted">Menunggu Finalisasi</div><strong>' + (s.campaignsByStatus ? (s.campaignsByStatus.Closed || 0) : 0) + '</strong></div>';
+    html += '<div><div class="muted">Final</div><strong>' + (s.campaignsByStatus ? (s.campaignsByStatus.Finalized || 0) : 0) + '</strong></div>';
     html += '</div>';
     html += '<div class="row" style="margin-top:8px;">';
-    html += '<div><div class="muted">Total donatur</div><strong>' + s.totalDonors + '</strong></div>';
-    html += '<div><div class="muted">Belum dibayar</div><strong>' + formatIDR(s.totalPending) + '</strong></div>';
-    html += '<div><div class="muted">Terkumpul</div><strong>' + formatIDR(s.totalCollected) + '</strong></div>';
+    html += '<div><div class="muted">Total donatur</div><strong>' + (s.totalDonors || 0) + '</strong></div>';
+    html += '<div><div class="muted">Belum dibayar</div><strong>' + formatIDR(s.totalPending || 0) + '</strong></div>';
+    html += '<div><div class="muted">Terkumpul</div><strong>' + formatIDR(s.totalCollected || 0) + '</strong></div>';
     html += '</div>';
-    html += '<p class="muted" style="margin-top:8px;">Token PIC: ' + s.picTokens.unused + ' belum dipakai, '
-      + s.picTokens.active + ' aktif, ' + s.picTokens.expired + ' kedaluwarsa.</p>';
+    const unusedToken = s.picTokens ? (s.picTokens.unused || 0) : 0;
+    const activeToken = s.picTokens ? (s.picTokens.active || 0) : 0;
+    const expToken = s.picTokens ? (s.picTokens.expired || 0) : 0;
+    html += '<p class="muted" style="margin-top:8px;">Token PIC: ' + unusedToken + ' belum dipakai, '
+      + activeToken + ' aktif, ' + expToken + ' kedaluwarsa.</p>';
     if (s.totalMembers !== undefined) {
-      html += '<p class="muted">Members: ' + s.totalMembers + ' total (' + s.activeMembers + ' aktif).</p>';
+      html += '<p class="muted">Members: ' + s.totalMembers + ' total di database (' + s.activeMembers + ' aktif).</p>';
     }
     return html;
   }
@@ -2476,13 +2589,13 @@
     const user = JSON.parse(safeGet('donor_user') || 'null');
     if (!user) { showView('user-login'); return; }
 
-    let titleHtml = user.name + ' 👋';
+    let titleHtml = escapeHtml(user.name);
     if (user.verified) {
       // Add a visual indicator for Alumni vs Active
       if (user.status === 'ex') {
-        titleHtml += ' <span class="badge closed">Alumni Member</span>';
+        titleHtml += ' <span class="badge closed">Member alumni</span>';
       } else {
-        titleHtml += ' <span class="badge finalized">Verified Member</span>';
+        titleHtml += ' <span class="badge finalized">Member terverifikasi</span>';
       }
     }
     document.getElementById('u-display-name').innerHTML = titleHtml;
@@ -2526,6 +2639,28 @@
       showInfoModal(e.message || String(e), 'Error');
       btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";
       btn.disabled = false;
+    });
+  }
+
+  function sortCampaignsForDonorDashboard(list) {
+    if (!Array.isArray(list)) return [];
+    const now = new Date().setHours(0, 0, 0, 0);
+    return list.slice().sort((a, b) => {
+      const aTime = a.deadline ? new Date(a.deadline).getTime() : NaN;
+      const bTime = b.deadline ? new Date(b.deadline).getTime() : NaN;
+      const aHas = !isNaN(aTime);
+      const bHas = !isNaN(bTime);
+
+      if (aHas && bHas) {
+        const aOverdue = aTime < now;
+        const bOverdue = bTime < now;
+        if (aOverdue && !bOverdue) return -1;
+        if (!aOverdue && bOverdue) return 1;
+        return aTime - bTime;
+      }
+      if (aHas && !bHas) return -1;
+      if (!aHas && bHas) return 1;
+      return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
     });
   }
 
@@ -2586,7 +2721,7 @@
           html += '</div>';
         }
 
-        html += '<div class="split-layout">';
+                html += '<div class="split-layout">';
 
         html += '<div class="split-left">';
         if (pending.length > 0) {
@@ -2608,16 +2743,25 @@
             }
           });
         } else {
-          html += '<h3 style="margin-top:0;">Menunggu Pembayaran</h3>';
-          html += '<div class="card muted">Tidak ada tagihan tertunda.</div>';
+          html += '<div class="card donor-empty-state" style="padding: 24px 16px; text-align: center;">';
+          html += '<div style="margin-bottom: 8px;">' + paymentStatusIcon('verified') + '</div>';
+          html += '<strong style="display: block; font-size: 15px; margin-bottom: 4px;">Tidak ada tagihan tertunda</strong>';
+          html += '<p class="muted" style="margin: 0 0 16px 0; font-size: 13px;">Semua partisipasi donasi Anda sudah lunas atau belum ada tagihan baru.</p>';
+          html += '<a class="btn secondary btn-auto" href="#donor-group-open" style="display: inline-flex; font-size: 13px;">Lihat campaign yang masih terbuka</a>';
+          html += '</div>';
         }
         html += '</div>';
 
         html += '<div class="split-right">';
-        if (others.length > 0) {
-          html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
-          const joinable = others.filter(c => c.status === 'Open' && !c.joined);
-          if (joinable.length > 1) {
+        const canJoin = others.filter(c => c.status === 'Open' && !c.joined);
+        const alreadyJoined = others.filter(c => c.joined && c.status !== 'Archived');
+        const history = others.filter(c => c.status === 'Archived' || (c.status !== 'Open' && !c.joined));
+
+        // Group 1: Bisa Diikuti
+        html += '<div id="donor-group-open">';
+        html += '<h3 style="margin-top:0;">Bisa Diikuti</h3>';
+        if (canJoin.length > 0) {
+          if (canJoin.length > 1) {
             let bulkJoinHtml = '<div class="card" style="background:#f4fbf7; border: 1px solid #cceadb; margin-bottom: 16px; padding: 12px 16px;">';
             bulkJoinHtml += '<h4 style="margin-top:0; color:#0f766e; font-size:14px; margin-bottom:4px;">📝 Gabung Banyak Campaign</h4>';
             bulkJoinHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Centang campaign di bawah, lalu klik tombol ini untuk gabung sekaligus.</p>';
@@ -2628,14 +2772,37 @@
             bulkJoinHtml += '</div>';
             html += bulkJoinHtml;
           }
-          html += others.map(c => renderCampaignCard(c, user, false)).join('');
+          const sortedCanJoin = sortCampaignsForDonorDashboard(canJoin);
+          html += sortedCanJoin.map(c => renderCampaignCard(c, user, false)).join('');
         } else {
-          html += '<h3 style="margin-top:0;">Campaign Lainnya</h3>';
-          html += '<div class="card muted">Belum ada campaign lain.</div>';
+          html += '<div class="card muted">Tidak ada campaign terbuka untuk diikuti saat ini.</div>';
         }
         html += '</div>';
 
+        // Group 2: Campaign yang Diikuti
+        if (alreadyJoined.length > 0) {
+          html += '<div id="donor-group-joined" style="margin-top:24px;">';
+          html += '<h3 style="margin-top:0;">Campaign yang Diikuti</h3>';
+          const sortedJoined = sortCampaignsForDonorDashboard(alreadyJoined);
+          html += sortedJoined.map(c => renderCampaignCard(c, user, false)).join('');
+          html += '</div>';
+        }
+
+        // Group 3: Selesai / Riwayat
+        if (history.length > 0) {
+          html += '<details class="donor-history-disclosure" style="margin-top:24px;">';
+          html += '<summary style="cursor:pointer; font-weight:600; color:var(--muted); font-size:13px; padding:8px 0;">Riwayat Campaign Selesai (' + history.length + ')</summary>';
+          html += '<div style="margin-top:12px;">';
+          const sortedHistory = sortCampaignsForDonorDashboard(history);
+          html += sortedHistory.map(c => renderCampaignCard(c, user, false)).join('');
+          html += '</div>';
+          html += '</details>';
+        }
+
         html += '</div>';
+
+        html += '</div>';
+
       }
 
       html += picHtml;
@@ -2788,11 +2955,11 @@
   }
 
   function getDeadlineBadge(deadlineStr) {
-    if (!deadlineStr) return '';
+    if (!deadlineStr) return '<span class="badge" style="background:#6b728022; color:#6b7280; margin-left:8px;">⏳ Deadline belum ditentukan</span>';
     const diffDays = Math.ceil((new Date(deadlineStr) - new Date()) / (1000 * 60 * 60 * 24));
     let color = '#1d9e75';
     let text = 'Aman';
-    if (diffDays < 0) { color = '#a32d2d'; text = 'Terlewat'; }
+    if (diffDays < 0) { color = '#a32d2d'; text = 'Deadline terlewat'; }
     else if (diffDays === 0) { color = '#a32d2d'; text = 'Hari ini!'; }
     else if (diffDays <= 2) { color = '#d97706'; text = diffDays + ' hari lagi'; }
     else if (diffDays <= 5) { color = '#ca8a04'; text = diffDays + ' hari lagi'; }
@@ -2820,7 +2987,7 @@
     
     let html = '<div class="card donor-campaign-card donor-primary-card" style="border-left: 4px solid var(--blue); background: #f0f7ff; margin-bottom:16px;">';
     html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
-    html += '<strong style="color:var(--blue); font-size:15px;">Combined Payment (' + groupList.length + ' Campaign)</strong>';
+    html += '<strong style="color:var(--blue); font-size:15px;">Pembayaran Gabungan (' + groupList.length + ' Campaign)</strong>';
     html += '<span class="badge" style="background:var(--blue-light); color:var(--blue);">⏳ Menunggu Pembayaran</span>';
     html += '</div>';
     
@@ -2833,12 +3000,12 @@
     html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin: 12px 0;">';
     html += '<div style="font-size:12px; color:var(--text);">Total nominal gabungan yang harus ditransfer:</div>';
     html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(totalDue);
-    html += ' <span class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">📋 Salin</span>';
+    html += ' <span class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">Salin</span>';
     html += '</div>';
     html += '</div>';
     
     html += '<p class="muted" style="margin:8px 0; font-size:12px;">Ke: ' + escapeHtml(bankName) + ' ' + escapeHtml(bankAccount);
-    html += ' <button class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">📋 Copy</button>';
+    html += ' <button class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
     html += ' a.n. ' + escapeHtml(accountHolder) + '</p>';
     
     html += '<div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:12px;">';
@@ -2862,11 +3029,7 @@
     let html = '<div class="' + cardClass + '" id="card-' + c.campaignId + '">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
     html += '<div style="display:flex;align-items:center;">' + checkboxHtml + '<strong>' + escapeHtml(c.targetName) + '</strong></div>';
-    if (isPending) {
-      html += '<div>' + statusBadge(c.status) + getDeadlineBadge(c.deadline) + '</div>';
-    } else {
-      html += statusBadge(c.status);
-    }
+    html += '<div>' + statusBadge(c.status) + getDeadlineBadge(c.deadline) + '</div>';
     html += '</div>';
     if (c.reason) html += '<p class="muted">' + escapeHtml(c.reason) + '</p>';
 
@@ -2883,7 +3046,7 @@
 
     if (c.status === 'Open') {
       if (c.joined) {
-        html += '<div class="success">✓ Kamu sudah daftar di list ini.</div>';
+        html += '<div class="success">✓ Kamu sudah daftar di list ini. Menunggu finalisasi oleh PIC.</div>';
         html += '<button id="btn-withdraw-' + c.campaignId + '" class="btn secondary" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
       } else {
         html += '<div class="card" style="background:#f9f9f9;border:1px solid #eee;margin-top:8px;">';
@@ -2910,11 +3073,11 @@
         html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin-bottom:12px;">';
         html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
         html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(c.amountDue);
-        html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">📋 Salin</span>';
+        html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">Salin</span>';
         html += '</div>';
         html += '</div>';
         html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount);
-        html += ' <button class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(c.bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">📋 Copy</button>';
+        html += ' <button class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(c.bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
         html += ' a.n. ' + escapeHtml(c.accountHolder) + '</p>';
         if (c.paid) {
           html += '<div class="success">✓ Sudah konfirmasi transfer.</div>';
@@ -3275,42 +3438,40 @@
     });
   }
 
-  function getPicProgress(detail) {
+    function getPicProgress(detail) {
     const donors = detail.donors || [];
-    const verifiedDonors = donors.filter(d => String(d.Verified).toUpperCase() === 'TRUE');
-    const reminderDonors = donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE');
-    const reviewDonors = donors.filter(d =>
-      String(d.Paid).toUpperCase() === 'TRUE' && String(d.Verified).toUpperCase() !== 'TRUE'
-    );
-    const collected = donors.reduce((total, donor) => {
-      if (String(donor.Paid).toUpperCase() !== 'TRUE') return total;
-      const amountPaid = Number(donor.AmountPaid);
-      const fallbackAmount = String(donor.Verified).toUpperCase() === 'TRUE' ? Number(donor.AmountDue) || 0 : 0;
-      return total + (Number.isFinite(amountPaid) && amountPaid > 0 ? amountPaid : fallbackAmount);
-    }, 0);
+    let collected = 0;
+    let reminderCount = 0;
+    let reviewCount = 0;
+    let verifiedCount = 0;
+    let refundCount = 0;
+
+    donors.forEach(d => {
+      const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
+      const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
+      const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
+      const hasProof = Boolean(String(d.ProofLink || '').trim());
+      const amountDue = Number(d.AmountDue) || 0;
+      const amountPaid = Number(d.AmountPaid) || 0;
+
+      if (isPaid) collected += amountPaid;
+      if (isVerified) verifiedCount++;
+      else if (isPaid && amountPaid > amountDue && !isRefunded) refundCount++;
+      else if (hasProof) reviewCount++;
+      else if (detail.campaign.Status === 'Finalized' && !isPaid) reminderCount++;
+    });
+
     const target = Number(detail.campaign.GiftAmount) || 0;
     const percent = target > 0 ? Math.min(100, Math.round((collected / target) * 100)) : 0;
-
     return {
       collected,
       percent,
-      verifiedCount: verifiedDonors.length,
-      reminderCount: reminderDonors.length,
-      reviewCount: reviewDonors.length,
+      reminderCount,
+      reviewCount,
+      verifiedCount,
+      refundCount,
       totalDonorCount: donors.length
     };
-  }
-
-  function scrollToPicActions() {
-    const el = document.getElementById('pic-actions');
-    if (el) {
-      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
-    }
-  }
-
-  function actionArrowIcon() {
-    return '<svg class="action-arrow-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>';
   }
 
   function isVisiblePicActionTarget(el) {
@@ -3348,10 +3509,13 @@
 
   function renderPicActionItem(type, count, isPrimary) {
     const isReminder = type === 'reminder';
-    const label = isReminder ? 'Kirim pengingat WA' : 'Tinjau Bukti Transfer';
+    const isRefund = type === 'refund';
+    const label = isReminder
+      ? 'Kirim pengingat WA'
+      : (isRefund ? 'Refund' : 'Tinjau Bukti Transfer');
     const description = isReminder
       ? count + ' Donor belum upload Bukti Transfer.'
-      : count + ' Bukti Transfer menunggu verifikasi.';
+      : (isRefund ? count + ' Donor menunggu penyelesaian refund.' : count + ' Bukti Transfer menunggu verifikasi.');
     const className = isPrimary ? 'btn blue' : 'btn secondary';
     return '<div class="pic-action-item' + (isPrimary ? ' primary' : '') + '">' +
       '<div class="pic-action-copy"><strong>' + label + '</strong><span>' + description + '</span></div>' +
@@ -3369,7 +3533,10 @@
     if (progress.reviewCount > 0) {
       html += renderPicActionItem('review', progress.reviewCount, progress.reminderCount === 0);
     }
-    if (progress.reminderCount === 0 && progress.reviewCount === 0) {
+    if (progress.refundCount > 0) {
+      html += renderPicActionItem('refund', progress.refundCount, progress.reminderCount === 0 && progress.reviewCount === 0);
+    }
+    if (progress.reminderCount === 0 && progress.reviewCount === 0 && progress.refundCount === 0) {
       const message = progress.totalDonorCount > 0
         ? 'Semua pembayaran terverifikasi.'
         : 'Belum ada tindakan pembayaran.';
@@ -3394,6 +3561,7 @@
   function renderPicDashboard(detail) {
     const c = detail.campaign;
     _picCampaignData = c; // Store for copyShareLink
+    _picCampaignDetail = detail;
     const infoEl = document.getElementById('pic-campaign-info');
     const titleEl = document.getElementById('pic-dashboard-title');
     const subtitleEl = document.getElementById('pic-dashboard-subtitle');
@@ -3404,11 +3572,16 @@
 
     // Handle the zero-state gracefully
     const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Belum ditentukan';
+    const isZeroState = (!c.GiftAmount || c.GiftAmount <= 0) || (c.Status === 'Open' && progress.collected === 0);
+    const zeroStateNotice = isZeroState
+      ? '<div class="pic-state-callout">' + paymentStatusIcon('review') + '<span><strong>Langkah selanjutnya:</strong> Tentukan total hadiah dan rekening sebelum menagih donatur.</span></div>'
+      : '';
 
     infoEl.innerHTML = '<div class="pic-progress-card">' +
       '<div class="pic-progress-header"><div><span class="role-eyebrow">PROGRES CAMPAIGN</span><h3>' + formatIDR(progress.collected) + ' terkumpul</h3></div>' + statusBadge(c.Status) + '</div>' +
       '<p class="pic-progress-copy">Target hadiah ' + giftText + ' &middot; deadline ' + (c.Deadline || '-') + '</p>' +
       '<div class="pic-progress-track" role="progressbar" aria-label="Progres campaign ' + progress.percent + ' persen" aria-valuenow="' + progress.percent + '" aria-valuemin="0" aria-valuemax="100"><span style="width:' + progress.percent + '%"></span></div>' +
+      zeroStateNotice +
       '<div class="pic-progress-metrics"><div class="pic-progress-metric"><span>Pengingat pembayaran</span><strong>' + progress.reminderCount + '</strong></div><div class="pic-progress-metric"><span>Bukti Transfer perlu ditinjau</span><strong>' + progress.reviewCount + '</strong></div><div class="pic-progress-metric"><span>Sudah diverifikasi</span><strong>' + progress.verifiedCount + '</strong></div></div>' +
       renderPicNextAction(detail, progress) +
       '</div>';
@@ -3418,7 +3591,7 @@
 
     const dangerZone = document.getElementById('pic-danger-zone');
     if (c.Status !== 'Archived') {
-      let dangerHtml = '<h3 style="margin-top:0; color:var(--red);">Danger Zone</h3>';
+      let dangerHtml = '<h3 style="margin-top:0; color:var(--red);">Zona Berbahaya</h3>';
       
       // Delete button for Open/Closed campaigns only
       if (c.Status === 'Open' || c.Status === 'Closed') {
@@ -3452,35 +3625,34 @@
     }
 
     // --- SHARE MESSAGE LOGIC ---
-    html += '<div style="background:#eaf3de; padding:10px; border-radius:8px; margin-bottom:12px;">';
+    html += '<div class="pic-share-box" style="background:#eaf3de; padding:10px; border-radius:8px; margin-bottom:12px;">';
     if (c.Status === 'Open' || c.Status === 'Closed') {
-      html += '<strong>Bagikan Undangan Patungan:</strong><br>';
-      html += '<p class="muted" style="margin:4px 0;">Copy pesan undangan beserta daftar peserta yang sudah gabung.</p>';
-      html += '<button class="btn" style="background:var(--green); margin-top:4px;" onclick="copyPicGroupReminder()">📋 Copy Undangan Patungan</button>';
+      html += '<strong>Bagikan Undangan Patungan:</strong><br>' +
+        '<p class="muted" style="margin:4px 0;">Salin pesan undangan beserta daftar peserta yang sudah bergabung.</p>' +
+        '<button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
     } else if (c.Status === 'Finalized') {
       if (isAchieved) {
-        html += '<strong>Target Terkumpul! 🎉</strong><br>';
-        html += '<p class="muted" style="margin:4px 0;">Semua pembayaran terverifikasi. Salin pesan terima kasih untuk grup.</p>';
-        html += '<button class="btn" style="background:var(--blue); margin-top:4px;" onclick="copyPicGroupReminder()">📋 Copy Laporan Selesai (Gratitude)</button>';
+        html += '<strong>Target Terkumpul! 🎉</strong><br>' +
+          '<p class="muted" style="margin:4px 0;">Semua pembayaran terverifikasi. Salin pesan terima kasih untuk grup.</p>' +
+          '<button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Laporan Selesai</button>';
       } else {
-        html += '<strong>Tagihan Patungan (Grup):</strong><br>';
-        html += '<p class="muted" style="margin:4px 0;">Salin rincian tagihan pro-rata, nominal bebas, dan nomor rekening untuk dibagikan ke grup.</p>';
-        html += '<button class="btn" style="background:var(--amber); margin-top:4px;" onclick="copyPicGroupReminder()">📋 Copy Tagihan Patungan (Grup)</button>';
+        html += '<strong>Tagihan Patungan (Grup):</strong><br>' +
+          '<p class="muted" style="margin:4px 0;">Salin rincian tagihan pro-rata, nominal bebas, dan nomor rekening untuk dibagikan ke grup.</p>' +
+          '<button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Rincian Tagihan</button>';
       }
     } else {
-      html += '<strong>Campaign Selesai:</strong><br>';
-      html += '<p class="muted" style="margin:4px 0;">Campaign sudah selesai/diarsipkan.</p>';
+      html += '<strong>Campaign Selesai:</strong><br><p class="muted" style="margin:4px 0;">Campaign sudah selesai/diarsipkan.</p>';
     }
     html += '</div>';
     // ----------------------------
 
     if (c.Status === 'Open') {
-      html += '<button class="btn amber" onclick="closeList()">Tutup pendaftaran</button>';
       // Pass the current amount to the Finalize form in case they already filled it out
-      html += '<button class="btn blue" onclick="showFinalizeForm(' + c.GiftAmount + ')">Selesaikan & input rekening</button>';
+      html += '<button class="btn blue" onclick="showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')">Selesaikan & input rekening</button>';
+      html += '<button class="btn secondary" onclick="closeList()">Tutup pendaftaran</button>';
     } else if (c.Status === 'Closed') {
+      html += '<button class="btn blue" onclick="showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')">Selesaikan & input rekening</button>';
       html += '<button class="btn secondary" onclick="reopenList()">Buka lagi pendaftaran</button>';
-      html += '<button class="btn blue" onclick="showFinalizeForm(' + c.GiftAmount + ')">Selesaikan & input rekening</button>';
     } else if (c.Status === 'Finalized') {
       const paidCount = detail.donors.filter(d => String(d.Paid).toUpperCase() === 'TRUE').length;
 
@@ -3522,45 +3694,18 @@
 
     // Late Donor Form Modal
     html += '<div id="late-donor-form" class="hidden card" style="background:#f9f9f9; margin-top:16px; position:relative;">';
-    html += '<button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById(\'late-donor-form\').classList.add(\'hidden\')">&times;</button>';
-    html += '<h3 style="margin-top:0;">Ajukan Donatur Susulan</h3>';
-    html += '<label>Nama Donatur</label><input id="late-name" placeholder="Nama lengkap">';
-    html += '<label>Nomor WhatsApp</label><input id="late-wa" placeholder="08xxxxxxxxxx">';
-    html += '<label>Nama Alias / Samaran (Opsional)</label><input id="late-alias" placeholder="Contoh: Hamba Allah">';
-    html += '<label style="display:flex; align-items:center; gap:8px; margin-top:10px; margin-bottom:10px;"><input type="checkbox" id="late-is-custom" onchange="document.getElementById(\'late-custom-wrap\').classList.toggle(\'hidden\')" style="width:auto; margin-top:0;"> Donasi Nominal Khusus (Bukan patungan rata)</label>';
-    html += '<div id="late-custom-wrap" class="hidden"><label>Nominal (Rp)</label><input type="text" inputmode="numeric" id="late-custom-amount" placeholder="Contoh: 150.000" onkeyup="formatInputRibuan(event)"></div>';
-    html += '<label>Alasan</label><input id="late-reason" placeholder="Contoh: Terlewat saat awal">';
-    html += '<button id="btn-submit-late-donor" class="btn" onclick="submitLateDonor()">Kirim Pengajuan</button>';
-    html += '<div id="late-error" class="error"></div>';
-    html += '</div>';
-
-    // Gift Proof Form Modal
-    html += '<div id="gift-proof-form" class="hidden card" style="background:#f9f9f9; margin-top:16px; position:relative;">';
-    html += '<button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById(\'gift-proof-form\').classList.add(\'hidden\')">&times;</button>';
-    html += '<h3 style="margin-top:0;">Dokumentasi Hadiah</h3>';
-    if (c.GiftLink || c.GiftImage) {
-      html += '<div style="background:#f5f7fa; padding:16px; border-radius:8px; margin-bottom:16px;">';
-      if (c.GiftImage) {
-        html += '<a href="' + escapeHtml(c.GiftImage) + '" target="_blank"><img src="' + escapeHtml(c.GiftImage) + '" style="max-width:100px; max-height:100px; border-radius:8px; margin-right:16px; margin-bottom:8px; vertical-align:middle; border:1px solid #ccc; object-fit:cover;"></a>';
-      }
-      if (c.GiftLink) {
-        html += '<a class="link-btn" href="' + escapeHtml(c.GiftLink) + '" target="_blank">Buka Link Barang/Hadiah</a>';
-      }
-      html += '<div style="margin-top:12px;"><button class="btn secondary" style="font-size:12px; padding:4px 8px;" onclick="document.getElementById(\'gift-edit-form\').classList.toggle(\'hidden\')">✏️ Edit Dokumentasi</button></div>';
-      html += '</div>';
-    }
-
-    html += '<div id="gift-edit-form" class="' + ((c.GiftLink || c.GiftImage) ? 'hidden' : '') + '">';
-    html += '<p class="muted" style="margin-top:0;">Bagikan dokumentasi hadiah kepada seluruh donatur. Fitur ini bisa digunakan kapan saja.</p>';
-    html += '<label>Link Barang / Hadiah (Opsional)</label><input id="gift-link" placeholder="https://tokopedia.com/..." value="' + (c.GiftLink || '') + '">';
-    html += '<label>Upload Nota Pembelian include ongkir dan diskon (Opsional)</label><input id="gift-image" type="file" accept="image/*">';
-    html += '<button class="btn blue" onclick="submitGiftProof()">' + ((c.GiftLink || c.GiftImage) ? 'Perbarui Dokumentasi' : 'Simpan Dokumentasi') + '</button>';
-    html += '<div id="gift-error" class="error"></div>';
-    html += '</div>';
+    html += '<h4 style="margin-top:0;">Ajukan Donatur Susulan</h4>';
+    html += '<p class="muted" style="font-size:12px;">Tambahkan teman yang belum sempat daftar di list sebelumnya.</p>';
+    html += '<label>Nama Teman: <input type="text" id="late-name" placeholder="cth: Budi Susanto"></label>';
+    html += '<label>No WhatsApp: <input type="tel" id="late-wa" placeholder="cth: 08123456789"></label>';
+    html += '<label>Tipe Nominal: <select id="late-amount-type" onchange="toggleLateCustomAmount()"><option value="fixed">Ikuti Nominal Rata-rata</option><option value="custom">Nominal Bebas (Custom)</option></select></label>';
+    html += '<div id="late-custom-amount-group" class="hidden"><label>Nominal Donasi (Rp): <input type="number" id="late-custom-amount" placeholder="cth: 50000"></label></div>';
+    html += '<div style="margin-top:12px;"><button class="btn green" onclick="submitLateDonor(\'' + c.CampaignID + '\')">Simpan & Masukkan ke List</button> <button class="btn secondary" onclick="hideLateDonorForm()">Batal</button></div>';
     html += '</div>';
 
     el.innerHTML = html;
   }
+
 
   function showLateDonorForm() {
     document.getElementById('late-donor-form').classList.remove('hidden');
@@ -3665,6 +3810,7 @@
 
   // Store latest PIC campaign data so copyShareLink can build a rich message
   let _picCampaignData = null;
+  let _picCampaignDetail = null;
   let originalTitle = document.title || 'Donatur Helper';
   let activePendingCount = 0;
 
@@ -3793,9 +3939,9 @@
       + '👉 Daftar di sini:\n' + shareUrl;
 
     navigator.clipboard.writeText(msg).then(() => {
-      showToast('Pesan undangan berhasil di-copy! Paste ke grup WhatsApp.');
+      showToast('Pesan undangan berhasil disalin! Tempel ke grup WhatsApp.');
     }).catch(e => {
-      showToast('Gagal meng-copy pesan.');
+      showToast('Gagal menyalin pesan.');
       console.error(e);
     });
   }
@@ -3817,7 +3963,7 @@
       }
       
       navigator.clipboard.writeText(res.bulkMessage).then(() => {
-        showToast('Pesan berhasil di-copy! Paste ke grup WhatsApp.');
+        showToast('Pesan berhasil disalin! Tempel ke grup WhatsApp.');
       }).catch(err => {
         showToast('Gagal menyalin pesan.');
         console.error(err);
@@ -3959,6 +4105,34 @@
     }
   }
 
+    function getPicDonorQueueState(d, campaignStatus) {
+    const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
+    const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
+    const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
+    const hasProof = Boolean(String(d.ProofLink || '').trim());
+    const amountDue = Number(d.AmountDue) || 0;
+    const amountPaid = Number(d.AmountPaid) || 0;
+    const isFinalized = campaignStatus === 'Finalized';
+
+    if (isVerified) return 'complete';
+    if (isPaid && amountPaid > amountDue && !isRefunded) return 'refund';
+    if (hasProof && !isVerified) return 'review';
+    if (isPaid && !hasProof && !isVerified) return 'missing-proof';
+    if (isFinalized && !isPaid) return 'reminder';
+    return 'participant';
+  }
+
+  function getPicDonorQueueLabel(key) {
+    switch (key) {
+      case 'reminder': return 'Pengingat pembayaran';
+      case 'review': return 'Bukti Transfer perlu ditinjau';
+      case 'refund': return 'Refund perlu diselesaikan';
+      case 'missing-proof': return 'Bukti Transfer belum tersedia';
+      case 'complete': return 'Terverifikasi';
+      default: return 'Peserta terdaftar';
+    }
+  }
+
   function renderDonorTable(detail) {
     const el = document.getElementById('pic-donor-list');
     if (!detail.donors || !detail.donors.length) {
@@ -3966,162 +4140,255 @@
       return;
     }
 
-    // Sort: Unpaid first, then highest tagihan
-    detail.donors.sort((a, b) => {
-      const aPaid = String(a.Paid).toUpperCase() === 'TRUE';
-      const bPaid = String(b.Paid).toUpperCase() === 'TRUE';
-      if (aPaid !== bPaid) return aPaid ? 1 : -1;
-      const aDue = Number(a.AmountDue) || 0;
-      const bDue = Number(b.AmountDue) || 0;
-      return bDue - aDue;
-    });
-
-    let tableHtml = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>';
-    let cardHtml = '<div class="donor-cards">';
-    const reminderCount = detail.donors.filter(d => String(d.Paid).toUpperCase() !== 'TRUE').length;
-    const reviewCount = detail.donors.filter(d =>
-      String(d.Paid).toUpperCase() === 'TRUE' && String(d.Verified).toUpperCase() !== 'TRUE'
-    ).length;
-    const headingSummary = [];
-    if (reminderCount > 0) headingSummary.push(reminderCount + ' pengingat');
-    if (reviewCount > 0) headingSummary.push(reviewCount + ' tinjau');
-    const headingHtml = '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>' + (headingSummary.join(' · ') || '0 item') + '</span></div>';
+    const isFinalized = detail.campaign.Status === 'Finalized';
+    const queues = {
+      'reminder': [],
+      'review': [],
+      'refund': [],
+      'missing-proof': [],
+      'complete': [],
+      'participant': []
+    };
 
     detail.donors.forEach(d => {
-      const displayName = d.Alias ? d.Alias : d.Name;
-      const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
-      const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
-      const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
-      const hasProof = Boolean(String(d.ProofLink || '').trim());
-      const actionType = detail.campaign.Status === 'Finalized'
-        ? (!isPaid ? 'reminder' : (!isVerified ? 'review' : ''))
-        : '';
-      const actionAttribute = actionType ? ' data-pic-action="' + actionType + '" tabindex="-1"' : '';
-      const picName = d.ModifiedBy ? escapeHtml(d.ModifiedBy) : '';
-      const picLabel = picName ? ' (' + picName + ')' : '';
-
-      // --- Status badge (shared) ---
-      let statusBadge = '';
-      if (isVerified) {
-        statusBadge = '<span class="badge success payment-status-badge">' + paymentStatusIcon('verified') + '<span>Verified</span></span>';
-      } else if (isPaid) {
-        statusBadge = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Perlu Cek</span></span>';
-      } else {
-        statusBadge = '<span class="badge warning payment-status-badge" style="background:#faeeda;color:var(--amber);">' + paymentStatusIcon('unpaid') + '<span>Belum upload Bukti Transfer</span></span>';
-      }
-
-      // --- Timeline (shared) ---
-      let timeHtml = '<div class="milestone-stack">';
-      timeHtml += '<div class="milestone-item"><span class="milestone-dot daftar"></span><span class="milestone-label">Daftar:</span><span class="milestone-time">' + formatTime(d.JoinedAt) + '</span></div>';
-      if (isPaid) {
-        const payTime = d.PaidAt ? formatTime(d.PaidAt) : '-';
-        timeHtml += '<div class="milestone-item"><span class="milestone-dot bayar"></span><span class="milestone-label">Bayar:</span><span class="milestone-time">' + payTime + '</span></div>';
-      }
-      if (isVerified) {
-        const verTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
-        timeHtml += '<div class="milestone-item"><span class="milestone-dot verif"></span><span class="milestone-label">Verif' + picLabel + ':</span><span class="milestone-time">' + verTime + '</span></div>';
-      }
-      if (isRefunded) {
-        const refTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
-        timeHtml += '<div class="milestone-item"><span class="milestone-dot refund"></span><span class="milestone-label">Refund' + picLabel + ':</span><span class="milestone-time">' + refTime + '</span></div>';
-      }
-      timeHtml += '</div>';
-
-      // --- Amount ---
-      let amountHtml = d.AmountDue ? formatIDR(d.AmountDue) : '-';
-      if (isPaid) {
-        amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
-      }
-
-      // --- Refund ---
-      let refundHtml = '-';
-      let needsRefund = false;
-      if (isPaid && d.AmountPaid) {
-        const diff = Number(d.AmountPaid) - Number(d.AmountDue);
-        if (diff > 0) {
-          needsRefund = true;
-          if (isRefunded) {
-            refundHtml = '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(diff) + '</small>';
-          } else {
-            refundHtml = '<span class="badge amber" style="margin-bottom:4px;">⚠️ ' + formatIDR(diff) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>';
-          }
-        }
-      }
-
-      // --- Verification actions ---
-      let verificationHtml = '-';
-      if (isPaid && hasProof) {
-        verificationHtml = '<div class="verification-stack"><a href="' + escapeHtml(d.ProofLink) + '" target="_blank" rel="noopener noreferrer" class="link-btn donor-proof-link">Lihat Bukti</a>';
-        if (!isVerified) {
-          if (needsRefund && !isRefunded) {
-            verificationHtml += '<span class="muted verification-warning" style="color:var(--red);">Selesaikan refund dulu sebelum verifikasi.</span>';
-          } else {
-            verificationHtml += '<div class="verification-controls"><button class="btn green" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', true)">Konfirmasi</button>';
-            verificationHtml += '<button class="btn danger" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', false)">Tolak</button></div>';
-          }
-        } else {
-          verificationHtml += '<span class="muted verification-complete">Sudah dikonfirmasi</span>';
-        }
-        verificationHtml += '</div>';
-      } else if (isPaid && !isVerified) {
-        verificationHtml = '<div class="verification-stack"><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Bukti Transfer belum tersedia</span></span><span class="muted verification-warning">Minta Donor upload ulang sebelum verifikasi.</span></div>';
-      } else if (!isPaid && detail.campaign.Status === 'Finalized') {
-        const msg = encodeURIComponent("Halo " + d.Name + ", ini reminder untuk patungan *" + detail.campaign.TargetName + "*. Tagihan kamu: " + formatIDR(d.AmountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
-        verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim pengingat WA</a>';
-      }
-
-      // === TABLE ROW ===
-      tableHtml += '<tr' + actionAttribute + '>';
-      tableHtml += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
-      tableHtml += '<td>' + timeHtml + '</td>';
-      tableHtml += '<td>' + statusBadge + '</td>';
-      tableHtml += '<td>' + amountHtml + '</td>';
-      tableHtml += '<td>' + refundHtml + '</td>';
-      tableHtml += '<td>' + verificationHtml + '</td>';
-      tableHtml += '</tr>';
-
-      // === MOBILE CARD ===
-      cardHtml += '<div class="donor-card' + (actionType ? ' donor-card-needs-action' : '') + '"' + actionAttribute + '>';
-      cardHtml += '<div class="donor-card-header"><div class="donor-card-identity"><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div><div class="donor-card-status">' + statusBadge + '</div></div>';
-      cardHtml += '<div class="donor-card-body">';
-      cardHtml += '<div class="donor-card-field donor-card-amount"><span class="label">Tagihan</span><strong class="donor-card-value">' + amountHtml + '</strong></div>';
-      if (needsRefund) cardHtml += '<div class="donor-card-field"><span class="label">Refund</span><div class="donor-card-value">' + refundHtml + '</div></div>';
-      cardHtml += '<div class="donor-card-timeline">' + timeHtml + '</div>';
-      cardHtml += '</div>';
-      if (verificationHtml !== '-') {
-        cardHtml += '<div class="donor-card-actions">' + verificationHtml + '</div>';
-      }
-      cardHtml += '</div>';
+      const q = isFinalized ? getPicDonorQueueState(d, detail.campaign.Status) : 'participant';
+      if (queues[q]) queues[q].push(d);
+      else queues.participant.push(d);
     });
 
-    // Total
+    const queueOrder = ['reminder', 'review', 'refund', 'missing-proof', 'complete', 'participant'];
+
+    // Sort within queues
+    queueOrder.forEach(k => {
+      queues[k].sort((a, b) => {
+        const aDue = Number(a.AmountDue) || 0;
+        const bDue = Number(b.AmountDue) || 0;
+        return bDue - aDue;
+      });
+    });
+
+    const reminderCount = queues.reminder.length;
+    const reviewCount = queues.review.length;
+    const refundCount = queues.refund.length;
+    const missingProofCount = queues['missing-proof'].length;
+    const unsettledCount = reminderCount + reviewCount + refundCount + missingProofCount;
+
+    let html = '';
+    if (isFinalized) {
+      const headingSummary = [];
+      if (reminderCount > 0) headingSummary.push(reminderCount + ' pengingat');
+      if (reviewCount > 0) headingSummary.push(reviewCount + ' tinjau');
+      if (refundCount > 0) headingSummary.push(refundCount + ' refund');
+      if (missingProofCount > 0) headingSummary.push(missingProofCount + ' data perlu dicek');
+      
+      html += '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>' + (headingSummary.join(' · ') || '0 item') + '</span></div>';
+
+      if (unsettledCount === 0 && queues.complete.length > 0) {
+        html += '<div class="verification-complete" style="margin-bottom:16px;">Semua donor selesai · Semua pembayaran terverifikasi dan final. Tidak ada tagihan tertunda.</div>';
+      } else if (unsettledCount === 0) {
+        html += '<div class="pic-complete-state" role="status">' + paymentStatusIcon('verified') + '<span>Semua donatur sudah tertata. Tidak ada tindakan pembayaran yang tertunda.</span></div>';
+      }
+    }
+
+    let tableRows = '';
+    let cardItems = '';
+
+    queueOrder.forEach(qKey => {
+      const list = queues[qKey];
+      if (!list || !list.length) return;
+
+      const qHeading = isFinalized ? getPicDonorQueueLabel(qKey) : '';
+      if (qHeading && qKey !== 'participant') {
+        const countLabel = qKey === 'complete' ? (' (' + list.length + ')') : '';
+        let qSectionHeader = '';
+        if (qKey === 'reminder' && list.length > 0) {
+          qSectionHeader = '<div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0 8px 0; gap: 8px;">' +
+            '<h4 class="pic-queue-heading" style="margin: 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">' + escapeHtml(qHeading + countLabel) + '</h4>' +
+            '<button type="button" class="btn secondary btn-auto" style="font-size: 11px; padding: 4px 8px; margin: 0;" onclick="copyUnpaidDonorsRecap()">📋 Salin Rekap Pengingat (' + list.length + ')</button>' +
+            '</div>';
+        } else {
+          qSectionHeader = '<h4 class="pic-queue-heading" style="margin: 16px 0 8px 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">' + escapeHtml(qHeading + countLabel) + '</h4>';
+        }
+        cardItems += qSectionHeader;
+      }
+
+      list.forEach(d => {
+        const displayName = d.Alias ? d.Alias : d.Name;
+        const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
+        const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
+        const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
+        const hasProof = Boolean(String(d.ProofLink || '').trim());
+        const actionType = isFinalized
+          ? (qKey === 'reminder' ? 'reminder' : (qKey === 'review' ? 'review' : (qKey === 'refund' ? 'refund' : '')))
+          : '';
+        const actionAttribute = actionType ? ' data-pic-action="' + actionType + '" tabindex="-1"' : '';
+        const picName = d.ModifiedBy ? escapeHtml(d.ModifiedBy) : '';
+        const picLabel = picName ? ' (' + picName + ')' : '';
+
+        // Status badge
+        let badgeHtml = '';
+        if (isVerified) {
+          badgeHtml = '<span class="badge green payment-status-badge donor-queue-badge">' + paymentStatusIcon('verified') + '<span>' + (isFinalized ? 'Terverifikasi' : 'Terdaftar') + '</span></span>';
+        } else if (isPaid && hasProof) {
+          badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Perlu Cek</span></span>';
+        } else if (isPaid) {
+          badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Bukti Belum Ada</span></span>';
+        } else {
+          badgeHtml = '<span class="badge warning payment-status-badge" style="background:#faeeda;color:var(--amber);">' + paymentStatusIcon('unpaid') + '<span>Belum Bayar</span></span>';
+        }
+
+        // Timeline
+        let timeHtml = '<div class="milestone-stack">';
+        timeHtml += '<div class="milestone-item"><span class="milestone-dot daftar"></span><span class="milestone-label">Daftar:</span><span class="milestone-time">' + formatTime(d.JoinedAt) + '</span></div>';
+        if (isPaid) {
+          const payTime = d.PaidAt ? formatTime(d.PaidAt) : '-';
+          timeHtml += '<div class="milestone-item"><span class="milestone-dot bayar"></span><span class="milestone-label">Bayar:</span><span class="milestone-time">' + payTime + '</span></div>';
+        }
+        if (isVerified) {
+          const verTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
+          timeHtml += '<div class="milestone-item"><span class="milestone-dot verif"></span><span class="milestone-label">Verif' + picLabel + ':</span><span class="milestone-time">' + verTime + '</span></div>';
+        }
+        if (isRefunded) {
+          const refTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
+          timeHtml += '<div class="milestone-item"><span class="milestone-dot refund"></span><span class="milestone-label">Refund' + picLabel + ':</span><span class="milestone-time">' + refTime + '</span></div>';
+        }
+        timeHtml += '</div>';
+
+        // Amount
+        let amountHtml = d.AmountDue ? formatIDR(d.AmountDue) : '-';
+        if (isPaid) {
+          amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
+        }
+
+        // Refund
+        let refundHtml = '-';
+        let needsRefund = false;
+        if (isPaid && d.AmountPaid) {
+          const diff = Number(d.AmountPaid) - Number(d.AmountDue);
+          if (diff > 0) {
+            needsRefund = true;
+            if (isRefunded) {
+              refundHtml = '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(diff) + '</small>';
+            } else {
+              refundHtml = '<span class="badge amber" style="margin-bottom:4px;">⚠️ Refund perlu diselesaikan: ' + formatIDR(diff) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>';
+            }
+          }
+        }
+
+        // Verification actions
+        let verificationHtml = '-';
+        let cardActions = '';
+        if (isPaid && hasProof) {
+          verificationHtml = '<div class="verification-stack"><a href="' + escapeHtml(d.ProofLink) + '" target="_blank" rel="noopener noreferrer" class="link-btn donor-proof-link">Lihat Bukti</a>';
+          if (!isVerified) {
+            if (needsRefund && !isRefunded) {
+              verificationHtml += '<span class="muted verification-warning" style="color:var(--red);">Selesaikan refund dulu sebelum verifikasi.</span>';
+            } else {
+              verificationHtml += '<div class="verification-controls"><button class="btn green" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', true)">Konfirmasi</button>';
+              verificationHtml += '<button class="btn danger" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', false)">Tolak</button></div>';
+            }
+          } else {
+            verificationHtml += '<span class="muted verification-complete">Sudah dikonfirmasi</span>';
+          }
+          verificationHtml += '</div>';
+        } else if (isPaid && !isVerified) {
+          verificationHtml = '<div class="verification-stack"><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Bukti Transfer belum tersedia</span></span><span class="muted verification-warning">Minta Donor upload ulang sebelum verifikasi.</span></div>';
+        } else if (!isPaid && isFinalized) {
+          const msg = encodeURIComponent("Halo " + d.Name + ", ini reminder untuk patungan *" + detail.campaign.TargetName + "*. Tagihan kamu: " + formatIDR(d.AmountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
+          verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim pengingat WA</a>';
+        }
+
+        if (isVerified && isFinalized) {
+          cardActions = '<div class="donor-card-actions"><div class="donor-settled-notice" style="font-size:12px; color:var(--muted);">Selesai · Tidak ada tindakan lanjutan untuk donatur ini.</div></div>';
+        } else if (verificationHtml !== '-') {
+          cardActions = '<div class="donor-card-actions">' + verificationHtml + '</div>';
+        }
+
+        // TABLE ROW
+        tableRows += '<tr' + actionAttribute + '>';
+        tableRows += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
+        tableRows += '<td>' + timeHtml + '</td>';
+        tableRows += '<td>' + badgeHtml + '</td>';
+        tableRows += '<td>' + amountHtml + '</td>';
+        tableRows += '<td>' + refundHtml + '</td>';
+        tableRows += '<td>' + verificationHtml + '</td>';
+        tableRows += '</tr>';
+
+        // MOBILE CARD
+        const cardClass = isVerified ? 'donor-card donor-card-settled' : (actionType ? ('donor-card donor-card-needs-action donor-card-action-' + actionType) : 'donor-card');
+        cardItems += '<div class="' + cardClass + '"' + actionAttribute + '>';
+        cardItems += '<div class="donor-card-header"><div class="donor-card-identity"><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div><div class="donor-card-status">' + badgeHtml + '</div></div>';
+        cardItems += '<div class="donor-card-body">';
+        cardItems += '<div class="donor-card-field donor-card-amount"><span class="label">Tagihan</span><strong class="donor-card-value">' + amountHtml + '</strong></div>';
+        if (needsRefund) cardItems += '<div class="donor-card-field"><span class="label">Refund</span><div class="donor-card-value">' + (isRefunded ? '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(Number(d.AmountPaid) - Number(d.AmountDue)) + '</small>' : '<span class="badge amber" style="margin-bottom:4px;">⚠️ Refund perlu diselesaikan: ' + formatIDR(Number(d.AmountPaid) - Number(d.AmountDue)) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>') + '</div></div>';
+        cardItems += '<div class="donor-card-timeline">' + timeHtml + '</div>';
+        cardItems += '</div>';
+        cardItems += cardActions;
+        cardItems += '</div>';
+      });
+    });
+
     let totalTagihan = 0;
     detail.donors.forEach(d => {
       totalTagihan += (Number(d.AmountDue) || 0);
     });
 
-    tableHtml += '</tbody>';
+    let cardContainer = '<div class="donor-cards">' + cardItems;
+    if (totalTagihan > 0) {
+      cardContainer += '<div class="donor-card-total">Total Tagihan: ' + formatIDR(totalTagihan) + '</div>';
+    }
+    cardContainer += '</div>';
+
+    let tableHtml = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>' + tableRows + '</tbody>';
     if (totalTagihan > 0) {
       tableHtml += '<tfoot style="background:#f5f7fa; font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
     }
     tableHtml += '</table></div>';
 
-    if (totalTagihan > 0) {
-      cardHtml += '<div class="donor-card-total">Total Tagihan: ' + formatIDR(totalTagihan) + '</div>';
-    }
-    cardHtml += '</div>';
-
-    el.innerHTML = headingHtml + cardHtml + tableHtml;
+    el.innerHTML = html + cardContainer + tableHtml;
   }
 
 
 
+
+  function copyUnpaidDonorsRecap() {
+    if (!_picCampaignData || !_picCampaignDetail || !_picCampaignDetail.donors) return;
+    const c = _picCampaignData;
+    const unpaid = _picCampaignDetail.donors.filter(d => getPicDonorQueueState(d, c.Status) === 'reminder');
+    if (!unpaid.length) {
+      showToast('Tidak ada donatur yang menunggu pembayaran.');
+      return;
+    }
+    let text = '*Pengingat Patungan: ' + (c.TargetName || 'Campaign') + '*\n';
+    text += 'Berikut daftar donatur yang belum transfer/upload bukti pembayaran:\n\n';
+    unpaid.forEach((d, idx) => {
+      const name = d.Alias ? (d.Alias + ' (' + d.Name + ')') : d.Name;
+      text += (idx + 1) + '. ' + name + ' - ' + formatIDR(d.AmountDue) + '\n';
+    });
+    text += '\nMohon segera konfirmasi atau upload bukti transfer melalui link:\n';
+    text += window.location.origin + window.location.pathname + '#c=' + c.CampaignID;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+      showToast('Rekap ' + unpaid.length + ' pengingat berhasil disalin!');
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      showToast('Rekap ' + unpaid.length + ' pengingat berhasil disalin!');
+    }
+  }
+
   function copyBulkMessage() {
+
     const el = document.getElementById('pic-bulk-msg');
     if (el) {
       el.select();
       document.execCommand('copy');
-      showToast('Pesan berhasil di-copy!');
+      showToast('Pesan berhasil disalin!');
     }
   }
 
@@ -4187,9 +4454,9 @@
       let text = "🎉 *Laporan Selesai: Patungan untuk " + detail.campaign.TargetName + "*\n\n";
       let summaryText = "Terima kasih banyak untuk teman-teman yang sudah berpartisipasi! Total partisipan : " + detail.donors.length + " orang dengan total donasi " + formatIDR(detail.campaign.GiftAmount);
       if (customCount > 0) {
-        summaryText += ", " + customCount + " custom amount and pro rata sebanyak " + formatIDR(proRata);
+        summaryText += ", " + customCount + " donasi nominal khusus dan pro-rata sebanyak " + formatIDR(proRata);
       } else {
-        summaryText += " and pro rata sebanyak " + formatIDR(proRata);
+        summaryText += " dan pro-rata sebanyak " + formatIDR(proRata);
       }
       text += summaryText + "\n\n";
       text += "*Daftar Donatur:*\n";
@@ -4211,9 +4478,9 @@
       document.body.removeChild(el);
 
       if (detail.campaign.GiftImage) {
-        showInfoModal('Laporan berhasil di-copy! Jangan lupa untuk copy/download gambar barang dan paste ke WhatsApp bersama laporan ini.', 'Sukses');
+        showInfoModal('Laporan berhasil disalin! Jangan lupa untuk simpan/unduh gambar barang dan tempel ke WhatsApp bersama laporan ini.', 'Sukses');
       } else {
-        showToast('Laporan selesai berhasil di-copy!');
+        showToast('Laporan selesai berhasil disalin!');
       }
     }).catch(e => showInfoModal(e.message || String(e), 'Error'));
   }
@@ -4539,17 +4806,7 @@
     filterAdminItems(listId, searchId, statusId, summaryId, '[data-admin-account-item]', 'admin');
   }
 
-  function filterMembers(listId, searchId, statusId, summaryId) {
-    const isSuperAdmin = String(listId).startsWith('sa-');
-    filterAdminItems(
-      listId,
-      searchId,
-      statusId || (isSuperAdmin ? 'sa-member-status-filter' : 'admin-member-status-filter'),
-      summaryId || (isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary'),
-      '[data-admin-member-item]',
-      'member'
-    );
-  }
+
 
   function renderAdminAccounts(list) {
     if (!list.length) return '<p class="muted admin-data-empty">Belum ada Admin terdaftar.</p>';
@@ -4641,23 +4898,24 @@
     });
   }
 
-  function renderAdminCampaignDeadline(c) {
+    function renderAdminCampaignDeadline(c) {
     if (!c.Deadline || c.Status === 'Archived') return '<span class="muted">-</span>';
 
     const diffDays = Math.ceil((new Date(c.Deadline) - new Date()) / (1000 * 60 * 60 * 24));
     let label = '';
     let kind = 'verified';
     let className = 'success';
+    const absDate = formatDate(c.Deadline);
     if (diffDays < 0) {
-      label = 'Terlewat ' + Math.abs(diffDays) + ' hari';
+      label = 'Terlewat ' + Math.abs(diffDays) + ' hari (' + absDate + ')';
       kind = 'alert';
       className = 'danger';
     } else if (diffDays <= 2) {
-      label = diffDays === 0 ? 'Hari ini' : diffDays + ' hari lagi';
+      label = (diffDays === 0 ? 'Hari ini' : diffDays + ' hari lagi') + ' (' + absDate + ')';
       kind = 'review';
       className = 'warning';
     } else {
-      label = diffDays + ' hari lagi';
+      label = diffDays + ' hari lagi (' + absDate + ')';
     }
     return '<span class="semantic-status ' + className + '">' + paymentStatusIcon(kind) + '<span>' + label + '</span></span>';
   }
@@ -4702,14 +4960,20 @@
       const targetName = escapeHtml(c.TargetName);
       const updateText = c.ModifiedBy ? (formatTime(c.ModifiedAt) + '<br><small>oleh ' + escapeHtml(c.ModifiedBy) + '</small>') : '-';
 
+      let overdueCallout = '';
+      if (c.Status === 'Open' && c.Deadline && new Date(c.Deadline) < new Date()) {
+        overdueCallout = '<div class="admin-overdue-callout" style="background:#fff1f2; border-left:4px solid var(--red); padding:8px 12px; margin-top:8px; border-radius:4px; font-size:12px; color:#991b1b;"><strong>Campaign terlewat:</strong> Hubungi PIC untuk menutup pendaftaran atau perbarui deadline.</div>';
+      }
+
       cards += '<article class="admin-campaign-card admin-filterable admin-filter-canonical"' + dataAttrs + '>';
       cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Target</span><strong>' + targetName + '</strong></div>' + statusBadge(c.Status) + '</div>';
       cards += '<dl class="admin-data-card-meta">';
       cards += '<div><dt>Sisa waktu</dt><dd>' + renderAdminCampaignDeadline(c) + '</dd></div>';
-      cards += '<div><dt>PIC</dt><dd>' + escapeHtml(c.picName || '-') + '</dd></div>';
       cards += '<div><dt>Donatur</dt><dd>' + String(c.paidCount) + '/' + String(c.donorCount) + ' sudah bayar</dd></div>';
-      cards += '<div><dt>Terakhir diupdate</dt><dd class="muted">' + updateText + '</dd></div>';
-      cards += '</dl>' + renderAdminCampaignActions(c, role) + '</article>';
+      cards += '</dl>';
+      cards += overdueCallout;
+      cards += '<details class="admin-card-more" style="margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 6px;"><summary class="muted" style="cursor: pointer; font-size: 12px;">Info PIC & Log</summary><div style="font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4;"><span><strong>PIC:</strong> ' + escapeHtml(c.picName || '-') + '</span><br><span><strong>Terakhir diupdate:</strong> ' + updateText + '</span></div></details>';
+      cards += renderAdminCampaignActions(c, role) + '</article>';
 
       table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + targetName + '</td><td>' + statusBadge(c.Status) + '</td>';
       table += '<td>' + renderAdminCampaignDeadline(c) + '</td><td>' + escapeHtml(c.picName || '-') + '</td><td>' + String(c.paidCount) + '/' + String(c.donorCount) + '</td>';
@@ -4748,13 +5012,13 @@
         html += '</div>';
 
         if (detail.picToken) {
-          html += '<button class="btn secondary" style="margin-bottom:12px;" onclick="deepDive(\'' + detail.picToken + '\'); document.getElementById(\'admin-modal\').innerHTML=\'\';">Lihat sebagai PIC (Deep Dive)</button>';
+          html += '<button class="btn secondary" style="margin-bottom:12px;" onclick="deepDive(\'' + detail.picToken + '\'); document.getElementById(\'admin-modal\').innerHTML=\'\';">Tinjau sebagai PIC</button>';
         }
 
         const c = detail.campaign;
 
         if (c.Status === 'Finalized') {
-          html += '<button class="btn amber" style="margin-bottom:12px; margin-left:8px;" onclick="adminRecalculateUI(\'' + c.CampaignID + '\')">Recalculate Donor Split</button>';
+          html += '<button class="btn amber" style="margin-bottom:12px; margin-left:8px;" onclick="adminRecalculateUI(\'' + c.CampaignID + '\')">Hitung Ulang Tagihan Donatur</button>';
         }
         let totalRefund = 0;
         detail.donors.forEach(d => {
@@ -4850,7 +5114,7 @@
   }
 
   function adminRecalculateUI(campaignId) {
-    showConfirmModal('Yakin ingin melakukan Recalculate Donor Split? Ini akan menghitung ulang dan mengubah tagihan (Amount Due) seluruh donatur pada campaign ini.', () => {
+    showConfirmModal('Yakin ingin menghitung ulang pembagian donasi? Ini akan memperbarui nominal tagihan seluruh donatur pada campaign ini.', () => {
       // Calls the requested backend function and handles loading queue
       callQueued('adminRecalculateCampaign', currentToken(), campaignId)
         .then(() => {
@@ -4926,7 +5190,7 @@
         return;
       }
       closeEditGiftModal();
-      showConfirmModal('Yakin ingin mengubah Total Hadiah menjadi ' + formatIDR(newVal) + '? (Jangan lupa Recalculate Donor Split setelah ini!)', () => {
+      showConfirmModal('Yakin ingin mengubah Total Hadiah menjadi ' + formatIDR(newVal) + '? (Jangan lupa Hitung Ulang Tagihan Donatur setelah ini!)', () => {
         callQueued('adminUpdateGiftAmount', currentToken(), campaignId, newVal)
           .then(() => {
             showToast('Total Hadiah berhasil diperbarui.');
@@ -5059,7 +5323,7 @@
 
   function runDataSweep() {
     const msgEl = document.getElementById('sa-sweep-msg');
-    msgEl.innerHTML = '<span class="muted">Sweeping database...</span>';
+    msgEl.innerHTML = '<span class="muted">Membersihkan data arsip...</span>';
 
     call('sweepArchivedData', currentToken())
       .then(msg => {
@@ -5107,6 +5371,53 @@
     });
   }
 
+    let _memberPageSize = { admin: 20, sa: 20 };
+  let _allActiveMembers = { admin: [], sa: [] };
+
+  function loadMoreMembers(scope = 'admin') {
+    _memberPageSize[scope] = (_memberPageSize[scope] || 20) + 20;
+    const isSuperAdmin = scope === 'sa';
+    const listId = isSuperAdmin ? 'sa-member-list' : 'admin-member-list';
+    const searchId = isSuperAdmin ? 'sa-search-member' : 'admin-search-member';
+    const statusId = isSuperAdmin ? 'sa-member-status-filter' : 'admin-member-status-filter';
+    const summaryId = isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary';
+    filterMembers(listId, searchId, statusId, summaryId);
+  }
+
+  function filterMembers(listId, searchId, statusId, summaryId) {
+    const isSuperAdmin = String(listId).startsWith('sa-');
+    const scope = isSuperAdmin ? 'sa' : 'admin';
+    const root = document.getElementById(listId);
+    if (!root) return;
+
+    const searchEl = document.getElementById(searchId);
+    const statusEl = document.getElementById(statusId);
+    const query = adminFilterText(searchEl ? searchEl.value : '');
+    const selectedStatus = adminFilterText(statusEl ? statusEl.value : 'all') || 'all';
+    const isFiltering = Boolean(query || selectedStatus !== 'all');
+
+    const fullList = _allActiveMembers[scope] || [];
+    const filteredList = fullList.filter(m => {
+      const searchable = adminFilterText([m.Name, m.WhatsApp, m.Role, m.Status, m.ModifiedBy].join(' '));
+      const itemStatus = adminFilterText(m.Status);
+      const matchesSearch = !query || searchable.includes(query);
+      const matchesStatus = selectedStatus === 'all' || itemStatus === selectedStatus;
+      return matchesSearch && matchesStatus;
+    });
+
+    const limit = _memberPageSize[scope] || 20;
+    const total = fullList.length;
+    const listToRender = isFiltering ? filteredList : fullList.slice(0, limit);
+    const displayedCount = isFiltering ? filteredList.length : Math.min(limit, total);
+
+    root.innerHTML = renderMembersHtml(listToRender, isSuperAdmin, scope, total, displayedCount, isFiltering);
+
+    const summaryEl = document.getElementById(summaryId);
+    if (summaryEl) {
+      summaryEl.textContent = 'Menampilkan ' + displayedCount + ' dari ' + total + ' member.';
+    }
+  }
+
   function refreshMembers() {
     call('fetchAllMembers', currentToken()).then(list => {
       const activeList = list.filter(m => {
@@ -5115,13 +5426,13 @@
       });
       const role = safeGet('auth_role');
       const isSuperAdmin = role === 'SuperAdmin';
+      const scope = isSuperAdmin ? 'sa' : 'admin';
       const listId = isSuperAdmin ? 'sa-member-list' : 'admin-member-list';
       const searchId = isSuperAdmin ? 'sa-search-member' : 'admin-search-member';
       const statusId = isSuperAdmin ? 'sa-member-status-filter' : 'admin-member-status-filter';
       const summaryId = isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary';
-      const el = document.getElementById(listId);
-      if (!el) return;
-      el.innerHTML = renderMembersView(activeList, isSuperAdmin);
+      _allActiveMembers[scope] = activeList;
+      _memberPageSize[scope] = 20;
       filterMembers(listId, searchId, statusId, summaryId);
     }).catch(e => {
       const role = safeGet('auth_role');
@@ -5144,21 +5455,32 @@
   function renderMemberActions(m) {
     let html = '<div class="admin-card-actions">';
     if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
-      html += '<button type="button" class="btn blue" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')">Jadikan Admin</button>';
+      html += '<button type="button" class="btn blue" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai Admin" onclick="assignMemberRoleUI(\\\'' + m.WhatsApp + '\\\', \\\'Admin\\\')">Jadikan Admin</button>';
     }
     if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
-      html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')">Jadikan PIC</button>';
+      html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai PIC" onclick="assignMemberRoleUI(\\\'' + m.WhatsApp + '\\\', \\\'PIC\\\')">Jadikan PIC</button>';
     }
-    html += '<button type="button" class="btn danger" aria-label="Hapus member ' + escapeHtml(m.Name) + '" onclick="removeMemberUI(\'' + m.WhatsApp + '\')">Hapus member</button>';
+    html += '<button type="button" class="btn danger" aria-label="Hapus member ' + escapeHtml(m.Name) + '" onclick="removeMemberUI(\\\'' + m.WhatsApp + '\\\')">Hapus member</button>';
     return html + '</div>';
   }
 
-  function renderMembersView(activeList, isSuperAdmin) {
-    if (!activeList.length) return '<p class="muted admin-data-empty">Belum ada member terdaftar.</p>';
+  function renderMembersView(activeList, isSuperAdmin, scope = (isSuperAdmin ? 'sa' : 'admin')) {
+    _allActiveMembers[scope] = activeList;
+    _memberPageSize[scope] = 20;
+    const total = activeList.length;
+    const limit = 20;
+    const listToRender = activeList.slice(0, limit);
+    const displayedCount = Math.min(limit, total);
+    return renderMembersHtml(listToRender, isSuperAdmin, scope, total, displayedCount, false);
+  }
+
+  function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, displayedCount, isFiltering) {
+    if (!itemsToRender.length && total === 0) return '<p class="muted admin-data-empty">Belum ada member terdaftar.</p>';
 
     let cards = '<div class="admin-member-cards">';
     let table = '<div class="admin-member-table-view"><div class="table-responsive"><table><tr><th>Nama</th><th>WA</th><th>Role</th><th>Status</th><th>Terakhir Diupdate</th>' + (isSuperAdmin ? '<th>Aksi</th>' : '') + '</tr>';
-    activeList.forEach(m => {
+
+    itemsToRender.forEach(m => {
       const statusValue = adminFilterText(m.Status);
       const searchText = adminFilterText([m.Name, m.WhatsApp, m.Role, m.Status, m.ModifiedBy].join(' '));
       const dataAttrs = ' data-admin-member-item data-search="' + escapeHtml(searchText) + '" data-status="' + escapeHtml(statusValue) + '"';
@@ -5177,19 +5499,35 @@
       if (isSuperAdmin) {
         table += '<td><div class="action-group">';
         if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
-          table += '<button type="button" class="btn blue" aria-label="Jadikan ' + name + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')">+ Admin</button>';
+          table += '<button type="button" class="btn blue" aria-label="Jadikan ' + name + ' sebagai Admin" onclick="assignMemberRoleUI(\\\'' + m.WhatsApp + '\\\', \\\'Admin\\\')">+ Admin</button>';
         }
         if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
-          table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')">+ PIC</button>';
+          table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai PIC" onclick="assignMemberRoleUI(\\\'' + m.WhatsApp + '\\\', \\\'PIC\\\')">+ PIC</button>';
         }
-        table += '<button type="button" class="btn danger" aria-label="Hapus member ' + name + '" onclick="removeMemberUI(\'' + m.WhatsApp + '\')">Hapus</button></div></td>';
+        table += '<button type="button" class="btn danger" aria-label="Hapus member ' + name + '" onclick="removeMemberUI(\\\'' + m.WhatsApp + '\\\')">Hapus</button></div></td>';
       }
       table += '</tr>';
     });
+
+    let paginationHtml = '';
+    if (!isFiltering) {
+      if (displayedCount < total) {
+        paginationHtml = '<div class="admin-pagination-controls" style="text-align:center; padding:16px 0;">' +
+          '<p class="muted" style="margin-bottom:8px; font-size:13px;">Menampilkan ' + displayedCount + ' dari ' + total + ' member</p>' +
+          '<button type="button" class="btn secondary btn-auto" onclick="loadMoreMembers(\\\'' + scope + '\\\')">Muat lebih banyak</button>' +
+          '</div>';
+      } else {
+        paginationHtml = '<div class="admin-pagination-controls" style="text-align:center; padding:12px 0;">' +
+          '<p class="muted" style="margin:0; font-size:13px;">Menampilkan ' + displayedCount + ' dari ' + total + ' member</p>' +
+          '</div>';
+      }
+    }
+
     cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
     table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
-    return cards + table;
+    return cards + table + paginationHtml;
   }
+
 
   function updateMemberStatusUI(source) {
     const sel = source && source.nodeType ? source : null;
