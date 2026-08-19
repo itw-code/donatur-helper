@@ -48,7 +48,7 @@ export function formatUserErrorMessage(err) {
   if (/respons server bukan json|error 500|server 502|503 service|<!doctype/i.test(trimmed)) {
     return 'Respons server tidak dapat diproses. Silakan coba beberapa saat lagi.';
   }
-  if (/cannot read properties|undefined|referenceerror|typeerror|syntaxerror|null is not an object|at doPost|at doGet|Code\.js|\.js:\d+/i.test(trimmed)) {
+  if (/cannot read properties|undefined|referenceerror|typeerror|syntaxerror|null is not an object|at doPost|at doGet|Code\.js|\.js:\d+|pgrst|violates.*constraint|relation.*does not exist|syntax error at or near|column.*does not exist|permission denied for/i.test(trimmed)) {
     return 'Terjadi kendala saat memproses data. Silakan muat ulang halaman atau coba lagi.';
   }
   return escapeHtml(trimmed);

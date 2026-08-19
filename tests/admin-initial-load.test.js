@@ -23,10 +23,8 @@ test('Task 4: Admin dashboard initializes critical summary and action queues bef
 
   loadAdminDashboard();
 
-  // Primary calls must occur immediately in initial batch
-  assert.ok(callSequence.includes('getDashboardSummary'), 'Summary must be requested at start');
-  assert.ok(callSequence.includes('getPendingMembers'), 'Pending members must be requested at start');
-  assert.ok(callSequence.includes('getPendingLateRequests'), 'Late requests must be requested at start');
+  // Primary Stage 1 single call must occur immediately at start
+  assert.ok(callSequence.includes('getDashboardSummary'), 'Stage 1 single unified call must be requested at start');
 });
 
 test('Task 4: Member pagination remains strictly limited to 20 items per initial render', () => {

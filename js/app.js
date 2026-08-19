@@ -180,6 +180,8 @@ import {
 import {
   loadSuperAdminDashboard,
   loadSuperAdminSettings,
+  loadSuperAdminStage1,
+  renderSuperAdminSettings,
   runDataSweep,
   saveSettings,
   genAdminToken
@@ -348,6 +350,8 @@ const globalBindings = {
   refreshSACampaigns,
   loadSuperAdminDashboard,
   loadSuperAdminSettings,
+  loadSuperAdminStage1,
+  renderSuperAdminSettings,
   runDataSweep,
   saveSettings,
   genAdminToken,
@@ -375,6 +379,16 @@ if (typeof window !== 'undefined') {
 
 export function initApp() {
   initTargetCampaignId();
+
+  if (typeof window !== 'undefined' && window.location && window.location.search) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token');
+    if (urlToken && urlToken.trim()) {
+      loginToken(urlToken.trim());
+      mountDebugPanel();
+      return;
+    }
+  }
 
   const user = safeGet('donor_user');
   const token = safeGet('auth_token');

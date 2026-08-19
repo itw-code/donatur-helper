@@ -35,7 +35,7 @@ export function refreshSummary(elId) {
   if (!el) return Promise.resolve();
   el.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat ringkasan...</div>';
   markFetchStart('Admin', 'getDashboardSummary');
-  return call('getDashboardSummary', currentToken()).then(s => {
+  return call('getDashboardSummary', { token: currentToken() }).then(s => {
     markFetchEnd('Admin', 'getDashboardSummary', { recordCount: (s.totalDonors || 0) });
     markRenderStart('Admin', 'summary');
     el.innerHTML = renderSummaryCard(s);
@@ -93,17 +93,95 @@ export function updateAdminActionQueue(kind, count) {
   emptyEl.classList.toggle('hidden', total !== 0);
 }
 
+export function loadAdminStage1(scope = 'admin') {
+  const isSuperAdmin = scope === 'sa' || scope === 'superadmin';
+  const summaryElId = isSuperAdmin ? 'sa-summary' : 'admin-summary';
+  const pendingElId = isSuperAdmin ? 'sa-pending-members' : 'admin-pending-members';
+  const lateElId = isSuperAdmin ? 'sa-late-donors' : 'admin-late-donors';
+
+  const summaryEl = document.getElementById(summaryElId);
+  if (summaryEl) summaryEl.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat ringkasan...</div>';
+
+  markFetchStart(isSuperAdmin ? 'SuperAdmin' : 'Admin', 'getDashboardSummary');
+
+  return call('getDashboardSummary', { token: currentToken() })
+    .then(data => {
+      recordPendingFetchTime();
+      markFetchEnd(isSuperAdmin ? 'SuperAdmin' : 'Admin', 'getDashboardSummary', { recordCount: (data.totalDonors || 0) });
+      markRenderStart(isSuperAdmin ? 'SuperAdmin' : 'Admin', 'stage1');
+
+      // a. Summary metrics panel
+      if (summaryEl) {
+        summaryEl.innerHTML = renderSummaryCard(data);
+      }
+
+      // b. Pending members approval cards
+      const pendingMembers = data.pendingMembers || (data.pending_members_list || []).map(m => ({
+        Name: m.name || m.Name,
+        name: m.name || m.Name,
+        WhatsApp: m.whatsapp || m.WhatsApp,
+        whatsapp: m.whatsapp || m.WhatsApp,
+        AddedBy: m.added_by || m.AddedBy || 'Self-Registered - active',
+        addedBy: m.added_by || m.AddedBy || 'Self-Registered - active',
+        AddedAt: m.added_at || m.AddedAt,
+        addedAt: m.added_at || m.AddedAt,
+        id: m.id,
+        ...m
+      }));
+      renderPendingMembersSection(pendingElId, pendingMembers);
+
+      // c. Pending late requests queue
+      const pendingLate = data.pendingLateRequests || (data.pending_late_requests || []).map(r => ({
+        reqId: r.request_id || r.reqId || r.requestId,
+        requestId: r.request_id || r.reqId || r.requestId,
+        targetName: r.target_name || r.targetName || r.campaign_id,
+        campaignId: r.campaign_id || r.campaignId,
+        pic: r.pic || '',
+        donorName: r.donor_name || r.donorName,
+        donorWhatsApp: r.donor_whatsapp || r.donorWhatsApp,
+        isCustom: Boolean(r.is_custom !== undefined ? r.is_custom : r.isCustom),
+        customAmount: Number(r.custom_amount !== undefined ? r.custom_amount : r.customAmount) || 0,
+        reason: r.reason || '',
+        createdAt: r.created_at || r.createdAt,
+        ...r
+      }));
+      renderLateRequestsSection(lateElId, pendingLate);
+
+      markRenderEnd(isSuperAdmin ? 'SuperAdmin' : 'Admin', 'stage1');
+      return data;
+    })
+    .catch(e => {
+      markFetchEnd(isSuperAdmin ? 'SuperAdmin' : 'Admin', 'getDashboardSummary', { isError: true, isTimeout: e.isTimeout });
+      if (!isSuperAdmin) {
+        updateAdminActionQueue('pending', null);
+        updateAdminActionQueue('late', null);
+      }
+      if (summaryEl) {
+        summaryEl.innerHTML = '<p class="error" role="alert">Ringkasan belum dapat dimuat. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshSummary(\'' + summaryElId + '\')">Coba lagi</button></p>';
+      }
+      const pendingEl = document.getElementById(pendingElId);
+      if (pendingEl) {
+        const parentCard = getAdminParentCard(pendingElId);
+        if (parentCard) parentCard.classList.remove('hidden');
+        pendingEl.innerHTML = '<p class="error" role="alert">Pendaftaran belum dapat dimuat. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshPendingMembers(\'' + pendingElId + '\')">Coba lagi</button></p>';
+      }
+      const lateEl = document.getElementById(lateElId);
+      if (lateEl) {
+        const parentCard = getAdminParentCard(lateElId);
+        if (parentCard) parentCard.classList.remove('hidden');
+        lateEl.innerHTML = '<p class="error" role="alert">Gagal memuat pengajuan. <button type="button" class="btn secondary btn-auto retry-action" onclick="refreshLateRequests(\'' + lateElId + '\')">Coba lagi</button></p>';
+      }
+      console.error('Stage 1 error:', e);
+    });
+}
+
 export function loadAdminDashboard() {
   showView('admin-dashboard');
   startViewTiming('Admin');
   resetAdminActionQueue();
 
-  // STAGE 1 (High Priority): Operational Summary & Action Queues
-  const stage1 = Promise.allSettled([
-    refreshSummary('admin-summary'),
-    refreshPendingMembers('admin-pending-members'),
-    refreshLateRequests('admin-late-donors')
-  ]);
+  // STAGE 1 (High Priority): Operational Summary & Action Queues via Single Stage 1 RPC
+  const stage1 = loadAdminStage1('admin');
 
   // STAGE 2 (Medium Priority): Campaigns & Members
   stage1.finally(() => {
@@ -128,86 +206,95 @@ export function getAdminParentCard(elId) {
   return parentCardId ? document.getElementById(parentCardId) : null;
 }
 
+export function renderPendingMembersSection(elId, list) {
+  const el = document.getElementById(elId);
+  if (!el) return list;
+  if (elId === 'admin-pending-members') updateAdminActionQueue('pending', list.length);
+  const parentCard = getAdminParentCard(elId);
+  const bannerId = elId === 'sa-pending-members' ? 'sa-notify-banner' : 'admin-notify-banner';
+  const bannerEl = document.getElementById(bannerId);
+
+  if (!list.length) {
+    el.innerHTML = '<p class="muted">Tidak ada pendaftaran baru.</p>';
+    if (parentCard) parentCard.classList.add('hidden');
+    if (bannerEl) bannerEl.classList.add('hidden');
+    return list;
+  }
+  if (parentCard) parentCard.classList.remove('hidden');
+
+  if (bannerEl) {
+    bannerEl.innerHTML = '<span class="semantic-status" style="color:inherit;">' + paymentStatusIcon('review') + '<span>Ada ' + list.length + ' pendaftaran member baru yang memerlukan persetujuan!</span></span>' +
+                          '<button type="button" class="link-btn" aria-label="Lihat detail pendaftaran member baru" onclick="scrollToPending(\'' + elId + '\')" style="color:white; font-size:12px; text-decoration:underline;">Lihat Detail</button>';
+    bannerEl.classList.remove('hidden');
+  }
+
+  let cardHtml = '<div class="pending-bulk-actions">';
+  cardHtml += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><input type="checkbox" id="select-all-pending-mobile-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"> Pilih Semua</label>';
+  cardHtml += '<button type="button" class="btn green" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui</button>';
+  cardHtml += '<button type="button" class="btn danger" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak</button>';
+  cardHtml += '</div>';
+  cardHtml += '<div class="pending-cards">';
+
+  list.forEach((m) => {
+    let defaultStatus = 'active';
+    const addedBy = m.AddedBy || m.added_by || m.addedBy || '';
+    if (addedBy && String(addedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
+    const statusLabel = defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)';
+    const name = m.Name || m.name || '';
+    const wa = m.WhatsApp || m.whatsapp || '';
+
+    cardHtml += '<div class="pending-card">';
+    cardHtml += '<div class="pending-card-header">';
+    cardHtml += '<label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(wa) + '" data-status="' + defaultStatus + '"><span class="pending-card-name">' + escapeHtml(name) + '</span></label>';
+    cardHtml += '<span class="badge" style="font-size:11px;">' + statusLabel + '</span>';
+    cardHtml += '</div>';
+    cardHtml += '<span class="pending-card-wa">' + escapeHtml(wa) + '</span>';
+    cardHtml += '<div class="pending-card-actions">';
+    cardHtml += '<button type="button" class="btn green" aria-label="Setujui pendaftaran ' + escapeHtml(name) + '" onclick="approvePending(\'' + wa + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
+    cardHtml += '<button type="button" class="btn danger" aria-label="Tolak pendaftaran ' + escapeHtml(name) + '" onclick="approvePending(\'' + wa + '\', \'rejected\', \'' + elId + '\')">Tolak</button>';
+    cardHtml += '</div>';
+    cardHtml += '</div>';
+  });
+  cardHtml += '</div>';
+
+  let tableHtml = '<div class="pending-table-view">';
+  tableHtml += '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
+  tableHtml += '<button type="button" class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
+  tableHtml += '<button type="button" class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
+  tableHtml += '</div>';
+
+  tableHtml += '<div class="table-responsive"><table><tr>';
+  tableHtml += '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-pending-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"></th>';
+  tableHtml += '<th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
+
+  list.forEach((m) => {
+    let defaultStatus = 'active';
+    const addedBy = m.AddedBy || m.added_by || m.addedBy || '';
+    if (addedBy && String(addedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
+    const name = m.Name || m.name || '';
+    const wa = m.WhatsApp || m.whatsapp || '';
+
+    tableHtml += '<tr>';
+    tableHtml += '<td style="text-align: center;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(wa) + '" data-status="' + defaultStatus + '"></td>';
+    tableHtml += '<td>' + escapeHtml(name) + '</td><td>' + escapeHtml(wa) + '</td>';
+    tableHtml += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
+    tableHtml += '<td><button type="button" class="btn green" aria-label="Setujui pendaftaran ' + escapeHtml(name) + '" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + wa + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
+    tableHtml += '<button type="button" class="btn danger" aria-label="Tolak pendaftaran ' + escapeHtml(name) + '" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + wa + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
+  });
+  tableHtml += '</table></div></div>';
+
+  el.innerHTML = cardHtml + tableHtml;
+  return list;
+}
+
 export function refreshPendingMembers(elId) {
   markFetchStart('Admin', 'getPendingMembers');
-  return call('getPendingMembers', currentToken()).then(list => {
+  return call('getPendingMembers', { token: currentToken() }).then(res => {
     recordPendingFetchTime();
+    const list = Array.isArray(res) ? res : (res && res.pending_members_list ? res.pending_members_list : []);
     markFetchEnd('Admin', 'getPendingMembers', { recordCount: list.length });
     markRenderStart('Admin', 'pendingMembers');
-    const el = document.getElementById(elId);
-    if (!el) {
-      markRenderEnd('Admin', 'pendingMembers');
-      return list;
-    }
-    if (elId === 'admin-pending-members') updateAdminActionQueue('pending', list.length);
-    const parentCard = getAdminParentCard(elId);
-    const bannerId = elId === 'sa-pending-members' ? 'sa-notify-banner' : 'admin-notify-banner';
-    const bannerEl = document.getElementById(bannerId);
-
-    if (!list.length) {
-      el.innerHTML = '<p class="muted">Tidak ada pendaftaran baru.</p>';
-      if (parentCard) parentCard.classList.add('hidden');
-      if (bannerEl) bannerEl.classList.add('hidden');
-      markRenderEnd('Admin', 'pendingMembers');
-      return list;
-    }
-    if (parentCard) parentCard.classList.remove('hidden');
-
-    if (bannerEl) {
-      bannerEl.innerHTML = '<span class="semantic-status" style="color:inherit;">' + paymentStatusIcon('review') + '<span>Ada ' + list.length + ' pendaftaran member baru yang memerlukan persetujuan!</span></span>' +
-                            '<button type="button" class="link-btn" aria-label="Lihat detail pendaftaran member baru" onclick="scrollToPending(\'' + elId + '\')" style="color:white; font-size:12px; text-decoration:underline;">Lihat Detail</button>';
-      bannerEl.classList.remove('hidden');
-    }
-
-    let cardHtml = '<div class="pending-bulk-actions">';
-    cardHtml += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;"><input type="checkbox" id="select-all-pending-mobile-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"> Pilih Semua</label>';
-    cardHtml += '<button type="button" class="btn green" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui</button>';
-    cardHtml += '<button type="button" class="btn danger" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak</button>';
-    cardHtml += '</div>';
-    cardHtml += '<div class="pending-cards">';
-
-    list.forEach((m) => {
-      let defaultStatus = 'active';
-      if (m.AddedBy && String(m.AddedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
-      const statusLabel = defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)';
-
-      cardHtml += '<div class="pending-card">';
-      cardHtml += '<div class="pending-card-header">';
-      cardHtml += '<label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"><span class="pending-card-name">' + escapeHtml(m.Name) + '</span></label>';
-      cardHtml += '<span class="badge" style="font-size:11px;">' + statusLabel + '</span>';
-      cardHtml += '</div>';
-      cardHtml += '<span class="pending-card-wa">' + escapeHtml(m.WhatsApp) + '</span>';
-      cardHtml += '<div class="pending-card-actions">';
-      cardHtml += '<button type="button" class="btn green" aria-label="Setujui pendaftaran ' + escapeHtml(m.Name) + '" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
-      cardHtml += '<button type="button" class="btn danger" aria-label="Tolak pendaftaran ' + escapeHtml(m.Name) + '" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button>';
-      cardHtml += '</div>';
-      cardHtml += '</div>';
-    });
-    cardHtml += '</div>';
-
-    let tableHtml = '<div class="pending-table-view">';
-    tableHtml += '<div style="margin-bottom: 12px; display: flex; gap: 8px;">';
-    tableHtml += '<button type="button" class="btn green btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'approve\', \'' + elId + '\')">Setujui Terpilih</button>';
-    tableHtml += '<button type="button" class="btn danger btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="bulkApprovePending(\'reject\', \'' + elId + '\')">Tolak Terpilih</button>';
-    tableHtml += '</div>';
-
-    tableHtml += '<div class="table-responsive"><table><tr>';
-    tableHtml += '<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-pending-' + elId + '" onclick="toggleSelectAllPending(this, \'' + elId + '\')"></th>';
-    tableHtml += '<th>Nama</th><th>WhatsApp</th><th>Status Awal</th><th>Aksi</th></tr>';
-
-    list.forEach((m) => {
-      let defaultStatus = 'active';
-      if (m.AddedBy && String(m.AddedBy).toLowerCase().includes('- ex')) defaultStatus = 'ex';
-      tableHtml += '<tr>';
-      tableHtml += '<td style="text-align: center;"><input type="checkbox" class="pending-checkbox-' + elId + '" value="' + escapeHtml(m.WhatsApp) + '" data-status="' + defaultStatus + '"></td>';
-      tableHtml += '<td>' + escapeHtml(m.Name) + '</td><td>' + escapeHtml(m.WhatsApp) + '</td>';
-      tableHtml += '<td class="muted">' + (defaultStatus === 'active' ? 'Active (Karyawan)' : 'Ex (Alumni)') + '</td>';
-      tableHtml += '<td><button type="button" class="btn green" aria-label="Setujui pendaftaran ' + escapeHtml(m.Name) + '" style="margin-top:0; padding:6px 12px; font-size:12px; margin-right:4px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'' + defaultStatus + '\', \'' + elId + '\')">Setujui</button>';
-      tableHtml += '<button type="button" class="btn danger" aria-label="Tolak pendaftaran ' + escapeHtml(m.Name) + '" style="margin-top:0; padding:6px 12px; font-size:12px;" onclick="approvePending(\'' + m.WhatsApp + '\', \'rejected\', \'' + elId + '\')">Tolak</button></td></tr>';
-    });
-    tableHtml += '</table></div></div>';
-
-    el.innerHTML = cardHtml + tableHtml;
+    renderPendingMembersSection(elId, list);
     markRenderEnd('Admin', 'pendingMembers');
     return list;
   }).catch(e => {
@@ -230,11 +317,12 @@ export function scrollToPending(elId) {
 }
 
 export function approvePending(wa, newStatus, elId) {
-  call('adminUpdateMemberStatus', currentToken(), wa, newStatus).then(() => {
+  call('adminUpdateMemberStatus', { token: currentToken(), whatsapp: wa, newStatus: newStatus }).then(() => {
+    showToast('Status member berhasil diperbarui.');
     refreshPendingMembers(elId);
     refreshMembers();
     refreshSummary(elId === 'sa-pending-members' ? 'sa-summary' : 'admin-summary');
-  }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
 }
 
 export function toggleSelectAllPending(master, elId) {
@@ -265,47 +353,56 @@ export function bulkApprovePending(action, elId) {
     refreshPendingMembers(elId);
     refreshMembers();
     refreshSummary(elId === 'sa-pending-members' ? 'sa-summary' : 'admin-summary');
-  }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
+}
+
+export function renderLateRequestsSection(elId, list) {
+  const el = document.getElementById(elId);
+  if (!el) return list;
+  if (elId === 'admin-late-donors') updateAdminActionQueue('late', list.length);
+  const parentCard = getAdminParentCard(elId);
+  if (!list.length) {
+    el.innerHTML = '<p class="muted">Tidak ada pengajuan donatur susulan.</p>';
+    if (parentCard) parentCard.classList.add('hidden');
+    return list;
+  }
+  if (parentCard) parentCard.classList.remove('hidden');
+  let cards = '<div class="admin-late-cards">';
+  let table = '<div class="admin-late-table-view"><div class="table-responsive"><table><tr><th>Campaign (PIC)</th><th>Donatur Susulan</th><th>Nominal</th><th>Alasan</th><th>Aksi</th></tr>';
+  list.forEach(r => {
+    const targetName = escapeHtml(r.targetName || r.target_name || r.campaign_id || '');
+    const donorName = escapeHtml(r.donorName || r.donor_name || '');
+    const donorWhatsApp = escapeHtml(r.donorWhatsApp || r.donor_whatsapp || '');
+    const reqId = r.reqId || r.request_id || r.requestId || '';
+    const isCustom = Boolean(r.isCustom !== undefined ? r.isCustom : r.is_custom);
+    const customAmount = Number(r.customAmount !== undefined ? r.customAmount : r.custom_amount) || 0;
+    const amount = isCustom ? '<span class="badge blue">Khusus: ' + formatIDR(customAmount) + '</span>' : '<span class="badge green">Patungan Rata</span>';
+    const reason = escapeHtml(r.reason || '');
+    const pic = escapeHtml(r.pic || '');
+
+    cards += '<article class="admin-late-card">';
+    cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Campaign</span><strong>' + targetName + '</strong><span class="muted">PIC: ' + pic + '</span></div><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Perlu ditinjau</span></span></div>';
+    cards += '<dl class="admin-data-card-meta"><div><dt>Donatur susulan</dt><dd>' + donorName + '<br><span class="muted">' + donorWhatsApp + '</span></dd></div>';
+    cards += '<div><dt>Nominal</dt><dd>' + amount + '</dd></div><div><dt>Alasan</dt><dd class="muted">' + reason + '</dd></div></dl>';
+    cards += '<div class="admin-card-actions"><button type="button" class="btn blue" aria-label="Setujui pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + reqId + '\', true, \'' + elId + '\')">Setujui</button><button type="button" class="btn danger" aria-label="Tolak pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + reqId + '\', false, \'' + elId + '\')">Tolak</button></div></article>';
+
+    table += '<tr><td><strong>' + targetName + '</strong><br><small class="muted">PIC: ' + pic + '</small></td>';
+    table += '<td>' + donorName + '<br><small class="muted">' + donorWhatsApp + '</small></td><td>' + amount + '</td><td class="muted">' + reason + '</td>';
+    table += '<td><div class="action-group"><button type="button" class="btn blue" aria-label="Setujui pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + reqId + '\', true, \'' + elId + '\')">Setujui</button><button type="button" class="btn danger" aria-label="Tolak pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + reqId + '\', false, \'' + elId + '\')">Tolak</button></div></td></tr>';
+  });
+  cards += '</div>';
+  table += '</table></div></div>';
+  el.innerHTML = cards + table;
+  return list;
 }
 
 export function refreshLateRequests(elId) {
   markFetchStart('Admin', 'getPendingLateRequests');
-  return call('getPendingLateRequests', currentToken()).then(list => {
+  return call('getPendingLateRequests', { token: currentToken() }).then(res => {
+    const list = Array.isArray(res) ? res : (res && res.pending_late_requests ? res.pending_late_requests : []);
     markFetchEnd('Admin', 'getPendingLateRequests', { recordCount: list.length });
     markRenderStart('Admin', 'lateRequests');
-    const el = document.getElementById(elId);
-    if (!el) {
-      markRenderEnd('Admin', 'lateRequests');
-      return list;
-    }
-    if (elId === 'admin-late-donors') updateAdminActionQueue('late', list.length);
-    const parentCard = getAdminParentCard(elId);
-    if (!list.length) {
-      el.innerHTML = '<p class="muted">Tidak ada pengajuan donatur susulan.</p>';
-      if (parentCard) parentCard.classList.add('hidden');
-      markRenderEnd('Admin', 'lateRequests');
-      return list;
-    }
-    if (parentCard) parentCard.classList.remove('hidden');
-    let cards = '<div class="admin-late-cards">';
-    let table = '<div class="admin-late-table-view"><div class="table-responsive"><table><tr><th>Campaign (PIC)</th><th>Donatur Susulan</th><th>Nominal</th><th>Alasan</th><th>Aksi</th></tr>';
-    list.forEach(r => {
-      const targetName = escapeHtml(r.targetName);
-      const donorName = escapeHtml(r.donorName);
-      const amount = r.isCustom ? '<span class="badge blue">Khusus: ' + formatIDR(r.customAmount) + '</span>' : '<span class="badge green">Patungan Rata</span>';
-      cards += '<article class="admin-late-card">';
-      cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Campaign</span><strong>' + targetName + '</strong><span class="muted">PIC: ' + escapeHtml(r.pic) + '</span></div><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Perlu ditinjau</span></span></div>';
-      cards += '<dl class="admin-data-card-meta"><div><dt>Donatur susulan</dt><dd>' + donorName + '<br><span class="muted">' + escapeHtml(r.donorWhatsApp) + '</span></dd></div>';
-      cards += '<div><dt>Nominal</dt><dd>' + amount + '</dd></div><div><dt>Alasan</dt><dd class="muted">' + escapeHtml(r.reason) + '</dd></div></dl>';
-      cards += '<div class="admin-card-actions"><button type="button" class="btn blue" aria-label="Setujui pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', true, \'' + elId + '\')">Setujui</button><button type="button" class="btn danger" aria-label="Tolak pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', false, \'' + elId + '\')">Tolak</button></div></article>';
-
-      table += '<tr><td><strong>' + targetName + '</strong><br><small class="muted">PIC: ' + escapeHtml(r.pic) + '</small></td>';
-      table += '<td>' + donorName + '<br><small class="muted">' + escapeHtml(r.donorWhatsApp) + '</small></td><td>' + amount + '</td><td class="muted">' + escapeHtml(r.reason) + '</td>';
-      table += '<td><div class="action-group"><button type="button" class="btn blue" aria-label="Setujui pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', true, \'' + elId + '\')">Setujui</button><button type="button" class="btn danger" aria-label="Tolak pengajuan ' + donorName + '" onclick="handleApproveLateDonor(\'' + r.reqId + '\', false, \'' + elId + '\')">Tolak</button></div></td></tr>';
-    });
-    cards += '</div>';
-    table += '</table></div></div>';
-    el.innerHTML = cards + table;
+    renderLateRequestsSection(elId, list);
     markRenderEnd('Admin', 'lateRequests');
     return list;
   }).catch(e => {
@@ -328,10 +425,11 @@ export function handleApproveLateDonor(reqId, isApprove, elId) {
 }
 
 export function executeApproveLateDonor(reqId, isApprove, elId) {
-  return call('approveLateDonor', currentToken(), reqId, isApprove).then(() => {
+  return call('approveLateDonor', { token: currentToken(), reqId: reqId, isApproved: isApprove }).then(() => {
+    showToast(isApprove ? 'Pengajuan donatur susulan berhasil disetujui.' : 'Pengajuan donatur susulan ditolak.');
     refreshLateRequests(elId);
     refreshSummary(elId.startsWith('sa-') ? 'sa-summary' : 'admin-summary');
-  }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
 }
 
 export function refreshAdmins() {
@@ -470,14 +568,24 @@ export function genPicToken() {
   }).catch(e => showInfoModal(e.message || String(e), 'Error'));
 }
 
-export function refreshAdminCampaigns() {
+export function refreshAdminCampaigns(page = 1, pageSize = 50, status = null) {
   const listEl = document.getElementById('admin-campaign-list');
   if (!listEl) return Promise.resolve();
   listEl.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat daftar campaign...</div>';
   const summaryEl = document.getElementById('admin-campaign-filter-summary');
   if (summaryEl) summaryEl.textContent = 'Memuat campaign...';
   markFetchStart('Admin', 'listAllCampaigns');
-  return call('listAllCampaigns', currentToken()).then(list => {
+
+  const statusFilterEl = document.getElementById('admin-campaign-status-filter');
+  const selectedStatus = status || (statusFilterEl ? statusFilterEl.value : null);
+
+  return call('listAllCampaigns', {
+    token: currentToken(),
+    page: page,
+    page_size: pageSize,
+    status: selectedStatus === 'all' ? null : selectedStatus
+  }).then(res => {
+    const list = Array.isArray(res) ? res : (res && res.campaigns ? res.campaigns : []);
     markFetchEnd('Admin', 'listAllCampaigns', { recordCount: list.length });
     markRenderStart('Admin', 'campaigns');
     listEl.innerHTML = renderAdminCampaignViews(list);
@@ -590,13 +698,14 @@ export function renderAdminCampaignViews(list) {
 export function adminView(campaignId) {
   call('getCampaignDetailAdmin', currentToken(), campaignId)
     .then(detail => {
-      return call('fetchAllMembers', currentToken()).then(members => {
-        return { detail: detail, members: members };
+      return call('fetchAllMembers', { token: currentToken() }).then(res => {
+        const rawMembers = Array.isArray(res) ? res : (res && res.members ? res.members : []);
+        return { detail: detail, members: rawMembers };
       });
     })
     .then(res => {
       const detail = res.detail;
-      const members = res.members.filter(m => String(m.Status).toLowerCase() === 'active');
+      const members = (res.members || []).filter(m => String(m.Status || m.status).toLowerCase() === 'active');
 
       let html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;">';
       html += '<div class="card" style="width:100%;max-width:600px;max-height:90vh;overflow-y:auto;">';
@@ -946,13 +1055,21 @@ export function filterMembers(listId, searchId, statusId, summaryId) {
   }
 }
 
-export function refreshMembers() {
+export function refreshMembers(page = 1, pageSize = 50, search = null, status = null, roleFilter = null) {
   markFetchStart('Admin', 'fetchAllMembers');
-  return call('fetchAllMembers', currentToken()).then(list => {
+  return call('fetchAllMembers', {
+    token: currentToken(),
+    page: page,
+    page_size: pageSize,
+    q: search,
+    status: status === 'all' ? null : status,
+    role: roleFilter === 'all' ? null : roleFilter
+  }).then(res => {
+    const list = Array.isArray(res) ? res : (res && res.members ? res.members : []);
     markFetchEnd('Admin', 'fetchAllMembers', { recordCount: list.length });
     markRenderStart('Admin', 'members');
     const activeList = list.filter(m => {
-      const st = String(m.Status).toLowerCase();
+      const st = String(m.Status || m.status).toLowerCase();
       return st !== 'deleted' && st !== 'rejected';
     });
     const role = safeGet('auth_role');
@@ -977,9 +1094,9 @@ export function refreshMembers() {
 }
 
 export function renderMemberStatusControl(m) {
-  const wa = escapeHtml(m.WhatsApp);
-  const currentStatus = String(m.Status).toLowerCase();
-  let html = '<select class="admin-status-control member-status-control" data-member-wa="' + wa + '" aria-label="Status member ' + escapeHtml(m.Name) + '" onchange="updateMemberStatusUI(this)">';
+  const wa = escapeHtml(m.WhatsApp || m.whatsapp);
+  const currentStatus = String(m.Status || m.status).toLowerCase();
+  let html = '<select class="admin-status-control member-status-control" data-member-wa="' + wa + '" aria-label="Status member ' + escapeHtml(m.Name || m.name) + '" onchange="updateMemberStatusUI(this)">';
   ['Active', 'Ex', 'Pending'].forEach(st => {
     html += '<option value="' + st.toLowerCase() + '"' + (currentStatus === st.toLowerCase() ? ' selected' : '') + '>' + st + '</option>';
   });
@@ -988,13 +1105,16 @@ export function renderMemberStatusControl(m) {
 
 export function renderMemberActions(m) {
   let html = '<div class="admin-card-actions">';
-  if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
-    html += '<button type="button" class="btn blue" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')">Jadikan Admin</button>';
+  const role = m.Role || m.role;
+  const name = m.Name || m.name;
+  const wa = m.WhatsApp || m.whatsapp;
+  if (role !== 'Admin' && role !== 'SuperAdmin') {
+    html += '<button type="button" class="btn blue" aria-label="Jadikan ' + escapeHtml(name) + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + wa + '\', \'Admin\')">Jadikan Admin</button>';
   }
-  if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
-    html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(m.Name) + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')">Jadikan PIC</button>';
+  if (role !== 'PIC' && role !== 'SuperAdmin') {
+    html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(name) + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + wa + '\', \'PIC\')">Jadikan PIC</button>';
   }
-  html += '<button type="button" class="btn danger" aria-label="Hapus member ' + escapeHtml(m.Name) + '" onclick="removeMemberUI(\'' + m.WhatsApp + '\')">Hapus member</button>';
+  html += '<button type="button" class="btn danger" aria-label="Hapus member ' + escapeHtml(name) + '" onclick="removeMemberUI(\'' + wa + '\')">Hapus member</button>';
   return html + '</div>';
 }
 
@@ -1015,30 +1135,37 @@ export function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, dis
   let table = '<div class="admin-member-table-view"><div class="table-responsive"><table><tr><th>Nama</th><th>WA</th><th>Role</th><th>Status</th><th>Terakhir Diupdate</th>' + (isSuperAdmin ? '<th>Aksi</th>' : '') + '</tr>';
 
   itemsToRender.forEach(m => {
-    const statusValue = adminFilterText(m.Status);
-    const searchText = adminFilterText([m.Name, m.WhatsApp, m.Role, m.Status, m.ModifiedBy].join(' '));
+    const rawStatus = m.Status || m.status || '';
+    const rawName = m.Name || m.name || '';
+    const rawWa = m.WhatsApp || m.whatsapp || '';
+    const rawRole = m.Role || m.role || 'Member';
+    const rawModifiedBy = m.ModifiedBy || m.modified_by || m.modifiedBy || '';
+    const rawModifiedAt = m.ModifiedAt || m.modified_at || m.modifiedAt || null;
+
+    const statusValue = adminFilterText(rawStatus);
+    const searchText = adminFilterText([rawName, rawWa, rawRole, rawStatus, rawModifiedBy].join(' '));
     const dataAttrs = ' data-admin-member-item data-search="' + escapeHtml(searchText) + '" data-status="' + escapeHtml(statusValue) + '"';
-    const name = escapeHtml(m.Name);
-    const updateText = m.ModifiedBy ? (formatTime(m.ModifiedAt) + '<br><small>oleh ' + escapeHtml(m.ModifiedBy) + '</small>') : '-';
+    const name = escapeHtml(rawName);
+    const updateText = rawModifiedBy ? (formatTime(rawModifiedAt) + '<br><small>oleh ' + escapeHtml(rawModifiedBy) + '</small>') : '-';
 
     cards += '<article class="admin-member-card admin-filterable admin-filter-canonical"' + dataAttrs + '>';
-    cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Member</span><strong>' + name + '</strong></div><span class="badge">' + escapeHtml(m.Role || 'Member') + '</span></div>';
+    cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Member</span><strong>' + name + '</strong></div><span class="badge">' + escapeHtml(rawRole) + '</span></div>';
     cards += '<dl class="admin-data-card-meta">';
-    cards += '<div><dt>WhatsApp</dt><dd>' + escapeHtml(m.WhatsApp) + '</dd></div>';
+    cards += '<div><dt>WhatsApp</dt><dd>' + escapeHtml(rawWa) + '</dd></div>';
     cards += '<div><dt>Status</dt><dd>' + renderMemberStatusControl(m) + '</dd></div>';
     cards += '<div><dt>Terakhir diupdate</dt><dd class="muted">' + updateText + '</dd></div>';
     cards += '</dl>' + (isSuperAdmin ? renderMemberActions(m) : '') + '</article>';
 
-    table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + name + '</td><td>' + escapeHtml(m.WhatsApp) + '</td><td><span class="badge">' + escapeHtml(m.Role || 'Member') + '</span></td><td>' + renderMemberStatusControl(m) + '</td><td class="muted">' + updateText + '</td>';
+    table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + name + '</td><td>' + escapeHtml(rawWa) + '</td><td><span class="badge">' + escapeHtml(rawRole) + '</span></td><td>' + renderMemberStatusControl(m) + '</td><td class="muted">' + updateText + '</td>';
     if (isSuperAdmin) {
       table += '<td><div class="action-group">';
-      if (m.Role !== 'Admin' && m.Role !== 'SuperAdmin') {
-        table += '<button type="button" class="btn blue" aria-label="Jadikan ' + name + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'Admin\')">+ Admin</button>';
+      if (rawRole !== 'Admin' && rawRole !== 'SuperAdmin') {
+        table += '<button type="button" class="btn blue" aria-label="Jadikan ' + name + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + rawWa + '\', \'Admin\')">+ Admin</button>';
       }
-      if (m.Role !== 'PIC' && m.Role !== 'SuperAdmin') {
-        table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + m.WhatsApp + '\', \'PIC\')">+ PIC</button>';
+      if (rawRole !== 'PIC' && rawRole !== 'SuperAdmin') {
+        table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + rawWa + '\', \'PIC\')">+ PIC</button>';
       }
-      table += '<button type="button" class="btn danger" aria-label="Hapus member ' + name + '" onclick="removeMemberUI(\'' + m.WhatsApp + '\')">Hapus</button></div></td>';
+      table += '<button type="button" class="btn danger" aria-label="Hapus member ' + name + '" onclick="removeMemberUI(\'' + rawWa + '\')">Hapus</button></div></td>';
     }
     table += '</tr>';
   });
@@ -1070,7 +1197,7 @@ export function updateMemberStatusUI(source) {
   if (!activeControl) return;
   const newStatus = activeControl.value;
   controls.forEach(control => control.disabled = true);
-  callQueued('adminUpdateMemberStatus', currentToken(), wa, newStatus)
+  callQueued('adminUpdateMemberStatus', { token: currentToken(), whatsapp: wa, newStatus: newStatus })
     .then(() => {
       controls.forEach(control => control.disabled = false);
       showToast('Status berhasil diupdate.');
@@ -1079,7 +1206,7 @@ export function updateMemberStatusUI(source) {
     })
     .catch(e => {
       controls.forEach(control => control.disabled = false);
-      showInfoModal(e.message || String(e), 'Error');
+      showInfoModal(formatUserErrorMessage(e), 'Error');
     });
 }
 
@@ -1126,13 +1253,23 @@ export function removeMemberUI(wa) {
   });
 }
 
-export function refreshSACampaigns() {
+export function refreshSACampaigns(page = 1, pageSize = 50, status = null) {
   const listEl = document.getElementById('sa-campaign-list');
   if (!listEl) return;
   listEl.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">Memuat daftar campaign...</div>';
   const summaryEl = document.getElementById('sa-campaign-filter-summary');
   if (summaryEl) summaryEl.textContent = 'Memuat campaign...';
-  call('listAllCampaigns', currentToken()).then(list => {
+
+  const statusFilterEl = document.getElementById('sa-campaign-status-filter');
+  const selectedStatus = status || (statusFilterEl ? statusFilterEl.value : null);
+
+  call('listAllCampaigns', {
+    token: currentToken(),
+    page: page,
+    page_size: pageSize,
+    status: selectedStatus === 'all' ? null : selectedStatus
+  }).then(res => {
+    const list = Array.isArray(res) ? res : (res && res.campaigns ? res.campaigns : []);
     listEl.innerHTML = renderAdminCampaignViews(list);
     filterAdminCampaigns('sa-campaign-list', 'sa-campaign-search', 'sa-campaign-status-filter', 'sa-campaign-filter-summary');
   }).catch(e => {

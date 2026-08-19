@@ -9,6 +9,8 @@ const JS_FILES = [
   'js/perf.js',
   'js/debug-panel.js',
   'js/state.js',
+  'js/services/supabaseClient.js',
+  'js/services/backendAdapter.js',
   'js/api.js',
   'js/views/auth.js',
   'js/views/donor.js',

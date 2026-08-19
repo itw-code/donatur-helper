@@ -1,5 +1,19 @@
 {
+  "scripts": {
+    "build": "node scripts/deployment/build-static.cjs",
+    "inventory:xlsx": "node scripts/migration/inventory-xlsx.mjs",
+    "migrate:dry-run": "node scripts/migration/migrate-xlsx-to-supabase.mjs --dry-run",
+    "migrate:write": "node scripts/migration/migrate-xlsx-to-supabase.mjs --write",
+    "verify:db": "node scripts/migration/verify-supabase-data.mjs",
+    "test:smtp": "node scripts/email/test-gmail-smtp.mjs"
+  },
   "devDependencies": {
-    "netlify-cli": "^26.2.0"
+    "dotenv": "^17.4.2",
+    "netlify-cli": "^26.2.0",
+    "nodemailer": "^9.0.5",
+    "xlsx": "^0.18.5"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3"
   }
 }

@@ -1,10 +1,26 @@
-// Donor Dashboard, Campaign Browsing, Joining, and Payment Proof Submissions
-
 import { safeGet, safeSet, safeRemove } from '../storage.js';
 import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, parseRibuan, statusBadge, paymentStatusIcon } from '../utils.js';
 import { call, callQueued } from '../api.js';
 import { appState } from '../state.js';
 import { loadPicDashboard } from './pic.js';
+import { getClient } from '../services/supabaseClient.js';
+
+function _getSupabaseClient() {
+  if (typeof getClient === 'function') {
+    const cl = getClient();
+    if (cl) return cl;
+  }
+  if (typeof window !== 'undefined') {
+    if (window.__dhSupabase && typeof window.__dhSupabase.getClient === 'function') {
+      const cl = window.__dhSupabase.getClient();
+      if (cl) return cl;
+    }
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      return window.supabase;
+    }
+  }
+  return null;
+}
 
 export function openProfileModal() {
   const user = JSON.parse(safeGet('donor_user') || '{}');
@@ -101,22 +117,35 @@ export function loadUserDashboard() {
 
 export function seamlessBecomePic(e) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
+  if (!user || !user.whatsapp) {
+    showInfoModal('Sesi login tidak valid. Silakan login kembali.', 'Peringatan');
+    return;
+  }
   const btn = (e && e.target) || (typeof event !== 'undefined' && event && event.target) || document.querySelector('#pic-create-btn-container button');
   if (btn) {
     btn.textContent = "Memproses...";
     btn.disabled = true;
   }
 
-  call('generateSeamlessPicToken', user.whatsapp).then(token => {
-    safeSet('auth_token', token);
-    safeSet('auth_role', 'PIC');
-    loadPicDashboard();
-  }).catch(err => {
-    showInfoModal(err.message || String(err), 'Error');
+  call('generateSeamlessPicToken', user.whatsapp).then(res => {
     if (btn) {
       btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";
       btn.disabled = false;
     }
+    const token = typeof res === 'object' && res ? (res.token || res) : res;
+    if (!token) {
+      throw new Error('Token PIC tidak ditemukan dalam respons server.');
+    }
+    safeSet('auth_token', token);
+    safeSet('auth_role', 'PIC');
+    showInfoModal('Token PIC Anda: ' + token + '\n\nToken telah disimpan dan Anda dialihkan ke pembuatan campaign.', 'Sukses');
+    loadPicDashboard();
+  }).catch(err => {
+    if (btn) {
+      btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";
+      btn.disabled = false;
+    }
+    showInfoModal(formatUserErrorMessage(err), 'Kendala');
   });
 }
 
@@ -151,26 +180,10 @@ export function refreshCampaignList() {
     el.innerHTML = '<div style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div>';
   }
 
-  let picHtml = '';
-  call('getUserPicCampaigns', user.whatsapp).then(picList => {
-    if (picList && picList.length > 0) {
-      picHtml += '<h3 style="margin-top:0;">Campaign Saya (Sebagai PIC)</h3>';
-      picList.forEach(p => {
-        picHtml += '<div class="card" style="border-left:4px solid var(--primary); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; gap: 16px;">';
-        picHtml += '<div style="flex: 1;"><strong>' + escapeHtml(p.targetName) + '</strong><br><small>' + statusBadge(p.status) + '</small></div>';
-        if (p.status === 'Draft') {
-          picHtml += '<button class="btn danger btn-auto" style="margin:0; font-size:12px; padding:6px 12px; flex-shrink: 0;" onclick="deleteDraftCampaign(\'' + p.picToken + '\')">Hapus</button>';
-        } else {
-          picHtml += '<button class="btn blue btn-auto" style="margin:0; font-size:12px; padding:6px 12px; flex-shrink: 0;" onclick="seamlessLoginAsPic(\'' + p.picToken + '\')">Kelola</button>';
-        }
-        picHtml += '</div>';
-      });
-    }
-    return call('listActiveCampaigns', user.whatsapp);
-  }).then(list => {
+  call('listActiveCampaigns', user.whatsapp).then(list => {
     let html = '';
     if (!list || !list.length) {
-      if (el) el.innerHTML = picHtml + '<div class="card muted">Belum ada campaign aktif saat ini.</div>';
+      if (el) el.innerHTML = '<div class="card muted">Belum ada campaign aktif saat ini.</div>';
       return;
     }
 
@@ -185,8 +198,8 @@ export function refreshCampaignList() {
         html += '<button class="btn secondary" style="margin-top: 16px;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
       }
     } else {
-      const pending = list.filter(c => c.status === 'Finalized' && c.joined && !c.paid);
-      const others = list.filter(c => !(c.status === 'Finalized' && c.joined && !c.paid));
+      const pending = list.filter(c => (c.action_group === 'NEED_PAYMENT' || (c.status === 'Finalized' && c.joined && !c.paid)));
+      const others = list.filter(c => !(c.action_group === 'NEED_PAYMENT' || (c.status === 'Finalized' && c.joined && !c.paid)));
 
       if (pending.length > 0) {
         const attentionTarget = pending.length === 1
@@ -281,10 +294,9 @@ export function refreshCampaignList() {
       html += '</div>';
     }
 
-    html += picHtml;
     if (el) el.innerHTML = html;
   }).catch(e => {
-    if (el) el.innerHTML = '<div class="card error">Gagal memuat: ' + escapeHtml(e.message || String(e)) + '</div>';
+    if (el) el.innerHTML = '<div class="card error">Gagal memuat: ' + escapeHtml(formatUserErrorMessage(e)) + '</div>';
   });
 }
 
@@ -389,7 +401,10 @@ export function toggleBulkJoinFields() {
 
 export function submitBulkJoin(campaignIdsStr) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
-  if (!user) return;
+  if (!user || !user.whatsapp) {
+    showInfoModal('Sesi login tidak valid. Silakan login kembali.', 'Peringatan');
+    return;
+  }
 
   const btn = document.getElementById('btn-submit-bulk-join');
   let originalText = '';
@@ -406,7 +421,7 @@ export function submitBulkJoin(campaignIdsStr) {
     }
   };
 
-  const campaignIds = campaignIdsStr.split(',');
+  const campaignIds = campaignIdsStr.split(',').map(s => s.trim()).filter(Boolean);
   const isBebasEl = document.getElementById('bj-type-bebas');
   const isBebas = isBebasEl ? isBebasEl.checked : false;
   let customAmount = '';
@@ -432,7 +447,7 @@ export function submitBulkJoin(campaignIdsStr) {
     })
     .catch(e => {
       resetBtn();
-      showInfoModal(e.message || String(e), 'Error');
+      showInfoModal(formatUserErrorMessage(e), 'Kendala');
     });
 }
 
@@ -575,7 +590,11 @@ export function renderCampaignCard(c, user, isPending) {
       html += ' <button class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(c.bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
       html += ' a.n. ' + escapeHtml(c.accountHolder) + '</p>';
       if (c.paid) {
-        html += '<div class="success">✓ Sudah konfirmasi transfer.</div>';
+        if (c.verified) {
+          html += '<div class="success">✓ Pembayaran terverifikasi oleh PIC.</div>';
+        } else {
+          html += '<div class="success">✓ Sudah konfirmasi transfer (Menunggu Verifikasi PIC).</div>';
+        }
         if (c.proofLink) html += '<a class="link-btn" href="' + escapeHtml(sanitizeUrl(c.proofLink)) + '" target="_blank" rel="noopener noreferrer">Lihat bukti transfer</a>';
       } else {
         html += '<label>Upload bukti transfer</label>';
@@ -597,12 +616,16 @@ export function renderCampaignCard(c, user, isPending) {
 
 export function joinCampaign(campaignId) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
+  if (!user || !user.whatsapp) {
+    showInfoModal('Sesi login tidak valid. Silakan login kembali.', 'Peringatan');
+    return;
+  }
 
   let customAmount = 0;
   const checkEl = document.getElementById('check-custom-' + campaignId);
   if (checkEl && checkEl.checked) {
     const inputEl = document.getElementById('input-custom-' + campaignId);
-    customAmount = parseRibuan(inputEl.value);
+    customAmount = parseRibuan(inputEl ? inputEl.value : '');
     if (!customAmount || customAmount <= 0) {
       showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
       return;
@@ -612,7 +635,8 @@ export function joinCampaign(campaignId) {
   let alias = '';
   const checkAliasEl = document.getElementById('check-alias-' + campaignId);
   if (checkAliasEl && checkAliasEl.checked) {
-    alias = document.getElementById('input-alias-' + campaignId).value.trim();
+    const inputAliasEl = document.getElementById('input-alias-' + campaignId);
+    alias = inputAliasEl ? inputAliasEl.value.trim() : '';
     if (!alias) {
       showInfoModal('Silakan isi nama alias.', 'Peringatan');
       return;
@@ -628,11 +652,12 @@ export function joinCampaign(campaignId) {
   }
 
   callQueued('joinCampaign', campaignId, user.name, user.whatsapp, customAmount, alias)
-    .then(res => {
+    .then(() => {
       if (btn) {
         btn.disabled = false;
         btn.textContent = originalText;
       }
+      showToast('Berhasil bergabung dalam campaign!');
       refreshCampaignList();
     })
     .catch(e => {
@@ -640,7 +665,7 @@ export function joinCampaign(campaignId) {
         btn.disabled = false;
         btn.textContent = originalText;
       }
-      showInfoModal(e.message || String(e), 'Error');
+      showInfoModal(formatUserErrorMessage(e), 'Kendala');
     });
 }
 
@@ -655,39 +680,55 @@ export function toggleCustomAmount(campaignId) {
 
 export function withdraw(campaignId) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
-  const btn = document.getElementById('btn-withdraw-' + campaignId);
-  let originalText = '';
-  if (btn) {
-    originalText = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = 'Memproses...';
+  if (!user || !user.whatsapp) {
+    showInfoModal('Sesi login tidak valid. Silakan login kembali.', 'Peringatan');
+    return;
   }
-  call('withdrawCampaign', campaignId, user.whatsapp)
-    .then(res => {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-      refreshCampaignList();
-    })
-    .catch(e => {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-      showInfoModal(e.message || String(e), 'Error');
-    });
+  showConfirmModal('Batalkan keikutsertaan Anda dalam campaign ini?', () => {
+    const btn = document.getElementById('btn-withdraw-' + campaignId);
+    let originalText = '';
+    if (btn) {
+      originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+    }
+    return call('withdrawCampaign', campaignId, user.whatsapp)
+      .then(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        showToast('Keikutsertaan berhasil dibatalkan.');
+        refreshCampaignList();
+      })
+      .catch(e => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        showInfoModal(formatUserErrorMessage(e), 'Kendala');
+      });
+  });
 }
 
-export function submitProof(campaignId) {
+export async function submitProof(campaignId) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
+  if (!user || !user.whatsapp) {
+    showInfoModal('Sesi login tidak valid. Silakan login kembali.', 'Peringatan');
+    return;
+  }
   const fileInput = document.getElementById('proof-' + campaignId);
   const errEl = document.getElementById('proof-error-' + campaignId);
   const submitBtn = document.getElementById('btn-submit-proof-' + campaignId);
   if (errEl) errEl.textContent = '';
-  const file = fileInput ? fileInput.files[0] : null;
+  const file = fileInput ? (fileInput.files && fileInput.files[0]) : null;
   if (!file) {
     if (errEl) errEl.textContent = 'Pilih file bukti transfer dulu.';
+    return;
+  }
+
+  if (file.size && file.size > 2 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran file maksimal 2MB.';
     return;
   }
 
@@ -703,71 +744,59 @@ export function submitProof(campaignId) {
     }
   };
 
-  if (file.type === 'application/pdf') {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const base64 = event.target.result.split(',')[1];
-      call('submitPaymentProof', campaignId, user.whatsapp, {
-        base64: base64, mimeType: 'application/pdf', fileName: `Receipt_${campaignId}_${user.whatsapp}.pdf`
-      }).then(() => refreshCampaignList())
-        .catch(e => {
-          if (errEl) errEl.textContent = e.message || String(e);
-          resetBtn();
-        });
-    };
-    reader.onerror = function() {
-      if (errEl) errEl.textContent = 'Gagal membaca file PDF.';
-      resetBtn();
-    };
-    reader.readAsDataURL(file);
-    return;
-  }
+  try {
+    const client = _getSupabaseClient();
+    if (!client || !client.storage) {
+      throw new Error('Layanan penyimpanan Supabase belum siap.');
+    }
 
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-  reader.onerror = function() {
-    if (errEl) errEl.textContent = 'Gagal membaca file gambar.';
-    resetBtn();
-  };
-  reader.onload = function (event) {
-    const img = new Image();
-    img.onload = function () {
-      const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 800;
-      const scaleSize = Math.min(1, MAX_WIDTH / img.width);
-      canvas.width = img.width * scaleSize;
-      canvas.height = img.height * scaleSize;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
-      const base64 = compressedDataUrl.split(',')[1];
-      call('submitPaymentProof', campaignId, user.whatsapp, {
-        base64: base64, mimeType: 'image/jpeg', fileName: `Receipt_${campaignId}_${user.whatsapp}.jpg`
-      }).then(() => refreshCampaignList())
-        .catch(e => {
-          if (errEl) errEl.textContent = e.message || String(e);
-          resetBtn();
-        });
-    };
-    img.onerror = function () { 
-      if (errEl) errEl.textContent = 'Gagal membaca gambar, coba file lain.'; 
+    const cleanWa = String(user.whatsapp).replace(/\D/g, '');
+    const timestamp = Date.now();
+    const fileName = file.name || 'receipt.jpg';
+    const ext = (fileName.split('.').pop() || 'jpg').toLowerCase();
+    const storagePath = `proofs/${campaignId}/${cleanWa}_${timestamp}.${ext}`;
+
+    const { data: uploadData, error: uploadError } = await client.storage
+      .from('bukti-transfer')
+      .upload(storagePath, file, { upsert: true });
+
+    if (uploadError) {
+      if (errEl) errEl.textContent = 'Gagal mengunggah bukti pembayaran.';
       resetBtn();
-    };
-    img.src = event.target.result;
-  };
+      return;
+    }
+
+    const savedPath = (uploadData && uploadData.path) ? uploadData.path : storagePath;
+
+    await call('submitPaymentProof', campaignId, user.whatsapp, savedPath);
+
+    showToast('Bukti transfer berhasil dikirim. Menunggu verifikasi PIC.');
+    refreshCampaignList();
+  } catch (err) {
+    if (errEl) errEl.textContent = formatUserErrorMessage(err) || 'Gagal mengunggah bukti pembayaran.';
+    resetBtn();
+  }
 }
 
-export function submitCombinedProof(bankAccount, campaignIdsStr) {
+export async function submitCombinedProof(bankAccount, campaignIdsStr) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
-  if (!user) return;
+  if (!user || !user.whatsapp) {
+    showInfoModal('Sesi login tidak valid. Silakan login kembali.', 'Peringatan');
+    return;
+  }
 
   const fileInput = document.getElementById('combined-proof-' + bankAccount);
   const errEl = document.getElementById('combined-error-' + bankAccount);
   const submitBtn = document.getElementById('btn-submit-combined-' + bankAccount);
   if (errEl) errEl.textContent = '';
-  const file = fileInput ? fileInput.files[0] : null;
+  const file = fileInput ? (fileInput.files && fileInput.files[0]) : null;
   if (!file) {
     if (errEl) errEl.textContent = 'Pilih file bukti transfer dulu.';
+    return;
+  }
+
+  if (file.size && file.size > 2 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran file maksimal 2MB.';
     return;
   }
 
@@ -783,64 +812,41 @@ export function submitCombinedProof(bankAccount, campaignIdsStr) {
     }
   };
 
-  const campaignIds = campaignIdsStr.split(',');
+  const campaignIds = campaignIdsStr.split(',').map(s => s.trim()).filter(Boolean);
 
-  if (file.type === 'application/pdf') {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const base64 = event.target.result.split(',')[1];
-      call('submitCombinedPaymentProof', campaignIds, user.whatsapp, {
-        base64: base64, mimeType: 'application/pdf', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.pdf`
-      }).then(() => {
-        showToast('Bukti transfer gabungan berhasil dikirim.');
-        refreshCampaignList();
-      }).catch(e => {
-        if (errEl) errEl.textContent = e.message || String(e);
-        resetBtn();
-      });
-    };
-    reader.onerror = function() {
-      if (errEl) errEl.textContent = 'Gagal membaca file PDF.';
+  try {
+    const client = _getSupabaseClient();
+    if (!client || !client.storage) {
+      throw new Error('Layanan penyimpanan Supabase belum siap.');
+    }
+
+    const cleanWa = String(user.whatsapp).replace(/\D/g, '');
+    const cleanAcc = String(bankAccount).replace(/\D/g, '');
+    const timestamp = Date.now();
+    const fileName = file.name || 'receipt.jpg';
+    const ext = (fileName.split('.').pop() || 'jpg').toLowerCase();
+    const storagePath = `proofs/combined_${cleanAcc}/${cleanWa}_${timestamp}.${ext}`;
+
+    const { data: uploadData, error: uploadError } = await client.storage
+      .from('bukti-transfer')
+      .upload(storagePath, file, { upsert: true });
+
+    if (uploadError) {
+      if (errEl) errEl.textContent = 'Gagal mengunggah bukti pembayaran.';
       resetBtn();
-    };
-    reader.readAsDataURL(file);
-    return;
-  }
+      return;
+    }
 
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-  reader.onerror = function() {
-    if (errEl) errEl.textContent = 'Gagal membaca file gambar.';
+    const savedPath = (uploadData && uploadData.path) ? uploadData.path : storagePath;
+
+    await call('submitCombinedPaymentProof', campaignIds, user.whatsapp, savedPath);
+
+    showToast('Bukti transfer gabungan berhasil dikirim. Menunggu verifikasi PIC.');
+    refreshCampaignList();
+  } catch (err) {
+    if (errEl) errEl.textContent = formatUserErrorMessage(err) || 'Gagal mengunggah bukti pembayaran.';
     resetBtn();
-  };
-  reader.onload = function (event) {
-    const img = new Image();
-    img.onload = function () {
-      const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 800;
-      const scaleSize = Math.min(1, MAX_WIDTH / img.width);
-      canvas.width = img.width * scaleSize;
-      canvas.height = img.height * scaleSize;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
-      const base64 = compressedDataUrl.split(',')[1];
-      call('submitCombinedPaymentProof', campaignIds, user.whatsapp, {
-        base64: base64, mimeType: 'image/jpeg', fileName: `Receipt_Combined_${bankAccount}_${user.whatsapp}.jpg`
-      }).then(() => {
-        showToast('Bukti transfer gabungan berhasil dikirim.');
-        refreshCampaignList();
-      }).catch(e => {
-        if (errEl) errEl.textContent = e.message || String(e);
-        resetBtn();
-      });
-    };
-    img.onerror = function () { 
-      if (errEl) errEl.textContent = 'Gagal membaca gambar, coba file lain.'; 
-      resetBtn();
-    };
-    img.src = event.target.result;
-  };
+  }
 }
 
 export function deleteDraftCampaign(picToken) {
@@ -848,6 +854,6 @@ export function deleteDraftCampaign(picToken) {
     call('deleteDraftPicToken', picToken).then(() => {
       showToast('Draft campaign berhasil dihapus.');
       loadUserDashboard();
-    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Kendala'));
   });
 }

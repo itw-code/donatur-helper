@@ -1,0 +1,2929 @@
+{
+  "metadata": {
+    "generatedAt": "2026-08-18T08:24:14.585Z",
+    "sourcePath": "data/source/donatur-helper.xlsx",
+    "fileSizeBytes": 62658,
+    "sheetCount": 7,
+    "sheets": [
+      "Workaroundsz",
+      "Settings",
+      "Members",
+      "Tokens",
+      "Campaigns",
+      "LateRequests",
+      "Donors"
+    ]
+  },
+  "sheets": {
+    "Workaroundsz": {
+      "sheetName": "Workaroundsz",
+      "totalRowsRaw": 78,
+      "dataRowCount": 77,
+      "emptyRowCount": 0,
+      "columnCount": 34,
+      "headers": [
+        "__EMPTY_COL_1",
+        "__EMPTY_COL_2",
+        "__EMPTY_COL_3",
+        "__EMPTY_COL_4",
+        "__EMPTY_COL_5",
+        "__EMPTY_COL_6",
+        "__EMPTY_COL_7",
+        "__EMPTY_COL_8",
+        "__EMPTY_COL_9",
+        "__EMPTY_COL_10",
+        "__EMPTY_COL_11",
+        "__EMPTY_COL_12",
+        "__EMPTY_COL_13",
+        "__EMPTY_COL_14",
+        "__EMPTY_COL_15",
+        "__EMPTY_COL_16",
+        "__EMPTY_COL_17",
+        "__EMPTY_COL_18",
+        "CampaignID",
+        "Name",
+        "WhatsApp",
+        "JoinedAt",
+        "DonorStatus",
+        "AmountDue",
+        "Paid",
+        "ProofLink",
+        "PaidAt",
+        "CustomAmount",
+        "AmountPaid",
+        "Verified",
+        "Refunded",
+        "Alias",
+        "ModifiedBy",
+        "ModifiedAt"
+      ],
+      "columns": {
+        "__EMPTY_COL_1": {
+          "columnIndex": 0,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 1,
+          "emptyCount": 76,
+          "fillRatePercent": 1.3,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "SA-****"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_2": {
+          "columnIndex": 1,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_3": {
+          "columnIndex": 2,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "H***",
+            "K***",
+            "W***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_4": {
+          "columnIndex": 3,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "H***",
+            "K***",
+            "W***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_5": {
+          "columnIndex": 4,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****89",
+            "628****34",
+            "628****22"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_6": {
+          "columnIndex": 5,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "851****89",
+            "812****34",
+            "08112002122‬"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_7": {
+          "columnIndex": 6,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "851****89",
+            "812****34",
+            "811****22"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_8": {
+          "columnIndex": 7,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "851****89",
+            "812****34",
+            "811****22"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_9": {
+          "columnIndex": 8,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_10": {
+          "columnIndex": 9,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_11": {
+          "columnIndex": 10,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 50,
+          "emptyCount": 27,
+          "fillRatePercent": 64.9,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "H***",
+            "K***",
+            "W***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_12": {
+          "columnIndex": 11,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 50,
+          "emptyCount": 27,
+          "fillRatePercent": 64.9,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****89",
+            "628****34",
+            "628****22"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_13": {
+          "columnIndex": 12,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_14": {
+          "columnIndex": 13,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_15": {
+          "columnIndex": 14,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "H***",
+            "K***",
+            "W***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_16": {
+          "columnIndex": 15,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****89",
+            "628****34",
+            "628****22"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_17": {
+          "columnIndex": 16,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "C-5170E8E5",
+            "C-C8A76FD7"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "__EMPTY_COL_18": {
+          "columnIndex": 17,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "CampaignID": {
+          "columnIndex": 18,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "C-5170E8E5",
+            "C-C8A76FD7"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "Name": {
+          "columnIndex": 19,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "H***",
+            "K***",
+            "W***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "WhatsApp": {
+          "columnIndex": 20,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****89",
+            "628****34",
+            "628****22"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "JoinedAt": {
+          "columnIndex": 21,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-17"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "DonorStatus": {
+          "columnIndex": 22,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Pleged"
+          ],
+          "anonymizedSamples": [
+            "Pleged"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "AmountDue": {
+          "columnIndex": 23,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "Paid": {
+          "columnIndex": 24,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 77,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "boolean"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "false"
+          ],
+          "anonymizedSamples": [
+            false
+          ],
+          "recommendedPostgresType": "boolean"
+        },
+        "ProofLink": {
+          "columnIndex": 25,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "PaidAt": {
+          "columnIndex": 26,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "CustomAmount": {
+          "columnIndex": 27,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "AmountPaid": {
+          "columnIndex": 28,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "Verified": {
+          "columnIndex": 29,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": [],
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "boolean"
+        },
+        "Refunded": {
+          "columnIndex": 30,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": [],
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "boolean"
+        },
+        "Alias": {
+          "columnIndex": 31,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedBy": {
+          "columnIndex": 32,
+          "isSensitive": true,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedAt": {
+          "columnIndex": 33,
+          "isSensitive": false,
+          "totalValues": 77,
+          "nonNullCount": 0,
+          "emptyCount": 77,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "timestamptz"
+        }
+      },
+      "primaryKeyCandidates": [],
+      "anomalies": [
+        "Sheet 'Workaroundsz' is not defined in standard Code.js schema (likely scratch or backup tab)",
+        "Column '__EMPTY_COL_2' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_5' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_6' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_7' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_8' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_9' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_10' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_12' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_13' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_14' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_16' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_18' is 100% empty across all 77 rows",
+        "Column 'WhatsApp' contains mixed types: integer, string",
+        "Column 'AmountDue' is 100% empty across all 77 rows",
+        "Column 'ProofLink' is 100% empty across all 77 rows",
+        "Column 'PaidAt' is 100% empty across all 77 rows",
+        "Column 'CustomAmount' is 100% empty across all 77 rows",
+        "Column 'AmountPaid' is 100% empty across all 77 rows",
+        "Column 'Verified' is 100% empty across all 77 rows",
+        "Column 'Refunded' is 100% empty across all 77 rows",
+        "Column 'Alias' is 100% empty across all 77 rows",
+        "Column 'ModifiedBy' is 100% empty across all 77 rows",
+        "Column 'ModifiedAt' is 100% empty across all 77 rows"
+      ]
+    },
+    "Settings": {
+      "sheetName": "Settings",
+      "totalRowsRaw": 7,
+      "dataRowCount": 6,
+      "emptyRowCount": 0,
+      "columnCount": 2,
+      "headers": [
+        "Key",
+        "Value"
+      ],
+      "columns": {
+        "Key": {
+          "columnIndex": 0,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": [
+            "AdminNotificationEmails",
+            "AppUrl",
+            "EnableRounding",
+            "ProofsFolderId",
+            "RequireMemberValidation",
+            "RoundToNearest"
+          ],
+          "anonymizedSamples": [
+            "EnableRounding",
+            "RoundToNearest",
+            "[FOLDER_ID_REDACTED]"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "Value": {
+          "columnIndex": 1,
+          "isSensitive": true,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "boolean",
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "true",
+            "10",
+            "[FOLDER_ID_REDACTED]"
+          ],
+          "recommendedPostgresType": "text"
+        }
+      },
+      "primaryKeyCandidates": [
+        "Key"
+      ],
+      "anomalies": [
+        "Column 'Value' contains mixed types: boolean, integer, string"
+      ]
+    },
+    "Members": {
+      "sheetName": "Members",
+      "totalRowsRaw": 102,
+      "dataRowCount": 101,
+      "emptyRowCount": 0,
+      "columnCount": 9,
+      "headers": [
+        "Name",
+        "WhatsApp",
+        "Status",
+        "AddedBy",
+        "AddedAt",
+        "Role",
+        "ModifiedBy",
+        "ModifiedAt",
+        "Email"
+      ],
+      "columns": {
+        "Name": {
+          "columnIndex": 0,
+          "isSensitive": true,
+          "totalValues": 101,
+          "nonNullCount": 101,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string",
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "I***",
+            "M*** g***",
+            "K***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "WhatsApp": {
+          "columnIndex": 1,
+          "isSensitive": true,
+          "totalValues": 101,
+          "nonNullCount": 101,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****43",
+            "628****33",
+            "628****21"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "Status": {
+          "columnIndex": 2,
+          "isSensitive": false,
+          "totalValues": 101,
+          "nonNullCount": 101,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Pending",
+            "active",
+            "deleted",
+            "ex",
+            "rejected"
+          ],
+          "anonymizedSamples": [
+            "active",
+            "deleted",
+            "rejected"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "AddedBy": {
+          "columnIndex": 3,
+          "isSensitive": true,
+          "totalValues": 101,
+          "nonNullCount": 101,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "S***",
+            "H*** H***",
+            "S*** * a***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "AddedAt": {
+          "columnIndex": 4,
+          "isSensitive": false,
+          "totalValues": 101,
+          "nonNullCount": 101,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-12",
+            "2026-06-13",
+            "2026-06-14"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "Role": {
+          "columnIndex": 5,
+          "isSensitive": false,
+          "totalValues": 101,
+          "nonNullCount": 51,
+          "emptyCount": 50,
+          "fillRatePercent": 50.5,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Admin",
+            "Member"
+          ],
+          "anonymizedSamples": [
+            "Admin",
+            "Member"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedBy": {
+          "columnIndex": 6,
+          "isSensitive": true,
+          "totalValues": 101,
+          "nonNullCount": 63,
+          "emptyCount": 38,
+          "fillRatePercent": 62.4,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****43",
+            "S***",
+            "B*** E***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedAt": {
+          "columnIndex": 7,
+          "isSensitive": false,
+          "totalValues": 101,
+          "nonNullCount": 63,
+          "emptyCount": 38,
+          "fillRatePercent": 62.4,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-07-30",
+            "2026-06-16",
+            "2026-06-30"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "Email": {
+          "columnIndex": 8,
+          "isSensitive": true,
+          "totalValues": 101,
+          "nonNullCount": 1,
+          "emptyCount": 100,
+          "fillRatePercent": 1,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "ih***@gmail.com"
+          ],
+          "recommendedPostgresType": "text"
+        }
+      },
+      "primaryKeyCandidates": [
+        "WhatsApp"
+      ],
+      "anomalies": [
+        "Column 'Name' contains mixed types: string, integer",
+        "Column 'WhatsApp' contains mixed types: integer, string",
+        "Column 'ModifiedBy' contains mixed types: integer, string"
+      ]
+    },
+    "Tokens": {
+      "sheetName": "Tokens",
+      "totalRowsRaw": 48,
+      "dataRowCount": 47,
+      "emptyRowCount": 0,
+      "columnCount": 7,
+      "headers": [
+        "TokenID",
+        "Role",
+        "Status",
+        "LinkedCampaignID",
+        "CreatedBy",
+        "CreatedAt",
+        "Alias"
+      ],
+      "columns": {
+        "TokenID": {
+          "columnIndex": 0,
+          "isSensitive": true,
+          "totalValues": 47,
+          "nonNullCount": 47,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "PIC-CE6AD6EA",
+            "PIC-081A6333",
+            "PIC-FA194203"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "Role": {
+          "columnIndex": 1,
+          "isSensitive": false,
+          "totalValues": 47,
+          "nonNullCount": 47,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Admin",
+            "PIC"
+          ],
+          "anonymizedSamples": [
+            "PIC",
+            "Admin"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "Status": {
+          "columnIndex": 2,
+          "isSensitive": false,
+          "totalValues": 47,
+          "nonNullCount": 47,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Active",
+            "Expired",
+            "Unused"
+          ],
+          "anonymizedSamples": [
+            "Expired",
+            "Active",
+            "Unused"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "LinkedCampaignID": {
+          "columnIndex": 3,
+          "isSensitive": false,
+          "totalValues": 47,
+          "nonNullCount": 15,
+          "emptyCount": 32,
+          "fillRatePercent": 31.9,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "C-3A4564AD",
+            "C-1E37F1F5",
+            "C-04674E2E"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "CreatedBy": {
+          "columnIndex": 4,
+          "isSensitive": true,
+          "totalValues": 47,
+          "nonNullCount": 47,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string",
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "ADM-****",
+            "628****43",
+            628989
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "CreatedAt": {
+          "columnIndex": 5,
+          "isSensitive": false,
+          "totalValues": 47,
+          "nonNullCount": 47,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-12",
+            "2026-06-13",
+            "2026-06-15"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "Alias": {
+          "columnIndex": 6,
+          "isSensitive": true,
+          "totalValues": 47,
+          "nonNullCount": 4,
+          "emptyCount": 43,
+          "fillRatePercent": 8.5,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "B*** E***",
+            "H*** H***",
+            "I***"
+          ],
+          "recommendedPostgresType": "text"
+        }
+      },
+      "primaryKeyCandidates": [
+        "TokenID"
+      ],
+      "anomalies": [
+        "Column 'CreatedBy' contains mixed types: string, integer"
+      ]
+    },
+    "Campaigns": {
+      "sheetName": "Campaigns",
+      "totalRowsRaw": 984,
+      "dataRowCount": 10,
+      "emptyRowCount": 973,
+      "columnCount": 18,
+      "headers": [
+        "CampaignID",
+        "TargetName",
+        "Reason",
+        "GiftAmount",
+        "Status",
+        "StartDate",
+        "Deadline",
+        "BankName",
+        "BankAccount",
+        "AccountHolder",
+        "RoundingUsed",
+        "RoundTo",
+        "CreatedAt",
+        "FinalizedAt",
+        "GiftLink",
+        "GiftImage",
+        "ModifiedBy",
+        "ModifiedAt"
+      ],
+      "columns": {
+        "CampaignID": {
+          "columnIndex": 0,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 10,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "C-04674E2E",
+            "C-5170E8E5",
+            "C-C8A76FD7"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "TargetName": {
+          "columnIndex": 1,
+          "isSensitive": true,
+          "totalValues": 10,
+          "nonNullCount": 10,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "K***",
+            "E***",
+            "D***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "Reason": {
+          "columnIndex": 2,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 10,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "Lastday 19 Juni 2026",
+            "resign: 19 June 2026",
+            "Resign 30 June 2026"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "GiftAmount": {
+          "columnIndex": 3,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 10,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            2000000,
+            1700000,
+            1649000
+          ],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "Status": {
+          "columnIndex": 4,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 10,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Archived",
+            "Finalized",
+            "Open"
+          ],
+          "anonymizedSamples": [
+            "Archived",
+            "Finalized",
+            "Open"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "StartDate": {
+          "columnIndex": 5,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 6,
+          "emptyCount": 4,
+          "fillRatePercent": 60,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-11",
+            "2026-06-16",
+            "2026-06-21"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "Deadline": {
+          "columnIndex": 6,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 10,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-17",
+            "2026-06-18",
+            "2026-06-25"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "BankName": {
+          "columnIndex": 7,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 5,
+          "emptyCount": 5,
+          "fillRatePercent": 50,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "Gopay",
+            "BCA"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "BankAccount": {
+          "columnIndex": 8,
+          "isSensitive": true,
+          "totalValues": 10,
+          "nonNullCount": 5,
+          "emptyCount": 5,
+          "fillRatePercent": 50,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "823****43",
+            "40****89",
+            "73****69"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "AccountHolder": {
+          "columnIndex": 9,
+          "isSensitive": true,
+          "totalValues": 10,
+          "nonNullCount": 5,
+          "emptyCount": 5,
+          "fillRatePercent": 50,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "S*** b***",
+            "H***",
+            "B*** K***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "RoundingUsed": {
+          "columnIndex": 10,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 5,
+          "emptyCount": 5,
+          "fillRatePercent": 50,
+          "detectedTypes": [
+            "boolean"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "false",
+            "true"
+          ],
+          "anonymizedSamples": [
+            false,
+            true
+          ],
+          "recommendedPostgresType": "boolean"
+        },
+        "RoundTo": {
+          "columnIndex": 11,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 5,
+          "emptyCount": 5,
+          "fillRatePercent": 50,
+          "detectedTypes": [
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "10",
+            "500"
+          ],
+          "anonymizedSamples": [
+            500,
+            10
+          ],
+          "recommendedPostgresType": "integer"
+        },
+        "CreatedAt": {
+          "columnIndex": 12,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 10,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-12",
+            "2026-06-17",
+            "2026-06-22"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "FinalizedAt": {
+          "columnIndex": 13,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 5,
+          "emptyCount": 5,
+          "fillRatePercent": 50,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-12",
+            "2026-06-19",
+            "2026-06-26"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "GiftLink": {
+          "columnIndex": 14,
+          "isSensitive": true,
+          "totalValues": 10,
+          "nonNullCount": 1,
+          "emptyCount": 9,
+          "fillRatePercent": 10,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "https://shopee.co.id/[REDACTED_PATH]"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "GiftImage": {
+          "columnIndex": 15,
+          "isSensitive": true,
+          "totalValues": 10,
+          "nonNullCount": 5,
+          "emptyCount": 5,
+          "fillRatePercent": 50,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "https://drive.google.com/[REDACTED_PATH]"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedBy": {
+          "columnIndex": 16,
+          "isSensitive": true,
+          "totalValues": 10,
+          "nonNullCount": 1,
+          "emptyCount": 9,
+          "fillRatePercent": 10,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "B*** E***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedAt": {
+          "columnIndex": 17,
+          "isSensitive": false,
+          "totalValues": 10,
+          "nonNullCount": 1,
+          "emptyCount": 9,
+          "fillRatePercent": 10,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-08-01"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        }
+      },
+      "primaryKeyCandidates": [
+        "CampaignID"
+      ],
+      "anomalies": [
+        "Contains 973 trailing empty rows allocated by Google Sheets",
+        "Column 'BankAccount' contains mixed types: integer, string"
+      ]
+    },
+    "LateRequests": {
+      "sheetName": "LateRequests",
+      "totalRowsRaw": 7,
+      "dataRowCount": 6,
+      "emptyRowCount": 0,
+      "columnCount": 11,
+      "headers": [
+        "RequestID",
+        "CampaignID",
+        "PIC_Alias",
+        "DonorWhatsApp",
+        "DonorName",
+        "DonorAlias",
+        "Reason",
+        "IsCustom",
+        "CustomAmount",
+        "Status",
+        "CreatedAt"
+      ],
+      "columns": {
+        "RequestID": {
+          "columnIndex": 0,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "REQ-389AF9CE",
+            "REQ-4BE0E9FF",
+            "REQ-D0FE00E9"
+          ],
+          "recommendedPostgresType": "uuid"
+        },
+        "CampaignID": {
+          "columnIndex": 1,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "C-04674E2E"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "PIC_Alias": {
+          "columnIndex": 2,
+          "isSensitive": true,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "ADM-****",
+            "PIC (Kyle)"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "DonorWhatsApp": {
+          "columnIndex": 3,
+          "isSensitive": true,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "M***",
+            "m***",
+            "M*** g***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "DonorName": {
+          "columnIndex": 4,
+          "isSensitive": true,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****89",
+            "628****56",
+            "628****31"
+          ],
+          "recommendedPostgresType": "integer"
+        },
+        "DonorAlias": {
+          "columnIndex": 5,
+          "isSensitive": true,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "boolean"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "t***"
+          ],
+          "recommendedPostgresType": "boolean"
+        },
+        "Reason": {
+          "columnIndex": 6,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            2000000,
+            1500000,
+            1200000
+          ],
+          "recommendedPostgresType": "integer"
+        },
+        "IsCustom": {
+          "columnIndex": 7,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Kelupaan",
+            "Lupa cuy",
+            "asda",
+            "goks",
+            "test"
+          ],
+          "anonymizedSamples": [
+            "Kelupaan",
+            "Lupa cuy",
+            "test"
+          ],
+          "recommendedPostgresType": "boolean"
+        },
+        "CustomAmount": {
+          "columnIndex": 8,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "Rejected",
+            "Duplicate",
+            "Approved"
+          ],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "Status": {
+          "columnIndex": 9,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 6,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": true,
+          "safeUniqueValues": [],
+          "anonymizedSamples": [
+            "2026-06-13"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "CreatedAt": {
+          "columnIndex": 10,
+          "isSensitive": false,
+          "totalValues": 6,
+          "nonNullCount": 0,
+          "emptyCount": 6,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "timestamptz"
+        }
+      },
+      "primaryKeyCandidates": [
+        "RequestID"
+      ],
+      "anomalies": [
+        "CRITICAL SCHEMA DRIFT: Header-to-data column misalignment detected! In the sheet, data was inserted with column order different from headers: DonorWhatsApp contains donor names, DonorName contains WhatsApp numbers, IsCustom contains reasons, Reason contains amounts, and Status contains timestamps.",
+        "Column 'CreatedAt' is 100% empty across all 6 rows"
+      ]
+    },
+    "Donors": {
+      "sheetName": "Donors",
+      "totalRowsRaw": 222,
+      "dataRowCount": 221,
+      "emptyRowCount": 0,
+      "columnCount": 17,
+      "headers": [
+        "CampaignID",
+        "Name",
+        "WhatsApp",
+        "JoinedAt",
+        "DonorStatus",
+        "AmountDue",
+        "Paid",
+        "ProofLink",
+        "PaidAt",
+        "CustomAmount",
+        "AmountPaid",
+        "Verified",
+        "Refunded",
+        "Alias",
+        "ModifiedBy",
+        "ModifiedAt",
+        "LastReminderSentAt"
+      ],
+      "columns": {
+        "CampaignID": {
+          "columnIndex": 0,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 221,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "C-04674E2E",
+            "C-5170E8E5",
+            "C-C8A76FD7"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "Name": {
+          "columnIndex": 1,
+          "isSensitive": true,
+          "totalValues": 221,
+          "nonNullCount": 221,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string",
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "I***",
+            "Y***",
+            "M*** g***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "WhatsApp": {
+          "columnIndex": 2,
+          "isSensitive": true,
+          "totalValues": 221,
+          "nonNullCount": 221,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "integer",
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "628****43",
+            628123,
+            "628****33"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "JoinedAt": {
+          "columnIndex": 3,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 221,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-12",
+            "2026-06-13",
+            "2026-06-17"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "DonorStatus": {
+          "columnIndex": 4,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 221,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "Pledged",
+            "Withdrawn"
+          ],
+          "anonymizedSamples": [
+            "Pledged",
+            "Withdrawn"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "AmountDue": {
+          "columnIndex": 5,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 181,
+          "emptyCount": 40,
+          "fillRatePercent": 81.9,
+          "detectedTypes": [
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            250000,
+            1500000,
+            32813
+          ],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "Paid": {
+          "columnIndex": 6,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 221,
+          "emptyCount": 0,
+          "fillRatePercent": 100,
+          "detectedTypes": [
+            "boolean"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "false",
+            "true"
+          ],
+          "anonymizedSamples": [
+            true,
+            false
+          ],
+          "recommendedPostgresType": "boolean"
+        },
+        "ProofLink": {
+          "columnIndex": 7,
+          "isSensitive": true,
+          "totalValues": 221,
+          "nonNullCount": 131,
+          "emptyCount": 90,
+          "fillRatePercent": 59.3,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "https://drive.google.com/[REDACTED_PATH]"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "PaidAt": {
+          "columnIndex": 8,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 131,
+          "emptyCount": 90,
+          "fillRatePercent": 59.3,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-13",
+            "2026-06-12",
+            "2026-06-22"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "CustomAmount": {
+          "columnIndex": 9,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 31,
+          "emptyCount": 190,
+          "fillRatePercent": 14,
+          "detectedTypes": [
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            1500000,
+            32813,
+            32812
+          ],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "AmountPaid": {
+          "columnIndex": 10,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 150,
+          "emptyCount": 71,
+          "fillRatePercent": 67.9,
+          "detectedTypes": [
+            "integer"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            250000,
+            1200000,
+            1500000
+          ],
+          "recommendedPostgresType": "numeric(12,2)"
+        },
+        "Verified": {
+          "columnIndex": 11,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 219,
+          "emptyCount": 2,
+          "fillRatePercent": 99.1,
+          "detectedTypes": [
+            "boolean"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "false",
+            "true"
+          ],
+          "anonymizedSamples": [
+            true,
+            false
+          ],
+          "recommendedPostgresType": "boolean"
+        },
+        "Refunded": {
+          "columnIndex": 12,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 144,
+          "emptyCount": 77,
+          "fillRatePercent": 65.2,
+          "detectedTypes": [
+            "boolean"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": [
+            "false",
+            "true"
+          ],
+          "anonymizedSamples": [
+            false,
+            true
+          ],
+          "recommendedPostgresType": "boolean"
+        },
+        "Alias": {
+          "columnIndex": 13,
+          "isSensitive": true,
+          "totalValues": 221,
+          "nonNullCount": 16,
+          "emptyCount": 205,
+          "fillRatePercent": 7.2,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "V***",
+            "S***",
+            "H*** W*** J***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedBy": {
+          "columnIndex": 14,
+          "isSensitive": true,
+          "totalValues": 221,
+          "nonNullCount": 132,
+          "emptyCount": 89,
+          "fillRatePercent": 59.7,
+          "detectedTypes": [
+            "string"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "S***",
+            "P***",
+            "H*** H***"
+          ],
+          "recommendedPostgresType": "text"
+        },
+        "ModifiedAt": {
+          "columnIndex": 15,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 132,
+          "emptyCount": 89,
+          "fillRatePercent": 59.7,
+          "detectedTypes": [
+            "date"
+          ],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [
+            "2026-06-21",
+            "2026-06-22",
+            "2026-06-25"
+          ],
+          "recommendedPostgresType": "timestamptz"
+        },
+        "LastReminderSentAt": {
+          "columnIndex": 16,
+          "isSensitive": false,
+          "totalValues": 221,
+          "nonNullCount": 0,
+          "emptyCount": 221,
+          "fillRatePercent": 0,
+          "detectedTypes": [],
+          "isUnique": false,
+          "safeUniqueValues": null,
+          "anonymizedSamples": [],
+          "recommendedPostgresType": "timestamptz"
+        }
+      },
+      "primaryKeyCandidates": [
+        "(CampaignID, WhatsApp)"
+      ],
+      "anomalies": [
+        "Column 'Name' contains mixed types: string, integer",
+        "Column 'WhatsApp' contains mixed types: integer, string",
+        "Column 'LastReminderSentAt' is 100% empty across all 221 rows"
+      ]
+    }
+  },
+  "relationships": [
+    {
+      "source": "Tokens.LinkedCampaignID",
+      "target": "Campaigns.CampaignID",
+      "relationshipType": "many-to-one (nullable)",
+      "totalReferencingRows": 15,
+      "matchedRows": 11,
+      "orphanRows": 4,
+      "referentialIntegrityPercent": 73.3,
+      "notes": "Tokens generated for historical/deleted test campaigns or standalone PIC tokens"
+    },
+    {
+      "source": "Donors.CampaignID",
+      "target": "Campaigns.CampaignID",
+      "relationshipType": "many-to-one",
+      "totalReferencingRows": 221,
+      "matchedRows": 221,
+      "orphanRows": 0,
+      "referentialIntegrityPercent": 100,
+      "notes": "100% referential integrity — every donor belongs to an existing campaign"
+    },
+    {
+      "source": "Donors.WhatsApp",
+      "target": "Members.WhatsApp",
+      "relationshipType": "many-to-one",
+      "totalReferencingRows": 221,
+      "matchedRows": 220,
+      "orphanRows": 1,
+      "referentialIntegrityPercent": 99.5,
+      "notes": "2 donor entries have unregistered phone numbers (external/guest donors or unlinked members)"
+    },
+    {
+      "source": "LateRequests.CampaignID",
+      "target": "Campaigns.CampaignID",
+      "relationshipType": "many-to-one",
+      "totalReferencingRows": 6,
+      "matchedRows": 6,
+      "orphanRows": 0,
+      "referentialIntegrityPercent": 100,
+      "notes": "All late join requests reference valid campaign IDs"
+    }
+  ],
+  "sensitiveColumns": [
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_1",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_2",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_3",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_4",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_5",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_6",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_7",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_8",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_9",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_10",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_11",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_12",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_13",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_14",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_15",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_16",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_17",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "__EMPTY_COL_18",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "Name",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "WhatsApp",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "ProofLink",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "Alias",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Workaroundsz",
+      "column": "ModifiedBy",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Settings",
+      "column": "Value",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Members",
+      "column": "Name",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Members",
+      "column": "WhatsApp",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Members",
+      "column": "AddedBy",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Members",
+      "column": "ModifiedBy",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Members",
+      "column": "Email",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Tokens",
+      "column": "TokenID",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Tokens",
+      "column": "CreatedBy",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Tokens",
+      "column": "Alias",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Campaigns",
+      "column": "TargetName",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Campaigns",
+      "column": "BankAccount",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Campaigns",
+      "column": "AccountHolder",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Campaigns",
+      "column": "GiftLink",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Campaigns",
+      "column": "GiftImage",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Campaigns",
+      "column": "ModifiedBy",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "LateRequests",
+      "column": "PIC_Alias",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "LateRequests",
+      "column": "DonorWhatsApp",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "LateRequests",
+      "column": "DonorName",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "LateRequests",
+      "column": "DonorAlias",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Donors",
+      "column": "Name",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Donors",
+      "column": "WhatsApp",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Donors",
+      "column": "ProofLink",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Donors",
+      "column": "Alias",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    },
+    {
+      "sheet": "Donors",
+      "column": "ModifiedBy",
+      "reason": "Matches sensitive PII / credential / financial identifier pattern"
+    }
+  ],
+  "anomalies": [
+    {
+      "sheet": "Workaroundsz",
+      "issues": [
+        "Sheet 'Workaroundsz' is not defined in standard Code.js schema (likely scratch or backup tab)",
+        "Column '__EMPTY_COL_2' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_5' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_6' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_7' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_8' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_9' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_10' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_12' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_13' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_14' is 100% empty across all 77 rows",
+        "Column '__EMPTY_COL_16' contains mixed types: integer, string",
+        "Column '__EMPTY_COL_18' is 100% empty across all 77 rows",
+        "Column 'WhatsApp' contains mixed types: integer, string",
+        "Column 'AmountDue' is 100% empty across all 77 rows",
+        "Column 'ProofLink' is 100% empty across all 77 rows",
+        "Column 'PaidAt' is 100% empty across all 77 rows",
+        "Column 'CustomAmount' is 100% empty across all 77 rows",
+        "Column 'AmountPaid' is 100% empty across all 77 rows",
+        "Column 'Verified' is 100% empty across all 77 rows",
+        "Column 'Refunded' is 100% empty across all 77 rows",
+        "Column 'Alias' is 100% empty across all 77 rows",
+        "Column 'ModifiedBy' is 100% empty across all 77 rows",
+        "Column 'ModifiedAt' is 100% empty across all 77 rows"
+      ]
+    },
+    {
+      "sheet": "Settings",
+      "issues": [
+        "Column 'Value' contains mixed types: boolean, integer, string"
+      ]
+    },
+    {
+      "sheet": "Members",
+      "issues": [
+        "Column 'Name' contains mixed types: string, integer",
+        "Column 'WhatsApp' contains mixed types: integer, string",
+        "Column 'ModifiedBy' contains mixed types: integer, string"
+      ]
+    },
+    {
+      "sheet": "Tokens",
+      "issues": [
+        "Column 'CreatedBy' contains mixed types: string, integer"
+      ]
+    },
+    {
+      "sheet": "Campaigns",
+      "issues": [
+        "Contains 973 trailing empty rows allocated by Google Sheets",
+        "Column 'BankAccount' contains mixed types: integer, string"
+      ]
+    },
+    {
+      "sheet": "LateRequests",
+      "issues": [
+        "CRITICAL SCHEMA DRIFT: Header-to-data column misalignment detected! In the sheet, data was inserted with column order different from headers: DonorWhatsApp contains donor names, DonorName contains WhatsApp numbers, IsCustom contains reasons, Reason contains amounts, and Status contains timestamps.",
+        "Column 'CreatedAt' is 100% empty across all 6 rows"
+      ]
+    },
+    {
+      "sheet": "Donors",
+      "issues": [
+        "Column 'Name' contains mixed types: string, integer",
+        "Column 'WhatsApp' contains mixed types: integer, string",
+        "Column 'LastReminderSentAt' is 100% empty across all 221 rows"
+      ]
+    }
+  ],
+  "recommendedMappings": {
+    "settings": {
+      "targetTable": "app_settings",
+      "sourceSheet": "Settings",
+      "primaryKey": "key (text PRIMARY KEY)",
+      "description": "System-wide configuration parameters and operational toggles",
+      "columns": [
+        {
+          "source": "Key",
+          "target": "key",
+          "type": "text PRIMARY KEY",
+          "description": "Configuration key identifier (e.g., AppUrl, EnableRounding)"
+        },
+        {
+          "source": "Value",
+          "target": "value",
+          "type": "text",
+          "description": "Configuration value stored as text or JSON"
+        },
+        {
+          "source": null,
+          "target": "updated_at",
+          "type": "timestamptz DEFAULT now()",
+          "description": "Timestamp of last modification"
+        }
+      ]
+    },
+    "members": {
+      "targetTable": "members",
+      "sourceSheet": "Members",
+      "primaryKey": "id uuid DEFAULT gen_random_uuid() PRIMARY KEY",
+      "uniqueConstraints": [
+        "whatsapp UNIQUE"
+      ],
+      "description": "Master list of registered group members and developers",
+      "columns": [
+        {
+          "source": null,
+          "target": "id",
+          "type": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+          "description": "Surrogate primary key"
+        },
+        {
+          "source": "Name",
+          "target": "name",
+          "type": "text NOT NULL",
+          "description": "Full member name (PII)"
+        },
+        {
+          "source": "WhatsApp",
+          "target": "whatsapp",
+          "type": "text NOT NULL UNIQUE",
+          "description": "Standardized E.164 phone number"
+        },
+        {
+          "source": "Email",
+          "target": "email",
+          "type": "text",
+          "description": "Optional email address for notifications"
+        },
+        {
+          "source": "Status",
+          "target": "status",
+          "type": "text NOT NULL DEFAULT 'ACTIVE'",
+          "description": "Member status (ACTIVE, PENDING, REJECTED, DELETED, EX)"
+        },
+        {
+          "source": "Role",
+          "target": "role",
+          "type": "text NOT NULL DEFAULT 'MEMBER'",
+          "description": "Permission role (MEMBER, ADMIN, SUPER_ADMIN)"
+        },
+        {
+          "source": "AddedBy",
+          "target": "added_by",
+          "type": "text",
+          "description": "Creator identifier or name"
+        },
+        {
+          "source": "AddedAt",
+          "target": "added_at",
+          "type": "timestamptz DEFAULT now()",
+          "description": "Creation timestamp"
+        },
+        {
+          "source": "ModifiedBy",
+          "target": "modified_by",
+          "type": "text",
+          "description": "Modifier identifier"
+        },
+        {
+          "source": "ModifiedAt",
+          "target": "modified_at",
+          "type": "timestamptz",
+          "description": "Last modified timestamp"
+        }
+      ]
+    },
+    "tokens": {
+      "targetTable": "auth_tokens",
+      "sourceSheet": "Tokens",
+      "primaryKey": "id uuid DEFAULT gen_random_uuid() PRIMARY KEY",
+      "uniqueConstraints": [
+        "token_id UNIQUE"
+      ],
+      "description": "Role-based access tokens for Admin, Super Admin, and Campaign PICs",
+      "columns": [
+        {
+          "source": null,
+          "target": "id",
+          "type": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+          "description": "Surrogate primary key"
+        },
+        {
+          "source": "TokenID",
+          "target": "token_id",
+          "type": "text NOT NULL UNIQUE",
+          "description": "Access token string (e.g. SA-XXXX, TOK-XXXX)"
+        },
+        {
+          "source": "Role",
+          "target": "role",
+          "type": "text NOT NULL",
+          "description": "Role granted (SUPER_ADMIN, ADMIN, PIC)"
+        },
+        {
+          "source": "Status",
+          "target": "status",
+          "type": "text NOT NULL DEFAULT 'ACTIVE'",
+          "description": "Token lifecycle state (ACTIVE, EXPIRED, UNUSED, REVOKED)"
+        },
+        {
+          "source": "LinkedCampaignID",
+          "target": "linked_campaign_id",
+          "type": "text REFERENCES campaigns(campaign_id) ON DELETE SET NULL",
+          "description": "Associated campaign ID if role is PIC"
+        },
+        {
+          "source": "Alias",
+          "target": "alias",
+          "type": "text",
+          "description": "Human friendly alias / nickname"
+        },
+        {
+          "source": "CreatedBy",
+          "target": "created_by",
+          "type": "text",
+          "description": "Creator identifier"
+        },
+        {
+          "source": "CreatedAt",
+          "target": "created_at",
+          "type": "timestamptz DEFAULT now()",
+          "description": "Token creation timestamp"
+        }
+      ]
+    },
+    "campaigns": {
+      "targetTable": "campaigns",
+      "sourceSheet": "Campaigns",
+      "primaryKey": "id uuid DEFAULT gen_random_uuid() PRIMARY KEY",
+      "uniqueConstraints": [
+        "campaign_id UNIQUE"
+      ],
+      "description": "Donation campaigns managed by PICs for specific beneficiaries",
+      "columns": [
+        {
+          "source": null,
+          "target": "id",
+          "type": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+          "description": "Surrogate primary key"
+        },
+        {
+          "source": "CampaignID",
+          "target": "campaign_id",
+          "type": "text NOT NULL UNIQUE",
+          "description": "Legacy campaign code (e.g. C-04674E2E)"
+        },
+        {
+          "source": "TargetName",
+          "target": "target_name",
+          "type": "text NOT NULL",
+          "description": "Beneficiary name"
+        },
+        {
+          "source": "Reason",
+          "target": "reason",
+          "type": "text NOT NULL",
+          "description": "Donation cause / occasion"
+        },
+        {
+          "source": "GiftAmount",
+          "target": "gift_amount",
+          "type": "numeric(12,2) DEFAULT 0",
+          "description": "Target gift / collection amount"
+        },
+        {
+          "source": "Status",
+          "target": "status",
+          "type": "text NOT NULL DEFAULT 'OPEN'",
+          "description": "Campaign state (OPEN, FINALIZED, ARCHIVED, CLOSED)"
+        },
+        {
+          "source": "StartDate",
+          "target": "start_date",
+          "type": "timestamptz",
+          "description": "Campaign start timestamp"
+        },
+        {
+          "source": "Deadline",
+          "target": "deadline",
+          "type": "timestamptz",
+          "description": "Donation collection deadline"
+        },
+        {
+          "source": "BankName",
+          "target": "bank_name",
+          "type": "text",
+          "description": "Destination bank or e-wallet name"
+        },
+        {
+          "source": "BankAccount",
+          "target": "bank_account",
+          "type": "text",
+          "description": "Destination account number"
+        },
+        {
+          "source": "AccountHolder",
+          "target": "account_holder",
+          "type": "text",
+          "description": "Name on destination bank account"
+        },
+        {
+          "source": "RoundingUsed",
+          "target": "rounding_used",
+          "type": "boolean DEFAULT false",
+          "description": "Whether split rounding was applied"
+        },
+        {
+          "source": "RoundTo",
+          "target": "round_to",
+          "type": "integer DEFAULT 500",
+          "description": "Rounding precision unit"
+        },
+        {
+          "source": "GiftLink",
+          "target": "gift_link",
+          "type": "text",
+          "description": "URL link to purchased gift"
+        },
+        {
+          "source": "GiftImage",
+          "target": "gift_image",
+          "type": "text",
+          "description": "Storage URL for gift image"
+        },
+        {
+          "source": "CreatedAt",
+          "target": "created_at",
+          "type": "timestamptz DEFAULT now()",
+          "description": "Creation timestamp"
+        },
+        {
+          "source": "FinalizedAt",
+          "target": "finalized_at",
+          "type": "timestamptz",
+          "description": "When bill split was finalized"
+        },
+        {
+          "source": "ModifiedBy",
+          "target": "modified_by",
+          "type": "text",
+          "description": "Last modifier"
+        },
+        {
+          "source": "ModifiedAt",
+          "target": "modified_at",
+          "type": "timestamptz",
+          "description": "Last modified timestamp"
+        }
+      ]
+    },
+    "donors": {
+      "targetTable": "donors",
+      "sourceSheet": "Donors",
+      "primaryKey": "id uuid DEFAULT gen_random_uuid() PRIMARY KEY",
+      "uniqueConstraints": [
+        "(campaign_id, whatsapp) UNIQUE"
+      ],
+      "description": "Individual member pledges, obligations, payments, and transfer proofs",
+      "columns": [
+        {
+          "source": null,
+          "target": "id",
+          "type": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+          "description": "Surrogate primary key"
+        },
+        {
+          "source": "CampaignID",
+          "target": "campaign_id",
+          "type": "text NOT NULL REFERENCES campaigns(campaign_id) ON DELETE CASCADE",
+          "description": "Associated campaign identifier"
+        },
+        {
+          "source": "Name",
+          "target": "name",
+          "type": "text NOT NULL",
+          "description": "Donor name"
+        },
+        {
+          "source": "WhatsApp",
+          "target": "whatsapp",
+          "type": "text NOT NULL",
+          "description": "Donor phone number"
+        },
+        {
+          "source": "Alias",
+          "target": "alias",
+          "type": "text",
+          "description": "Donor nickname / alias"
+        },
+        {
+          "source": "DonorStatus",
+          "target": "donor_status",
+          "type": "text NOT NULL DEFAULT 'PLEDGED'",
+          "description": "Donor participation status (PLEDGED, WITHDRAWN, CANCELLED)"
+        },
+        {
+          "source": "AmountDue",
+          "target": "amount_due",
+          "type": "numeric(12,2) DEFAULT 0",
+          "description": "Assigned share of campaign gift"
+        },
+        {
+          "source": "CustomAmount",
+          "target": "custom_amount",
+          "type": "numeric(12,2)",
+          "description": "Custom pledged amount (if non-standard split)"
+        },
+        {
+          "source": "AmountPaid",
+          "target": "amount_paid",
+          "type": "numeric(12,2) DEFAULT 0",
+          "description": "Actual transferred amount"
+        },
+        {
+          "source": "Paid",
+          "target": "paid",
+          "type": "boolean DEFAULT false",
+          "description": "Whether transfer proof has been uploaded"
+        },
+        {
+          "source": "ProofLink",
+          "target": "proof_link",
+          "type": "text",
+          "description": "URL or Supabase Storage key for transfer proof"
+        },
+        {
+          "source": "PaidAt",
+          "target": "paid_at",
+          "type": "timestamptz",
+          "description": "Payment proof upload timestamp"
+        },
+        {
+          "source": "Verified",
+          "target": "verified",
+          "type": "boolean DEFAULT false",
+          "description": "Whether PIC verified payment"
+        },
+        {
+          "source": "Refunded",
+          "target": "refunded",
+          "type": "boolean DEFAULT false",
+          "description": "Whether overpayment was refunded"
+        },
+        {
+          "source": "JoinedAt",
+          "target": "joined_at",
+          "type": "timestamptz DEFAULT now()",
+          "description": "Pledge timestamp"
+        },
+        {
+          "source": "LastReminderSentAt",
+          "target": "last_reminder_sent_at",
+          "type": "timestamptz",
+          "description": "WhatsApp payment reminder timestamp"
+        },
+        {
+          "source": "ModifiedBy",
+          "target": "modified_by",
+          "type": "text",
+          "description": "Last modifier"
+        },
+        {
+          "source": "ModifiedAt",
+          "target": "modified_at",
+          "type": "timestamptz",
+          "description": "Last modification timestamp"
+        }
+      ]
+    },
+    "late_requests": {
+      "targetTable": "late_requests",
+      "sourceSheet": "LateRequests",
+      "primaryKey": "id uuid DEFAULT gen_random_uuid() PRIMARY KEY",
+      "uniqueConstraints": [
+        "request_id UNIQUE"
+      ],
+      "description": "Requests by members to join a campaign after bill finalization",
+      "columns": [
+        {
+          "source": null,
+          "target": "id",
+          "type": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+          "description": "Surrogate primary key"
+        },
+        {
+          "source": "RequestID",
+          "target": "request_id",
+          "type": "text NOT NULL UNIQUE",
+          "description": "Request identifier (e.g. REQ-389AF9CE)"
+        },
+        {
+          "source": "CampaignID",
+          "target": "campaign_id",
+          "type": "text NOT NULL REFERENCES campaigns(campaign_id) ON DELETE CASCADE",
+          "description": "Target campaign code"
+        },
+        {
+          "source": "DonorName",
+          "target": "donor_name",
+          "type": "text NOT NULL",
+          "description": "Donor name (mapped from shifted data)"
+        },
+        {
+          "source": "DonorWhatsApp",
+          "target": "donor_whatsapp",
+          "type": "text NOT NULL",
+          "description": "Donor WhatsApp (mapped from shifted data)"
+        },
+        {
+          "source": "DonorAlias",
+          "target": "donor_alias",
+          "type": "text",
+          "description": "Donor alias"
+        },
+        {
+          "source": "PIC_Alias",
+          "target": "pic_alias",
+          "type": "text",
+          "description": "Target PIC alias"
+        },
+        {
+          "source": "IsCustom",
+          "target": "is_custom",
+          "type": "boolean DEFAULT false",
+          "description": "Whether custom amount pledged"
+        },
+        {
+          "source": "CustomAmount",
+          "target": "custom_amount",
+          "type": "numeric(12,2)",
+          "description": "Requested custom amount"
+        },
+        {
+          "source": "Reason",
+          "target": "reason",
+          "type": "text",
+          "description": "Reason for late join"
+        },
+        {
+          "source": "Status",
+          "target": "status",
+          "type": "text NOT NULL DEFAULT 'PENDING'",
+          "description": "Status (PENDING, APPROVED, REJECTED, DUPLICATE)"
+        },
+        {
+          "source": "CreatedAt",
+          "target": "created_at",
+          "type": "timestamptz DEFAULT now()",
+          "description": "Submission timestamp"
+        }
+      ]
+    }
+  },
+  "openQuestions": [
+    {
+      "id": "Q1_PRIMARY_KEYS",
+      "topic": "Primary Key & Legacy Identifier Strategy",
+      "question": "Should Postgres tables use synthetic UUIDs (`id uuid PRIMARY KEY DEFAULT gen_random_uuid()`) with UNIQUE constraints on legacy string identifiers (`campaign_id`, `token_id`, `request_id`), or should legacy string codes be used directly as primary keys during the initial migration?"
+    },
+    {
+      "id": "Q2_LATEREQUESTS_DATA_REPAIR",
+      "topic": "LateRequests Column Scrambling in Source Sheet",
+      "question": "The source XLSX for `LateRequests` has shifted data columns relative to its headers (e.g., column labeled `DonorWhatsApp` holds donor names, `DonorName` holds WhatsApp numbers, `Reason` holds amounts, `IsCustom` holds reasons, `CustomAmount` holds statuses). Should the data migration script apply a dedicated column-remapping transformation specifically for `LateRequests` to cleanly restore semantic correctness?"
+    },
+    {
+      "id": "Q3_PHONE_NORMALIZATION",
+      "topic": "WhatsApp Phone Number Standardization (E.164)",
+      "question": "Legacy Google Sheets entries format phone numbers variably as numbers (e.g., `62812...`), integers without country code (e.g., `8516...`), or text with prefixes (`0811...`). Should the Supabase migration script normalize all phone numbers to the canonical E.164 format (e.g., `+628...`) and enforce regex validation in Postgres?"
+    },
+    {
+      "id": "Q4_STORAGE_MIGRATION",
+      "topic": "Payment Proof Storage (Google Drive vs Supabase Storage)",
+      "question": "Legacy `ProofLink` columns store Google Drive URLs. When migrating, should existing Drive URLs be kept as legacy external URLs in `proof_link`, or should an asset migration script download files from Google Drive and upload them to a private Supabase Storage bucket (`bukti-transfer`)?"
+    },
+    {
+      "id": "Q5_ORPHAN_HANDLING",
+      "topic": "Referential Integrity & Orphan Records Cleanup",
+      "question": "The inventory found 4 tokens referencing historical/unlisted campaign IDs and 2 donor records with WhatsApp numbers not in `Members`. Should the data migration script: (A) create placeholder parent records in `campaigns` and `members`, (B) leave foreign keys nullable, or (C) prune obsolete orphan records?"
+    },
+    {
+      "id": "Q6_AUTH_SESSION_STRATEGY",
+      "topic": "Authentication & Session Architecture",
+      "question": "The Google Apps Script app used token-based URLs (`?token=SA-...` / `?token=TOK-...`) and WhatsApp phone lookup for donor views. In Supabase, will we maintain token-based access via a custom Postgres verification function / Edge Function, or migrate administrators to Supabase Auth (email/password/magic link) while retaining lightweight token access for PICs and Donors?"
+    },
+    {
+      "id": "Q7_TIMEZONE_HANDLING",
+      "topic": "Timestamp Parsing & Timezone Alignment",
+      "question": "Google Sheets stored timestamps in local Asia/Jakarta (WIB, UTC+7). When converting serial dates or string timestamps to PostgreSQL `timestamptz`, should migration scripts explicitly parse naive date-times with an explicit `+07:00` offset to prevent UTC shifting?"
+    },
+    {
+      "id": "Q8_SCRATCH_TAB_DISPOSITION",
+      "topic": "Disposition of `Workaroundsz` Scratch Sheet",
+      "question": "The sheet `Workaroundsz` contains unformatted developer/admin scratch data and duplicate donor records. Can we confirm that `Workaroundsz` should be completely excluded from the Supabase database migration?"
+    }
+  ]
+}

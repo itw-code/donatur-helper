@@ -218,6 +218,7 @@ export function tokenLogin(isDeepDive = false) {
     else if (res.role === 'SuperAdmin') loadSuperAdminDashboard();
   }).catch(e => {
     if (errEl) errEl.textContent = formatUserErrorMessage(e);
+    showView('token-login');
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Lanjut';

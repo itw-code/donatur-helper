@@ -1,0 +1,1055 @@
+{
+  "generated_at": "2026-08-19T15:18:00+07:00",
+  "version": "1.0.0",
+  "summary": {
+    "total_legacy_actions": 33,
+    "replaceable_read_actions_count": 12,
+    "mutation_actions_count": 21,
+    "dangerous_actions_count": 8,
+    "top_5_recommended_count": 5
+  },
+  "replaceable_read_actions": [
+    {
+      "legacy_action": "loginWithToken",
+      "recommended_rpc": "verify_auth_token",
+      "migration_file": "supabase/migrations/20260818010000_verify_auth_token.sql",
+      "role": ["PIC", "Admin", "SuperAdmin"],
+      "status": "implemented",
+      "description": "Authenticates plaintext legacy token against SHA-256 hash in auth_tokens, updates last_used_at, and returns safe role and alias metadata."
+    },
+    {
+      "legacy_action": "getDashboardSummary",
+      "recommended_rpc": "get_admin_dashboard_stage1",
+      "migration_file": "supabase/migrations/20260818020000_get_admin_dashboard_stage1.sql",
+      "role": ["Admin", "SuperAdmin"],
+      "status": "implemented",
+      "description": "Aggregates summary counts (members, campaigns, donors, pending registrations, unverified proofs) for initial Admin dashboard render."
+    },
+    {
+      "legacy_action": "getPendingMembers",
+      "recommended_rpc": "get_admin_dashboard_stage1",
+      "migration_file": "supabase/migrations/20260818020000_get_admin_dashboard_stage1.sql",
+      "role": ["Admin", "SuperAdmin"],
+      "status": "implemented",
+      "description": "Returns pending member registrations awaiting approval as part of Stage 1 dashboard payload."
+    },
+    {
+      "legacy_action": "getPendingLateRequests",
+      "recommended_rpc": "get_admin_dashboard_stage1",
+      "migration_file": "supabase/migrations/20260818020000_get_admin_dashboard_stage1.sql",
+      "role": ["Admin", "SuperAdmin"],
+      "status": "implemented",
+      "description": "Returns pending late donor requests awaiting admin decision as part of Stage 1 dashboard payload."
+    },
+    {
+      "legacy_action": "listAllCampaigns",
+      "recommended_rpc": "get_admin_campaigns",
+      "migration_file": "supabase/migrations/20260818030000_get_admin_stage2.sql",
+      "role": ["Admin", "SuperAdmin"],
+      "status": "implemented",
+      "description": "Returns paginated list of campaigns with donor count, collected totals, deadline metrics, and linked PIC aliases with status filter support."
+    },
+    {
+      "legacy_action": "fetchAllMembers",
+      "recommended_rpc": "get_admin_members",
+      "migration_file": "supabase/migrations/20260818030000_get_admin_stage2.sql",
+      "role": ["Admin", "SuperAdmin"],
+      "status": "implemented",
+      "description": "Returns paginated, searchable, and filterable member directory (search by name/whatsapp, filter by status/role)."
+    },
+    {
+      "legacy_action": "getCampaignForPic",
+      "recommended_rpc": "get_pic_dashboard",
+      "migration_file": "supabase/migrations/20260818040000_get_pic_dashboard.sql",
+      "role": ["PIC"],
+      "status": "implemented",
+      "description": "Consolidates PIC token metadata, linked campaign details, progress metrics, and prioritized donor action queue into a single call."
+    },
+    {
+      "legacy_action": "getSettingsForSuperAdmin",
+      "recommended_rpc": "get_superadmin_dashboard_stage1",
+      "migration_file": "supabase/migrations/20260818050000_get_superadmin_dashboard_stage1.sql",
+      "role": ["SuperAdmin"],
+      "status": "implemented",
+      "description": "Returns domain summary metrics, pending queues, and system settings (with secret values masked) for SuperAdmin console."
+    },
+    {
+      "legacy_action": "checkDonorWhatsApp",
+      "recommended_rpc": "get_donor_dashboard",
+      "migration_file": "supabase/migrations/20260818060000_get_donor_dashboard.sql",
+      "role": ["Donor"],
+      "status": "implemented",
+      "description": "Verifies donor WhatsApp registration status and returns identity state (active, pending, or unregistered)."
+    },
+    {
+      "legacy_action": "listActiveCampaigns",
+      "recommended_rpc": "get_donor_dashboard",
+      "migration_file": "supabase/migrations/20260818060000_get_donor_dashboard.sql",
+      "role": ["Donor"],
+      "status": "implemented",
+      "description": "Returns joined campaigns with billings and unjoined open campaigns for the authenticated donor."
+    },
+    {
+      "legacy_action": "getUserPicCampaigns",
+      "recommended_rpc": "get_donor_dashboard",
+      "migration_file": "supabase/migrations/20260818060000_get_donor_dashboard.sql",
+      "role": ["Donor"],
+      "status": "implemented",
+      "description": "Embeds PIC campaigns owned by the donor's WhatsApp phone directly in the donor dashboard payload."
+    },
+    {
+      "legacy_action": "getPublicSettings",
+      "recommended_rpc": "get_donor_dashboard",
+      "migration_file": "supabase/migrations/20260818060000_get_donor_dashboard.sql",
+      "role": ["Donor", "PIC"],
+      "status": "implemented",
+      "description": "Embedded in dashboard RPC payloads (rounding configuration, active thresholds)."
+    }
+  ],
+  "mutations": [
+    {
+      "id": "mut-donor-register",
+      "legacy_action": "registerUser",
+      "role": "Donor",
+      "ui_trigger": "userLogin() in js/views/auth.js -> Registration form (#u-register-fields), button #btn-u-login ('Selesaikan Pendaftaran')",
+      "required_inputs": ["name", "whatsapp", "empStatus"],
+      "optional_inputs": [],
+      "target_tables": ["members", "audit_logs"],
+      "expected_side_effects": "Normalizes WhatsApp to E.164, inserts member with status='PENDING' and role='MEMBER', logs self-registration audit entry.",
+      "validation_rules": [
+        "Name must not be empty",
+        "WhatsApp must be valid Indonesian phone number",
+        "empStatus must be in ('active', 'ex')",
+        "WhatsApp must not already exist as active member"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "register_donor_member",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-donor-update-profile",
+      "legacy_action": "updateMemberProfile",
+      "role": "Donor",
+      "ui_trigger": "saveProfile() in js/views/donor.js -> Profile modal (#profile-modal), button 'Simpan Profil'",
+      "required_inputs": ["whatsapp", "name"],
+      "optional_inputs": ["email"],
+      "target_tables": ["members", "audit_logs"],
+      "expected_side_effects": "Updates name and optional email in members record; updates modified_by and modified_at timestamp.",
+      "validation_rules": [
+        "WhatsApp must belong to an existing active member",
+        "Name must not be empty",
+        "Email must be valid format if provided"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "update_member_profile",
+      "priority": "important"
+    },
+    {
+      "id": "mut-donor-seamless-pic",
+      "legacy_action": "generateSeamlessPicToken",
+      "role": "Donor",
+      "ui_trigger": "seamlessBecomePic() in js/views/donor.js -> Button '+ Buat Campaign Baru (Jadi PIC)' in user dashboard",
+      "required_inputs": ["whatsapp"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "audit_logs"],
+      "expected_side_effects": "Generates a new PIC token ('PIC-XXXX'), stores SHA-256 hash in auth_tokens with role='PIC', status='UNUSED', created_by=whatsapp, returns plaintext token to client.",
+      "validation_rules": [
+        "Caller WhatsApp must be registered in members with status='ACTIVE'",
+        "Alumni ('EX') or pending members are rejected"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Creates authentication credentials. Unbounded creation leads to token proliferation.",
+      "recommended_rpc": "generate_seamless_pic_token",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-donor-delete-draft",
+      "legacy_action": "deleteDraftPicToken",
+      "role": "Donor",
+      "ui_trigger": "deleteDraftCampaign() in js/views/donor.js -> Button 'Hapus' on draft card in donor dashboard",
+      "required_inputs": ["picToken"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "audit_logs"],
+      "expected_side_effects": "Deletes or expires the unused PIC token record that has no linked campaign.",
+      "validation_rules": [
+        "Token must exist in auth_tokens",
+        "Token must have linked_campaign_id IS NULL (draft state only)"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "delete_draft_pic_token",
+      "priority": "optional"
+    },
+    {
+      "id": "mut-donor-join",
+      "legacy_action": "joinCampaign",
+      "role": "Donor",
+      "ui_trigger": "joinCampaign() in js/views/donor.js -> Button 'Gabung Donasi untuk [Target]' (#btn-join-[id])",
+      "required_inputs": ["campaignId", "name", "whatsapp"],
+      "optional_inputs": ["customAmount", "alias"],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Inserts or reactivates pledge in donors table with status='PLEDGED', amount_due=0 (or custom_amount), paid=FALSE, verified=FALSE, joined_at=NOW().",
+      "validation_rules": [
+        "Campaign must exist and status must be 'OPEN'",
+        "WhatsApp must be valid",
+        "If customAmount provided, must be numeric > 0",
+        "Donor must not already have an active PLEDGED record"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "join_campaign",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-donor-join-bulk",
+      "legacy_action": "joinCampaignsBulk",
+      "role": "Donor",
+      "ui_trigger": "submitBulkJoin() in js/views/donor.js -> Modal #custom-bulk-join-modal, button 'Gabung' (#btn-submit-bulk-join)",
+      "required_inputs": ["campaignIds", "name", "whatsapp"],
+      "optional_inputs": ["customAmount", "alias"],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Atomically pledges the donor into multiple open campaigns in a single transaction.",
+      "validation_rules": [
+        "campaignIds must be a non-empty array",
+        "Only processes campaigns that currently have status='OPEN'",
+        "If customAmount provided, must be > 0"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "join_campaigns_bulk",
+      "priority": "important"
+    },
+    {
+      "id": "mut-donor-withdraw",
+      "legacy_action": "withdrawCampaign",
+      "role": "Donor",
+      "ui_trigger": "withdraw() in js/views/donor.js -> Button 'Batal ikut' (#btn-withdraw-[id])",
+      "required_inputs": ["campaignId", "whatsapp"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Updates donor record to donor_status='WITHDRAWN', modified_at=NOW().",
+      "validation_rules": [
+        "Campaign must exist and status must be 'OPEN'",
+        "Donor must be currently PLEDGED in the campaign",
+        "Cannot withdraw if campaign status is CLOSED, FINALIZED, or ARCHIVED"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "withdraw_campaign",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-donor-submit-proof",
+      "legacy_action": "submitPaymentProof",
+      "role": "Donor",
+      "ui_trigger": "submitProof() in js/views/donor.js -> Button 'Sudah transfer, kirim bukti' (#btn-submit-proof-[id]), file input #proof-[id]",
+      "required_inputs": ["campaignId", "whatsapp", "proofStoragePath"],
+      "optional_inputs": ["proofUrl"],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Stores receipt storage path, marks donors.paid=TRUE, paid_at=NOW, amount_paid=amount_due, verified=FALSE.",
+      "validation_rules": [
+        "Campaign must be 'FINALIZED'",
+        "Donor must be PLEDGED in the campaign",
+        "Proof file must be valid image or PDF (max 2MB)"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "submit_payment_proof",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-donor-submit-combined-proof",
+      "legacy_action": "submitCombinedPaymentProof",
+      "role": "Donor",
+      "ui_trigger": "submitCombinedProof() in js/views/donor.js -> Button 'Konfirmasi Transfer' (#btn-submit-combined-[acc]), file input #combined-proof-[acc]",
+      "required_inputs": ["campaignIds", "whatsapp", "proofStoragePath"],
+      "optional_inputs": ["proofUrl"],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Atomically marks multiple donor campaign pledges as paid=TRUE with shared proof link/path in one transaction.",
+      "validation_rules": [
+        "campaignIds must be a non-empty array",
+        "All targeted campaigns must be FINALIZED and share identical bank details",
+        "Proof file must be valid image or PDF (max 2MB)"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "submit_combined_payment_proof",
+      "priority": "important"
+    },
+    {
+      "id": "mut-pic-create-campaign",
+      "legacy_action": "createCampaign",
+      "role": "PIC",
+      "ui_trigger": "createCampaign() in js/views/pic.js -> Form in #view-pic-create, button #btn-create-campaign ('Buat campaign')",
+      "required_inputs": ["picToken", "targetName", "deadline"],
+      "optional_inputs": ["reason", "giftAmount", "startDate"],
+      "target_tables": ["campaigns", "auth_tokens", "audit_logs"],
+      "expected_side_effects": "Creates new campaign record (status='OPEN'), links campaign_id to auth_tokens, transitions token status to 'ACTIVE'.",
+      "validation_rules": [
+        "PIC token must be valid and unused (linked_campaign_id IS NULL)",
+        "targetName and deadline are mandatory",
+        "giftAmount must be numeric >= 0"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "create_campaign_for_pic",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-pic-close-campaign",
+      "legacy_action": "closeCampaignList",
+      "role": "PIC",
+      "ui_trigger": "closeList() in js/views/pic.js -> Button 'Tutup pendaftaran' in PIC actions",
+      "required_inputs": ["picToken"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "audit_logs"],
+      "expected_side_effects": "Updates campaigns.status='CLOSED', modified_at=NOW(). Locks donor list from new public joins.",
+      "validation_rules": [
+        "PIC token must be valid and own the linked campaign",
+        "Campaign status must currently be 'OPEN'"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "close_campaign_list",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-pic-reopen-campaign",
+      "legacy_action": "reopenCampaignList",
+      "role": "PIC",
+      "ui_trigger": "reopenList() in js/views/pic.js -> Button 'Buka lagi pendaftaran' in PIC actions",
+      "required_inputs": ["picToken"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "audit_logs"],
+      "expected_side_effects": "Updates campaigns.status='OPEN', modified_at=NOW(). Re-allows donors to join.",
+      "validation_rules": [
+        "PIC token must be valid and own the linked campaign",
+        "Campaign status must currently be 'CLOSED' or 'FINALIZED'"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "reopen_campaign_list",
+      "priority": "important"
+    },
+    {
+      "id": "mut-pic-finalize-campaign",
+      "legacy_action": "finalizeCampaign",
+      "role": "PIC",
+      "ui_trigger": "doFinalize() in js/views/pic.js -> Button #btn-do-finalize ('Konfirmasi & finalisasi') in finalize form",
+      "required_inputs": ["picToken", "bankInfo", "finalGiftAmount"],
+      "optional_inputs": ["giftLink", "giftImageStoragePath"],
+      "target_tables": ["campaigns", "donors", "reminder_logs", "audit_logs"],
+      "expected_side_effects": "Computes split algorithm (deducting custom pledges, dividing remaining balance among regular donors with rounding), updates each donor's amount_due, sets campaign status='FINALIZED', captures bank info and timestamps, queues email billing reminders.",
+      "validation_rules": [
+        "PIC token must own the campaign",
+        "Campaign must have at least 1 PLEDGED donor",
+        "bankName, bankAccount, and accountHolder must not be empty",
+        "finalGiftAmount must be numeric > 0",
+        "Campaign must not be ARCHIVED"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Irreversibly computes financial obligations and shifts campaign into collection phase. Overwriting can disrupt donor billing.",
+      "recommended_rpc": "finalize_campaign",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-pic-update-gift-proof",
+      "legacy_action": "updateGiftProof",
+      "role": "PIC",
+      "ui_trigger": "submitGiftProof() in js/views/pic.js -> Form #gift-proof-form, button 'Simpan Dokumentasi Hadiah'",
+      "required_inputs": ["picToken"],
+      "optional_inputs": ["link", "imageStoragePath"],
+      "target_tables": ["campaigns", "audit_logs"],
+      "expected_side_effects": "Updates campaigns.gift_link and/or gift_image, modified_at=NOW().",
+      "validation_rules": [
+        "PIC token must own the campaign",
+        "Campaign must be 'FINALIZED' or 'CLOSED'",
+        "At least link or image file must be supplied"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "update_campaign_gift_proof",
+      "priority": "important"
+    },
+    {
+      "id": "mut-pic-verify-payment",
+      "legacy_action": "picVerifyPayment",
+      "role": "PIC",
+      "ui_trigger": "verifyPaymentUI() in js/views/pic.js -> Buttons 'Konfirmasi' (isValid=true) / 'Tolak' (isValid=false) on donor verification stack",
+      "required_inputs": ["picToken", "campaignId", "whatsapp", "isValid"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "If valid: sets verified=TRUE, modified_by=PIC. If invalid: resets paid=FALSE, proof_link=NULL, verified=FALSE.",
+      "validation_rules": [
+        "PIC token must own the campaign",
+        "Donor must exist and be PLEDGED in the campaign"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "verify_donor_payment",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-pic-verify-all-payments",
+      "legacy_action": "picVerifyAllPayments",
+      "role": "PIC",
+      "ui_trigger": "picVerifyAllUI() in js/views/pic.js -> Button '✓ Setujui Semua Bukti' in PIC workspace",
+      "required_inputs": ["picToken", "campaignId"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Batch marks all unverified paid donors in the campaign as verified=TRUE; returns verified count.",
+      "validation_rules": [
+        "PIC token must own the campaign",
+        "Only applies to donors where paid=TRUE, verified=FALSE, and proof is present"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "verify_all_donor_payments",
+      "priority": "important"
+    },
+    {
+      "id": "mut-pic-mark-refunded",
+      "legacy_action": "picMarkRefunded",
+      "role": "PIC",
+      "ui_trigger": "markRefundedUI() in js/views/pic.js -> Button 'Tandai Dikembalikan' on donor card/table",
+      "required_inputs": ["picToken", "campaignId", "whatsapp"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Updates donors.refunded=TRUE, modified_by=PIC, modified_at=NOW().",
+      "validation_rules": [
+        "PIC token must own the campaign",
+        "Donor must have overpaid (amount_paid > amount_due)"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": true,
+      "danger_reason": "Financial reconciliation flag without external banking verification.",
+      "recommended_rpc": "mark_donor_refunded",
+      "priority": "important"
+    },
+    {
+      "id": "mut-pic-request-late-donor",
+      "legacy_action": "requestLateDonor",
+      "role": "PIC",
+      "ui_trigger": "submitLateDonor() in js/views/pic.js -> Form #late-donor-form, button 'Simpan & Masukkan ke List'",
+      "required_inputs": ["picToken", "donorName", "donorWhatsApp", "reason"],
+      "optional_inputs": ["isCustom", "customAmount", "donorAlias", "realRequestorToken"],
+      "target_tables": ["late_requests", "audit_logs"],
+      "expected_side_effects": "Inserts record into late_requests (request_id='REQ-XXXX', status='PENDING').",
+      "validation_rules": [
+        "PIC token must own campaign",
+        "donorName, donorWhatsApp, and reason are required",
+        "Must not duplicate an existing PENDING request for same campaign & phone"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "request_late_donor",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-pic-archive-campaign",
+      "legacy_action": "archiveCampaign",
+      "role": "PIC",
+      "ui_trigger": "archiveThis() in js/views/pic.js -> Button 'Arsipkan campaign' in PIC Danger Zone",
+      "required_inputs": ["picToken"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "auth_tokens", "audit_logs"],
+      "expected_side_effects": "Sets campaigns.status='ARCHIVED' and expires PIC token (auth_tokens.status='EXPIRED').",
+      "validation_rules": [
+        "PIC token must own campaign",
+        "Campaign must be 'FINALIZED'"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": true,
+      "danger_reason": "Expires PIC access token and moves campaign to immutable archive state.",
+      "recommended_rpc": "archive_campaign_pic",
+      "priority": "important"
+    },
+    {
+      "id": "mut-pic-delete-campaign",
+      "legacy_action": "deleteCampaign",
+      "role": "PIC",
+      "ui_trigger": "deleteThis() in js/views/pic.js -> Button 'Hapus campaign' in PIC Danger Zone",
+      "required_inputs": ["picToken"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "donors", "late_requests", "auth_tokens", "audit_logs"],
+      "expected_side_effects": "Hard-deletes campaign row (cascading to donors and late_requests) and sets PIC token status to 'EXPIRED'.",
+      "validation_rules": [
+        "PIC token must own campaign",
+        "Campaign status MUST be 'OPEN' or 'CLOSED'",
+        "FINALIZED or ARCHIVED campaigns are strictly forbidden from PIC deletion"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Permanent data deletion of campaign, pledges, and donor history.",
+      "recommended_rpc": "delete_campaign_pic",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-update-member-status",
+      "legacy_action": "adminUpdateMemberStatus",
+      "role": "Admin",
+      "ui_trigger": "approvePending() / updateMemberStatusUI() in js/views/admin.js -> Buttons 'Setujui' / 'Tolak' on pending cards, member status select dropdowns",
+      "required_inputs": ["adminToken", "whatsapp", "newStatus"],
+      "optional_inputs": [],
+      "target_tables": ["members", "audit_logs"],
+      "expected_side_effects": "Updates members.status (ACTIVE, EX, PENDING, REJECTED, DELETED), records modified_by=admin_alias and modified_at timestamp.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "Target WhatsApp must exist in members",
+        "newStatus must be a valid status enum"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_update_member_status",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-admin-bulk-update-member-status",
+      "legacy_action": "adminBulkUpdateMemberStatus",
+      "role": "Admin",
+      "ui_trigger": "bulkApprovePending() in js/views/admin.js -> Buttons 'Setujui Terpilih' / 'Tolak Terpilih' on pending table toolbar",
+      "required_inputs": ["adminToken", "updates"],
+      "optional_inputs": [],
+      "target_tables": ["members", "audit_logs"],
+      "expected_side_effects": "Batch updates statuses of multiple members in a single atomic transaction.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "updates must be an array of { whatsapp, status } objects"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_bulk_update_member_status",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-approve-late-donor",
+      "legacy_action": "approveLateDonor",
+      "role": "Admin",
+      "ui_trigger": "executeApproveLateDonor() in js/views/admin.js -> Buttons 'Setujui' / 'Tolak' on late donor rows",
+      "required_inputs": ["adminToken", "reqId", "isApproved"],
+      "optional_inputs": [],
+      "target_tables": ["late_requests", "members", "donors", "campaigns", "audit_logs"],
+      "expected_side_effects": "If rejected: status='REJECTED'. If approved: auto-registers member if needed, injects donor pledge, recalculates campaign donor bills, updates late_requests.status='APPROVED'.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "Request must exist and status must currently be 'PENDING'"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_approve_late_donor",
+      "priority": "critical"
+    },
+    {
+      "id": "mut-admin-generate-pic-token",
+      "legacy_action": "generatePicToken",
+      "role": "Admin",
+      "ui_trigger": "genPicToken() in js/views/admin.js -> Button '+ Buat token PIC baru' in Tools PIC card",
+      "required_inputs": ["adminToken"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "audit_logs"],
+      "expected_side_effects": "Generates unlinked PIC token, stores hash in auth_tokens with role='PIC', status='UNUSED', returns plaintext token.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Creates authentication tokens. Unchecked generation leads to orphaned credentials.",
+      "recommended_rpc": "admin_generate_pic_token",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-transfer-ownership",
+      "legacy_action": "transferCampaignOwnershipAdmin",
+      "role": "Admin",
+      "ui_trigger": "adminTransferOwnershipUI() in js/views/admin.js -> Modal transfer ownership section, button 'Transfer'",
+      "required_inputs": ["adminToken", "campaignId", "targetWhatsapp"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "campaigns", "audit_logs"],
+      "expected_side_effects": "Expires existing PIC tokens for campaign, creates new active PIC token for target member, updates audit history.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "Target WhatsApp must be an ACTIVE member in members table",
+        "Campaign must exist"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Transfers administrative authority over campaign funds and bank accounts.",
+      "recommended_rpc": "admin_transfer_campaign_ownership",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-recalculate-campaign",
+      "legacy_action": "adminRecalculateCampaign",
+      "role": "Admin",
+      "ui_trigger": "adminRecalculateUI() in js/views/admin.js -> Button 'Hitung Ulang Tagihan Donatur' in admin view modal",
+      "required_inputs": ["adminToken", "campaignId"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "campaigns", "audit_logs"],
+      "expected_side_effects": "Recalculates amount_due across all donors in the campaign according to rounding rules without modifying payment proofs.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "Campaign must be 'FINALIZED'"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_recalculate_campaign",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-update-gift-amount",
+      "legacy_action": "adminUpdateGiftAmount",
+      "role": "Admin",
+      "ui_trigger": "adminEditGiftAmountUI() in js/views/admin.js -> Modal #edit-gift-modal, button 'Simpan'",
+      "required_inputs": ["adminToken", "campaignId", "newAmount"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "donors", "audit_logs"],
+      "expected_side_effects": "Updates campaigns.gift_amount, triggers campaign math recalculation across all donors if finalized.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "newAmount must be numeric > 0"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_update_gift_amount",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-delete-donor",
+      "legacy_action": "adminDeleteDonor",
+      "role": "Admin",
+      "ui_trigger": "adminDeleteDonorUI() in js/views/admin.js -> Button 'Hapus donatur' on donor row in campaign detail modal",
+      "required_inputs": ["adminToken", "campaignId", "donorWhatsApp"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "campaigns", "audit_logs"],
+      "expected_side_effects": "Deletes donor row from campaign, re-runs math recalculation for remaining donors.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "Donor must exist in campaign"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": true,
+      "danger_reason": "Deletes donor record and alters remaining donors' bill amounts.",
+      "recommended_rpc": "admin_delete_donor",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-toggle-paid",
+      "legacy_action": "adminTogglePaidStatus",
+      "role": "Admin",
+      "ui_trigger": "adminTogglePaidUI() in js/views/admin.js -> Button 'Tandai lunas' / 'Tandai belum lunas' in admin view modal",
+      "required_inputs": ["adminToken", "campaignId", "donorWhatsApp", "isPaid"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Toggles donors.paid and donors.verified, updates amount_paid=amount_due if marking as paid, records admin modifier.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "Donor must exist in campaign"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_toggle_paid_status",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-update-donor-amount",
+      "legacy_action": "updateDonorPaidAmountAdmin",
+      "role": "Admin",
+      "ui_trigger": "editAmountPaid() in js/views/admin.js -> Modal #edit-amount-modal, button 'Simpan'",
+      "required_inputs": ["adminToken", "campaignId", "whatsapp", "amount"],
+      "optional_inputs": [],
+      "target_tables": ["donors", "audit_logs"],
+      "expected_side_effects": "Updates donors.amount_paid and custom_amount to exact specified value, records admin modifier.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "amount must be numeric >= 0"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_update_donor_paid_amount",
+      "priority": "important"
+    },
+    {
+      "id": "mut-admin-set-campaign-status",
+      "legacy_action": "setCampaignStatusAdmin",
+      "role": "Admin",
+      "ui_trigger": "adminArchive() in js/views/admin.js -> Button 'Arsipkan' on campaign row",
+      "required_inputs": ["adminToken", "campaignId", "newStatus"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "audit_logs"],
+      "expected_side_effects": "Updates campaigns.status to newStatus (e.g. ARCHIVED), records admin modifier.",
+      "validation_rules": [
+        "Caller must have ADMIN or SUPER_ADMIN role token",
+        "newStatus must be valid campaign status enum"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "admin_set_campaign_status",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-generate-admin-token",
+      "legacy_action": "generateAdminToken",
+      "role": "SuperAdmin",
+      "ui_trigger": "genAdminToken() in js/views/superadmin.js -> Form #sa-gen-admin-form, button 'Buat token Admin baru'",
+      "required_inputs": ["superAdminToken", "alias"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "audit_logs"],
+      "expected_side_effects": "Generates new Admin token ('ADM-XXXX'), stores hash in auth_tokens with role='ADMIN', status='ACTIVE', returns plaintext token.",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "Alias is mandatory"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Creates full administrative credentials. Must be audited and strictly restricted.",
+      "recommended_rpc": "superadmin_generate_admin_token",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-revoke-admin-token",
+      "legacy_action": "revokeAdminToken",
+      "role": "SuperAdmin",
+      "ui_trigger": "revokeAdmin() in js/views/admin.js -> Button 'Nonaktifkan' in admin accounts table",
+      "required_inputs": ["superAdminToken", "tokenId"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "audit_logs"],
+      "expected_side_effects": "Sets auth_tokens.status='REVOKED' and revoked_at=NOW().",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "Token must exist"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": true,
+      "danger_reason": "Revokes administrative access. Can lock out admins.",
+      "recommended_rpc": "superadmin_revoke_admin_token",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-reactivate-admin-token",
+      "legacy_action": "reactivateAdminToken",
+      "role": "SuperAdmin",
+      "ui_trigger": "reactivateAdmin() in js/views/admin.js -> Button 'Aktifkan' in admin accounts table",
+      "required_inputs": ["superAdminToken", "tokenId"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "audit_logs"],
+      "expected_side_effects": "Sets auth_tokens.status='ACTIVE' and revoked_at=NULL.",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "Token must exist"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "superadmin_reactivate_admin_token",
+      "priority": "optional"
+    },
+    {
+      "id": "mut-superadmin-delete-admin-token",
+      "legacy_action": "deleteAdminToken",
+      "role": "SuperAdmin",
+      "ui_trigger": "deleteAdmin() in js/views/admin.js -> Button 'Hapus' in admin accounts table",
+      "required_inputs": ["superAdminToken", "tokenId"],
+      "optional_inputs": [],
+      "target_tables": ["auth_tokens", "audit_logs"],
+      "expected_side_effects": "Permanently deletes token record from auth_tokens.",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "Token must exist"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": true,
+      "danger_reason": "Irreversible credential deletion.",
+      "recommended_rpc": "superadmin_delete_admin_token",
+      "priority": "optional"
+    },
+    {
+      "id": "mut-superadmin-assign-member-role",
+      "legacy_action": "superAdminAssignMemberRole",
+      "role": "SuperAdmin",
+      "ui_trigger": "assignMemberRoleUI() in js/views/admin.js -> Buttons '+ Admin' / '+ PIC' in members table",
+      "required_inputs": ["superAdminToken", "whatsapp", "newRole"],
+      "optional_inputs": [],
+      "target_tables": ["members", "auth_tokens", "audit_logs"],
+      "expected_side_effects": "Updates members.role, auto-generates appropriate role token if not present, logs audit entry.",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "newRole must be in ('MEMBER', 'ADMIN', 'SUPER_ADMIN')",
+        "Member must exist"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": true,
+      "danger_reason": "Elevates user privileges to Admin or SuperAdmin.",
+      "recommended_rpc": "superadmin_assign_member_role",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-add-member",
+      "legacy_action": "addMember",
+      "role": "SuperAdmin",
+      "ui_trigger": "addMemberUI() in js/views/admin.js -> Form #sa-add-member-form, button 'Tambah member'",
+      "required_inputs": ["superAdminToken", "name", "wa", "status"],
+      "optional_inputs": [],
+      "target_tables": ["members", "audit_logs"],
+      "expected_side_effects": "Inserts member directly with role='MEMBER', added_by='SuperAdmin', added_at=NOW().",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "name and wa are required",
+        "wa must be unique"
+      ],
+      "idempotency_risk": "Medium",
+      "is_dangerous": false,
+      "danger_reason": null,
+      "recommended_rpc": "superadmin_add_member",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-remove-member",
+      "legacy_action": "removeMember",
+      "role": "SuperAdmin",
+      "ui_trigger": "removeMemberUI() in js/views/admin.js -> Button 'Hapus member' in members table",
+      "required_inputs": ["superAdminToken", "wa"],
+      "optional_inputs": [],
+      "target_tables": ["members", "audit_logs"],
+      "expected_side_effects": "Soft deletes member (status='DELETED'), records modified_by='SuperAdmin'.",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "Member must exist"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": true,
+      "danger_reason": "Deletes member account and removes user access.",
+      "recommended_rpc": "superadmin_remove_member",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-delete-campaign",
+      "legacy_action": "deleteCampaignAdmin",
+      "role": "SuperAdmin",
+      "ui_trigger": "adminDelete() in js/views/admin.js -> Button 'Hapus campaign' on campaign cards/tables",
+      "required_inputs": ["superAdminToken", "campaignId"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "donors", "late_requests", "auth_tokens", "audit_logs"],
+      "expected_side_effects": "Permanently deletes campaign and all associated donors and late requests; expires PIC token.",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "Campaign must exist"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Cascading destruction of campaign records, pledges, payment records, and proofs.",
+      "recommended_rpc": "superadmin_delete_campaign",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-update-settings",
+      "legacy_action": "updateSettings",
+      "role": "SuperAdmin",
+      "ui_trigger": "saveSettings() in js/views/superadmin.js -> Form #sa-section-settings, button 'Simpan pengaturan'",
+      "required_inputs": ["superAdminToken", "settings"],
+      "optional_inputs": [],
+      "target_tables": ["app_settings", "audit_logs"],
+      "expected_side_effects": "Updates key-value settings in app_settings table (rounding toggles, round to amount, validation flag, notification emails, app URL).",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "settings must be a valid JSON object matching recognized keys"
+      ],
+      "idempotency_risk": "Low",
+      "is_dangerous": true,
+      "danger_reason": "Changes global application behavior, rounding formulas, and notification routing.",
+      "recommended_rpc": "superadmin_update_settings",
+      "priority": "important"
+    },
+    {
+      "id": "mut-superadmin-sweep-archived-data",
+      "legacy_action": "sweepArchivedData",
+      "role": "SuperAdmin",
+      "ui_trigger": "runDataSweep() in js/views/superadmin.js -> Button 'Bersihkan Arsip Data' in database maintenance card",
+      "required_inputs": ["superAdminToken"],
+      "optional_inputs": [],
+      "target_tables": ["campaigns", "donors", "audit_logs"],
+      "expected_side_effects": "Partitions or moves ARCHIVED campaigns and their donors to cold archive storage to keep active queries lean.",
+      "validation_rules": [
+        "Caller must have SUPER_ADMIN role token",
+        "Only processes campaigns with status='ARCHIVED'"
+      ],
+      "idempotency_risk": "High",
+      "is_dangerous": true,
+      "danger_reason": "Bulk data movement and cleanup across multiple tables.",
+      "recommended_rpc": "superadmin_sweep_archived_data",
+      "priority": "optional"
+    }
+  ],
+  "dangerous_actions": [
+    {
+      "action_name": "updateSettings",
+      "rpc_name": "superadmin_update_settings",
+      "role": "SuperAdmin",
+      "risk_level": "High",
+      "danger_description": "Alters core application behavior such as rounding rules, validation requirements, and notification emails globally.",
+      "protection_measures": [
+        "Strict SUPER_ADMIN token validation via verify_auth_token",
+        "Validation schema enforcing proper types on all setting values",
+        "Comprehensive change logging in audit_logs with before/after snapshots"
+      ]
+    },
+    {
+      "action_name": "sweepArchivedData",
+      "rpc_name": "superadmin_sweep_archived_data",
+      "role": "SuperAdmin",
+      "risk_level": "High",
+      "danger_description": "Bulk data manipulation moving or pruning archived campaigns and donor histories.",
+      "protection_measures": [
+        "Strict SUPER_ADMIN authorization",
+        "Non-destructive archiving (move to archive partition or table rather than unrecoverable DROP)",
+        "Atomic transaction wrap with explicit row count reporting in audit_logs"
+      ]
+    },
+    {
+      "action_name": "generateAdminToken / generatePicToken / generateSeamlessPicToken",
+      "rpc_name": "superadmin_generate_admin_token / admin_generate_pic_token / generate_seamless_pic_token",
+      "role": "SuperAdmin / Admin / Active Member",
+      "risk_level": "High",
+      "danger_description": "Issues authentication credentials for privileged roles or campaign ownership.",
+      "protection_measures": [
+        "Store only SHA-256 hashes using pgcrypto in auth_tokens",
+        "Set strict expiration intervals (expires_at) and rate limits",
+        "Enforce active member verification for seamless PIC creation",
+        "Audit token generation events with creator identity"
+      ]
+    },
+    {
+      "action_name": "revokeAdminToken / deleteAdminToken",
+      "rpc_name": "superadmin_revoke_admin_token / superadmin_delete_admin_token",
+      "role": "SuperAdmin",
+      "risk_level": "High",
+      "danger_description": "Revokes or destroys administrator access credentials, potentially causing lockout.",
+      "protection_measures": [
+        "Require explicit confirmation and SuperAdmin verification",
+        "Prevent revocation of the primary root SuperAdmin credentials",
+        "Audit log all revocation and deletion events"
+      ]
+    },
+    {
+      "action_name": "picMarkRefunded",
+      "rpc_name": "mark_donor_refunded",
+      "role": "PIC",
+      "risk_level": "Medium",
+      "danger_description": "Marks financial excess as settled without banking API confirmation.",
+      "protection_measures": [
+        "Verify donor genuinely overpaid (amount_paid > amount_due)",
+        "PIC ownership validation on campaign",
+        "Audit log refund settlement with PIC alias and timestamp"
+      ]
+    },
+    {
+      "action_name": "finalizeCampaign",
+      "rpc_name": "finalize_campaign",
+      "role": "PIC",
+      "risk_level": "High",
+      "danger_description": "Irreversibly computes split amounts, locks donor list, and captures bank info.",
+      "protection_measures": [
+        "Execute calculation in a single PostgreSQL serializable transaction",
+        "Verify bank details are complete and finalGiftAmount is valid positive number",
+        "Check that pledged donor count > 0 before locking"
+      ]
+    },
+    {
+      "action_name": "removeMember",
+      "rpc_name": "superadmin_remove_member",
+      "role": "SuperAdmin",
+      "risk_level": "High",
+      "danger_description": "Deletes member profile and can break referential integrity on past pledges.",
+      "protection_measures": [
+        "Implement as soft deletion (status = 'DELETED')",
+        "Ensure foreign key references in donors use ON DELETE SET NULL to preserve history",
+        "Strict SUPER_ADMIN authorization"
+      ]
+    },
+    {
+      "action_name": "deleteCampaignAdmin / deleteCampaign",
+      "rpc_name": "superadmin_delete_campaign / delete_campaign_pic",
+      "role": "SuperAdmin / PIC",
+      "risk_level": "Critical",
+      "danger_description": "Cascading destruction of campaigns, pledges, payment records, and receipts.",
+      "protection_measures": [
+        "Strictly disallow PIC deletion once campaign is FINALIZED or ARCHIVED",
+        "SuperAdmin emergency deletion only with explicit confirmation and full audit trail",
+        "Soft delete / archive flag preference over hard SQL DELETE where possible"
+      ]
+    }
+  ],
+  "top_5_recommended_rpcs": [
+    {
+      "rank": 1,
+      "recommended_rpc": "join_campaign",
+      "role": "Donor",
+      "legacy_action": "joinCampaign",
+      "target_table": "donors",
+      "rationale": "Highest volume end-user action. Enables donors to join campaigns with custom amounts and aliases. Directly unblocks the primary fundraising participation flow.",
+      "priority": "critical"
+    },
+    {
+      "rank": 2,
+      "recommended_rpc": "submit_payment_proof",
+      "role": "Donor",
+      "legacy_action": "submitPaymentProof",
+      "target_table": "donors",
+      "rationale": "Core fulfillment action. Enables donors to upload payment proofs to Supabase Storage and mark obligations as paid, unblocking the verification and collection pipeline.",
+      "priority": "critical"
+    },
+    {
+      "rank": 3,
+      "recommended_rpc": "create_campaign_for_pic",
+      "role": "PIC",
+      "legacy_action": "createCampaign",
+      "target_table": "campaigns",
+      "rationale": "Kickoff action for campaign lifecycles. Allows active members and PICs to initiate new donation campaigns and establish database records.",
+      "priority": "critical"
+    },
+    {
+      "rank": 4,
+      "recommended_rpc": "finalize_campaign",
+      "role": "PIC",
+      "legacy_action": "finalizeCampaign",
+      "target_table": "campaigns, donors",
+      "rationale": "Core mathematical calculation engine. Transitions campaigns from registration to payment phase, divides obligations, sets bank info, and triggers billing notices.",
+      "priority": "critical"
+    },
+    {
+      "rank": 5,
+      "recommended_rpc": "verify_donor_payment",
+      "role": "PIC",
+      "legacy_action": "picVerifyPayment",
+      "target_table": "donors",
+      "rationale": "Core settlement verification gate. Enables PICs to review transfer proofs, approve valid payments, reject invalid uploads, and complete campaign reconciliation.",
+      "priority": "critical"
+    }
+  ]
+}

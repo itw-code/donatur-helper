@@ -1,61 +1,21 @@
 // API Network Layer with Serial Write Queue, Timeout Hardening and Error Handling
 
-import { SCRIPT_URL } from './config.js';
+import { fetchBackend as adapterFetchBackend } from './services/backendAdapter.js';
 
 export const DEFAULT_TIMEOUT_MS = 15000;
 
 export function fetchBackend(name, args, options = {}) {
-  const timeoutMs = options.timeoutMs || DEFAULT_TIMEOUT_MS;
-  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  let timer = null;
-  if (controller && timeoutMs > 0) {
-    timer = setTimeout(() => {
-      controller.abort();
-    }, timeoutMs);
+  const runner = (typeof adapterFetchBackend === 'function')
+    ? adapterFetchBackend
+    : (typeof window !== 'undefined' && window.__dhBackendAdapter && typeof window.__dhBackendAdapter.fetchBackend === 'function' ? window.__dhBackendAdapter.fetchBackend : null);
+
+  if (runner) {
+    return runner(name, args, options);
   }
-
-  const fetchOptions = {
-    method: 'POST',
-    body: JSON.stringify({ action: name, params: args }),
-    mode: 'cors',
-    credentials: 'omit',
-    redirect: 'follow',
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8'
-    }
-  };
-
-  if (controller) {
-    fetchOptions.signal = controller.signal;
-  }
-
-  return fetch(SCRIPT_URL, fetchOptions)
-    .then(async response => {
-      if (timer) clearTimeout(timer);
-      const text = await response.text();
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        throw new Error("Respons server bukan JSON (mungkin error atau diblokir). Detail: " + text.substring(0, 80));
-      }
-    })
-    .then(res => {
-      if (res.status === 'error') throw new Error(res.message);
-      if (res.data && typeof res.data === 'object' && res.data.error) {
-        throw new Error(res.data.error);
-      }
-      return res.data;
-    })
-    .catch(err => {
-      if (timer) clearTimeout(timer);
-      if (err.name === 'AbortError' || (err.message && err.message.toLowerCase().includes('abort'))) {
-        const timeoutErr = new Error('Permintaan memakan waktu lebih lama dari biasanya. Silakan coba lagi.');
-        timeoutErr.isTimeout = true;
-        throw timeoutErr;
-      }
-      throw err;
-    });
+  throw new Error('Backend adapter is not available.');
 }
+
+
 
 export function run(fn) {
   if (!fn || !fn.name) {

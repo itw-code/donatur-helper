@@ -5,38 +5,153 @@ import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showCon
 import { call, callQueued } from '../api.js';
 import { appState, currentToken } from '../state.js';
 import { loadUserDashboard } from './donor.js';
+import { getClient } from '../services/supabaseClient.js';
+
+function _getSupabaseClient() {
+  if (typeof getClient === 'function') {
+    const cl = getClient();
+    if (cl) return cl;
+  }
+  if (typeof window !== 'undefined') {
+    if (window.__dhSupabase && typeof window.__dhSupabase.getClient === 'function') {
+      const cl = window.__dhSupabase.getClient();
+      if (cl) return cl;
+    }
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      return window.supabase;
+    }
+  }
+  return null;
+}
+
+function _normalizeCampaignStatus(rawStatus) {
+  if (!rawStatus) return 'Open';
+  const upper = String(rawStatus).toUpperCase();
+  if (upper === 'OPEN') return 'Open';
+  if (upper === 'CLOSED') return 'Closed';
+  if (upper === 'FINALIZED') return 'Finalized';
+  if (upper === 'ARCHIVED') return 'Archived';
+  if (upper === 'DRAFT') return 'Draft';
+  return rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+}
+
+function _copyText(text, successMsg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).then(() => showToast(successMsg)).catch(() => showToast('Gagal menyalin.'));
+  }
+  const el = document.createElement('textarea');
+  el.value = text;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+  showToast(successMsg);
+}
+
+export async function getBuktiSignedUrl(storagePath) {
+  if (!storagePath || typeof storagePath !== 'string' || !storagePath.trim()) return null;
+  const cleanPath = storagePath.trim();
+  if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) return cleanPath;
+  try {
+    const client = _getSupabaseClient();
+    if (!client || !client.storage) return null;
+    const { data, error } = await client.storage.from('bukti-transfer').createSignedUrl(cleanPath, 3600);
+    return (!error && data && data.signedUrl) ? data.signedUrl : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function uploadGiftImage(campaignId, file) {
+  if (!file) return null;
+  const client = _getSupabaseClient();
+  if (!client || !client.storage) throw new Error('Layanan penyimpanan Supabase belum siap.');
+  const timestamp = Date.now();
+  const fileName = file.name || 'gift.jpg';
+  const ext = (fileName.split('.').pop() || 'jpg').toLowerCase();
+  const cleanCampaignId = String(campaignId || 'campaign').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const storagePath = `gifts/${cleanCampaignId}/${timestamp}.${ext}`;
+
+  const { data, error } = await client.storage.from('bukti-transfer').upload(storagePath, file, { upsert: true });
+  if (error) throw new Error('Gagal mengunggah foto hadiah: ' + (error.message || 'Error'));
+  return (data && data.path) ? data.path : storagePath;
+}
+
+export async function resolvePicMediaUrls(detail) {
+  if (!detail) return;
+  const promises = [];
+
+  if (detail.campaign) {
+    const giftImg = detail.campaign.gift_image || detail.campaign.GiftImage;
+    if (giftImg && typeof giftImg === 'string' && !giftImg.startsWith('http')) {
+      promises.push(
+        getBuktiSignedUrl(giftImg).then(url => {
+          if (url) {
+            detail.campaign.GiftImage = url;
+            detail.campaign.gift_image = url;
+          }
+        })
+      );
+    }
+  }
+
+  if (Array.isArray(detail.donors)) {
+    detail.donors.forEach(d => {
+      const storagePath = d.proof_storage_path || d.ProofStoragePath;
+      if (storagePath && typeof storagePath === 'string' && !storagePath.startsWith('http')) {
+        promises.push(
+          getBuktiSignedUrl(storagePath).then(url => {
+            if (url) {
+              d._resolvedProofUrl = url;
+              d.ProofLink = url;
+              d.proof_link = url;
+            }
+          })
+        );
+      }
+    });
+  }
+
+  if (promises.length > 0) {
+    await Promise.all(promises);
+  }
+}
 
 export function loadPicDashboard() {
-  call('getCampaignForPic', currentToken()).then(detail => {
-    if (!detail) {
+  const token = currentToken();
+  if (!token) {
+    showView('landing');
+    return Promise.resolve();
+  }
+
+  return call('getCampaignForPic', token, 1, 100).then(async detail => {
+    if (!detail || !detail.campaign) {
       showView('pic-create');
       return;
     }
+
+    await resolvePicMediaUrls(detail);
     renderPicDashboard(detail);
     showView('pic-dashboard');
+
+    const returnAdmin = document.getElementById('btn-return-admin');
+    const returnMember = document.getElementById('btn-return-member');
+    const picLogout = document.getElementById('btn-pic-logout');
+
     if (safeGet('deep_dive_return_token')) {
-      const returnAdmin = document.getElementById('btn-return-admin');
-      const returnMember = document.getElementById('btn-return-member');
-      const picLogout = document.getElementById('btn-pic-logout');
       if (returnAdmin) returnAdmin.classList.remove('hidden');
       if (returnMember) returnMember.classList.add('hidden');
       if (picLogout) picLogout.classList.add('hidden');
     } else if (safeGet('donor_user')) {
-      const returnAdmin = document.getElementById('btn-return-admin');
-      const returnMember = document.getElementById('btn-return-member');
-      const picLogout = document.getElementById('btn-pic-logout');
       if (returnAdmin) returnAdmin.classList.add('hidden');
       if (returnMember) returnMember.classList.remove('hidden');
       if (picLogout) picLogout.classList.add('hidden');
     } else {
-      const returnAdmin = document.getElementById('btn-return-admin');
-      const returnMember = document.getElementById('btn-return-member');
-      const picLogout = document.getElementById('btn-pic-logout');
       if (returnAdmin) returnAdmin.classList.add('hidden');
       if (returnMember) returnMember.classList.add('hidden');
       if (picLogout) picLogout.classList.remove('hidden');
     }
-  }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
 }
 
 export function createCampaign() {
@@ -52,16 +167,16 @@ export function createCampaign() {
   }
 
   const amtInput = document.getElementById('pc-amount');
-  const rawAmount = amtInput ? parseRibuan(amtInput.value) : 0;
   const targetInput = document.getElementById('pc-target');
   const reasonInput = document.getElementById('pc-reason');
   const startInput = document.getElementById('pc-start');
   const deadlineInput = document.getElementById('pc-deadline');
 
   const data = {
+    token: currentToken(),
     targetName: targetInput ? targetInput.value.trim() : '',
     reason: reasonInput ? reasonInput.value.trim() : '',
-    giftAmount: rawAmount,
+    giftAmount: amtInput ? parseRibuan(amtInput.value) : 0,
     startDate: startInput ? startInput.value : '',
     deadline: deadlineInput ? deadlineInput.value : ''
   };
@@ -71,50 +186,40 @@ export function createCampaign() {
       btn.disabled = false;
       btn.textContent = originalText;
     }
+    showToast('Campaign berhasil dibuat!');
     loadPicDashboard();
   }).catch(e => {
     if (btn) {
       btn.disabled = false;
       btn.textContent = originalText;
     }
-    if (errEl) errEl.textContent = e.message || String(e);
+    if (errEl) errEl.textContent = formatUserErrorMessage(e);
   });
 }
 
 export function getPicProgress(detail) {
-  const donors = detail.donors || [];
-  let collected = 0;
-  let reminderCount = 0;
-  let reviewCount = 0;
-  let verifiedCount = 0;
-  let refundCount = 0;
+  const donors = (detail && detail.donors) || [];
+  let collected = 0, reminderCount = 0, reviewCount = 0, verifiedCount = 0, refundCount = 0;
 
   donors.forEach(d => {
-    const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
-    const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
-    const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
-    const hasProof = Boolean(String(d.ProofLink || '').trim());
-    const amountDue = Number(d.AmountDue) || 0;
-    const amountPaid = Number(d.AmountPaid) || 0;
+    const isPaid = String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+    const isVerified = String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+    const isRefunded = String(d.Refunded || (d.refunded ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+    const hasProof = Boolean(String(d.ProofStoragePath || d.proof_storage_path || d.ProofLink || d.proof_link || '').trim());
+    const amountDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
+    const amountPaid = Number(d.AmountPaid !== undefined ? d.AmountPaid : d.amount_paid) || 0;
 
     if (isPaid) collected += amountPaid;
     if (isVerified) verifiedCount++;
     else if (isPaid && amountPaid > amountDue && !isRefunded) refundCount++;
     else if (hasProof) reviewCount++;
-    else if (detail.campaign && detail.campaign.Status === 'Finalized' && !isPaid) reminderCount++;
+    else if (detail && detail.campaign && _normalizeCampaignStatus(detail.campaign.Status || detail.campaign.status) === 'Finalized' && !isPaid) reminderCount++;
   });
 
-  const target = detail.campaign ? (Number(detail.campaign.GiftAmount) || 0) : 0;
+  const c = detail && detail.campaign;
+  const target = c ? (Number(c.GiftAmount !== undefined ? c.GiftAmount : c.gift_amount) || 0) : 0;
   const percent = target > 0 ? Math.min(100, Math.round((collected / target) * 100)) : 0;
-  return {
-    collected,
-    percent,
-    reminderCount,
-    reviewCount,
-    verifiedCount,
-    refundCount,
-    totalDonorCount: donors.length
-  };
+  return { collected, percent, reminderCount, reviewCount, verifiedCount, refundCount, totalDonorCount: donors.length };
 }
 
 export function isVisiblePicActionTarget(el) {
@@ -124,9 +229,7 @@ export function isVisiblePicActionTarget(el) {
 
 export function scrollToPicActions() {
   const target = document.getElementById('pic-actions');
-  if (target) {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 export function scrollToPicDonorAction(actionType) {
@@ -146,11 +249,7 @@ export function scrollToPicDonorAction(actionType) {
 
   const focusTarget = () => {
     if (typeof target.focus !== 'function') return;
-    try {
-      target.focus({ preventScroll: true });
-    } catch (e) {
-      target.focus();
-    }
+    try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
   };
   if (reduceMotion) focusTarget();
   else if (typeof window !== 'undefined') window.setTimeout(focusTarget, 150);
@@ -160,12 +259,8 @@ export function scrollToPicDonorAction(actionType) {
 export function renderPicActionItem(type, count, isPrimary) {
   const isReminder = type === 'reminder';
   const isRefund = type === 'refund';
-  const label = isReminder
-    ? 'Kirim pengingat WA'
-    : (isRefund ? 'Refund' : 'Tinjau Bukti Transfer');
-  const description = isReminder
-    ? count + ' Donor belum upload Bukti Transfer.'
-    : (isRefund ? count + ' Donor menunggu penyelesaian refund.' : count + ' Bukti Transfer menunggu verifikasi.');
+  const label = isReminder ? 'Kirim pengingat WA' : (isRefund ? 'Refund' : 'Tinjau Bukti Transfer');
+  const description = isReminder ? count + ' Donor belum upload Bukti Transfer.' : (isRefund ? count + ' Donor menunggu penyelesaian refund.' : count + ' Bukti Transfer menunggu verifikasi.');
   const className = isPrimary ? 'btn blue' : 'btn secondary';
   return '<div class="pic-action-item' + (isPrimary ? ' primary' : '') + '">' +
     '<div class="pic-action-copy"><strong>' + label + '</strong><span>' + description + '</span></div>' +
@@ -174,43 +269,53 @@ export function renderPicActionItem(type, count, isPrimary) {
 }
 
 export function renderPicActionQueue(detail, progress) {
-  if (!detail.campaign || detail.campaign.Status !== 'Finalized') return '';
+  const c = detail && detail.campaign;
+  if (!c || _normalizeCampaignStatus(c.Status || c.status) !== 'Finalized') return '';
 
   let html = '<div class="pic-action-list" aria-label="Tindakan pembayaran">';
-  if (progress.reminderCount > 0) {
-    html += renderPicActionItem('reminder', progress.reminderCount, true);
-  }
-  if (progress.reviewCount > 0) {
-    html += renderPicActionItem('review', progress.reviewCount, progress.reminderCount === 0);
-  }
-  if (progress.refundCount > 0) {
-    html += renderPicActionItem('refund', progress.refundCount, progress.reminderCount === 0 && progress.reviewCount === 0);
-  }
+  if (progress.reminderCount > 0) html += renderPicActionItem('reminder', progress.reminderCount, true);
+  if (progress.reviewCount > 0) html += renderPicActionItem('review', progress.reviewCount, progress.reminderCount === 0);
+  if (progress.refundCount > 0) html += renderPicActionItem('refund', progress.refundCount, progress.reminderCount === 0 && progress.reviewCount === 0);
   if (progress.reminderCount === 0 && progress.reviewCount === 0 && progress.refundCount === 0) {
-    const message = progress.totalDonorCount > 0
-      ? 'Semua pembayaran terverifikasi.'
-      : 'Belum ada tindakan pembayaran.';
+    const message = progress.totalDonorCount > 0 ? 'Semua pembayaran terverifikasi.' : 'Belum ada tindakan pembayaran.';
     html += '<div class="pic-complete-state" role="status">' + paymentStatusIcon('verified') + '<span>' + message + '</span></div>';
   }
   return html + '</div>';
 }
 
 export function renderPicNextAction(detail, progress) {
-  const c = detail.campaign;
+  const c = detail && detail.campaign;
   if (!c) return '';
-  if (c.Status === 'Finalized') return renderPicActionQueue(detail, progress);
+  const status = _normalizeCampaignStatus(c.Status || c.status);
+  if (status === 'Finalized') return renderPicActionQueue(detail, progress);
 
   let label = 'Lihat tindakan berikutnya';
   let action = 'scrollToPicActions()';
-  if (c.Status === 'Closed') {
+  if (status === 'Closed') {
     label = 'Input rekening';
-    action = 'showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')';
+    action = 'showFinalizeForm(' + (Number(c.GiftAmount !== undefined ? c.GiftAmount : c.gift_amount) || 0) + ')';
   }
   return '<button type="button" class="btn blue pic-next-action" onclick="' + action + '">' + label + ' ' + actionArrowIcon() + '</button>';
 }
 
 export function renderPicDashboard(detail) {
+  if (!detail || !detail.campaign) {
+    showView('pic-create');
+    return;
+  }
   const c = detail.campaign;
+  c.CampaignID = c.CampaignID || c.campaign_id || c.campaignId || '';
+  c.TargetName = c.TargetName || c.target_name || c.targetName || '';
+  c.Reason = c.Reason || c.reason || '';
+  c.GiftAmount = Number(c.GiftAmount !== undefined ? c.GiftAmount : c.gift_amount) || 0;
+  c.Status = _normalizeCampaignStatus(c.Status || c.status);
+  c.Deadline = c.Deadline || (c.deadline ? String(c.deadline).split('T')[0] : '') || '';
+  c.GiftLink = c.GiftLink || c.gift_link || '';
+  c.GiftImage = c.GiftImage || c.gift_image || '';
+  c.BankName = c.BankName || c.bank_name || '';
+  c.BankAccount = c.BankAccount || c.bank_account || '';
+  c.AccountHolder = c.AccountHolder || c.account_holder || '';
+
   appState.picCampaignData = c;
   appState.picCampaignDetail = detail;
   const infoEl = document.getElementById('pic-campaign-info');
@@ -265,28 +370,16 @@ export function renderPicActions(detail) {
   if (!el) return;
   let html = '<div class="pic-section-heading"><div><span class="role-eyebrow">PIC · WORKSPACE</span><h3>Tindakan berikutnya</h3></div><span>Prioritaskan tindakan</span></div>';
 
-  let isAchieved = true;
-  if (!detail.donors || detail.donors.length === 0) isAchieved = false;
-  else {
-    detail.donors.forEach(d => {
-      if (String(d.Verified).toUpperCase() !== 'TRUE') isAchieved = false;
-    });
-  }
+  let isAchieved = Boolean(detail.donors && detail.donors.length > 0 && detail.donors.every(d => String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE'));
 
   html += '<div class="pic-share-box" style="background:#eaf3de; padding:10px; border-radius:8px; margin-bottom:12px;">';
   if (c.Status === 'Open' || c.Status === 'Closed') {
-    html += '<strong>Bagikan Undangan Patungan:</strong><br>' +
-      '<p class="muted" style="margin:4px 0;">Salin pesan undangan beserta daftar peserta yang sudah bergabung.</p>' +
-      '<button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
+    html += '<strong>Bagikan Undangan Patungan:</strong><br><p class="muted" style="margin:4px 0;">Salin pesan undangan beserta daftar peserta yang sudah bergabung.</p><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
   } else if (c.Status === 'Finalized') {
     if (isAchieved) {
-      html += '<strong>Target Terkumpul! 🎉</strong><br>' +
-        '<p class="muted" style="margin:4px 0;">Semua pembayaran terverifikasi. Salin pesan terima kasih untuk grup.</p>' +
-        '<button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Laporan Selesai</button>';
+      html += '<strong>Target Terkumpul! 🎉</strong><br><p class="muted" style="margin:4px 0;">Semua pembayaran terverifikasi. Salin pesan terima kasih untuk grup.</p><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Laporan Selesai</button>';
     } else {
-      html += '<strong>Tagihan Patungan (Grup):</strong><br>' +
-        '<p class="muted" style="margin:4px 0;">Salin rincian tagihan pro-rata, nominal bebas, dan nomor rekening untuk dibagikan ke grup.</p>' +
-        '<button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Rincian Tagihan</button>';
+      html += '<strong>Tagihan Patungan (Grup):</strong><br><p class="muted" style="margin:4px 0;">Salin rincian tagihan pro-rata, nominal bebas, dan nomor rekening untuk dibagikan ke grup.</p><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Rincian Tagihan</button>';
     }
   } else {
     html += '<strong>Campaign Selesai:</strong><br><p class="muted" style="margin:4px 0;">Campaign sudah selesai/diarsipkan.</p>';
@@ -300,53 +393,48 @@ export function renderPicActions(detail) {
     html += '<button class="btn blue" onclick="showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')">Selesaikan & input rekening</button>';
     html += '<button class="btn secondary" onclick="reopenList()">Buka lagi pendaftaran</button>';
   } else if (c.Status === 'Finalized') {
-    const paidCount = detail.donors.filter(d => String(d.Paid).toUpperCase() === 'TRUE').length;
-
+    const paidCount = detail.donors.filter(d => String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE').length;
     let totalRefund = 0;
     detail.donors.forEach(d => {
-      if (String(d.Paid).toUpperCase() === 'TRUE' && d.AmountPaid) {
-        const diff = Number(d.AmountPaid) - Number(d.AmountDue);
-        if (diff > 0 && String(d.Refunded).toUpperCase() !== 'TRUE') totalRefund += diff;
-      }
+      const isPaid = String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const isRef = String(d.Refunded || (d.refunded ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const amtPaid = Number(d.AmountPaid !== undefined ? d.AmountPaid : d.amount_paid) || 0;
+      const amtDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
+      if (isPaid && amtPaid && amtPaid > amtDue && !isRef) totalRefund += (amtPaid - amtDue);
     });
 
     html += '<p class="muted">' + paidCount + ' / ' + detail.donors.length + ' sudah upload bukti</p>';
-    if (totalRefund > 0) {
-      html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
-    }
+    if (totalRefund > 0) html += '<p style="color:var(--amber); font-weight:bold; margin-bottom:12px;">⚠️ Total Perlu Refund: ' + formatIDR(totalRefund) + '</p>';
 
-    const hasReviewableProof = detail.donors.some(d =>
-      String(d.Paid).toUpperCase() === 'TRUE' &&
-      String(d.Verified).toUpperCase() !== 'TRUE' &&
-      Boolean(String(d.ProofLink || '').trim())
-    );
-    const hasMissingProof = detail.donors.some(d =>
-      String(d.Paid).toUpperCase() === 'TRUE' &&
-      String(d.Verified).toUpperCase() !== 'TRUE' &&
-      !String(d.ProofLink || '').trim()
-    );
-    if (hasReviewableProof && !hasMissingProof) {
-      html += '<button class="btn green" style="margin-bottom:8px; margin-right:8px;" onclick="picVerifyAllUI(\'' + c.CampaignID + '\')">✓ Setujui Semua Bukti</button>';
-    }
-    if (!isAchieved) {
-      html += '<button class="btn secondary" style="margin-bottom:8px; margin-right:8px;" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
-    }
+    const hasReviewableProof = detail.donors.some(d => {
+      const isPaid = String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const isVerified = String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const hasProof = Boolean(String(d.ProofStoragePath || d.proof_storage_path || d.ProofLink || d.proof_link || '').trim());
+      return isPaid && !isVerified && hasProof;
+    });
+    const hasMissingProof = detail.donors.some(d => {
+      const isPaid = String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const isVerified = String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const hasProof = Boolean(String(d.ProofStoragePath || d.proof_storage_path || d.ProofLink || d.proof_link || '').trim());
+      return isPaid && !isVerified && !hasProof;
+    });
+
+    if (hasReviewableProof && !hasMissingProof) html += '<button class="btn green" style="margin-bottom:8px; margin-right:8px;" onclick="picVerifyAllUI(\'' + escapeHtml(c.CampaignID) + '\')">✓ Setujui Semua Bukti</button>';
+    if (!isAchieved) html += '<button class="btn secondary" style="margin-bottom:8px; margin-right:8px;" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
     html += '<button class="btn blue" style="margin-bottom:8px;" onclick="showGiftProofForm()">📸 Upload Foto & Link Hadiah</button>';
   } else {
     html += '<p class="muted">Campaign sudah diarsipkan. Token ini sudah tidak aktif.</p>';
   }
 
   html += '<div id="finalize-form" class="hidden"></div>';
-
-  html += '<div id="late-donor-form" class="hidden card" style="background:#f9f9f9; margin-top:16px; position:relative;">';
-  html += '<h4 style="margin-top:0;">Ajukan Donatur Susulan</h4>';
-  html += '<p class="muted" style="font-size:12px;">Tambahkan teman yang belum sempat daftar di list sebelumnya.</p>';
-  html += '<label>Nama Teman: <input type="text" id="late-name" placeholder="cth: Budi Susanto"></label>';
-  html += '<label>No WhatsApp: <input type="tel" id="late-wa" placeholder="cth: 08123456789"></label>';
-  html += '<label>Tipe Nominal: <select id="late-amount-type" onchange="toggleLateCustomAmount()"><option value="fixed">Ikuti Nominal Rata-rata</option><option value="custom">Nominal Bebas (Custom)</option></select></label>';
-  html += '<div id="late-custom-amount-group" class="hidden"><label>Nominal Donasi (Rp): <input type="number" id="late-custom-amount" placeholder="cth: 50000"></label></div>';
-  html += '<div style="margin-top:12px;"><button class="btn green" onclick="submitLateDonor(\'' + c.CampaignID + '\')">Simpan & Masukkan ke List</button> <button class="btn secondary" onclick="hideLateDonorForm()">Batal</button></div>';
-  html += '</div>';
+  html += '<div id="late-donor-form" class="hidden card" style="background:#f9f9f9; margin-top:16px; position:relative;">' +
+    '<h4 style="margin-top:0;">Ajukan Donatur Susulan</h4><p class="muted" style="font-size:12px;">Tambahkan teman yang belum sempat daftar di list sebelumnya.</p>' +
+    '<label>Nama Teman: <input type="text" id="late-name" placeholder="cth: Budi Susanto"></label>' +
+    '<label>No WhatsApp: <input type="tel" id="late-wa" placeholder="cth: 08123456789"></label>' +
+    '<label>Tipe Nominal: <select id="late-amount-type" onchange="toggleLateCustomAmount()"><option value="fixed">Ikuti Nominal Rata-rata</option><option value="custom">Nominal Bebas (Custom)</option></select></label>' +
+    '<div id="late-custom-amount-group" class="hidden"><label>Nominal Donasi (Rp): <input type="number" id="late-custom-amount" placeholder="cth: 50000"></label></div>' +
+    '<div style="margin-top:12px;"><button id="btn-submit-late-donor" class="btn green" onclick="submitLateDonor(\'' + escapeHtml(c.CampaignID) + '\')">Simpan & Masukkan ke List</button> <button class="btn secondary" onclick="hideLateDonorForm()">Batal</button></div>' +
+    '<div id="late-error" class="error" style="margin-top:8px;"></div></div>';
 
   el.innerHTML = html;
 }
@@ -379,54 +467,69 @@ export function showGiftProofForm() {
   if (lateForm) lateForm.classList.add('hidden');
 }
 
-export function submitGiftProof() {
+export async function submitGiftProof() {
   const errEl = document.getElementById('gift-error');
   if (errEl) errEl.textContent = 'Menyimpan...';
+
+  const btn = document.querySelector('#gift-proof-form button.btn.blue') || document.getElementById('btn-submit-gift-proof');
+  let originalText = '';
+  if (btn) {
+    originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+  }
+
+  const resetBtn = () => {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  };
 
   const linkInput = document.getElementById('gift-link');
   const link = linkInput ? linkInput.value.trim() : '';
   const fileInput = document.getElementById('gift-image');
-  const file = fileInput ? fileInput.files[0] : null;
+  const file = fileInput ? (fileInput.files && fileInput.files[0]) : null;
 
   if (!file && !link) {
     if (errEl) errEl.textContent = 'Harap isi link atau upload foto hadiah.';
+    resetBtn();
     return;
   }
 
-  if (!file) {
-    call('updateGiftProof', currentToken(), link, null)
-      .then(() => { showToast('Dokumentasi hadiah berhasil disimpan!'); loadPicDashboard(); })
-      .catch(e => { if (errEl) errEl.textContent = e.message || String(e); });
+  if (file && file.size > 2 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran gambar maksimal 2MB.';
+    resetBtn();
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function (event) {
-    const img = new Image();
-    img.onload = function () {
-      const canvas = document.createElement('canvas');
-      const scaleSize = Math.min(1, 800 / img.width);
-      canvas.width = img.width * scaleSize;
-      canvas.height = img.height * scaleSize;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-      const base64 = dataUrl.split(',')[1];
+  const c = appState.picCampaignData;
+  const campaignId = (c && (c.CampaignID || c.campaign_id)) || 'campaign';
 
-      call('updateGiftProof', currentToken(), link, { name: file.name, type: 'image/jpeg', data: base64 })
-        .then(() => { showToast('Dokumentasi hadiah berhasil disimpan!'); loadPicDashboard(); })
-        .catch(e => { if (errEl) errEl.textContent = e.message || String(e); });
-    };
-    img.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
+  try {
+    let imageStoragePath = null;
+    if (file) {
+      if (errEl) errEl.textContent = 'Mengunggah foto hadiah...';
+      imageStoragePath = await uploadGiftImage(campaignId, file);
+    }
+
+    await call('updateGiftProof', currentToken(), link, imageStoragePath);
+    resetBtn();
+    showToast('Dokumentasi hadiah berhasil disimpan!');
+    const giftForm = document.getElementById('gift-proof-form');
+    if (giftForm) giftForm.classList.add('hidden');
+    loadPicDashboard();
+  } catch (e) {
+    resetBtn();
+    if (errEl) errEl.textContent = formatUserErrorMessage(e);
+  }
 }
 
 export function submitLateDonor() {
   const errEl = document.getElementById('late-error');
   if (errEl) errEl.textContent = 'Mengirim...';
 
-  const btn = document.getElementById('btn-submit-late-donor');
+  const btn = document.getElementById('btn-submit-late-donor') || (document.querySelector('#late-donor-form button.btn.green'));
   let originalText = '';
   if (btn) {
     originalText = btn.textContent;
@@ -448,12 +551,12 @@ export function submitLateDonor() {
   const customAmtEl = document.getElementById('late-custom-amount');
   const reasonInput = document.getElementById('late-reason');
 
-  const name = nameInput ? nameInput.value : '';
-  const wa = waInput ? waInput.value : '';
-  const alias = aliasInput ? aliasInput.value : '';
+  const name = nameInput ? nameInput.value.trim() : '';
+  const wa = waInput ? waInput.value.trim() : '';
+  const alias = aliasInput ? aliasInput.value.trim() : '';
   const isCustom = isCustomEl ? isCustomEl.checked : (document.getElementById('late-amount-type') && document.getElementById('late-amount-type').value === 'custom');
   const amount = isCustom && customAmtEl ? parseRibuan(customAmtEl.value) : null;
-  const reason = reasonInput ? reasonInput.value : '';
+  const reason = reasonInput ? reasonInput.value.trim() : '';
 
   if (!name || !wa || !reason) {
     if (errEl) errEl.textContent = 'Harap isi semua kolom.';
@@ -462,7 +565,7 @@ export function submitLateDonor() {
   }
 
   const realToken = safeGet('deep_dive_return_token') || null;
-  callQueued('requestLateDonor', currentToken(), name, wa, isCustom, amount, reason, realToken, alias).then(res => {
+  callQueued('requestLateDonor', currentToken(), name, wa, isCustom, amount, reason, realToken, alias).then(() => {
     resetBtn();
     showToast('Pengajuan berhasil dikirim ke Admin!');
     if (errEl) errEl.textContent = '';
@@ -473,34 +576,20 @@ export function submitLateDonor() {
     if (customAmtEl) customAmtEl.value = '';
     const lateForm = document.getElementById('late-donor-form');
     if (lateForm) lateForm.classList.add('hidden');
+    loadPicDashboard();
   }).catch(e => {
     resetBtn();
-    if (errEl) errEl.textContent = e.message || String(e);
+    if (errEl) errEl.textContent = formatUserErrorMessage(e);
   });
 }
 
 export function copyShareLink() {
   const c = appState.picCampaignData;
   if (!c) { showToast('Data campaign belum tersedia.'); return; }
-
-  const baseUrl = window.location.origin + window.location.pathname;
-  const shareUrl = baseUrl + '#c=' + c.CampaignID;
+  const shareUrl = window.location.origin + window.location.pathname + '#c=' + c.CampaignID;
   const giftText = c.GiftAmount > 0 ? formatIDR(c.GiftAmount) : 'Ditentukan nanti';
-  const deadlineText = c.Deadline || '-';
-
-  const msg = '🎁 *Yuk Patungan Donasi!*\n\n'
-    + '👤 Untuk: *' + c.TargetName + '*\n'
-    + (c.Reason ? '💬 Alasan: ' + c.Reason + '\n' : '')
-    + '💰 Total hadiah: ' + giftText + '\n'
-    + '📅 Deadline: ' + deadlineText + '\n\n'
-    + '👉 Daftar di sini:\n' + shareUrl;
-
-  navigator.clipboard.writeText(msg).then(() => {
-    showToast('Pesan undangan berhasil disalin! Tempel ke grup WhatsApp.');
-  }).catch(e => {
-    showToast('Gagal menyalin pesan.');
-    console.error(e);
-  });
+  const msg = '🎁 *Yuk Patungan Donasi!*\n\n👤 Untuk: *' + c.TargetName + '*\n' + (c.Reason ? '💬 Alasan: ' + c.Reason + '\n' : '') + '💰 Total hadiah: ' + giftText + '\n📅 Deadline: ' + (c.Deadline || '-') + '\n\n👉 Daftar di sini:\n' + shareUrl;
+  _copyText(msg, 'Pesan undangan berhasil disalin! Tempel ke grup WhatsApp.');
 }
 
 export function copyPicGroupReminder(e) {
@@ -514,42 +603,35 @@ export function copyPicGroupReminder(e) {
   }
 
   call('getReminderInfo', currentToken(), baseUrl).then(res => {
-    if (btn) {
-      btn.textContent = oldText;
-      btn.disabled = false;
-    }
-    
+    if (btn) { btn.textContent = oldText; btn.disabled = false; }
     if (!res || !res.bulkMessage) {
       showInfoModal("Gagal menghasilkan pesan reminder.", "Error");
       return;
     }
-    
-    navigator.clipboard.writeText(res.bulkMessage).then(() => {
-      showToast('Pesan berhasil disalin! Tempel ke grup WhatsApp.');
-    }).catch(err => {
-      showToast('Gagal menyalin pesan.');
-      console.error(err);
-    });
+    _copyText(res.bulkMessage, 'Pesan berhasil disalin! Tempel ke grup WhatsApp.');
   }).catch(e => {
-    if (btn) {
-      btn.textContent = oldText;
-      btn.disabled = false;
-    }
-    showInfoModal(e.message || String(e), 'Error');
+    if (btn) { btn.textContent = oldText; btn.disabled = false; }
+    showInfoModal(formatUserErrorMessage(e), 'Error');
   });
 }
 
 export function closeList() {
-  callQueued('closeCampaignList', currentToken()).then(renderAndShow).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  callQueued('closeCampaignList', currentToken()).then(() => {
+    showToast('Pendaftaran campaign berhasil ditutup.');
+    loadPicDashboard();
+  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
 }
 
 export function reopenList() {
-  call('reopenCampaignList', currentToken()).then(renderAndShow).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  call('reopenCampaignList', currentToken()).then(() => {
+    showToast('Pendaftaran campaign dibuka kembali.');
+    loadPicDashboard();
+  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
 }
 
 export function archiveThis() {
   showConfirmModal('Arsipkan campaign ini? Token PIC akan nonaktif.', () => {
-    return call('archiveCampaign', currentToken()).then(() => {
+    return callQueued('archiveCampaign', currentToken()).then(() => {
       showToast('Campaign berhasil diarsipkan.');
       if (safeGet('deep_dive_return_token')) {
         const returnAdminBtn = document.getElementById('btn-return-admin');
@@ -561,13 +643,13 @@ export function archiveThis() {
         safeRemove('auth_role');
         showView('landing');
       }
-    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
   });
 }
 
 export function deleteThis() {
   showConfirmModal('Hapus campaign ini? Semua data campaign dan donatur akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.', () => {
-    return call('deleteCampaign', currentToken()).then(() => {
+    return callQueued('deleteCampaign', currentToken()).then(() => {
       showToast('Campaign berhasil dihapus.');
       if (safeGet('deep_dive_return_token')) {
         const returnAdminBtn = document.getElementById('btn-return-admin');
@@ -579,7 +661,7 @@ export function deleteThis() {
         safeRemove('auth_role');
         showView('landing');
       }
-    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+    }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
   });
 }
 
@@ -594,9 +676,8 @@ export function showFinalizeForm(currentAmount) {
     el.classList.remove('hidden');
 
     const defaultAmount = currentAmount > 0 ? currentAmount : '';
-
-    let note = settings.enableRounding
-      ? 'Pembulatan AKTIF: tiap orang akan dibulatkan ke atas ke kelipatan ' + formatIDR(settings.roundTo) + '.'
+    let note = (settings && settings.enableRounding)
+      ? 'Pembulatan AKTIF: tiap orang akan dibulatkan ke atas ke kelipatan ' + formatIDR(settings.roundTo || 500) + '.'
       : 'Pembulatan NONAKTIF: nominal dibagi rata (selisih kecil ditanggung sebagian donatur agar totalnya pas).';
 
     el.innerHTML =
@@ -610,6 +691,8 @@ export function showFinalizeForm(currentAmount) {
       '<label>Screenshot Total Harga (Opsional)</label><input id="fin-image" type="file" accept="image/*">' +
       '<button id="btn-do-finalize" class="btn blue" onclick="doFinalize()">Konfirmasi & finalisasi</button>' +
       '<div id="fin-error" class="error"></div>';
+  }).catch(e => {
+    showInfoModal(formatUserErrorMessage(e), 'Error');
   });
 }
 
@@ -642,50 +725,60 @@ export function doFinalize() {
     giftLink: document.getElementById('fin-link') ? document.getElementById('fin-link').value.trim() : ''
   };
 
-  const fileInput = document.getElementById('fin-image');
-  const file = fileInput ? fileInput.files[0] : null;
-
-  const doCall = (fileData) => {
-    if (errEl) errEl.textContent = 'Menyimpan ke server...';
-    call('finalizeCampaign', currentToken(), bankInfo, rawFinalAmount, fileData)
-      .then(res => {
-        resetBtn();
-        renderAndShow(res);
-      })
-      .catch(e => {
-        resetBtn();
-        if (errEl) errEl.textContent = escapeHtml(e.message || String(e));
-      });
-  };
-
-  if (file) {
-    if (file.size > 2 * 1024 * 1024) {
-      if (errEl) errEl.textContent = 'Ukuran gambar maksimal 2MB.';
-      resetBtn();
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      doCall({
-        name: file.name,
-        type: file.type,
-        data: e.target.result.split(',')[1]
-      });
-    };
-    reader.readAsDataURL(file);
-  } else {
-    doCall(null);
+  if (!bankInfo.bankName || !bankInfo.bankAccount || !bankInfo.accountHolder || rawFinalAmount <= 0) {
+    if (errEl) errEl.textContent = 'Harap lengkapi nama bank, nomor rekening, nama pemilik, dan total nominal hadiah.';
+    resetBtn();
+    return;
   }
+
+  const fileInput = document.getElementById('fin-image');
+  const file = fileInput ? (fileInput.files && fileInput.files[0]) : null;
+
+  if (file && file.size > 2 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran gambar maksimal 2MB.';
+    resetBtn();
+    return;
+  }
+
+  const c = appState.picCampaignData;
+  const campaignId = (c && (c.CampaignID || c.campaign_id)) || 'campaign';
+
+  (async () => {
+    try {
+      let giftImagePath = null;
+      if (file) {
+        if (errEl) errEl.textContent = 'Mengunggah screenshot harga...';
+        giftImagePath = await uploadGiftImage(campaignId, file);
+      }
+
+      if (errEl) errEl.textContent = 'Menyimpan ke server...';
+      await callQueued('finalizeCampaign', currentToken(), bankInfo, rawFinalAmount, giftImagePath);
+      resetBtn();
+      showToast('Campaign berhasil difinalisasi!');
+      loadPicDashboard();
+    } catch (e) {
+      resetBtn();
+      if (errEl) errEl.textContent = escapeHtml(formatUserErrorMessage(e));
+    }
+  })();
 }
 
 export function getPicDonorQueueState(d, campaignStatus) {
-  const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
-  const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
-  const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
-  const hasProof = Boolean(String(d.ProofLink || '').trim());
-  const amountDue = Number(d.AmountDue) || 0;
-  const amountPaid = Number(d.AmountPaid) || 0;
-  const isFinalized = campaignStatus === 'Finalized';
+  const isPaid = String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+  const isVerified = String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+  const isRefunded = String(d.Refunded || (d.refunded ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+  const hasProof = Boolean(String(d.ProofStoragePath || d.proof_storage_path || d.ProofLink || d.proof_link || '').trim());
+  const amountDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
+  const amountPaid = Number(d.AmountPaid !== undefined ? d.AmountPaid : d.amount_paid) || 0;
+  const isFinalized = _normalizeCampaignStatus(campaignStatus) === 'Finalized';
+
+  if (d.action_group || d.ActionGroup) {
+    const ag = String(d.action_group || d.ActionGroup).toUpperCase();
+    if (ag === 'REFUND') return 'refund';
+    if (ag === 'FINAL') return 'complete';
+    if (ag === 'REVIEW_PROOF') return 'review';
+    if (ag === 'REMINDER') return 'reminder';
+  }
 
   if (isVerified) return 'complete';
   if (isPaid && amountPaid > amountDue && !isRefunded) return 'refund';
@@ -714,28 +807,21 @@ export function renderDonorTable(detail) {
     return;
   }
 
-  const isFinalized = detail.campaign.Status === 'Finalized';
-  const queues = {
-    'reminder': [],
-    'review': [],
-    'refund': [],
-    'missing-proof': [],
-    'complete': [],
-    'participant': []
-  };
+  const campaignStatus = _normalizeCampaignStatus(detail.campaign.Status || detail.campaign.status);
+  const isFinalized = campaignStatus === 'Finalized';
+  const queues = { 'reminder': [], 'review': [], 'refund': [], 'missing-proof': [], 'complete': [], 'participant': [] };
 
   detail.donors.forEach(d => {
-    const q = isFinalized ? getPicDonorQueueState(d, detail.campaign.Status) : 'participant';
+    const q = isFinalized ? getPicDonorQueueState(d, campaignStatus) : 'participant';
     if (queues[q]) queues[q].push(d);
     else queues.participant.push(d);
   });
 
   const queueOrder = ['reminder', 'review', 'refund', 'missing-proof', 'complete', 'participant'];
-
   queueOrder.forEach(k => {
     queues[k].sort((a, b) => {
-      const aDue = Number(a.AmountDue) || 0;
-      const bDue = Number(b.AmountDue) || 0;
+      const aDue = Number(a.AmountDue !== undefined ? a.AmountDue : a.amount_due) || 0;
+      const bDue = Number(b.AmountDue !== undefined ? b.AmountDue : b.amount_due) || 0;
       return bDue - aDue;
     });
   });
@@ -773,29 +859,35 @@ export function renderDonorTable(detail) {
     const qHeading = isFinalized ? getPicDonorQueueLabel(qKey) : '';
     if (qHeading && qKey !== 'participant') {
       const countLabel = qKey === 'complete' ? (' (' + list.length + ')') : '';
-      let qSectionHeader = '';
       if (qKey === 'reminder' && list.length > 0) {
-        qSectionHeader = '<div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0 8px 0; gap: 8px;">' +
+        cardItems += '<div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0 8px 0; gap: 8px;">' +
           '<h4 class="pic-queue-heading" style="margin: 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">' + escapeHtml(qHeading + countLabel) + '</h4>' +
           '<button type="button" class="btn secondary btn-auto" style="font-size: 11px; padding: 4px 8px; margin: 0;" onclick="copyUnpaidDonorsRecap()">📋 Salin Rekap Pengingat (' + list.length + ')</button>' +
           '</div>';
       } else {
-        qSectionHeader = '<h4 class="pic-queue-heading" style="margin: 16px 0 8px 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">' + escapeHtml(qHeading + countLabel) + '</h4>';
+        cardItems += '<h4 class="pic-queue-heading" style="margin: 16px 0 8px 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">' + escapeHtml(qHeading + countLabel) + '</h4>';
       }
-      cardItems += qSectionHeader;
     }
 
     list.forEach(d => {
-      const displayName = d.Alias ? d.Alias : d.Name;
-      const isPaid = String(d.Paid).toUpperCase() === 'TRUE';
-      const isVerified = String(d.Verified).toUpperCase() === 'TRUE';
-      const isRefunded = String(d.Refunded).toUpperCase() === 'TRUE';
-      const hasProof = Boolean(String(d.ProofLink || '').trim());
-      const actionType = isFinalized
-        ? (qKey === 'reminder' ? 'reminder' : (qKey === 'review' ? 'review' : (qKey === 'refund' ? 'refund' : '')))
-        : '';
+      const displayName = d.Alias || d.alias ? (d.Alias || d.alias) : (d.Name || d.name);
+      const donorWa = d.WhatsApp || d.whatsapp || '';
+      const isPaid = String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const isVerified = String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const isRefunded = String(d.Refunded || (d.refunded ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
+      const proofPath = d.proof_storage_path || d.ProofStoragePath || '';
+      const proofLink = d._resolvedProofUrl || (proofPath && proofPath.startsWith('http') ? proofPath : '') || d.proof_link || d.ProofLink || '';
+      const hasProof = Boolean(String(proofPath || proofLink || '').trim());
+      const amountDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
+      const amountPaid = Number(d.AmountPaid !== undefined ? d.AmountPaid : d.amount_paid) || 0;
+      const joinedAt = d.JoinedAt || d.joined_at || '';
+      const paidAt = d.PaidAt || d.paid_at || '';
+      const modifiedAt = d.ModifiedAt || d.modified_at || '';
+      const modifiedBy = d.ModifiedBy || d.modified_by || '';
+
+      const actionType = isFinalized ? (qKey === 'reminder' ? 'reminder' : (qKey === 'review' ? 'review' : (qKey === 'refund' ? 'refund' : ''))) : '';
       const actionAttribute = actionType ? ' data-pic-action="' + actionType + '" tabindex="-1"' : '';
-      const picName = d.ModifiedBy ? escapeHtml(d.ModifiedBy) : '';
+      const picName = modifiedBy ? escapeHtml(modifiedBy) : '';
       const picLabel = picName ? ' (' + picName + ')' : '';
 
       let badgeHtml = '';
@@ -809,37 +901,26 @@ export function renderDonorTable(detail) {
         badgeHtml = '<span class="badge warning payment-status-badge" style="background:#faeeda;color:var(--amber);">' + paymentStatusIcon('unpaid') + '<span>Belum Bayar</span></span>';
       }
 
-      let timeHtml = '<div class="milestone-stack">';
-      timeHtml += '<div class="milestone-item"><span class="milestone-dot daftar"></span><span class="milestone-label">Daftar:</span><span class="milestone-time">' + formatTime(d.JoinedAt) + '</span></div>';
-      if (isPaid) {
-        const payTime = d.PaidAt ? formatTime(d.PaidAt) : '-';
-        timeHtml += '<div class="milestone-item"><span class="milestone-dot bayar"></span><span class="milestone-label">Bayar:</span><span class="milestone-time">' + payTime + '</span></div>';
-      }
-      if (isVerified) {
-        const verTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
-        timeHtml += '<div class="milestone-item"><span class="milestone-dot verif"></span><span class="milestone-label">Verif' + picLabel + ':</span><span class="milestone-time">' + verTime + '</span></div>';
-      }
-      if (isRefunded) {
-        const refTime = d.ModifiedAt ? formatTime(d.ModifiedAt) : '-';
-        timeHtml += '<div class="milestone-item"><span class="milestone-dot refund"></span><span class="milestone-label">Refund' + picLabel + ':</span><span class="milestone-time">' + refTime + '</span></div>';
-      }
-      timeHtml += '</div>';
+      const timeHtml = '<div class="milestone-stack">' +
+        '<div class="milestone-item"><span class="milestone-dot daftar"></span><span class="milestone-label">Daftar:</span><span class="milestone-time">' + formatTime(joinedAt) + '</span></div>' +
+        (isPaid ? ('<div class="milestone-item"><span class="milestone-dot bayar"></span><span class="milestone-label">Bayar:</span><span class="milestone-time">' + (paidAt ? formatTime(paidAt) : '-') + '</span></div>') : '') +
+        (isVerified ? ('<div class="milestone-item"><span class="milestone-dot verif"></span><span class="milestone-label">Verif' + picLabel + ':</span><span class="milestone-time">' + (modifiedAt ? formatTime(modifiedAt) : '-') + '</span></div>') : '') +
+        (isRefunded ? ('<div class="milestone-item"><span class="milestone-dot refund"></span><span class="milestone-label">Refund' + picLabel + ':</span><span class="milestone-time">' + (modifiedAt ? formatTime(modifiedAt) : '-') + '</span></div>') : '') +
+        '</div>';
 
-      let amountHtml = d.AmountDue ? formatIDR(d.AmountDue) : '-';
-      if (isPaid) {
-        amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
-      }
+      let amountHtml = amountDue ? formatIDR(amountDue) : '-';
+      if (isPaid) amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
 
       let refundHtml = '-';
       let needsRefund = false;
-      if (isPaid && d.AmountPaid) {
-        const diff = Number(d.AmountPaid) - Number(d.AmountDue);
+      if (isPaid && amountPaid) {
+        const diff = amountPaid - amountDue;
         if (diff > 0) {
           needsRefund = true;
           if (isRefunded) {
             refundHtml = '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(diff) + '</small>';
           } else {
-            refundHtml = '<span class="badge amber" style="margin-bottom:4px;">⚠️ Refund perlu diselesaikan: ' + formatIDR(diff) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>';
+            refundHtml = '<span class="badge amber" style="margin-bottom:4px;">⚠️ Refund perlu diselesaikan: ' + formatIDR(diff) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + escapeHtml(detail.campaign.CampaignID) + '\', \'' + escapeHtml(donorWa) + '\')">Tandai Dikembalikan</button>';
           }
         }
       }
@@ -847,13 +928,15 @@ export function renderDonorTable(detail) {
       let verificationHtml = '-';
       let cardActions = '';
       if (isPaid && hasProof) {
-        verificationHtml = '<div class="verification-stack"><a href="' + escapeHtml(sanitizeUrl(d.ProofLink)) + '" target="_blank" rel="noopener noreferrer" class="link-btn donor-proof-link">Lihat Bukti</a>';
+        const proofHref = proofLink ? escapeHtml(sanitizeUrl(d.ProofLink)) : '#';
+        const dataPathAttr = proofPath ? (' data-proof-path="' + escapeHtml(proofPath) + '"') : '';
+        verificationHtml = '<div class="verification-stack"><a href="' + proofHref + '"' + dataPathAttr + ' target="_blank" rel="noopener noreferrer" class="link-btn donor-proof-link">Lihat Bukti</a>';
         if (!isVerified) {
           if (needsRefund && !isRefunded) {
             verificationHtml += '<span class="muted verification-warning" style="color:var(--red);">Selesaikan refund dulu sebelum verifikasi.</span>';
           } else {
-            verificationHtml += '<div class="verification-controls"><button class="btn green" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', true)">Konfirmasi</button>';
-            verificationHtml += '<button class="btn danger" type="button" onclick="verifyPaymentUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\', false)">Tolak</button></div>';
+            verificationHtml += '<div class="verification-controls"><button class="btn green" type="button" onclick="verifyPaymentUI(\'' + escapeHtml(detail.campaign.CampaignID) + '\', \'' + escapeHtml(donorWa) + '\', true)">Konfirmasi</button>';
+            verificationHtml += '<button class="btn danger" type="button" onclick="verifyPaymentUI(\'' + escapeHtml(detail.campaign.CampaignID) + '\', \'' + escapeHtml(donorWa) + '\', false)">Tolak</button></div>';
           }
         } else {
           verificationHtml += '<span class="muted verification-complete">Sudah dikonfirmasi</span>';
@@ -862,8 +945,8 @@ export function renderDonorTable(detail) {
       } else if (isPaid && !isVerified) {
         verificationHtml = '<div class="verification-stack"><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Bukti Transfer belum tersedia</span></span><span class="muted verification-warning">Minta Donor upload ulang sebelum verifikasi.</span></div>';
       } else if (!isPaid && isFinalized) {
-        const msg = encodeURIComponent("Halo " + d.Name + ", ini reminder untuk patungan *" + detail.campaign.TargetName + "*. Tagihan kamu: " + formatIDR(d.AmountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
-        verificationHtml = '<a href="https://wa.me/' + String(d.WhatsApp || '').replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim pengingat WA</a>';
+        const msg = encodeURIComponent("Halo " + (d.Name || d.name) + ", ini reminder untuk patungan *" + (detail.campaign.TargetName || 'Campaign') + "*. Tagihan kamu: " + formatIDR(amountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
+        verificationHtml = '<a href="https://wa.me/' + String(donorWa).replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim pengingat WA</a>';
       }
 
       if (isVerified && isFinalized) {
@@ -872,46 +955,46 @@ export function renderDonorTable(detail) {
         cardActions = '<div class="donor-card-actions">' + verificationHtml + '</div>';
       }
 
-      tableRows += '<tr' + actionAttribute + '>';
-      tableRows += '<td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(d.WhatsApp) + '</small></td>';
-      tableRows += '<td>' + timeHtml + '</td>';
-      tableRows += '<td>' + badgeHtml + '</td>';
-      tableRows += '<td>' + amountHtml + '</td>';
-      tableRows += '<td>' + refundHtml + '</td>';
-      tableRows += '<td>' + verificationHtml + '</td>';
-      tableRows += '</tr>';
+      tableRows += '<tr' + actionAttribute + '><td><strong>' + escapeHtml(displayName) + '</strong><br><small class="muted">' + escapeHtml(donorWa) + '</small></td><td>' + timeHtml + '</td><td>' + badgeHtml + '</td><td>' + amountHtml + '</td><td>' + refundHtml + '</td><td>' + verificationHtml + '</td></tr>';
 
       const cardClass = isVerified ? 'donor-card donor-card-settled' : (actionType ? ('donor-card donor-card-needs-action donor-card-action-' + actionType) : 'donor-card');
-      cardItems += '<div class="' + cardClass + '"' + actionAttribute + '>';
-      cardItems += '<div class="donor-card-header"><div class="donor-card-identity"><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(d.WhatsApp) + '</span></div><div class="donor-card-status">' + badgeHtml + '</div></div>';
-      cardItems += '<div class="donor-card-body">';
-      cardItems += '<div class="donor-card-field donor-card-amount"><span class="label">Tagihan</span><strong class="donor-card-value">' + amountHtml + '</strong></div>';
-      if (needsRefund) cardItems += '<div class="donor-card-field"><span class="label">Refund</span><div class="donor-card-value">' + (isRefunded ? '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(Number(d.AmountPaid) - Number(d.AmountDue)) + '</small>' : '<span class="badge amber" style="margin-bottom:4px;">⚠️ Refund perlu diselesaikan: ' + formatIDR(Number(d.AmountPaid) - Number(d.AmountDue)) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + detail.campaign.CampaignID + '\', \'' + d.WhatsApp + '\')">Tandai Dikembalikan</button>') + '</div></div>';
-      cardItems += '<div class="donor-card-timeline">' + timeHtml + '</div>';
-      cardItems += '</div>';
-      cardItems += cardActions;
-      cardItems += '</div>';
+      cardItems += '<div class="' + cardClass + '"' + actionAttribute + '>' +
+        '<div class="donor-card-header"><div class="donor-card-identity"><span class="donor-card-name">' + escapeHtml(displayName) + '</span><br><span class="donor-card-wa">' + escapeHtml(donorWa) + '</span></div><div class="donor-card-status">' + badgeHtml + '</div></div>' +
+        '<div class="donor-card-body">' +
+        '<div class="donor-card-field donor-card-amount"><span class="label">Tagihan</span><strong class="donor-card-value">' + amountHtml + '</strong></div>' +
+        (needsRefund ? ('<div class="donor-card-field"><span class="label">Refund</span><div class="donor-card-value">' + (isRefunded ? '<span class="badge success">✅ Dikembalikan</span><br><small class="muted">Kelebihan: ' + formatIDR(amountPaid - amountDue) + '</small>' : '<span class="badge amber" style="margin-bottom:4px;">⚠️ Refund perlu diselesaikan: ' + formatIDR(amountPaid - amountDue) + '</span><br><button class="btn secondary" style="padding:2px 4px; font-size:11px;" onclick="markRefundedUI(\'' + escapeHtml(detail.campaign.CampaignID) + '\', \'' + escapeHtml(donorWa) + '\')">Tandai Dikembalikan</button>') + '</div></div>') : '') +
+        '<div class="donor-card-timeline">' + timeHtml + '</div></div>' +
+        cardActions + '</div>';
     });
   });
 
   let totalTagihan = 0;
   detail.donors.forEach(d => {
-    totalTagihan += (Number(d.AmountDue) || 0);
+    totalTagihan += (Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0);
   });
 
   let cardContainer = '<div class="donor-cards">' + cardItems;
-  if (totalTagihan > 0) {
-    cardContainer += '<div class="donor-card-total">Total Tagihan: ' + formatIDR(totalTagihan) + '</div>';
-  }
+  if (totalTagihan > 0) cardContainer += '<div class="donor-card-total">Total Tagihan: ' + formatIDR(totalTagihan) + '</div>';
   cardContainer += '</div>';
 
   let tableHtml = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>' + tableRows + '</tbody>';
-  if (totalTagihan > 0) {
-    tableHtml += '<tfoot style="background:#f5f7fa; font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
-  }
+  if (totalTagihan > 0) tableHtml += '<tfoot style="background:#f5f7fa; font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
   tableHtml += '</table></div>';
 
   el.innerHTML = html + cardContainer + tableHtml;
+
+  if (typeof el.querySelectorAll === 'function') {
+    const unhydrated = el.querySelectorAll('a[data-proof-path]');
+    if (unhydrated && unhydrated.length) {
+      unhydrated.forEach(async linkEl => {
+        const p = linkEl.getAttribute('data-proof-path');
+        if (p && !p.startsWith('http')) {
+          const signed = await getBuktiSignedUrl(p);
+          if (signed) linkEl.href = sanitizeUrl(signed);
+        }
+      });
+    }
+  }
 }
 
 export function copyUnpaidDonorsRecap() {
@@ -925,24 +1008,14 @@ export function copyUnpaidDonorsRecap() {
   let text = '*Pengingat Patungan: ' + (c.TargetName || 'Campaign') + '*\n';
   text += 'Berikut daftar donatur yang belum transfer/upload bukti pembayaran:\n\n';
   unpaid.forEach((d, idx) => {
-    const name = d.Alias ? (d.Alias + ' (' + d.Name + ')') : d.Name;
-    text += (idx + 1) + '. ' + name + ' - ' + formatIDR(d.AmountDue) + '\n';
+    const name = d.Alias || d.alias ? ((d.Alias || d.alias) + ' (' + (d.Name || d.name) + ')') : (d.Name || d.name);
+    const amtDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
+    text += (idx + 1) + '. ' + name + ' - ' + formatIDR(amtDue) + '\n';
   });
   text += '\nMohon segera konfirmasi atau upload bukti transfer melalui link:\n';
   text += window.location.origin + window.location.pathname + '#c=' + c.CampaignID;
 
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text);
-    showToast('Rekap ' + unpaid.length + ' pengingat berhasil disalin!');
-  } else {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-    showToast('Rekap ' + unpaid.length + ' pengingat berhasil disalin!');
-  }
+  _copyText(text, 'Rekap ' + unpaid.length + ' pengingat berhasil disalin!');
 }
 
 export function copyBulkMessage() {
@@ -960,18 +1033,19 @@ export function verifyPaymentUI(campaignId, whatsapp, isValid) {
     return callQueued('picVerifyPayment', currentToken(), campaignId, whatsapp, isValid).then(res => {
       if (res && res.error) throw new Error(res.error);
       showToast('Bukti transfer berhasil di' + action + '.');
-      return call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
-    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      return loadPicDashboard();
+    }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
   });
 }
 
 export function picVerifyAllUI(campaignId) {
   showConfirmModal('Yakin ingin menyetujui/mengonfirmasi SEMUA bukti transfer yang sudah diupload?', () => {
     return callQueued('picVerifyAllPayments', currentToken(), campaignId).then(count => {
-      if (typeof count === 'object' && count.error) throw new Error(count.error);
-      showToast('Berhasil mengonfirmasi ' + count + ' bukti transfer.');
-      return call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
-    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      if (typeof count === 'object' && count && count.error) throw new Error(count.error);
+      const verifiedCount = (typeof count === 'object' && count && count.verified_count !== undefined) ? count.verified_count : count;
+      showToast('Berhasil mengonfirmasi ' + (verifiedCount || 0) + ' bukti transfer.');
+      return loadPicDashboard();
+    }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
   });
 }
 
@@ -980,54 +1054,49 @@ export function markRefundedUI(campaignId, whatsapp) {
     return callQueued('picMarkRefunded', currentToken(), campaignId, whatsapp).then(res => {
       if (res && res.error) throw new Error(res.error);
       showToast('Refund berhasil ditandai selesai.');
-      return call('getCampaignForPic', currentToken()).then(renderPicDashboard).catch(e => showInfoModal(e.message || String(e), 'Error'));
-    }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+      return loadPicDashboard();
+    }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
   });
 }
 
 export function copyLaporanSelesai() {
-  call('getCampaignForPic', currentToken()).then(detail => {
+  call('getCampaignForPic', currentToken(), 1, 100).then(async detail => {
+    if (!detail || !detail.campaign) {
+      showInfoModal('Data campaign tidak ditemukan.', 'Error');
+      return;
+    }
     let customCount = 0;
     let proRata = 0;
 
-    detail.donors.forEach(d => {
-      if (Number(d.CustomAmount) > 0) {
-        customCount++;
-      } else if (proRata === 0) {
-        proRata = Number(d.AmountDue) || 0;
-      }
+    (detail.donors || []).forEach(d => {
+      const customAmt = Number(d.CustomAmount !== undefined ? d.CustomAmount : d.custom_amount) || 0;
+      const amtDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
+      if (customAmt > 0) customCount++;
+      else if (proRata === 0) proRata = amtDue;
     });
 
-    let text = "🎉 *Laporan Selesai: Patungan untuk " + detail.campaign.TargetName + "*\n\n";
-    let summaryText = "Terima kasih banyak untuk teman-teman yang sudah berpartisipasi! Total partisipan : " + detail.donors.length + " orang dengan total donasi " + formatIDR(detail.campaign.GiftAmount);
-    if (customCount > 0) {
-      summaryText += ", " + customCount + " donasi nominal khusus dan pro-rata sebanyak " + formatIDR(proRata);
-    } else {
-      summaryText += " dan pro-rata sebanyak " + formatIDR(proRata);
-    }
-    text += summaryText + "\n\n";
-    text += "*Daftar Donatur:*\n";
+    const targetName = detail.campaign.TargetName || detail.campaign.target_name || 'Campaign';
+    const giftAmount = Number(detail.campaign.GiftAmount !== undefined ? detail.campaign.GiftAmount : detail.campaign.gift_amount) || 0;
+    const donors = detail.donors || [];
 
-    detail.donors.forEach((d, i) => {
-      const displayName = d.Alias ? d.Alias : d.Name;
+    let text = "🎉 *Laporan Selesai: Patungan untuk " + targetName + "*\n\n";
+    let summaryText = "Terima kasih banyak untuk teman-teman yang sudah berpartisipasi! Total partisipan : " + donors.length + " orang dengan total donasi " + formatIDR(giftAmount);
+    if (customCount > 0) summaryText += ", " + customCount + " donasi nominal khusus dan pro-rata sebanyak " + formatIDR(proRata);
+    else summaryText += " dan pro-rata sebanyak " + formatIDR(proRata);
+    text += summaryText + "\n\n*Daftar Donatur:*\n";
+
+    donors.forEach((d, i) => {
+      const displayName = d.Alias || d.alias ? (d.Alias || d.alias) : (d.Name || d.name);
+      const customAmt = Number(d.CustomAmount !== undefined ? d.CustomAmount : d.custom_amount) || 0;
       let suffix = " ✅";
-      if (Number(d.CustomAmount) > 0) {
-        suffix += " (" + formatIDR(d.CustomAmount) + ")";
-      }
+      if (customAmt > 0) suffix += " (" + formatIDR(customAmt) + ")";
       text += (i + 1) + ". " + displayName + suffix + "\n";
     });
 
-    const el = document.createElement('textarea');
-    el.value = text;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-
-    if (detail.campaign.GiftImage) {
+    _copyText(text, 'Laporan selesai berhasil disalin!');
+    const giftImage = detail.campaign.GiftImage || detail.campaign.gift_image;
+    if (giftImage) {
       showInfoModal('Laporan berhasil disalin! Jangan lupa untuk simpan/unduh gambar barang dan tempel ke WhatsApp bersama laporan ini.', 'Sukses');
-    } else {
-      showToast('Laporan selesai berhasil disalin!');
     }
-  }).catch(e => showInfoModal(e.message || String(e), 'Error'));
+  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
 }

@@ -103,8 +103,6 @@ test('Task 8 (Gate 4): Admin staged loading sequence and pagination preservation
   loadAdminDashboard();
 
   assert.ok(actions.includes('getDashboardSummary'));
-  assert.ok(actions.includes('getPendingMembers'));
-  assert.ok(actions.includes('getPendingLateRequests'));
 
   // Test pagination preservation
   const members = Array.from({ length: 30 }, (_, i) => ({

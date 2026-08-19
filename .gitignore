@@ -1,5 +1,8 @@
 node_modules/
 .env
+.env.local
+.env.production
+.env.cloudflare
 .DS_Store
 # Optional: .clasp.json is usually safe to commit (it only contains scriptId and rootDir), 
 # but if you use custom authentication tokens, ignore it.
@@ -10,4 +13,11 @@ _skill-stage/
 .scratch/
 .cloudflareignore
 *.local.md
-
+data/source/
+data/export/
+*.xlsx
+*.csv
+secrets/
+js/config/env.local.js
+dist/
+supabase/.temp/
