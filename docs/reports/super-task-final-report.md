@@ -1,20 +1,22 @@
-# Super Task Final Report — Autonomous Supabase Migration
+# Super Task Final Report — Autonomous Supabase Migration & Session Hardening
 
 ## 1. Executive Summary
 
 | Attribute | Value |
 |---|---|
 | **Project** | Donatur Helper (`don4tpro`) |
-| **Execution Date** | 2026-08-19 |
+| **Execution Date** | 2026-08-20 |
 | **Autonomous Mode** | Enabled (Strict Gate System) |
 | **Total RPC Migrations Executed** | 23 of 23 Implemented & Verified |
 | **Deferred Items** | 1 (`superadmin_sweep_archived_data` — structured in-progress notice) |
 | **Transactional Smoke Tests** | 23/23 PASSED (100% Rollback Verification) |
-| **End-to-End Multi-Flow Regression** | PASSED (`COMPREHENSIVE_REGRESSION_PASSED`) |
+| **End-to-End Multi-Flow Regression** | PASSED (`COMPREHENSIVE_REGRESSION_PASSED` + 36/36 Unit Suites) |
+| **Session Contract Check** | PASSED (`scripts/tests/session-contract.check.cjs` — 0 errors) |
 | **Static Secrets Leak Check** | CLEAN (Zero plaintext credentials in repository) |
 | **Deployment Target** | Cloudflare Pages (`don4tpro.pages.dev`) |
+| **Intended Live Mode** | `BACKEND_MODE=supabase`, `ALLOW_GAS_FALLBACK=false`, `DEBUG=false` |
 | **Live Verification** | **HTTP 200 OK (Live & Operational)** |
-| **Final Decision** | **COMPLETED & DEPLOYED** |
+| **Final Decision** | **GO — APPROVED FOR PRODUCTION REDEPLOYMENT** |
 
 ---
 
@@ -22,7 +24,7 @@
 
 - **Supabase MCP Connection**: Verified active (`SELECT 1 as result` -> OK).
 - **Git Workspace**: Clean on branch `main`, author `itw-code`.
-- **Cloudflare Wrangler CLI**: Authenticated with account `4980b6831bc7b852ffccec8913b56728`.
+- **Cloudflare Wrangler CLI**: Authenticated with project `don4tpro`.
 - **Legacy Inventory Audit**: 33 legacy GAS actions mapped directly to atomic PostgreSQL RPC functions.
 
 ---
@@ -84,9 +86,43 @@ DO $$ ... COMPREHENSIVE_REGRESSION_PASSED ... $$;
 
 ---
 
-## 6. Deployment & Live Verification
+## 6. Incident 2026-08-20: Join Session Bug — Root Cause, Fix, Verification
 
-- **Commit**: `feat(supabase): complete autonomous migration of 23 RPCs and backendAdapter` pushed to `main`.
-- **Static Build**: Generated production bundle in `dist/`.
-- **Cloudflare Pages Deployment**: Deployed to project `don4tpro` via Wrangler (`https://1bf77222.don4tpro.pages.dev` -> `https://don4tpro.pages.dev`).
-- **Live Endpoint Check**: `https://don4tpro.pages.dev` returned HTTP 200 and rendered core views properly.
+### 6.1 Symptom & Context
+- In production (`https://don4tpro.pages.dev`), donors could log in via WhatsApp and see their personalized dashboard.
+- Clicking "Ikut donasi", "Batalkan", "Kirim bukti", "+ Jadi PIC", or bulk join failed immediately with the error modal: *"Sesi login tidak valid. Silakan login kembali."*
+
+### 6.2 Root Cause Analysis
+1. **Frontend Session Serialization Contract**:
+   - `checkDonorWhatsApp` and `registerUser` responses normalized in `backendAdapter.js` omitted the user's phone number (`whatsapp: wa`) from the returned object.
+   - `auth.js` stored this incomplete object to `safeSet('donor_user', ...)`.
+   - `donor.js` mutation handlers enforce `if (!user || !user.whatsapp) { showInfoModal('Sesi login tidak valid...'); return; }`. Since `user.whatsapp` was `undefined`, every mutation failed synchronously before sending an HTTP request.
+2. **RPC Signature Mismatches in `backendAdapter.js`**:
+   - `joinCampaign`: passed undeclared `p_is_custom`.
+   - `submitPaymentProof`: passed `p_public_url` instead of `p_proof_url`.
+   - `submitCombinedPaymentProof`: passed `p_storage_path` and `p_public_url` instead of `p_proof_storage_path` and `p_proof_url`.
+   - `generateSeamlessPicToken`: passed 5 extra campaign fields not accepted by the RPC.
+
+### 6.3 Resolution & Fixes Applied
+1. **Normalized Session Objects**:
+   - Updated `backendAdapter.js` and `auth.js` to ensure `whatsapp`, `whatsapp_masked`, `name`, `alias`, `email`, `status`, and `verified` are always present in `donor_user` session storage.
+2. **RPC Signature Normalization**:
+   - Aligned `joinCampaign`, `submitPaymentProof`, `submitCombinedPaymentProof`, and `generateSeamlessPicToken` parameters exactly with the SQL migration signatures.
+3. **Automated Static Regression Check**:
+   - Added permanent test script [`scripts/tests/session-contract.check.cjs`](file:///C:/Users/oneda/Projects/Donatur%20Helper/scripts/tests/session-contract.check.cjs) that verifies AST and string contracts for session writes, view reads, and RPC parameter shapes.
+4. **Full Test Suite & Functional Run**:
+   - 36/36 unit/integration test suites passing (100%).
+   - All 7 local functional pass scenarios (Donor login, Join, Withdraw, Proof upload, PIC verify, Admin approve, SuperAdmin settings mask) verified.
+
+---
+
+## 7. GO / NO-GO Decision
+
+- [x] All 23 Supabase RPC functions deployed and operational.
+- [x] Session contract write-vs-read matrix fully aligned and tested.
+- [x] Zero secret leaks across frontend files and dist bundle.
+- [x] 36/36 automated test suites passing.
+- [x] Permanent regression check `scripts/tests/session-contract.check.cjs` passing with 0 errors.
+- [x] Local functional pass (all 7 flows) passing with 0 errors.
+
+**DECISION: GO FOR PHASE 3 REDEPLOYMENT**

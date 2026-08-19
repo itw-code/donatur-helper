@@ -223,6 +223,12 @@ function createSuperAdminHarness(options = {}) {
           error: null
         };
       }
+      if (fn === 'superadmin_update_settings') {
+        return { data: { success: true, settings: params.p_settings }, error: null };
+      }
+      if (fn === 'superadmin_generate_admin_token') {
+        return { data: { success: true, token: 'SA-ADMIN-TOKEN-999' }, error: null };
+      }
       return { data: null, error: { message: `Unknown RPC: ${fn}` } };
     }
   };
@@ -391,37 +397,33 @@ test('SuperAdmin Settings Rendering handles is_secret masking properly', () => {
   assert.equal(appUrlEl.value, 'https://custom.url');
 });
 
-test('SuperAdmin Mutations fall back to GAS endpoint', async () => {
+test('SuperAdmin Mutations execute mapped Supabase RPCs', async () => {
   const harness = createSuperAdminHarness();
   harness.storage.set('auth_token', 'sa-secret-token');
   harness.storage.set('auth_role', 'SuperAdmin');
 
-  const { runDataSweep, saveSettings, genAdminToken } = harness.context;
+  const { saveSettings, genAdminToken } = harness.context;
 
-  // Test runDataSweep fallback
-  harness.gasCalls.length = 0;
-  runDataSweep();
-  await new Promise(resolve => setTimeout(resolve, 50));
-  assert.equal(harness.gasCalls.length, 1);
-  assert.equal(harness.gasCalls[0].action, 'sweepArchivedData');
-
-  // Test saveSettings fallback
-  harness.gasCalls.length = 0;
+  // Test saveSettings RPC
+  harness.rpcCalls.length = 0;
   saveSettings();
   await new Promise(resolve => setTimeout(resolve, 50));
-  assert.equal(harness.gasCalls.length, 1);
-  assert.equal(harness.gasCalls[0].action, 'updateSettings');
+  const settingsCall = harness.rpcCalls.find(c => c.fn === 'superadmin_update_settings');
+  assert.ok(settingsCall, 'superadmin_update_settings RPC must be called');
+  assert.equal(settingsCall.params.p_token, 'sa-secret-token');
 
-  // Test genAdminToken fallback
-  harness.gasCalls.length = 0;
+  // Test genAdminToken RPC
+  harness.rpcCalls.length = 0;
   const aliasInput = harness.context.document.getElementById('sa-admin-alias');
   aliasInput.value = 'Admin Unit Test';
   genAdminToken();
   await new Promise(resolve => setTimeout(resolve, 50));
-  assert.ok(harness.gasCalls.some(c => c.action === 'generateAdminToken'), 'generateAdminToken must be called');
+  const tokenCall = harness.rpcCalls.find(c => c.fn === 'superadmin_generate_admin_token');
+  assert.ok(tokenCall, 'superadmin_generate_admin_token RPC must be called');
+  assert.equal(tokenCall.params.p_token, 'sa-secret-token');
 });
 
-test('SuperAdmin Mutations show migration in progress notice if GAS fallback is unavailable', async () => {
+test('SuperAdmin runDataSweep shows migration in progress notice when deferred', async () => {
   const harness = createSuperAdminHarness({
     backendMode: 'supabase',
     allowGasFallback: false

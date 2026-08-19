@@ -66,7 +66,16 @@ export function userLogin() {
           return;
         }
         // Log them in immediately!
-        safeSet('donor_user', JSON.stringify(res));
+        const userSession = {
+          ...res,
+          whatsapp: res.whatsapp || wa,
+          whatsapp_masked: res.whatsapp_masked || (res.identity && res.identity.whatsapp_masked) || '',
+          name: res.name || (res.identity && res.identity.name) || '',
+          alias: res.alias || (res.identity && res.identity.alias) || '',
+          status: res.status || (res.identity && res.identity.member_status ? String(res.identity.member_status).toLowerCase() : 'active'),
+          verified: res.verified !== undefined ? res.verified : true
+        };
+        safeSet('donor_user', JSON.stringify(userSession));
         resetUserLoginForm();
         loadUserDashboard();
       } else {
@@ -118,7 +127,15 @@ export function userLogin() {
       resetUserLoginForm();
       return;
     }
-    safeSet('donor_user', JSON.stringify(user));
+    const userSession = {
+      ...user,
+      whatsapp: user.whatsapp || wa,
+      whatsapp_masked: user.whatsapp_masked || user.maskedWhatsapp || '',
+      name: user.name || name,
+      status: user.status || empStatus || 'active',
+      verified: user.verified !== undefined ? user.verified : (user.status === 'active')
+    };
+    safeSet('donor_user', JSON.stringify(userSession));
     resetUserLoginForm();
     loadUserDashboard();
   }).catch(e => {

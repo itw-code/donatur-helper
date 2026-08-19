@@ -171,6 +171,9 @@ function createAdminHarness(options = {}) {
       if (fn === 'admin_approve_late_donor') {
         return { data: { success: true, req_id: params.p_req_id, is_approved: params.p_is_approved }, error: null };
       }
+      if (fn === 'admin_generate_pic_token') {
+        return { data: { success: true, token: 'NEW-PIC-TOKEN-123' }, error: null };
+      }
       return { data: null, error: { message: `Unknown RPC: ${fn}` } };
     }
   };
@@ -388,22 +391,11 @@ test('Admin Dashboard Stage 1 gracefully handles RPC errors with retry buttons',
   assert.ok(lateEl.innerHTML.includes('Gagal memuat pengajuan.'), 'Late requests error message must render');
 });
 
-test('Unimplemented Admin mutations fall back to legacy GAS', async () => {
-  let gasActionCalled = null;
+test('Admin mutation generatePicToken calls admin_generate_pic_token RPC', async () => {
   const harness = createAdminHarness();
 
   harness.storage.set('auth_token', 'valid-admin-token');
   harness.storage.set('auth_role', 'Admin');
-
-  harness.context.fetch = async (_url, opts) => {
-    const body = JSON.parse(opts.body);
-    gasActionCalled = body.action;
-    return {
-      async text() {
-        return JSON.stringify({ status: 'success', data: 'NEW-PIC-TOKEN-123' });
-      }
-    };
-  };
 
   const { genPicToken } = harness.context;
   assert.equal(typeof genPicToken, 'function', 'genPicToken must be exported');
@@ -412,6 +404,8 @@ test('Unimplemented Admin mutations fall back to legacy GAS', async () => {
 
   await new Promise(resolve => setTimeout(resolve, 50));
 
-  assert.equal(gasActionCalled, 'generatePicToken', 'generatePicToken must route to legacy GAS fallback');
+  const call = harness.rpcCalls.find(c => c.fn === 'admin_generate_pic_token');
+  assert.ok(call, 'admin_generate_pic_token RPC must be called');
+  assert.equal(call.params.p_token, 'valid-admin-token');
 });
 

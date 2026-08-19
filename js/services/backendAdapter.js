@@ -557,7 +557,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
       if (error) throw new Error(error.message || 'Gagal memeriksa nomor WhatsApp.');
       if (data && data.error) {
         if (data.error === 'not_found' || data.error === 'not_found_in_campaign') {
-          return { exists: false, status: 'unregistered', verified: false, pending: false };
+          return { exists: false, status: 'unregistered', verified: false, pending: false, whatsapp: wa };
         }
         throw new Error(data.message || data.error);
       }
@@ -566,8 +566,11 @@ async function _dispatchSupabaseRpc(action, args = []) {
       const status = String(id.member_status || (data && data.status) || '').toLowerCase();
       return {
         exists: Boolean(id.is_registered_member || id.name || data.exists),
+        whatsapp: wa,
+        whatsapp_masked: id.whatsapp_masked || data.whatsapp_masked || '',
         name: id.name || data.name || '',
         alias: id.alias || data.alias || '',
+        email: id.email || data.email || '',
         status: status || 'unregistered',
         verified: status === 'active',
         pending: status === 'pending',
@@ -709,13 +712,18 @@ async function _dispatchSupabaseRpc(action, args = []) {
       const member = (data && data.member) || {};
       const rawStatus = String(member.status || data.status || '').toUpperCase();
       const resolvedStatus = empStatus || (member.status ? String(member.status).toLowerCase() : (data.status || 'active'));
+      const maskedWa = member.whatsapp_masked || data.whatsapp_masked || member.maskedWhatsapp || '';
       return {
         exists: rawStatus === 'PENDING' || rawStatus === 'EXISTING' || rawStatus === 'EXISTS' || rawStatus === 'ACTIVE' || Boolean(data.exists),
         pending: rawStatus === 'PENDING' || Boolean(data.pending) || true,
         active: rawStatus === 'ACTIVE' || Boolean(data.active),
         status: resolvedStatus,
+        whatsapp: wa,
+        whatsapp_masked: maskedWa,
+        maskedWhatsapp: maskedWa,
         name: member.name || data.name || name,
-        maskedWhatsapp: member.whatsapp_masked || member.maskedWhatsapp || '',
+        alias: member.alias || alias || '',
+        email: member.email || email || '',
         token: data.token || member.token,
         member,
         ...data
@@ -723,24 +731,14 @@ async function _dispatchSupabaseRpc(action, args = []) {
     }
 
     case 'generateSeamlessPicToken': {
-      let wa, targetName, reason, giftAmount, deadline, startDate;
+      let wa;
       if (args[0] && typeof args[0] === 'object') {
         wa = args[0].whatsapp || args[0].p_whatsapp;
-        targetName = args[0].targetName || args[0].p_target_name;
-        reason = args[0].reason || args[0].p_reason;
-        giftAmount = args[0].giftAmount || args[0].p_gift_amount;
-        deadline = args[0].deadline || args[0].p_deadline;
-        startDate = args[0].startDate || args[0].p_start_date;
       } else {
-        [wa, targetName, reason, giftAmount, deadline, startDate] = args;
+        wa = args[0];
       }
       const { data, error } = await client.rpc('generate_seamless_pic_token', {
-        p_whatsapp: wa,
-        p_target_name: targetName || null,
-        p_reason: reason || null,
-        p_gift_amount: giftAmount ? Number(giftAmount) : null,
-        p_deadline: deadline || null,
-        p_start_date: startDate || null
+        p_whatsapp: wa
       });
       if (error) throw new Error(error.message || 'Gagal membuat campaign PIC.');
       if (data && data.error) throw new Error(data.message || data.error);
@@ -771,7 +769,6 @@ async function _dispatchSupabaseRpc(action, args = []) {
         p_campaign_id: campaignId,
         p_name: name,
         p_whatsapp: wa,
-        p_is_custom: isCustom !== undefined ? Boolean(isCustom) : Boolean(parsedCustomAmt),
         p_custom_amount: parsedCustomAmt,
         p_alias: alias || null
       });
@@ -825,20 +822,20 @@ async function _dispatchSupabaseRpc(action, args = []) {
     }
 
     case 'submitPaymentProof': {
-      let campaignId, wa, storagePath, publicUrl;
+      let campaignId, wa, storagePath, proofUrl;
       if (args[0] && typeof args[0] === 'object') {
         campaignId = args[0].campaignId || args[0].p_campaign_id;
         wa = args[0].whatsapp || args[0].p_whatsapp;
         storagePath = args[0].storagePath || args[0].p_storage_path;
-        publicUrl = args[0].publicUrl || args[0].p_public_url;
+        proofUrl = args[0].proofUrl || args[0].publicUrl || args[0].p_proof_url || args[0].p_public_url;
       } else {
-        [campaignId, wa, storagePath, publicUrl] = args;
+        [campaignId, wa, storagePath, proofUrl] = args;
       }
       const { data, error } = await client.rpc('submit_payment_proof', {
         p_campaign_id: campaignId,
         p_whatsapp: wa,
         p_storage_path: storagePath || null,
-        p_public_url: publicUrl || null
+        p_proof_url: proofUrl || null
       });
       if (error) throw new Error(error.message || 'Gagal mengunggah bukti transfer.');
       if (data && data.error) throw new Error(data.message || data.error);
@@ -847,21 +844,21 @@ async function _dispatchSupabaseRpc(action, args = []) {
     }
 
     case 'submitCombinedPaymentProof': {
-      let campaignIds, wa, storagePath, publicUrl;
+      let campaignIds, wa, storagePath, proofUrl;
       if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
-        campaignIds = args[0].campaignIds || args[0].p_campaign_ids;
+        campaignIds = args[0].campaignIds || args[0].campaign_ids || args[0].p_campaign_ids;
         wa = args[0].whatsapp || args[0].p_whatsapp;
-        storagePath = args[0].storagePath || args[0].p_storage_path;
-        publicUrl = args[0].publicUrl || args[0].p_public_url;
+        storagePath = args[0].storagePath || args[0].proofStoragePath || args[0].p_proof_storage_path || args[0].p_storage_path;
+        proofUrl = args[0].proofUrl || args[0].publicUrl || args[0].p_proof_url || args[0].p_public_url;
       } else {
-        [campaignIds, wa, storagePath, publicUrl] = args;
+        [campaignIds, wa, storagePath, proofUrl] = args;
       }
       const ids = Array.isArray(campaignIds) ? campaignIds : String(campaignIds || '').split(',').map(s => s.trim()).filter(Boolean);
       const { data, error } = await client.rpc('submit_combined_payment_proof', {
         p_campaign_ids: ids,
         p_whatsapp: wa,
-        p_storage_path: storagePath || null,
-        p_public_url: publicUrl || null
+        p_proof_storage_path: storagePath || null,
+        p_proof_url: proofUrl || null
       });
       if (error) throw new Error(error.message || 'Gagal mengirim bukti transfer gabungan.');
       if (data && data.error) throw new Error(data.message || data.error);
@@ -1528,11 +1525,9 @@ async function _dispatchSupabaseRpc(action, args = []) {
     }
 
     case 'sweepArchivedData': {
-      return {
-        success: false,
-        error: 'migration_deferred',
-        message: 'Fitur pembersihan arsip data ditangguhkan dalam migrasi ini.'
-      };
+      const err = new Error('Fitur pembersihan arsip data ditangguhkan dalam proses migrasi ini.');
+      err.error = 'migration_in_progress';
+      throw err;
     }
 
     default:

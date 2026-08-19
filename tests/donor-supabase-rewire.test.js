@@ -648,7 +648,7 @@ test('Task 6 & 7: Combined payment proof submission across multiple campaigns an
     },
     rpc: async (fn, params) => {
       rpcCalls.push({ fn, params });
-      if (fn === 'submit_payment_proof') {
+      if (fn === 'submit_payment_proof' || fn === 'submit_combined_payment_proof') {
         return { data: { success: true }, error: null };
       }
       if (fn === 'get_donor_dashboard') {
@@ -689,10 +689,10 @@ test('Task 6 & 7: Combined payment proof submission across multiple campaigns an
   assert.strictEqual(storageUploads.length, 1);
   assert.match(storageUploads[0].path, /^proofs\/combined_123456789\/081987654321_\d+\.pdf$/);
 
-  const proofCalls = rpcCalls.filter(c => c.fn === 'submit_payment_proof');
-  assert.strictEqual(proofCalls.length, 2);
-  assert.strictEqual(proofCalls[0].params.p_campaign_id, 'CAMP-A');
-  assert.strictEqual(proofCalls[1].params.p_campaign_id, 'CAMP-B');
+  const combinedCalls = rpcCalls.filter(c => c.fn === 'submit_combined_payment_proof');
+  assert.strictEqual(combinedCalls.length, 1);
+  assert.strictEqual(JSON.stringify(Array.from(combinedCalls[0].params.p_campaign_ids)), JSON.stringify(['CAMP-A', 'CAMP-B']));
+  assert.strictEqual(combinedCalls[0].params.p_whatsapp, '081987654321');
 
   // Verify toast
   assert.match(elements.get('toast').textContent, /Bukti transfer gabungan berhasil dikirim/);
