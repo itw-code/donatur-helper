@@ -243,6 +243,42 @@ assert(
   'admin.js renderAdminAccounts renders real token in .token-box and table column'
 );
 
+// 3.8 Admin token mutation RPC signatures (revoke, reactivate, delete)
+assert(
+  adapterCode.includes("client.rpc('superadmin_revoke_admin_token', {") &&
+  adapterCode.includes("p_token_id: String(tokenId).trim()"),
+  'backendAdapter.js revokeAdminToken must pass `p_token_id: String(tokenId).trim()`'
+);
+assert(
+  adapterCode.includes("client.rpc('superadmin_reactivate_admin_token', {") &&
+  adapterCode.includes("p_token_id: String(tokenId).trim()"),
+  'backendAdapter.js reactivateAdminToken must pass `p_token_id: String(tokenId).trim()`'
+);
+assert(
+  adapterCode.includes("client.rpc('superadmin_delete_admin_token', {") &&
+  adapterCode.includes("p_token_id: String(tokenId).trim()"),
+  'backendAdapter.js deleteAdminToken must pass `p_token_id: String(tokenId).trim()`'
+);
+
+// 3.9 Primary SuperAdmin and Current Session protection in renderAdminAccounts
+assert(
+  adminCode.includes("const isPrimary = a.Alias === 'primary-superadmin' || a.alias === 'primary-superadmin' || a.token === 'SA-6FC5F961' || a.TokenID === 'SA-6FC5F961';"),
+  'admin.js renderAdminAccounts must identify Primary SuperAdmin'
+);
+assert(
+  adminCode.includes("const isCurrentSession = (a.token && a.token === currentToken()) || (a.TokenID && a.TokenID === currentToken()) || (a.id && a.id === currentToken());"),
+  'admin.js renderAdminAccounts must identify Current Session token'
+);
+assert(
+  adminCode.includes('<span class="badge blue">Primary</span>') &&
+  adminCode.includes('<span class="muted" style="font-size:12px;">Akun Utama (Terkunci)</span>'),
+  'admin.js renderAdminAccounts must protect Primary SuperAdmin with badge and locked text'
+);
+assert(
+  adminCode.includes('<span class="muted" style="font-size:12px;">Akun Anda (Aktif)</span>'),
+  'admin.js renderAdminAccounts must protect Current Session against self-deactivation/deletion'
+);
+
 // -----------------------------------------------------------------------------
 // 4. ADMIN MEMBER PAGINATION CONTRACT (admin.js)
 // -----------------------------------------------------------------------------

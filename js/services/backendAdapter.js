@@ -1603,7 +1603,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
       }
       const { data, error } = await client.rpc('superadmin_revoke_admin_token', {
         p_token: token,
-        p_token_id: tokenId
+        p_token_id: String(tokenId).trim()
       });
       if (error) throw new Error(error.message || 'Gagal menonaktifkan token.');
       if (data && data.error) throw new Error(data.message || data.error);
@@ -1622,7 +1622,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
       }
       const { data, error } = await client.rpc('superadmin_reactivate_admin_token', {
         p_token: token,
-        p_token_id: tokenId
+        p_token_id: String(tokenId).trim()
       });
       if (error) throw new Error(error.message || 'Gagal mengaktifkan kembali token.');
       if (data && data.error) throw new Error(data.message || data.error);
@@ -1641,7 +1641,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
       }
       const { data, error } = await client.rpc('superadmin_delete_admin_token', {
         p_token: token,
-        p_token_id: tokenId
+        p_token_id: String(tokenId).trim()
       });
       if (error) throw new Error(error.message || 'Gagal menghapus token permanen.');
       if (data && data.error) throw new Error(data.message || data.error);

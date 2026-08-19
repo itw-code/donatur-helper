@@ -507,29 +507,46 @@ export function renderAdminAccounts(list) {
     const dataAttrs = ' data-admin-account-item data-search="' + escapeHtml(searchText) + '" data-status="' + statusValue + '"';
     const identity = escapeHtml(a.Alias || '-');
 
+    const isPrimary = a.Alias === 'primary-superadmin' || a.alias === 'primary-superadmin' || a.token === 'SA-6FC5F961' || a.TokenID === 'SA-6FC5F961';
+    const isCurrentSession = (a.token && a.token === currentToken()) || (a.TokenID && a.TokenID === currentToken()) || (a.id && a.id === currentToken());
+    const targetTokenId = escapeHtml(a.token || a.TokenID || a.id || '');
+    const primaryBadge = isPrimary ? '<span class="badge blue">Primary</span>' : '';
+
     cards += '<article class="admin-account-card admin-filterable admin-filter-canonical"' + dataAttrs + '>';
-    cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Admin</span><strong>' + identity + '</strong></div>' + statusBadge(a.Status) + '</div>';
+    cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Admin</span><strong>' + identity + '</strong></div>' + (primaryBadge ? primaryBadge + ' ' : '') + statusBadge(a.Status) + '</div>';
     cards += '<dl class="admin-data-card-meta">';
     cards += '<div><dt>WhatsApp</dt><dd>' + escapeHtml(wa) + '</dd></div>';
     cards += '<div><dt>Token</dt><dd class="token-box">' + escapeHtml(a.token || a.TokenID) + '</dd></div>';
     cards += '</dl>';
     cards += '<div class="admin-card-actions">';
-    const targetTokenId = escapeHtml(a.token || a.TokenID || a.id || '');
-    if (a.Status === 'Active') {
-      cards += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + targetTokenId + '\')">Nonaktifkan</button>';
+    if (isPrimary) {
+      cards += '<span class="muted" style="font-size:12px;">Akun Utama (Terkunci)</span>';
+    } else if (isCurrentSession) {
+      cards += '<span class="muted" style="font-size:12px;">Akun Anda (Aktif)</span>';
     } else {
-      cards += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + targetTokenId + '\')">Aktifkan</button>';
+      if (a.Status === 'Active') {
+        cards += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + targetTokenId + '\')">Nonaktifkan</button>';
+      } else {
+        cards += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + targetTokenId + '\')">Aktifkan</button>';
+      }
+      cards += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + targetTokenId + '\')">Hapus</button>';
     }
-    cards += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + targetTokenId + '\')">Hapus</button>';
     cards += '</div></article>';
 
-    table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + identity + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace; overflow-wrap:anywhere;">' + escapeHtml(a.token || a.TokenID) + '</td><td>' + statusBadge(a.Status) + '</td><td><div class="action-group">';
-    if (a.Status === 'Active') {
-      table += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + targetTokenId + '\')">Nonaktifkan</button>';
+    table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + identity + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace; overflow-wrap:anywhere;">' + escapeHtml(a.token || a.TokenID) + '</td><td>' + (primaryBadge ? primaryBadge + ' ' : '') + statusBadge(a.Status) + '</td><td><div class="action-group">';
+    if (isPrimary) {
+      table += '<span class="muted" style="font-size:12px;">Akun Utama (Terkunci)</span>';
+    } else if (isCurrentSession) {
+      table += '<span class="muted" style="font-size:12px;">Akun Anda (Aktif)</span>';
     } else {
-      table += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + targetTokenId + '\')">Aktifkan</button>';
+      if (a.Status === 'Active') {
+        table += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + targetTokenId + '\')">Nonaktifkan</button>';
+      } else {
+        table += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + targetTokenId + '\')">Aktifkan</button>';
+      }
+      table += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + targetTokenId + '\')">Hapus</button>';
     }
-    table += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + targetTokenId + '\')">Hapus</button></div></td></tr>';
+    table += '</div></td></tr>';
   });
 
   cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada admin yang sesuai filter.</p></div>';
