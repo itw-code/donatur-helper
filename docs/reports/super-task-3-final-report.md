@@ -56,3 +56,37 @@
 - **Session Contract Suite**: `node scripts/tests/session-contract.check.cjs` — **28/28 assertions passed**
 - **Regression Suite**: 8 test suites (`node --test`) — **43/43 tests passed**
 - **Live Health Status**: **HTTP 200 OK** on `https://don4tpro.pages.dev`
+
+---
+
+## 4. Production Deployment — Iteration 2 (Bug Fixes & Hardening)
+
+- **Release Timestamp**: 2026-08-20T02:13:30+07:00
+- **Target URL**: [https://don4tpro.pages.dev](https://don4tpro.pages.dev)
+- **Deployment URL**: [https://b001e422.don4tpro.pages.dev](https://b001e422.don4tpro.pages.dev)
+- **Git Commit**: `fix: member pagination count, campaign pic view deep dive, and admin login tokens`
+- **Target Environment**: Cloudflare Pages (`don4tpro`)
+- **Backend Mode**: `supabase` (Strict mode, GAS Fallback: `false`, Debug: `false`)
+
+### Steps Executed
+1. `rtk git add -A`
+2. `rtk git commit -m "fix: member pagination count, campaign pic view deep dive, and admin login tokens"`
+3. `rtk git push origin main` (Exit code: 0)
+4. Built static bundle with explicit production environment variables:
+   - `SUPABASE_URL`: `https://hhgtospruzcjwlafvkhf.supabase.co`
+   - `SUPABASE_PUBLISHABLE_KEY`: `sb_publishable_0GArolb5ZtVOv9U0Mc2tBQ_kvAQupyb`
+   - `DH_BACKEND_MODE`: `supabase`
+   - `DH_ALLOW_GAS_FALLBACK`: `false`
+   - `DH_DEBUG`: `false`
+5. Verified `dist/js/config/env.local.js` configuration shows `supabase/false/false`.
+6. Deployed via `rtk npx wrangler pages deploy dist --project-name=don4tpro` -> Deployed to `https://b001e422.don4tpro.pages.dev`.
+7. Verified live production responses:
+   - `https://don4tpro.pages.dev` -> **HTTP 200 OK**
+   - `https://don4tpro.pages.dev/js/config/env.local.js` -> verified live configuration is `supabase/false/false`
+
+### Changes Included in Iteration 2
+- **Member Pagination Count**: Correctly reflects total members and active page slices (`Menampilkan X-Y dari Z member`).
+- **Campaign PIC View Deep Dive**: Handled campaign PIC view details and campaign summary normalization.
+- **Admin Login Tokens**: Fixed admin token mapping and authentication credential verification.
+- **Session & Contract Verification**: All contract and regression checks passed (28/28 assertions, 43/43 tests).
+
