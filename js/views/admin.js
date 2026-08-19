@@ -808,18 +808,23 @@ export function adminView(campaignId) {
       }
 
       if (c.Status !== 'Archived') {
+        modalTransferMembers = members;
         let transferHtml = '<div style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin-bottom: 12px;">';
         transferHtml += '<h3 style="margin-top:0; font-size: 14px; color:var(--text);">🔄 Transfer Kepemilikan Campaign</h3>';
         transferHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Pindahkan hak PIC campaign ini ke member lain. Token PIC lama akan kedaluwarsa secara otomatis.</p>';
+        transferHtml += '<div style="margin-bottom:8px;">';
+        transferHtml += '<input type="text" id="transfer-pic-search" placeholder="🔍 Cari nama atau WhatsApp member..." style="width:100%; box-sizing:border-box; padding:6px 10px; font-size:12px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);" oninput="filterTransferPicOptions(this.value)" />';
+        transferHtml += '</div>';
         transferHtml += '<div style="display:flex; gap:8px;">';
-        transferHtml += '<select id="transfer-pic-select" style="flex:1; padding:6px; font-size:13px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--text);">';
-        transferHtml += '<option value="">-- Pilih PIC Baru --</option>';
+        transferHtml += '<select id="transfer-pic-select" style="flex:1; padding:6px 8px; font-size:13px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--text);">';
+        transferHtml += '<option value="">-- Pilih PIC Baru (' + members.length + ' member) --</option>';
         members.forEach(m => {
           transferHtml += '<option value="' + escapeHtml(m.WhatsApp) + '">' + escapeHtml(m.Name) + ' (' + escapeHtml(m.WhatsApp) + ')</option>';
         });
         transferHtml += '</select>';
-        transferHtml += '<button class="btn blue btn-auto" style="margin:0; padding:6px 12px; font-size:12px;" onclick="adminTransferOwnershipUI(\'' + c.CampaignID + '\')">Transfer</button>';
+        transferHtml += '<button class="btn blue btn-auto" style="margin:0; padding:6px 14px; font-size:12px; white-space:nowrap;" onclick="adminTransferOwnershipUI(\'' + c.CampaignID + '\')">Transfer</button>';
         transferHtml += '</div>';
+        transferHtml += '<div id="transfer-pic-count" class="muted" style="font-size:11px; margin-top:4px;"></div>';
         transferHtml += '</div>';
         html += transferHtml;
       }
@@ -835,6 +840,42 @@ export function adminView(campaignId) {
       modalContainer.innerHTML = html;
     })
     .catch(e => showInfoModal(e.message || String(e), 'Error'));
+}
+
+let modalTransferMembers = [];
+
+export function filterTransferPicOptions(query) {
+  const select = document.getElementById('transfer-pic-select');
+  const countEl = document.getElementById('transfer-pic-count');
+  if (!select) return;
+
+  const q = String(query || '').trim().toLowerCase();
+  const filtered = !q
+    ? modalTransferMembers
+    : modalTransferMembers.filter(m => {
+        const name = String(m.Name || m.name || '').toLowerCase();
+        const wa = String(m.WhatsApp || m.whatsapp || '').toLowerCase();
+        return name.includes(q) || wa.includes(q);
+      });
+
+  let optionsHtml = '';
+  if (filtered.length === 0) {
+    optionsHtml = '<option value="">(Tidak ada member cocok)</option>';
+  } else {
+    optionsHtml = '<option value="">-- Pilih PIC Baru (' + filtered.length + ' member) --</option>';
+    filtered.forEach(m => {
+      const wa = m.WhatsApp || m.whatsapp;
+      const name = m.Name || m.name;
+      optionsHtml += '<option value="' + escapeHtml(wa) + '">' + escapeHtml(name) + ' (' + escapeHtml(wa) + ')</option>';
+    });
+  }
+  select.innerHTML = optionsHtml;
+  if (countEl) {
+    countEl.textContent = q ? ('Ditemukan ' + filtered.length + ' dari ' + modalTransferMembers.length + ' member') : '';
+  }
+}
+if (typeof window !== 'undefined') {
+  window.filterTransferPicOptions = filterTransferPicOptions;
 }
 
 export function adminRecalculateUI(campaignId) {
@@ -858,8 +899,28 @@ export function adminTransferOwnershipUI(campaignId) {
   
   showConfirmModal('Yakin ingin mentransfer kepemilikan campaign ini? PIC lama akan kehilangan akses dan campaign akan dipindahkan ke PIC baru.', () => {
     call('transferCampaignOwnershipAdmin', currentToken(), campaignId, targetWhatsapp)
-      .then(newToken => {
-        showInfoModal('Transfer kepemilikan berhasil!\nToken PIC Baru: ' + newToken + '\n\nCampaign ini otomatis muncul di dashboard member yang bersangkutan.', 'Sukses');
+      .then(res => {
+        const newToken = (typeof res === 'object' && res !== null)
+          ? (res.new_pic_token || res.token || res.newToken || res.newPicToken || '')
+          : (typeof res === 'string' ? res : '');
+        const successMsg = (typeof res === 'object' && res !== null && res.message)
+          ? res.message
+          : 'Transfer kepemilikan berhasil!';
+        const targetName = (typeof res === 'object' && res !== null && res.target_name)
+          ? res.target_name
+          : '';
+
+        let modalBody = successMsg;
+        if (newToken) {
+          modalBody += '\n\nToken PIC Baru: ' + newToken;
+        }
+        if (targetName) {
+          modalBody += '\n\nCampaign ini otomatis muncul di dashboard ' + targetName + '.';
+        } else {
+          modalBody += '\n\nCampaign ini otomatis muncul di dashboard member yang bersangkutan.';
+        }
+
+        showInfoModal(modalBody, 'Sukses');
         const adminModal = document.getElementById('admin-modal');
         if (adminModal) adminModal.innerHTML = '';
         

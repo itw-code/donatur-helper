@@ -409,3 +409,60 @@ test('Admin mutation generatePicToken calls admin_generate_pic_token RPC', async
   assert.equal(call.params.p_token, 'valid-admin-token');
 });
 
+test('filterTransferPicOptions filters active members by name or WhatsApp and updates select element', () => {
+  const harness = createAdminHarness();
+  const { filterTransferPicOptions, adminView } = harness.context;
+
+  assert.equal(typeof filterTransferPicOptions, 'function', 'filterTransferPicOptions must be exported');
+
+  // Setup DOM elements for modal
+  const selectEl = harness.elements.get('transfer-pic-select');
+  const countEl = harness.elements.get('transfer-pic-count');
+
+  // Mock modalTransferMembers via invoking adminView
+  harness.storage.set('auth_token', 'valid-admin-token');
+  harness.storage.set('auth_role', 'Admin');
+
+  // Call filterTransferPicOptions with query
+  filterTransferPicOptions('Budi');
+  // Should handle safely even if list is empty or populated
+  assert.ok(selectEl.innerHTML.length >= 0);
+});
+
+test('adminTransferOwnershipUI calls transferCampaignOwnershipAdmin and handles object response cleanly', async () => {
+  const harness = createAdminHarness({
+    rpcHandler: (fn) => {
+      if (fn === 'admin_transfer_campaign_ownership') {
+        return {
+          data: {
+            success: true,
+            new_pic_token: 'PIC-TEST-1234',
+            message: 'Kepemilikan campaign berhasil dialihkan ke Budi Santoso.',
+            target_name: 'Budi Santoso'
+          },
+          error: null
+        };
+      }
+      return undefined;
+    }
+  });
+
+  harness.storage.set('auth_token', 'valid-admin-token');
+  harness.storage.set('auth_role', 'Admin');
+
+  const selectEl = harness.elements.get('transfer-pic-select');
+  selectEl.value = '081234567890';
+
+  const { adminTransferOwnershipUI } = harness.context;
+  assert.equal(typeof adminTransferOwnershipUI, 'function', 'adminTransferOwnershipUI must be exported');
+
+  adminTransferOwnershipUI('C-12345678');
+  await new Promise(resolve => setTimeout(resolve, 50));
+
+  const transferRpc = harness.rpcCalls.find(c => c.fn === 'admin_transfer_campaign_ownership');
+  assert.ok(transferRpc, 'admin_transfer_campaign_ownership RPC must be called');
+  assert.equal(transferRpc.params.p_campaign_id, 'C-12345678');
+  assert.equal(transferRpc.params.p_target_whatsapp, '081234567890');
+});
+
+

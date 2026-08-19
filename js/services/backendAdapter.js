@@ -1378,7 +1378,22 @@ async function _dispatchSupabaseRpc(action, args = []) {
       if (error) throw new Error(error.message || 'Gagal mentransfer kepemilikan campaign.');
       if (data && data.error) throw new Error(data.message || data.error);
 
-      return data;
+      const resObj = (typeof data === 'object' && data !== null) ? data : {};
+      const newToken = resObj.new_pic_token || resObj.token || resObj.newToken || (typeof data === 'string' ? data : '');
+      const msg = resObj.message || 'Kepemilikan campaign berhasil dialihkan.';
+
+      return {
+        success: true,
+        message: msg,
+        token: newToken,
+        new_pic_token: newToken,
+        newToken: newToken,
+        newPicToken: newToken,
+        target_name: resObj.target_name || '',
+        target_whatsapp: resObj.target_whatsapp || targetWhatsapp,
+        campaign_id: resObj.campaign_id || campaignId,
+        ...resObj
+      };
     }
 
     case 'adminRecalculateCampaign': {

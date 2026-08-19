@@ -188,3 +188,35 @@
 - **End-to-End Test Suite**: 100% pass rate across all 111 tests and 21 session contract assertions.
 - **Live Health Status**: Production endpoint operational at `https://don4tpro.pages.dev`.
 
+---
+
+## 8. Production Deployment — Iteration 6 (Searchable Campaign Transfer & Notification Fix)
+
+- **Release Timestamp**: 2026-08-20T04:08:20+07:00
+- **Target URL**: [https://don4tpro.pages.dev](https://don4tpro.pages.dev)
+- **Deployment URL**: [https://5eb38ad0.don4tpro.pages.dev](https://5eb38ad0.don4tpro.pages.dev)
+- **Git Commit**: Pending (`fix: searchable campaign ownership transfer and notification object coercion`)
+- **Target Environment**: Cloudflare Pages (`don4tpro`)
+- **Backend Mode**: `supabase` (Strict mode, GAS Fallback: `false`, Debug: `false`)
+
+### Steps Executed
+1. Verified changes with Verifier subagent (`63f54a92-b656-4294-abf4-1fee454e93ff`) — 100% PASS across syntax, 5/5 session contracts, and test suites.
+2. Built static bundle with explicit production environment variables:
+   - `SUPABASE_URL`: `https://hhgtospruzcjwlafvkhf.supabase.co`
+   - `SUPABASE_PUBLISHABLE_KEY`: `sb_publishable_0GArolb5ZtVOv9U0Mc2tBQ_kvAQupyb`
+   - `DH_BACKEND_MODE`: `supabase`
+   - `DH_ALLOW_GAS_FALLBACK`: `false`
+   - `DH_DEBUG`: `false`
+3. Verified `dist/js/config/env.local.js` configuration shows `supabase/false/false`.
+4. Deployed via `rtk npx wrangler pages deploy dist --project-name=don4tpro` -> Deployed to `https://5eb38ad0.don4tpro.pages.dev`.
+5. Verified live production responses:
+   - `https://don4tpro.pages.dev` -> **HTTP 200 OK**
+   - `https://don4tpro.pages.dev/js/config/env.local.js` -> verified live configuration is `supabase/false/false`
+
+### Changes Included in Iteration 6
+- **Searchable PIC Selection**: Added live search input `#transfer-pic-search` and `filterTransferPicOptions` in `admin.js` and `app.js` to search members by name or WhatsApp when transferring campaign ownership.
+- **Fixed `[object Object]` Notification**: Normalized `admin_transfer_campaign_ownership` RPC response in `backendAdapter.js` and extracted `newToken`, `message`, and `target_name` cleanly in `adminTransferOwnershipUI`, eliminating `[object Object]` modal string coercion.
+- **Contract & Regression Suite**: Verified all 5 contract sections in `session-contract.check.cjs` and added test cases in `tests/admin-supabase-rewire.test.js`.
+- **Live Health Status**: Production site operational and serving live Supabase configuration at `https://don4tpro.pages.dev`.
+
+

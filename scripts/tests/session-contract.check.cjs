@@ -314,6 +314,37 @@ assert(
 );
 
 // -----------------------------------------------------------------------------
+// 5. CAMPAIGN OWNERSHIP TRANSFER & SEARCHABLE PIC PICKER CONTRACT (admin.js)
+// -----------------------------------------------------------------------------
+console.log('\n--- 5. Campaign Ownership Transfer Contract ---');
+assert(
+  adapterCode.includes("case 'transferCampaignOwnershipAdmin':") &&
+  adapterCode.includes("client.rpc('admin_transfer_campaign_ownership'"),
+  'backendAdapter.js must handle transferCampaignOwnershipAdmin via admin_transfer_campaign_ownership RPC'
+);
+assert(
+  adapterCode.includes("new_pic_token: newToken") &&
+  adapterCode.includes("token: newToken"),
+  'backendAdapter.js must normalize transfer campaign response object with plaintext token properties'
+);
+assert(
+  adminCode.includes("id=\"transfer-pic-search\"") &&
+  adminCode.includes("oninput=\"filterTransferPicOptions(this.value)\""),
+  'admin.js must provide searchable input `#transfer-pic-search` for transferring campaign ownership'
+);
+assert(
+  adminCode.includes("export function filterTransferPicOptions(") &&
+  adminCode.includes("window.filterTransferPicOptions = filterTransferPicOptions"),
+  'admin.js must export filterTransferPicOptions and attach to window'
+);
+assert(
+  adminCode.includes("res.new_pic_token || res.token || res.newToken") &&
+  !adminCode.includes("'Token PIC Baru: ' + newToken + '\\n\\n'"),
+  'admin.js adminTransferOwnershipUI must defensively extract token and message without [object Object] coercion'
+);
+
+
+// -----------------------------------------------------------------------------
 // SUMMARY & VERDICT
 // -----------------------------------------------------------------------------
 console.log('\n================================================================');
