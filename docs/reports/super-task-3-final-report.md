@@ -90,3 +90,37 @@
 - **Admin Login Tokens**: Fixed admin token mapping and authentication credential verification.
 - **Session & Contract Verification**: All contract and regression checks passed (28/28 assertions, 43/43 tests).
 
+---
+
+## 5. Production Deployment — Iteration 3 (Primary SuperAdmin & Token Mutation Protection)
+
+- **Release Timestamp**: 2026-08-20T02:38:00+07:00
+- **Target URL**: [https://don4tpro.pages.dev](https://don4tpro.pages.dev)
+- **Deployment URL**: [https://c8eea505.don4tpro.pages.dev](https://c8eea505.don4tpro.pages.dev)
+- **Git Commit**: `fix: superadmin token mutations text identifier and primary superadmin hierarchy protection`
+- **Target Environment**: Cloudflare Pages (`don4tpro`)
+- **Backend Mode**: `supabase` (Strict mode, GAS Fallback: `false`, Debug: `false`)
+
+### Steps Executed
+1. `rtk git add -A`
+2. `rtk git commit -m "fix: superadmin token mutations text identifier and primary superadmin hierarchy protection"`
+3. `rtk git push origin main` (Exit code: 0)
+4. Built static bundle with explicit production environment variables:
+   - `SUPABASE_URL`: `https://hhgtospruzcjwlafvkhf.supabase.co`
+   - `SUPABASE_PUBLISHABLE_KEY`: `sb_publishable_0GArolb5ZtVOv9U0Mc2tBQ_kvAQupyb`
+   - `DH_BACKEND_MODE`: `supabase`
+   - `DH_ALLOW_GAS_FALLBACK`: `false`
+   - `DH_DEBUG`: `false`
+5. Verified `dist/js/config/env.local.js` configuration shows `supabase/false/false`.
+6. Deployed via `rtk npx wrangler pages deploy dist --project-name=don4tpro` -> Deployed to `https://c8eea505.don4tpro.pages.dev`.
+7. Verified live production responses:
+   - `https://don4tpro.pages.dev` -> **HTTP 200 OK**
+   - `https://don4tpro.pages.dev/js/config/env.local.js` -> verified live configuration is `supabase/false/false`
+
+### Changes Included in Iteration 3
+- **Primary SuperAdmin & Session Hierarchy Protection**: Handled primary SuperAdmin identification (`isPrimary`) and active session tracking (`isCurrentSession`) in `renderAdminAccounts` (`admin.js`), displaying `<span class="badge blue">Primary</span>` and preventing accidental self-revocation or primary admin deletion (`Akun Utama (Terkunci)` / `Akun Anda (Aktif)`).
+- **SuperAdmin Token Mutations Alignment**: Normalized `p_token_id: String(tokenId).trim()` in `revokeAdminToken`, `reactivateAdminToken`, and `deleteAdminToken` (`backendAdapter.js`) for text-based token identifiers.
+- **Contract & Regression Suite**: Verified 40/40 static contract assertions in `session-contract.check.cjs` and 113/113 unit/regression tests passing with 0 failures.
+- **Live Health Verification**: Live endpoint responds HTTP 200 OK and serves `BACKEND_MODE=supabase`, `ALLOW_GAS_FALLBACK=false`, `DEBUG=false`.
+
+
