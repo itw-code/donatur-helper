@@ -156,3 +156,35 @@
 - **Admin Token Display in SuperAdmin Account List**: In `renderAdminAccounts` (`js/views/admin.js`), enhanced the token display column to render full token code badge and copy button whenever `item.token` or `item.token_preview` is available, with fallback to masked token identifier.
 - **Session & Regression Contract Verification**: Verified 40/40 assertions in `session-contract.check.cjs` passing with 0 errors.
 - **Live Production Health**: Successfully deployed to Cloudflare Pages; live site verified HTTP 200 OK with strict Supabase backend mode.
+
+---
+
+## 7. Production Deployment — Iteration 5 (Role Sync, Two-Way Demotion & Token Re-issuance)
+
+- **Release Timestamp**: 2026-08-20T03:52:45+07:00
+- **Target URL**: [https://don4tpro.pages.dev](https://don4tpro.pages.dev)
+- **Deployment URL**: [https://56f3a7ab.don4tpro.pages.dev](https://56f3a7ab.don4tpro.pages.dev)
+- **Git Commit**: `2b9fc9e` (`fix: member role sync on admin token deletion, two-way demotion, and token re-issuance`)
+- **Target Environment**: Cloudflare Pages (`don4tpro`)
+- **Backend Mode**: `supabase` (Strict mode, GAS Fallback: `false`, Debug: `false`)
+
+### Steps Executed
+1. Verified commit `2b9fc9e` with Verifier subagent (syntax, session contracts, and full 111-test suite passing).
+2. Built static bundle with explicit production environment variables:
+   - `SUPABASE_URL`: `https://hhgtospruzcjwlafvkhf.supabase.co`
+   - `SUPABASE_PUBLISHABLE_KEY`: `sb_publishable_0GArolb5ZtVOv9U0Mc2tBQ_kvAQupyb`
+   - `DH_BACKEND_MODE`: `supabase`
+   - `DH_ALLOW_GAS_FALLBACK`: `false`
+   - `DH_DEBUG`: `false`
+3. Verified `dist/js/config/env.local.js` configuration shows `supabase/false/false`.
+4. Deployed via `rtk npx wrangler pages deploy dist --project-name=don4tpro` -> Deployed to `https://56f3a7ab.don4tpro.pages.dev`.
+5. Verified live production responses:
+   - `https://don4tpro.pages.dev` -> **HTTP 200 OK**
+   - `https://don4tpro.pages.dev/js/config/env.local.js` -> verified live configuration is `supabase/false/false`
+
+### Changes Included in Iteration 5
+- **Two-Way Demotion & Token Re-issuance**: Added explicit action buttons in `renderMemberActions` and `renderMembersHtml` (`js/views/admin.js`) allowing SuperAdmins to demote an Admin back to standard Member (`Jadikan Member` / `- Member`), create additional Admin Tokens (`+ Token Admin`), or promote Members to Admin / PIC.
+- **Confirmation & Token Guidance**: Updated `assignMemberRoleUI` with dedicated confirmation copy on demotion warning of token deactivation, and automatically refreshes admin tables upon role mutations.
+- **End-to-End Test Suite**: 100% pass rate across all 111 tests and 21 session contract assertions.
+- **Live Health Status**: Production endpoint operational at `https://don4tpro.pages.dev`.
+
