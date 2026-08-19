@@ -4,6 +4,8 @@
     "inventory:xlsx": "node scripts/migration/inventory-xlsx.mjs",
     "migrate:dry-run": "node scripts/migration/migrate-xlsx-to-supabase.mjs --dry-run",
     "migrate:write": "node scripts/migration/migrate-xlsx-to-supabase.mjs --write",
+    "migrate:fresh-diff": "node scripts/migration/upsert-fresh-diff.mjs --dry-run",
+    "migrate:fresh-write": "node scripts/migration/upsert-fresh-diff.mjs --write",
     "verify:db": "node scripts/migration/verify-supabase-data.mjs",
     "test:smtp": "node scripts/email/test-gmail-smtp.mjs"
   },

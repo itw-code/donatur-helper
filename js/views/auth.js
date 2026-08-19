@@ -66,12 +66,14 @@ export function userLogin() {
           return;
         }
         // Log them in immediately!
+        const resolvedEmail = res.email || (res.identity && res.identity.email) || '';
         const userSession = {
           ...res,
           whatsapp: res.whatsapp || wa,
           whatsapp_masked: res.whatsapp_masked || (res.identity && res.identity.whatsapp_masked) || '',
           name: res.name || (res.identity && res.identity.name) || '',
           alias: res.alias || (res.identity && res.identity.alias) || '',
+          email: resolvedEmail,
           status: res.status || (res.identity && res.identity.member_status ? String(res.identity.member_status).toLowerCase() : 'active'),
           verified: res.verified !== undefined ? res.verified : true
         };
@@ -127,11 +129,13 @@ export function userLogin() {
       resetUserLoginForm();
       return;
     }
+    const resolvedEmail = user.email || (user.member && user.member.email) || '';
     const userSession = {
       ...user,
       whatsapp: user.whatsapp || wa,
       whatsapp_masked: user.whatsapp_masked || user.maskedWhatsapp || '',
       name: user.name || name,
+      email: resolvedEmail,
       status: user.status || empStatus || 'active',
       verified: user.verified !== undefined ? user.verified : (user.status === 'active')
     };

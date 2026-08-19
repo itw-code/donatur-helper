@@ -91,6 +91,27 @@ for (const item of donorSessionReads) {
   assert(item.pattern.test(donorCode), `donor.js must correctly guard/read ${item.name}`);
 }
 
+// 1.6 Check backendAdapter.js checkDonorWhatsApp return shape includes email
+assert(
+  adapterCode.includes("case 'checkDonorWhatsApp':") &&
+  adapterCode.includes("email: resolvedEmail"),
+  'backendAdapter.js checkDonorWhatsApp must explicitly return `email`'
+);
+
+// 1.7 Check auth.js stores email in session on login
+assert(
+  authCode.includes("const resolvedEmail = res.email || (res.identity && res.identity.email) || '';") &&
+  authCode.includes("email: resolvedEmail"),
+  'auth.js must include `email` in userSession upon login'
+);
+
+// 1.8 Check auth.js stores email in session on register
+assert(
+  authCode.includes("const resolvedEmail = user.email || (user.member && user.member.email) || '';") &&
+  authCode.includes("email: resolvedEmail"),
+  'auth.js must include `email` in userSession upon registration'
+);
+
 // -----------------------------------------------------------------------------
 // 2. TOKEN SESSION CONTRACT (Role Views: PIC, Admin, SuperAdmin)
 // -----------------------------------------------------------------------------
@@ -161,6 +182,69 @@ if (seamlessRpcCall) {
   assert(seamlessParams.includes('p_whatsapp'), 'generate_seamless_pic_token RPC passes `p_whatsapp`');
   assert(!seamlessParams.includes('p_target_name'), 'generate_seamless_pic_token RPC must NOT pass undeclared `p_target_name`');
 }
+
+// 3.5 admin_get_campaign_detail RPC signature & parity
+assert(
+  adapterCode.includes("'getCampaignDetail'") &&
+  adapterCode.includes("'getCampaignDetailAdmin'") &&
+  adapterCode.includes("'adminGetCampaignDetail'"),
+  'backendAdapter.js MIGRATED_ACTIONS must include campaign detail action variants'
+);
+const adminDetailRpcCall = adapterCode.match(/client\.rpc\('admin_get_campaign_detail',\s*\{([\s\S]*?)\}\);/);
+assert(Boolean(adminDetailRpcCall), 'backendAdapter.js has admin_get_campaign_detail RPC dispatch');
+if (adminDetailRpcCall) {
+  const detailParams = adminDetailRpcCall[1];
+  assert(detailParams.includes('p_token'), 'admin_get_campaign_detail RPC passes `p_token`');
+  assert(detailParams.includes('p_campaign_id'), 'admin_get_campaign_detail RPC passes `p_campaign_id`');
+}
+
+// 3.6 admin_generate_pic_token response normalization
+assert(
+  adapterCode.includes("case 'adminGeneratePicToken':") &&
+  adapterCode.includes("token: plaintextToken") &&
+  adapterCode.includes("plaintextToken: plaintextToken"),
+  'backendAdapter.js adminGeneratePicToken must normalize response to include plaintext token properties'
+);
+assert(
+  adminCode.includes("res.token || res.plaintextToken || ''") &&
+  adminCode.includes("genPicToken"),
+  'admin.js genPicToken must read string token from response'
+);
+
+// 3.7 superadmin_list_admin_tokens RPC dispatch & mapping
+assert(
+  adapterCode.includes("'listAdminTokens'") &&
+  adapterCode.includes("'listAdmins'") &&
+  adapterCode.includes("'superadminListAdminTokens'"),
+  'backendAdapter.js MIGRATED_ACTIONS must include superadmin token list action variants'
+);
+const saTokenRpcCall = adapterCode.match(/client\.rpc\('superadmin_list_admin_tokens',\s*\{([\s\S]*?)\}\);/);
+assert(Boolean(saTokenRpcCall), 'backendAdapter.js has superadmin_list_admin_tokens RPC dispatch');
+if (saTokenRpcCall) {
+  const saParams = saTokenRpcCall[1];
+  assert(saParams.includes('p_token'), 'superadmin_list_admin_tokens RPC passes `p_token`');
+  assert(adapterCode.includes("TokenID: t.id") && adapterCode.includes("Alias: t.alias"), 'superadmin_list_admin_tokens maps TokenID and Alias');
+}
+
+// -----------------------------------------------------------------------------
+// 4. ADMIN MEMBER PAGINATION CONTRACT (admin.js)
+// -----------------------------------------------------------------------------
+console.log('\n--- 4. Admin Member Pagination Contract ---');
+assert(
+  adminCode.includes("export function changeMemberPage(") &&
+  adminCode.includes("window.changeMemberPage = changeMemberPage"),
+  'admin.js must export changeMemberPage and attach to window.changeMemberPage'
+);
+assert(
+  adminCode.includes("onclick=\"changeMemberPage(") &&
+  adminCode.includes("&laquo; Sebelumnya") &&
+  adminCode.includes("Berikutnya &raquo;"),
+  'admin.js must render Prev/Next buttons with changeMemberPage handlers'
+);
+assert(
+  adminCode.includes("Menampilkan ' + fromNum + '-' + toNum + ' dari ' + total + ' member"),
+  'admin.js must format page range as `Menampilkan X-Y dari Z member`'
+);
 
 // -----------------------------------------------------------------------------
 // SUMMARY & VERDICT

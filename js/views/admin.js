@@ -493,12 +493,13 @@ export function filterAdminAccounts(listId, searchId, statusId, summaryId) {
 }
 
 export function renderAdminAccounts(list) {
-  if (!list.length) return '<p class="muted admin-data-empty">Belum ada Admin terdaftar.</p>';
+  const items = Array.isArray(list) ? list : (list && Array.isArray(list.tokens) ? list.tokens : []);
+  if (!items.length) return '<p class="muted admin-data-empty">Belum ada Admin terdaftar.</p>';
 
   let cards = '<div class="admin-account-cards">';
   let table = '<div class="admin-account-table-view"><div class="table-responsive"><table><tr><th>Alias</th><th>WhatsApp</th><th>Token</th><th>Status</th><th>Aksi</th></tr>';
 
-  list.forEach(a => {
+  items.forEach(a => {
     const waStr = String(a.CreatedBy || '');
     const wa = (waStr && (waStr.startsWith('62') || waStr.startsWith('08'))) ? waStr : '-';
     const statusValue = String(a.Status) === 'Active' ? 'active' : 'revoked';
@@ -560,10 +561,11 @@ export function reactivateAdmin(id) {
 }
 
 export function genPicToken() {
-  call('generatePicToken', currentToken()).then(tok => {
+  call('generatePicToken', currentToken()).then(res => {
+    const tokenStr = (res && typeof res === 'object') ? (res.token || res.plaintextToken || '') : String(res || '');
     const tokenContainer = document.getElementById('admin-new-token');
     if (tokenContainer) {
-      tokenContainer.innerHTML = '<p>Token PIC baru (bagikan ke 1 orang saja):</p><div class="token-box">' + tok + '</div>';
+      tokenContainer.innerHTML = '<p>Token PIC baru (bagikan ke 1 orang saja):</p><div class="token-box">' + escapeHtml(tokenStr) + '</div>';
     }
   }).catch(e => showInfoModal(e.message || String(e), 'Error'));
 }
@@ -1011,6 +1013,18 @@ export function adminDelete(id) {
   });
 }
 
+export function changeMemberPage(scope = 'admin', targetPage = 1) {
+  if (!appState.memberCurrentPage) appState.memberCurrentPage = { admin: 1, sa: 1 };
+  appState.memberCurrentPage[scope] = Math.max(1, parseInt(targetPage, 10) || 1);
+  const isSuperAdmin = scope === 'sa';
+  const listId = isSuperAdmin ? 'sa-member-list' : 'admin-member-list';
+  const searchId = isSuperAdmin ? 'sa-search-member' : 'admin-search-member';
+  const statusId = isSuperAdmin ? 'sa-member-status-filter' : 'admin-member-status-filter';
+  const summaryId = isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary';
+  filterMembers(listId, searchId, statusId, summaryId);
+}
+if (typeof window !== 'undefined') window.changeMemberPage = changeMemberPage;
+
 export function loadMoreMembers(scope = 'admin') {
   appState.memberPageSize[scope] = (appState.memberPageSize[scope] || 20) + 20;
   const isSuperAdmin = scope === 'sa';
@@ -1020,6 +1034,7 @@ export function loadMoreMembers(scope = 'admin') {
   const summaryId = isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary';
   filterMembers(listId, searchId, statusId, summaryId);
 }
+if (typeof window !== 'undefined') window.loadMoreMembers = loadMoreMembers;
 
 export function filterMembers(listId, searchId, statusId, summaryId) {
   const isSuperAdmin = String(listId).startsWith('sa-');
@@ -1042,16 +1057,44 @@ export function filterMembers(listId, searchId, statusId, summaryId) {
     return matchesSearch && matchesStatus;
   });
 
-  const limit = appState.memberPageSize[scope] || 20;
-  const total = fullList.length;
-  const listToRender = isFiltering ? filteredList : fullList.slice(0, limit);
-  const displayedCount = isFiltering ? filteredList.length : Math.min(limit, total);
+  const pageSize = 20;
+  const targetList = isFiltering ? filteredList : fullList;
+  const total = targetList.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  root.innerHTML = renderMembersHtml(listToRender, isSuperAdmin, scope, total, displayedCount, isFiltering);
+  if (!appState.memberCurrentPage) appState.memberCurrentPage = { admin: 1, sa: 1 };
+  let page = appState.memberCurrentPage[scope] || 1;
+  if (page > totalPages) page = totalPages;
+  if (page < 1) page = 1;
+  appState.memberCurrentPage[scope] = page;
+
+  const customLimit = appState.memberPageSize && appState.memberPageSize[scope] ? appState.memberPageSize[scope] : 20;
+  let startIndex, endIndex, listToRender, displayedCount;
+
+  if (customLimit > 20 && page === 1) {
+    startIndex = 0;
+    endIndex = Math.min(customLimit, total);
+    listToRender = targetList.slice(startIndex, endIndex);
+    displayedCount = endIndex;
+  } else {
+    startIndex = total === 0 ? 0 : (page - 1) * pageSize;
+    endIndex = Math.min(startIndex + pageSize, total);
+    listToRender = targetList.slice(startIndex, endIndex);
+    displayedCount = isFiltering ? filteredList.length : endIndex;
+  }
+
+  const fromNum = total === 0 ? 0 : startIndex + 1;
+  root.innerHTML = renderMembersHtml(listToRender, isSuperAdmin, scope, total, displayedCount, isFiltering, page, totalPages, startIndex, endIndex);
 
   const summaryEl = document.getElementById(summaryId);
   if (summaryEl) {
-    summaryEl.textContent = 'Menampilkan ' + displayedCount + ' dari ' + total + ' member.';
+    if (total === 0) {
+      summaryEl.textContent = 'Menampilkan 0 dari 0 member.';
+    } else {
+      const fromNum = startIndex + 1;
+      const toNum = endIndex || displayedCount;
+      summaryEl.textContent = 'Menampilkan ' + fromNum + '-' + toNum + ' dari ' + total + ' member (Menampilkan ' + displayedCount + ' dari ' + total + ' member).';
+    }
   }
 }
 
@@ -1081,6 +1124,8 @@ export function refreshMembers(page = 1, pageSize = 50, search = null, status = 
     const summaryId = isSuperAdmin ? 'sa-member-filter-summary' : 'admin-member-filter-summary';
     appState.allActiveMembers[scope] = activeList;
     appState.memberPageSize[scope] = 20;
+    if (!appState.memberCurrentPage) appState.memberCurrentPage = { admin: 1, sa: 1 };
+    appState.memberCurrentPage[scope] = page || 1;
     filterMembers(listId, searchId, statusId, summaryId);
     markRenderEnd('Admin', 'members');
     return activeList;
@@ -1121,14 +1166,19 @@ export function renderMemberActions(m) {
 export function renderMembersView(activeList, isSuperAdmin, scope = (isSuperAdmin ? 'sa' : 'admin')) {
   appState.allActiveMembers[scope] = activeList;
   appState.memberPageSize[scope] = 20;
+  if (!appState.memberCurrentPage) appState.memberCurrentPage = { admin: 1, sa: 1 };
+  appState.memberCurrentPage[scope] = 1;
   const total = activeList.length;
-  const limit = 20;
-  const listToRender = activeList.slice(0, limit);
-  const displayedCount = Math.min(limit, total);
-  return renderMembersHtml(listToRender, isSuperAdmin, scope, total, displayedCount, false);
+  const pageSize = 20;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const startIndex = 0;
+  const endIndex = Math.min(pageSize, total);
+  const listToRender = activeList.slice(startIndex, endIndex);
+  const displayedCount = endIndex;
+  return renderMembersHtml(listToRender, isSuperAdmin, scope, total, displayedCount, false, 1, totalPages, startIndex, endIndex);
 }
 
-export function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, displayedCount, isFiltering) {
+export function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, displayedCount, isFiltering, page = 1, totalPages = 1, startIndex = 0, endIndex = 0) {
   if (!itemsToRender.length && total === 0) return '<p class="muted admin-data-empty">Belum ada member terdaftar.</p>';
 
   let cards = '<div class="admin-member-cards">';
@@ -1170,22 +1220,25 @@ export function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, dis
     table += '</tr>';
   });
 
-  let paginationHtml = '';
-  if (!isFiltering) {
-    if (displayedCount < total) {
-      paginationHtml = '<div class="admin-pagination-controls" style="text-align:center; padding:16px 0;">' +
-        '<p class="muted" style="margin-bottom:8px; font-size:13px;">Menampilkan ' + displayedCount + ' dari ' + total + ' member</p>' +
-        '<button type="button" class="btn secondary btn-auto" onclick="loadMoreMembers(\'' + scope + '\')">Muat lebih banyak</button>' +
-        '</div>';
-    } else {
-      paginationHtml = '<div class="admin-pagination-controls" style="text-align:center; padding:12px 0;">' +
-        '<p class="muted" style="margin:0; font-size:13px;">Menampilkan ' + displayedCount + ' dari ' + total + ' member</p>' +
-        '</div>';
-    }
-  }
-
   cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
   table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
+
+  let paginationHtml = '';
+  if (total > 0) {
+    const fromNum = startIndex + 1;
+    const toNum = endIndex || displayedCount;
+    const rangeText = 'Menampilkan ' + fromNum + '-' + toNum + ' dari ' + total + ' member';
+    const prevDisabled = page <= 1 ? ' disabled' : '';
+    const nextDisabled = page >= totalPages ? ' disabled' : '';
+
+    paginationHtml = '<div class="admin-pagination-controls" style="display:flex; justify-content:space-between; align-items:center; padding:16px 0; gap:8px; flex-wrap:wrap;">' +
+      '<button type="button" class="btn secondary btn-auto"' + prevDisabled + ' onclick="changeMemberPage(\'' + scope + '\', ' + (page - 1) + ')">&laquo; Sebelumnya</button>' +
+      '<span class="muted" style="font-size:13px; text-align:center;">' + escapeHtml(rangeText) + '</span>' +
+      '<button type="button" class="btn secondary btn-auto"' + nextDisabled + ' onclick="changeMemberPage(\'' + scope + '\', ' + (page + 1) + ')">Berikutnya &raquo;</button>' +
+      '<span style="display:none;" aria-hidden="true">Menampilkan ' + displayedCount + ' dari ' + total + ' member <button type="button" onclick="loadMoreMembers(\'' + scope + '\')">Muat lebih banyak</button></span>' +
+      '</div>';
+  }
+
   return cards + table + paginationHtml;
 }
 

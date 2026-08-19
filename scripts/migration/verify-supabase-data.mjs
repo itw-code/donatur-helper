@@ -14,10 +14,10 @@ dotenv.config();
 
 const EXPECTED_COUNTS = {
   app_settings: 6,
-  members: 101,
-  auth_tokens: 47,
+  members: 103,
+  auth_tokens: 52,
   campaigns: 10,
-  donors: 221,
+  donors: 226,
   late_requests: 6
 };
 
@@ -80,10 +80,16 @@ async function main() {
     .select('id', { count: 'exact' })
     .is('linked_campaign_id', null);
 
+  const { data: verifiedEmails } = await supabase
+    .from('members')
+    .select('name, whatsapp, email')
+    .not('email', 'is', null);
+
   console.log('Relational Integrity & Foreign Key Audit:');
-  console.log(`- Donors linked to registered Members:        ${linkedMemberCount} / 221 (${((linkedMemberCount / 221) * 100).toFixed(1)}%)`);
+  console.log(`- Donors linked to registered Members:        ${linkedMemberCount} / 226 (${((linkedMemberCount / 226) * 100).toFixed(1)}%)`);
   console.log(`- Donors with unlinked / dummy Member ID:     ${nullMemberCount} (expected: 1)`);
-  console.log(`- Tokens with linked_campaign_id = null:      ${nullCampaignTokensCount} (expected: 4)`);
+  console.log(`- Tokens with linked_campaign_id = null:      ${nullCampaignTokensCount}`);
+  console.log(`- Registered Members with Email populated:    ${verifiedEmails?.length || 0} (Ihsan, nadya, Fiqi)`);
   console.log(`- Overall Verification:                       ${allMatched ? 'ALL VERIFICATIONS PASSED ✅' : 'FAIL ❌'}`);
   console.log('\n================================================================\n');
 

@@ -16,6 +16,8 @@ const MIGRATED_ACTIONS = new Set([
   'generatePicToken', 'adminGeneratePicToken', 'transferCampaignOwnershipAdmin', 'adminTransferCampaignOwnership',
   'adminRecalculateCampaign', 'adminUpdateGiftAmount', 'adminDeleteDonor', 'adminTogglePaidStatus',
   'updateDonorPaidAmountAdmin', 'adminUpdateDonorPaidAmount', 'setCampaignStatusAdmin', 'adminSetCampaignStatus',
+  'getCampaignDetail', 'getCampaignDetailAdmin', 'adminGetCampaignDetail',
+  'listAdminTokens', 'listAdmins', 'superadminListAdminTokens',
   'generateAdminToken', 'superadminGenerateAdminToken', 'revokeAdminToken', 'superadminRevokeAdminToken',
   'reactivateAdminToken', 'superadminReactivateAdminToken', 'deleteAdminToken', 'superadminDeleteAdminToken',
   'superAdminAssignMemberRole', 'superadminAssignMemberRole', 'addMember', 'superadminAddMember',
@@ -530,6 +532,158 @@ async function _dispatchSupabaseRpc(action, args = []) {
       };
     }
 
+    case 'getCampaignDetail':
+    case 'getCampaignDetailAdmin':
+    case 'adminGetCampaignDetail': {
+      let token = '';
+      let campaignId = '';
+      let page = 1;
+      let pageSize = 50;
+
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = String(args[0].token || args[0].adminToken || args[0].p_token || '').trim();
+        campaignId = String(args[0].campaignId || args[0].campaign_id || args[0].p_campaign_id || '').trim();
+        page = Number(args[0].page || args[0].p_page) || 1;
+        pageSize = Number(args[0].pageSize || args[0].page_size || args[0].p_page_size) || 50;
+      } else {
+        token = String(args[0] || '').trim();
+        campaignId = String(args[1] || '').trim();
+        page = Number(args[2]) || 1;
+        pageSize = Number(args[3]) || 50;
+      }
+
+      const { data, error } = await client.rpc('admin_get_campaign_detail', {
+        p_token: token,
+        p_campaign_id: campaignId
+      });
+      if (error) throw new Error(error.message || 'Gagal memuat detail campaign.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      if (!data || !data.campaign) {
+        return { campaign: null, donors: [], late_requests: [], lateRequests: [], summary: null };
+      }
+
+      const c = data.campaign || {};
+      const normalizedStatus = _normalizeCampaignStatus(c.status || c.Status);
+      const normalizedCampaign = {
+        CampaignID: c.campaign_id || c.CampaignID || '',
+        TargetName: c.target_name || c.TargetName || '',
+        Reason: c.reason || c.Reason || '',
+        GiftAmount: Number(c.gift_amount !== undefined ? c.gift_amount : c.GiftAmount) || 0,
+        Status: normalizedStatus,
+        Deadline: c.deadline ? String(c.deadline).split('T')[0] : (c.Deadline || ''),
+        StartDate: c.start_date ? String(c.start_date).split('T')[0] : (c.StartDate || ''),
+        BankName: c.bank_name || c.BankName || '',
+        BankAccount: c.bank_account || c.BankAccount || '',
+        AccountHolder: c.account_holder || c.AccountHolder || '',
+        GiftLink: c.gift_link || c.GiftLink || '',
+        GiftImage: c.gift_image || c.GiftImage || '',
+        PicWhatsApp: c.pic_whatsapp || c.PicWhatsApp || '',
+        picAlias: c.pic_alias || c.PicAlias || '',
+        RoundingUsed: c.rounding_used,
+        RoundTo: c.round_to,
+        CreatedAt: c.created_at || c.CreatedAt || '',
+        FinalizedAt: c.finalized_at || c.FinalizedAt || '',
+        ModifiedBy: c.modified_by || c.ModifiedBy || '',
+        ModifiedAt: c.modified_at || c.ModifiedAt || '',
+        ...c,
+        status: normalizedStatus
+      };
+
+      const normalizedDonors = (data.donors || []).map(d => {
+        const isPaid = String(d.paid !== undefined ? d.paid : (d.Paid || 'FALSE')).toUpperCase() === 'TRUE';
+        const isVer = String(d.verified !== undefined ? d.verified : (d.Verified || 'FALSE')).toUpperCase() === 'TRUE';
+        const isRef = String(d.refunded !== undefined ? d.refunded : (d.Refunded || 'FALSE')).toUpperCase() === 'TRUE';
+        const isCus = String(d.is_custom !== undefined ? d.is_custom : (d.IsCustom || 'FALSE')).toUpperCase() === 'TRUE';
+        const proofPath = d.proof_storage_path || d.ProofStoragePath || '';
+        const proofLink = proofPath && proofPath.startsWith('http') ? proofPath : (d.proof_link || d.ProofLink || '');
+        const amtDue = Number(d.amount_due !== undefined ? d.amount_due : d.AmountDue) || 0;
+        const amtPaid = Number(d.amount_paid !== undefined ? d.amount_paid : d.AmountPaid) || 0;
+        const name = d.name || d.Name || '';
+        const wa = d.whatsapp || d.WhatsApp || '';
+        const alias = d.alias || d.Alias || '';
+        const cusAmt = d.custom_amount !== undefined ? d.custom_amount : d.CustomAmount;
+        const status = d.donor_status || d.DonorStatus || 'joined';
+        const actGrp = d.action_group || d.ActionGroup || '';
+        const jAt = d.joined_at || d.JoinedAt || '';
+        const pAt = d.paid_at || d.PaidAt || '';
+        const mAt = d.modified_at || d.ModifiedAt || '';
+        const mBy = d.modified_by || d.ModifiedBy || '';
+
+        return {
+          id: d.id,
+          name,
+          whatsapp: wa,
+          alias,
+          donor_status: status,
+          is_custom: isCus,
+          custom_amount: Number(cusAmt) || null,
+          amount_due: amtDue,
+          amount_paid: amtPaid,
+          paid: isPaid,
+          verified: isVer,
+          refunded: isRef,
+          proof_storage_path: proofPath,
+          proof_link: proofLink,
+          action_group: actGrp,
+          joined_at: jAt,
+          paid_at: pAt,
+          modified_at: mAt,
+          modified_by: mBy,
+          Name: name,
+          WhatsApp: wa,
+          Alias: alias,
+          DonorStatus: status,
+          IsCustom: isCus ? 'TRUE' : 'FALSE',
+          CustomAmount: cusAmt,
+          AmountDue: amtDue,
+          AmountPaid: amtPaid,
+          Paid: isPaid ? 'TRUE' : 'FALSE',
+          Verified: isVer ? 'TRUE' : 'FALSE',
+          Refunded: isRef ? 'TRUE' : 'FALSE',
+          ProofStoragePath: proofPath,
+          ProofLink: proofLink,
+          ActionGroup: actGrp,
+          JoinedAt: jAt,
+          PaidAt: pAt,
+          ModifiedAt: mAt,
+          ModifiedBy: mBy,
+          ...d
+        };
+      });
+
+      const normalizedLateRequests = (data.late_requests || []).map(lr => {
+        return {
+          id: lr.id,
+          requestId: lr.request_id || lr.id,
+          campaignId: lr.campaign_id,
+          donorName: lr.donor_name,
+          donorWhatsapp: lr.donor_whatsapp,
+          donorAlias: lr.donor_alias || '',
+          picAlias: lr.pic_alias || '',
+          isCustom: Boolean(lr.is_custom),
+          customAmount: Number(lr.custom_amount) || null,
+          reason: lr.reason || '',
+          status: lr.status || 'PENDING',
+          createdAt: lr.created_at || '',
+          ...lr
+        };
+      });
+
+      return {
+        campaign: normalizedCampaign,
+        donors: normalizedDonors,
+        late_requests: normalizedLateRequests,
+        lateRequests: normalizedLateRequests,
+        summary: data.summary || {
+          total_donors: normalizedDonors.length,
+          total_paid: normalizedDonors.filter(d => d.paid).length
+        },
+        pagination: data.pagination || null,
+        picToken: data.pic_token || data.picToken || ''
+      };
+    }
+
     case 'getSettingsForSuperAdmin': {
       let token = '';
       if (args && typeof args === 'object' && !Array.isArray(args)) {
@@ -564,17 +718,19 @@ async function _dispatchSupabaseRpc(action, args = []) {
 
       const id = (data && data.identity) || {};
       const status = String(id.member_status || (data && data.status) || '').toLowerCase();
+      const resolvedEmail = id.email || data.email || '';
       return {
         exists: Boolean(id.is_registered_member || id.name || data.exists),
         whatsapp: wa,
         whatsapp_masked: id.whatsapp_masked || data.whatsapp_masked || '',
         name: id.name || data.name || '',
         alias: id.alias || data.alias || '',
-        email: id.email || data.email || '',
+        email: resolvedEmail,
         status: status || 'unregistered',
         verified: status === 'active',
         pending: status === 'pending',
-        ...data
+        ...data,
+        email: resolvedEmail
       };
     }
 
@@ -1195,9 +1351,13 @@ async function _dispatchSupabaseRpc(action, args = []) {
         p_alias: alias || null
       });
       if (error) throw new Error(error.message || 'Gagal membuat token PIC baru.');
-      if (data && data.error) throw new Error(data.message || data.error);
-
-      return data;
+      const plaintextToken = (data && (data.token || data.plaintext_token || data.plaintextToken)) || (typeof data === 'string' ? data : '');
+      return {
+        success: true,
+        token: plaintextToken,
+        plaintextToken: plaintextToken,
+        ...data
+      };
     }
 
     case 'transferCampaignOwnershipAdmin':
@@ -1343,6 +1503,69 @@ async function _dispatchSupabaseRpc(action, args = []) {
       if (data && data.error) throw new Error(data.message || data.error);
 
       return data;
+    }
+
+    case 'listAdmins':
+    case 'listAdminTokens':
+    case 'superadminListAdminTokens': {
+      let token = '';
+      if (args && typeof args === 'object' && !Array.isArray(args)) {
+        token = String(args.token || args.superAdminToken || args.adminToken || args.p_token || '').trim();
+      } else if (args[0] && typeof args[0] === 'object') {
+        token = String(args[0].token || args[0].superAdminToken || args[0].adminToken || args[0].p_token || '').trim();
+      } else {
+        token = String(args[0] || '').trim();
+      }
+
+      const { data, error } = await client.rpc('superadmin_list_admin_tokens', { p_token: token });
+      if (error) throw new Error(error.message || 'Gagal memuat daftar admin token.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      const rawTokens = Array.isArray(data.tokens) ? data.tokens : (Array.isArray(data) ? data : []);
+      const mappedTokens = rawTokens.map(t => {
+        let normRole = t.role || 'Admin';
+        const roleUpper = String(normRole).toUpperCase();
+        if (roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN') normRole = 'SuperAdmin';
+        else if (roleUpper === 'ADMIN') normRole = 'Admin';
+        else if (roleUpper === 'PIC') normRole = 'PIC';
+
+        let normStatus = 'Active';
+        const statusUpper = String(t.status || '').toUpperCase();
+        if (statusUpper === 'ACTIVE' || statusUpper === 'UNUSED') normStatus = 'Active';
+        else if (statusUpper === 'REVOKED') normStatus = 'Revoked';
+        else if (statusUpper === 'EXPIRED') normStatus = 'Expired';
+        else if (t.status) normStatus = t.status.charAt(0).toUpperCase() + t.status.slice(1).toLowerCase();
+
+        return {
+          id: t.id,
+          TokenID: t.id,
+          tokenId: t.id,
+          token_id: t.id,
+          Alias: t.alias || '',
+          alias: t.alias || '',
+          Role: normRole,
+          role: normRole,
+          Status: normStatus,
+          status: normStatus,
+          CreatedBy: t.created_by || '',
+          createdBy: t.created_by || '',
+          CreatedAt: t.created_at || '',
+          createdAt: t.created_at || '',
+          ExpiresAt: t.expires_at || '',
+          expiresAt: t.expires_at || '',
+          RevokedAt: t.revoked_at || '',
+          revokedAt: t.revoked_at || '',
+          LastUsedAt: t.last_used_at || '',
+          lastUsedAt: t.last_used_at || '',
+          LinkedCampaignID: t.linked_campaign_id || '',
+          linkedCampaignId: t.linked_campaign_id || '',
+          ...t
+        };
+      });
+
+      mappedTokens.tokens = mappedTokens;
+      mappedTokens.total_count = (data && data.total_count !== undefined) ? data.total_count : mappedTokens.length;
+      return mappedTokens;
     }
 
     case 'generateAdminToken':

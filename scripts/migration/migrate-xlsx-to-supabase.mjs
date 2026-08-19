@@ -824,7 +824,11 @@ async function main() {
   console.log('\n================================================================\n');
 }
 
-main().catch(err => {
-  console.error('[FATAL ETL ERROR]:', err.message);
-  process.exit(1);
-});
+import { fileURLToPath } from 'node:url';
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  main().catch(err => {
+    console.error('[FATAL ETL ERROR]:', err.message);
+    process.exit(1);
+  });
+}
