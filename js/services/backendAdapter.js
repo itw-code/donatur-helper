@@ -357,7 +357,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
     case 'fetchAllMembers': {
       let token = '';
       let page = 1;
-      let pageSize = 50;
+      let pageSize = 1000;
       let search = null;
       let status = null;
       let role = null;
@@ -365,21 +365,21 @@ async function _dispatchSupabaseRpc(action, args = []) {
       if (args && typeof args === 'object' && !Array.isArray(args)) {
         token = String(args.token || args.p_token || '').trim();
         page = Number(args.page || args.p_page) || 1;
-        pageSize = Number(args.page_size || args.pageSize || args.p_page_size) || 50;
+        pageSize = Number(args.page_size || args.pageSize || args.p_page_size) || 1000;
         search = args.q || args.search || args.p_search || null;
         status = args.status || args.p_status || null;
         role = args.role || args.p_role || null;
       } else if (args[0] && typeof args[0] === 'object') {
         token = String(args[0].token || args[0].p_token || '').trim();
         page = Number(args[0].page || args[0].p_page) || 1;
-        pageSize = Number(args[0].page_size || args[0].pageSize || args[0].p_page_size) || 50;
+        pageSize = Number(args[0].page_size || args[0].pageSize || args[0].p_page_size) || 1000;
         search = args[0].q || args[0].search || args[0].p_search || null;
         status = args[0].status || args[0].p_status || null;
         role = args[0].role || args[0].p_role || null;
       } else {
         token = String(args[0] || '').trim();
         page = Number(args[1]) || 1;
-        pageSize = Number(args[2]) || 50;
+        pageSize = Number(args[2]) || 1000;
         search = args[3] || null;
         status = args[4] || null;
         role = args[5] || null;
@@ -680,7 +680,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
           total_paid: normalizedDonors.filter(d => d.paid).length
         },
         pagination: data.pagination || null,
-        picToken: data.pic_token || data.picToken || ''
+        picToken: data.pic_token || (data.campaign && data.campaign.pic_token) || data.picToken || null
       };
     }
 
@@ -1536,11 +1536,14 @@ async function _dispatchSupabaseRpc(action, args = []) {
         else if (statusUpper === 'EXPIRED') normStatus = 'Expired';
         else if (t.status) normStatus = t.status.charAt(0).toUpperCase() + t.status.slice(1).toLowerCase();
 
+        const realToken = t.token || t.TokenID || t.id;
+
         return {
           id: t.id,
-          TokenID: t.id,
-          tokenId: t.id,
-          token_id: t.id,
+          TokenID: realToken,
+          tokenId: realToken,
+          token_id: realToken,
+          token: realToken,
           Alias: t.alias || '',
           alias: t.alias || '',
           Role: normRole,
@@ -1559,7 +1562,9 @@ async function _dispatchSupabaseRpc(action, args = []) {
           lastUsedAt: t.last_used_at || '',
           LinkedCampaignID: t.linked_campaign_id || '',
           linkedCampaignId: t.linked_campaign_id || '',
-          ...t
+          ...t,
+          TokenID: realToken,
+          token: realToken
         };
       });
 

@@ -511,24 +511,25 @@ export function renderAdminAccounts(list) {
     cards += '<div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Admin</span><strong>' + identity + '</strong></div>' + statusBadge(a.Status) + '</div>';
     cards += '<dl class="admin-data-card-meta">';
     cards += '<div><dt>WhatsApp</dt><dd>' + escapeHtml(wa) + '</dd></div>';
-    cards += '<div><dt>Token</dt><dd class="token-box">' + escapeHtml(a.TokenID) + '</dd></div>';
+    cards += '<div><dt>Token</dt><dd class="token-box">' + escapeHtml(a.token || a.TokenID) + '</dd></div>';
     cards += '</dl>';
     cards += '<div class="admin-card-actions">';
+    const targetTokenId = escapeHtml(a.token || a.TokenID || a.id || '');
     if (a.Status === 'Active') {
-      cards += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button>';
+      cards += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + targetTokenId + '\')">Nonaktifkan</button>';
     } else {
-      cards += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button>';
+      cards += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + targetTokenId + '\')">Aktifkan</button>';
     }
-    cards += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + a.TokenID + '\')">Hapus</button>';
+    cards += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + targetTokenId + '\')">Hapus</button>';
     cards += '</div></article>';
 
-    table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + identity + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace; overflow-wrap:anywhere;">' + escapeHtml(a.TokenID) + '</td><td>' + statusBadge(a.Status) + '</td><td><div class="action-group">';
+    table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + identity + '</td><td>' + escapeHtml(wa) + '</td><td style="font-family:monospace; overflow-wrap:anywhere;">' + escapeHtml(a.token || a.TokenID) + '</td><td>' + statusBadge(a.Status) + '</td><td><div class="action-group">';
     if (a.Status === 'Active') {
-      table += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + a.TokenID + '\')">Nonaktifkan</button>';
+      table += '<button type="button" class="btn secondary" aria-label="Nonaktifkan admin ' + identity + '" onclick="revokeAdmin(\'' + targetTokenId + '\')">Nonaktifkan</button>';
     } else {
-      table += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + a.TokenID + '\')">Aktifkan</button>';
+      table += '<button type="button" class="btn green" aria-label="Aktifkan admin ' + identity + '" onclick="reactivateAdmin(\'' + targetTokenId + '\')">Aktifkan</button>';
     }
-    table += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + a.TokenID + '\')">Hapus</button></div></td></tr>';
+    table += '<button type="button" class="btn danger" aria-label="Hapus admin ' + identity + '" onclick="deleteAdmin(\'' + targetTokenId + '\')">Hapus</button></div></td></tr>';
   });
 
   cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada admin yang sesuai filter.</p></div>';
@@ -717,7 +718,8 @@ export function adminView(campaignId) {
       html += '</div>';
 
       if (detail.picToken) {
-        html += '<button class="btn secondary" style="margin-bottom:12px;" onclick="deepDive(\'' + detail.picToken + '\'); document.getElementById(\'admin-modal\').innerHTML=\'\';">Tinjau sebagai PIC</button>';
+        // Tinjau sebagai PIC
+        html += '<button class="btn secondary" style="margin-bottom:12px;" onclick="deepDive(\'' + detail.picToken + '\'); document.getElementById(\'admin-modal\').innerHTML=\'\';">👁️ Lihat Sebagai PIC</button>';
       }
 
       const c = detail.campaign;
@@ -1098,7 +1100,7 @@ export function filterMembers(listId, searchId, statusId, summaryId) {
   }
 }
 
-export function refreshMembers(page = 1, pageSize = 50, search = null, status = null, roleFilter = null) {
+export function refreshMembers(page = 1, pageSize = 1000, search = null, status = null, roleFilter = null) {
   markFetchStart('Admin', 'fetchAllMembers');
   return call('fetchAllMembers', {
     token: currentToken(),

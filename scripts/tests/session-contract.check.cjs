@@ -197,6 +197,15 @@ if (adminDetailRpcCall) {
   assert(detailParams.includes('p_token'), 'admin_get_campaign_detail RPC passes `p_token`');
   assert(detailParams.includes('p_campaign_id'), 'admin_get_campaign_detail RPC passes `p_campaign_id`');
 }
+assert(
+  adapterCode.includes("picToken: data.pic_token || (data.campaign && data.campaign.pic_token) || data.picToken || null"),
+  'backendAdapter.js getCampaignDetail must normalize picToken fallback chain'
+);
+assert(
+  adminCode.includes("👁️ Lihat Sebagai PIC") &&
+  adminCode.includes("deepDive(\\'' + detail.picToken + '\\')"),
+  'admin.js adminView must render `👁️ Lihat Sebagai PIC` button when picToken is present'
+);
 
 // 3.6 admin_generate_pic_token response normalization
 assert(
@@ -223,13 +232,26 @@ assert(Boolean(saTokenRpcCall), 'backendAdapter.js has superadmin_list_admin_tok
 if (saTokenRpcCall) {
   const saParams = saTokenRpcCall[1];
   assert(saParams.includes('p_token'), 'superadmin_list_admin_tokens RPC passes `p_token`');
-  assert(adapterCode.includes("TokenID: t.id") && adapterCode.includes("Alias: t.alias"), 'superadmin_list_admin_tokens maps TokenID and Alias');
+  assert(
+    (adapterCode.includes("TokenID: realToken") || adapterCode.includes("TokenID: t.token || t.TokenID || t.id")) &&
+    adapterCode.includes("token: realToken"),
+    'superadmin_list_admin_tokens maps real TokenID and token'
+  );
 }
+assert(
+  adminCode.includes("escapeHtml(a.token || a.TokenID)"),
+  'admin.js renderAdminAccounts renders real token in .token-box and table column'
+);
 
 // -----------------------------------------------------------------------------
 // 4. ADMIN MEMBER PAGINATION CONTRACT (admin.js)
 // -----------------------------------------------------------------------------
 console.log('\n--- 4. Admin Member Pagination Contract ---');
+assert(
+  adapterCode.includes("pageSize = 1000") &&
+  adminCode.includes("export function refreshMembers(page = 1, pageSize = 1000"),
+  'backendAdapter.js and admin.js refreshMembers must default to pageSize = 1000 for full member roster'
+);
 assert(
   adminCode.includes("export function changeMemberPage(") &&
   adminCode.includes("window.changeMemberPage = changeMemberPage"),
