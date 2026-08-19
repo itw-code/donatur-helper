@@ -1172,11 +1172,14 @@ export function renderMemberActions(m) {
   const role = m.Role || m.role;
   const name = m.Name || m.name;
   const wa = m.WhatsApp || m.whatsapp;
-  if (role !== 'Admin' && role !== 'SuperAdmin') {
+  if (role === 'Admin') {
+    html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(name) + ' sebagai Member" onclick="assignMemberRoleUI(\'' + wa + '\', \'Member\')">Jadikan Member</button>';
+    html += '<button type="button" class="btn blue" aria-label="Buat Token Admin baru untuk ' + escapeHtml(name) + '" onclick="assignMemberRoleUI(\'' + wa + '\', \'Admin\')">+ Token Admin</button>';
+  } else if (role !== 'SuperAdmin') {
     html += '<button type="button" class="btn blue" aria-label="Jadikan ' + escapeHtml(name) + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + wa + '\', \'Admin\')">Jadikan Admin</button>';
-  }
-  if (role !== 'PIC' && role !== 'SuperAdmin') {
-    html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(name) + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + wa + '\', \'PIC\')">Jadikan PIC</button>';
+    if (role !== 'PIC') {
+      html += '<button type="button" class="btn secondary" aria-label="Jadikan ' + escapeHtml(name) + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + wa + '\', \'PIC\')">Jadikan PIC</button>';
+    }
   }
   html += '<button type="button" class="btn danger" aria-label="Hapus member ' + escapeHtml(name) + '" onclick="removeMemberUI(\'' + wa + '\')">Hapus member</button>';
   return html + '</div>';
@@ -1228,11 +1231,14 @@ export function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, dis
     table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + name + '</td><td>' + escapeHtml(rawWa) + '</td><td><span class="badge">' + escapeHtml(rawRole) + '</span></td><td>' + renderMemberStatusControl(m) + '</td><td class="muted">' + updateText + '</td>';
     if (isSuperAdmin) {
       table += '<td><div class="action-group">';
-      if (rawRole !== 'Admin' && rawRole !== 'SuperAdmin') {
+      if (rawRole === 'Admin') {
+        table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai Member" onclick="assignMemberRoleUI(\'' + rawWa + '\', \'Member\')">- Member</button>';
+        table += '<button type="button" class="btn blue" aria-label="Buat Token Admin baru untuk ' + name + '" onclick="assignMemberRoleUI(\'' + rawWa + '\', \'Admin\')">+ Admin</button>';
+      } else if (rawRole !== 'SuperAdmin') {
         table += '<button type="button" class="btn blue" aria-label="Jadikan ' + name + ' sebagai Admin" onclick="assignMemberRoleUI(\'' + rawWa + '\', \'Admin\')">+ Admin</button>';
-      }
-      if (rawRole !== 'PIC' && rawRole !== 'SuperAdmin') {
-        table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + rawWa + '\', \'PIC\')">+ PIC</button>';
+        if (rawRole !== 'PIC') {
+          table += '<button type="button" class="btn secondary" aria-label="Jadikan ' + name + ' sebagai PIC" onclick="assignMemberRoleUI(\'' + rawWa + '\', \'PIC\')">+ PIC</button>';
+        }
       }
       table += '<button type="button" class="btn danger" aria-label="Hapus member ' + name + '" onclick="removeMemberUI(\'' + rawWa + '\')">Hapus</button></div></td>';
     }
@@ -1283,7 +1289,10 @@ export function updateMemberStatusUI(source) {
 }
 
 export function assignMemberRoleUI(wa, role) {
-  showConfirmModal('Jadikan member ini sebagai ' + role + '?', () => {
+  const confirmMsg = role === 'Member'
+    ? 'Kembalikan member ini menjadi role Member biasa? Token Admin yang aktif akan dinonaktifkan.'
+    : 'Jadikan member ini sebagai ' + role + '?';
+  showConfirmModal(confirmMsg, () => {
     call('superAdminAssignMemberRole', currentToken(), wa, role)
       .then(res => {
         if (res && res.error) throw new Error(res.error);
@@ -1293,7 +1302,7 @@ export function assignMemberRoleUI(wa, role) {
           showToast(res ? res.message : 'Role berhasil diperbarui.');
         }
         refreshMembers();
-        if (role === 'Admin') refreshAdmins();
+        refreshAdmins();
       })
       .catch(e => showInfoModal(e.message || String(e), 'Error'));
   });
