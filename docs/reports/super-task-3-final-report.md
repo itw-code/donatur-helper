@@ -124,3 +124,35 @@
 - **Live Health Verification**: Live endpoint responds HTTP 200 OK and serves `BACKEND_MODE=supabase`, `ALLOW_GAS_FALLBACK=false`, `DEBUG=false`.
 
 
+---
+
+## 6. Production Deployment — Iteration 4 (Plaintext Token on Member Promotion & Admin Token Display)
+
+- **Release Timestamp**: 2026-08-20T02:56:00+07:00
+- **Target URL**: [https://don4tpro.pages.dev](https://don4tpro.pages.dev)
+- **Deployment URL**: [https://bb1751dc.don4tpro.pages.dev](https://bb1751dc.don4tpro.pages.dev)
+- **Git Commit**: `2ab1260` (`fix: populate plaintext token on member promotion to admin and display in admin list`)
+- **Target Environment**: Cloudflare Pages (`don4tpro`)
+- **Backend Mode**: `supabase` (Strict mode, GAS Fallback: `false`, Debug: `false`)
+
+### Steps Executed
+1. `rtk git add -A`
+2. `rtk git commit -m "fix: populate plaintext token on member promotion to admin and display in admin list"`
+3. `rtk git push origin main` (Exit code: 0)
+4. Built static bundle with explicit production environment variables:
+   - `SUPABASE_URL`: `https://hhgtospruzcjwlafvkhf.supabase.co`
+   - `SUPABASE_PUBLISHABLE_KEY`: `sb_publishable_0GArolb5ZtVOv9U0Mc2tBQ_kvAQupyb`
+   - `DH_BACKEND_MODE`: `supabase`
+   - `DH_ALLOW_GAS_FALLBACK`: `false`
+   - `DH_DEBUG`: `false`
+5. Verified `dist/js/config/env.local.js` configuration shows `supabase/false/false`.
+6. Deployed via `rtk npx wrangler pages deploy dist --project-name=don4tpro` -> Deployed to `https://bb1751dc.don4tpro.pages.dev`.
+7. Verified live production responses:
+   - `https://don4tpro.pages.dev` -> **HTTP 200 OK**
+   - `https://don4tpro.pages.dev/js/config/env.local.js` -> verified live configuration is `supabase/false/false`
+
+### Changes Included in Iteration 4
+- **Plaintext Token Population on Member Promotion**: In `promoteMemberToAdmin` (`js/views/admin.js`), populated `#newAdminToken` input value with `res.token` and changed display from `none` to `block` upon successful promotion so admins can immediately view and copy the generated token.
+- **Admin Token Display in SuperAdmin Account List**: In `renderAdminAccounts` (`js/views/admin.js`), enhanced the token display column to render full token code badge and copy button whenever `item.token` or `item.token_preview` is available, with fallback to masked token identifier.
+- **Session & Regression Contract Verification**: Verified 40/40 assertions in `session-contract.check.cjs` passing with 0 errors.
+- **Live Production Health**: Successfully deployed to Cloudflare Pages; live site verified HTTP 200 OK with strict Supabase backend mode.
