@@ -7,11 +7,20 @@ const MIGRATED_ACTIONS = new Set([
   'loginWithToken', 'getDashboardSummary', 'getPendingMembers', 'getPendingLateRequests',
   'listAllCampaigns', 'fetchAllMembers', 'getCampaignForPic', 'getSettingsForSuperAdmin',
   'checkDonorWhatsApp', 'listActiveCampaigns', 'getUserPicCampaigns', 'getPublicSettings',
-  'registerUser', 'generateSeamlessPicToken', 'joinCampaign', 'joinCampaignsBulk',
-  'withdrawCampaign', 'submitPaymentProof', 'submitCombinedPaymentProof', 'createCampaign',
-  'closeCampaignList', 'reopenCampaignList', 'finalizeCampaign', 'updateGiftProof',
-  'picVerifyPayment', 'picVerifyAllPayments', 'requestLateDonor', 'archiveCampaign',
-  'deleteCampaign', 'adminUpdateMemberStatus', 'approveLateDonor'
+  'registerUser', 'updateMemberProfile', 'generateSeamlessPicToken', 'deleteDraftPicToken',
+  'joinCampaign', 'joinCampaignsBulk', 'withdrawCampaign', 'submitPaymentProof',
+  'submitCombinedPaymentProof', 'createCampaign', 'closeCampaignList', 'reopenCampaignList',
+  'finalizeCampaign', 'updateGiftProof', 'picVerifyPayment', 'picVerifyAllPayments',
+  'picMarkRefunded', 'markDonorRefunded', 'requestLateDonor', 'archiveCampaign',
+  'deleteCampaign', 'adminUpdateMemberStatus', 'adminBulkUpdateMemberStatus', 'approveLateDonor',
+  'generatePicToken', 'adminGeneratePicToken', 'transferCampaignOwnershipAdmin', 'adminTransferCampaignOwnership',
+  'adminRecalculateCampaign', 'adminUpdateGiftAmount', 'adminDeleteDonor', 'adminTogglePaidStatus',
+  'updateDonorPaidAmountAdmin', 'adminUpdateDonorPaidAmount', 'setCampaignStatusAdmin', 'adminSetCampaignStatus',
+  'generateAdminToken', 'superadminGenerateAdminToken', 'revokeAdminToken', 'superadminRevokeAdminToken',
+  'reactivateAdminToken', 'superadminReactivateAdminToken', 'deleteAdminToken', 'superadminDeleteAdminToken',
+  'superAdminAssignMemberRole', 'superadminAssignMemberRole', 'addMember', 'superadminAddMember',
+  'removeMember', 'superadminRemoveMember', 'deleteCampaignAdmin', 'superadminDeleteCampaign',
+  'updateSettings', 'superadminUpdateSettings', 'sweepArchivedData'
 ]);
 
 function _getEnv() {
@@ -773,13 +782,24 @@ async function _dispatchSupabaseRpc(action, args = []) {
     }
 
     case 'joinCampaignsBulk': {
-      let payload;
-      if (args[0] && typeof args[0] === 'object' && args[0].joins) {
-        payload = args[0].joins;
+      let campaignIds, name, wa, customAmount, alias;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        campaignIds = args[0].campaignIds || args[0].campaign_ids || args[0].p_campaign_ids;
+        name = args[0].name || args[0].donorName || args[0].p_name;
+        wa = args[0].whatsapp || args[0].donorWhatsApp || args[0].p_whatsapp;
+        customAmount = args[0].customAmount || args[0].custom_amount || args[0].p_custom_amount;
+        alias = args[0].alias || args[0].donorAlias || args[0].p_alias;
       } else {
-        payload = args[0];
+        [campaignIds, name, wa, customAmount, alias] = args;
       }
-      const { data, error } = await client.rpc('join_campaigns_bulk', { p_joins: payload });
+      const ids = Array.isArray(campaignIds) ? campaignIds : String(campaignIds || '').split(',').map(s => s.trim()).filter(Boolean);
+      const { data, error } = await client.rpc('join_campaigns_bulk', {
+        p_campaign_ids: ids,
+        p_name: name,
+        p_whatsapp: wa,
+        p_custom_amount: customAmount ? Number(customAmount) : null,
+        p_alias: alias || null
+      });
       if (error) throw new Error(error.message || 'Gagal bergabung secara massal.');
       if (data && data.error) throw new Error(data.message || data.error);
 
@@ -837,18 +857,16 @@ async function _dispatchSupabaseRpc(action, args = []) {
         [campaignIds, wa, storagePath, publicUrl] = args;
       }
       const ids = Array.isArray(campaignIds) ? campaignIds : String(campaignIds || '').split(',').map(s => s.trim()).filter(Boolean);
-      const results = [];
-      for (const cid of ids) {
-        const { data, error } = await client.rpc('submit_payment_proof', {
-          p_campaign_id: cid,
-          p_whatsapp: wa,
-          p_storage_path: storagePath || null,
-          p_public_url: publicUrl || null
-        });
-        if (error) throw new Error(error.message || 'Gagal mengirim bukti transfer gabungan.');
-        results.push(data);
-      }
-      return { success: true, count: results.length, results };
+      const { data, error } = await client.rpc('submit_combined_payment_proof', {
+        p_campaign_ids: ids,
+        p_whatsapp: wa,
+        p_storage_path: storagePath || null,
+        p_public_url: publicUrl || null
+      });
+      if (error) throw new Error(error.message || 'Gagal mengirim bukti transfer gabungan.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
     }
 
     case 'createCampaign': {
@@ -1089,6 +1107,432 @@ async function _dispatchSupabaseRpc(action, args = []) {
       if (data && data.error) throw new Error(data.message || data.error);
 
       return data;
+    }
+
+    case 'updateMemberProfile': {
+      let wa, name, email;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        wa = args[0].whatsapp || args[0].wa || args[0].p_whatsapp;
+        name = args[0].name || args[0].p_name;
+        email = args[0].email || args[0].p_email;
+      } else {
+        [wa, name, email] = args;
+      }
+      const { data, error } = await client.rpc('update_member_profile', {
+        p_whatsapp: wa,
+        p_name: name,
+        p_email: email || null
+      });
+      if (error) throw new Error(error.message || 'Gagal memperbarui profil member.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'deleteDraftPicToken': {
+      let picToken = '';
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        picToken = args[0].picToken || args[0].token || args[0].p_pic_token || '';
+      } else {
+        picToken = String(args[0] || '').trim();
+      }
+      const { data, error } = await client.rpc('delete_draft_pic_token', {
+        p_pic_token: picToken
+      });
+      if (error) throw new Error(error.message || 'Gagal menghapus token draft PIC.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'picMarkRefunded':
+    case 'markDonorRefunded': {
+      let token, campaignId, wa;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].picToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        wa = args[0].whatsapp || args[0].donorWhatsApp || args[0].p_whatsapp;
+      } else {
+        [token, campaignId, wa] = args;
+      }
+      const { data, error } = await client.rpc('mark_donor_refunded', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_whatsapp: wa
+      });
+      if (error) throw new Error(error.message || 'Gagal menandai pengembalian dana donatur.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'adminBulkUpdateMemberStatus': {
+      let token, updates;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0]) && args[0].updates) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        updates = args[0].updates || args[0].p_updates;
+      } else {
+        [token, updates] = args;
+      }
+      const { data, error } = await client.rpc('admin_bulk_update_member_status', {
+        p_token: token,
+        p_updates: Array.isArray(updates) ? updates : []
+      });
+      if (error) throw new Error(error.message || 'Gagal memperbarui status member massal.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'generatePicToken':
+    case 'adminGeneratePicToken': {
+      let token, alias;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        alias = args[0].alias || args[0].p_alias;
+      } else {
+        [token, alias] = args;
+      }
+      const { data, error } = await client.rpc('admin_generate_pic_token', {
+        p_token: token,
+        p_alias: alias || null
+      });
+      if (error) throw new Error(error.message || 'Gagal membuat token PIC baru.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'transferCampaignOwnershipAdmin':
+    case 'adminTransferCampaignOwnership': {
+      let token, campaignId, targetWhatsapp;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        targetWhatsapp = args[0].targetWhatsapp || args[0].target_whatsapp || args[0].p_target_whatsapp;
+      } else {
+        [token, campaignId, targetWhatsapp] = args;
+      }
+      const { data, error } = await client.rpc('admin_transfer_campaign_ownership', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_target_whatsapp: targetWhatsapp
+      });
+      if (error) throw new Error(error.message || 'Gagal mentransfer kepemilikan campaign.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'adminRecalculateCampaign': {
+      let token, campaignId;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+      } else {
+        [token, campaignId] = args;
+      }
+      const { data, error } = await client.rpc('admin_recalculate_campaign', {
+        p_token: token,
+        p_campaign_id: campaignId
+      });
+      if (error) throw new Error(error.message || 'Gagal menghitung ulang tagihan campaign.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'adminUpdateGiftAmount': {
+      let token, campaignId, newAmount;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        newAmount = args[0].newAmount !== undefined ? args[0].newAmount : (args[0].amount || args[0].p_new_amount);
+      } else {
+        [token, campaignId, newAmount] = args;
+      }
+      const { data, error } = await client.rpc('admin_update_gift_amount', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_new_amount: Number(newAmount) || 0
+      });
+      if (error) throw new Error(error.message || 'Gagal memperbarui nominal hadiah campaign.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'adminDeleteDonor': {
+      let token, campaignId, donorWhatsApp;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        donorWhatsApp = args[0].donorWhatsApp || args[0].whatsapp || args[0].p_donor_whatsapp;
+      } else {
+        [token, campaignId, donorWhatsApp] = args;
+      }
+      const { data, error } = await client.rpc('admin_delete_donor', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_donor_whatsapp: donorWhatsApp
+      });
+      if (error) throw new Error(error.message || 'Gagal menghapus donatur dari campaign.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'adminTogglePaidStatus': {
+      let token, campaignId, donorWhatsApp, isPaid;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        donorWhatsApp = args[0].donorWhatsApp || args[0].whatsapp || args[0].p_donor_whatsapp;
+        isPaid = args[0].isPaid !== undefined ? args[0].isPaid : args[0].p_is_paid;
+      } else {
+        [token, campaignId, donorWhatsApp, isPaid] = args;
+      }
+      const { data, error } = await client.rpc('admin_toggle_paid_status', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_donor_whatsapp: donorWhatsApp,
+        p_is_paid: Boolean(isPaid)
+      });
+      if (error) throw new Error(error.message || 'Gagal mengubah status pembayaran donatur.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'updateDonorPaidAmountAdmin':
+    case 'adminUpdateDonorPaidAmount': {
+      let token, campaignId, wa, amount;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        wa = args[0].whatsapp || args[0].donorWhatsApp || args[0].p_whatsapp;
+        amount = args[0].amount !== undefined ? args[0].amount : (args[0].paidAmount || args[0].p_amount);
+      } else {
+        [token, campaignId, wa, amount] = args;
+      }
+      const { data, error } = await client.rpc('admin_update_donor_paid_amount', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_whatsapp: wa,
+        p_amount: Number(amount) || 0
+      });
+      if (error) throw new Error(error.message || 'Gagal memperbarui nominal bayar donatur.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'setCampaignStatusAdmin':
+    case 'adminSetCampaignStatus': {
+      let token, campaignId, newStatus;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].adminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        newStatus = args[0].newStatus || args[0].status || args[0].p_new_status;
+      } else {
+        [token, campaignId, newStatus] = args;
+      }
+      const { data, error } = await client.rpc('admin_set_campaign_status', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_new_status: newStatus
+      });
+      if (error) throw new Error(error.message || 'Gagal memperbarui status campaign.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'generateAdminToken':
+    case 'superadminGenerateAdminToken': {
+      let token, alias;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        alias = args[0].alias || args[0].p_alias;
+      } else {
+        [token, alias] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_generate_admin_token', {
+        p_token: token,
+        p_alias: alias
+      });
+      if (error) throw new Error(error.message || 'Gagal membuat token Admin baru.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'revokeAdminToken':
+    case 'superadminRevokeAdminToken': {
+      let token, tokenId;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        tokenId = args[0].tokenId || args[0].token_id || args[0].p_token_id;
+      } else {
+        [token, tokenId] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_revoke_admin_token', {
+        p_token: token,
+        p_token_id: tokenId
+      });
+      if (error) throw new Error(error.message || 'Gagal menonaktifkan token.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'reactivateAdminToken':
+    case 'superadminReactivateAdminToken': {
+      let token, tokenId;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        tokenId = args[0].tokenId || args[0].token_id || args[0].p_token_id;
+      } else {
+        [token, tokenId] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_reactivate_admin_token', {
+        p_token: token,
+        p_token_id: tokenId
+      });
+      if (error) throw new Error(error.message || 'Gagal mengaktifkan kembali token.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'deleteAdminToken':
+    case 'superadminDeleteAdminToken': {
+      let token, tokenId;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        tokenId = args[0].tokenId || args[0].token_id || args[0].p_token_id;
+      } else {
+        [token, tokenId] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_delete_admin_token', {
+        p_token: token,
+        p_token_id: tokenId
+      });
+      if (error) throw new Error(error.message || 'Gagal menghapus token permanen.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'superAdminAssignMemberRole':
+    case 'superadminAssignMemberRole': {
+      let token, wa, newRole;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        wa = args[0].whatsapp || args[0].wa || args[0].p_whatsapp;
+        newRole = args[0].newRole || args[0].role || args[0].p_new_role;
+      } else {
+        [token, wa, newRole] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_assign_member_role', {
+        p_token: token,
+        p_whatsapp: wa,
+        p_new_role: newRole
+      });
+      if (error) throw new Error(error.message || 'Gagal memperbarui role member.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'addMember':
+    case 'superadminAddMember': {
+      let token, name, wa, status, email;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        name = args[0].name || args[0].p_name;
+        wa = args[0].whatsapp || args[0].wa || args[0].p_whatsapp;
+        status = args[0].status || args[0].p_status;
+        email = args[0].email || args[0].p_email;
+      } else {
+        [token, name, wa, status, email] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_add_member', {
+        p_token: token,
+        p_name: name,
+        p_whatsapp: wa,
+        p_status: status || 'ACTIVE',
+        p_email: email || null
+      });
+      if (error) throw new Error(error.message || 'Gagal menambahkan member.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'removeMember':
+    case 'superadminRemoveMember': {
+      let token, wa;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        wa = args[0].whatsapp || args[0].wa || args[0].p_whatsapp;
+      } else {
+        [token, wa] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_remove_member', {
+        p_token: token,
+        p_whatsapp: wa
+      });
+      if (error) throw new Error(error.message || 'Gagal menghapus member.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'deleteCampaignAdmin':
+    case 'superadminDeleteCampaign': {
+      let token, campaignId;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+      } else {
+        [token, campaignId] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_delete_campaign', {
+        p_token: token,
+        p_campaign_id: campaignId
+      });
+      if (error) throw new Error(error.message || 'Gagal menghapus campaign secara permanen.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'updateSettings':
+    case 'superadminUpdateSettings': {
+      let token, settings;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0]) && args[0].settings) {
+        token = args[0].token || args[0].superAdminToken || args[0].p_token;
+        settings = args[0].settings || args[0].p_settings;
+      } else {
+        [token, settings] = args;
+      }
+      const { data, error } = await client.rpc('superadmin_update_settings', {
+        p_token: token,
+        p_settings: typeof settings === 'object' && settings !== null ? settings : {}
+      });
+      if (error) throw new Error(error.message || 'Gagal memperbarui pengaturan sistem.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
+    }
+
+    case 'sweepArchivedData': {
+      return {
+        success: false,
+        error: 'migration_deferred',
+        message: 'Fitur pembersihan arsip data ditangguhkan dalam migrasi ini.'
+      };
     }
 
     default:
