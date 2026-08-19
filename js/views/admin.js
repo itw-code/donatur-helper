@@ -1287,7 +1287,11 @@ export function assignMemberRoleUI(wa, role) {
     call('superAdminAssignMemberRole', currentToken(), wa, role)
       .then(res => {
         if (res && res.error) throw new Error(res.error);
-        showToast(res ? res.message : 'Role berhasil diperbarui.');
+        if (res && res.generated_admin_token) {
+          showInfoModal('Member ' + escapeHtml(wa) + ' berhasil diubah menjadi Admin!\n\nToken Login Admin: ' + res.generated_admin_token + '\n\nToken telah disimpan di database dan aktif di Daftar Admin.', 'Sukses');
+        } else {
+          showToast(res ? res.message : 'Role berhasil diperbarui.');
+        }
         refreshMembers();
         if (role === 'Admin') refreshAdmins();
       })

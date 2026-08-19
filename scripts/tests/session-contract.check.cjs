@@ -279,6 +279,15 @@ assert(
   'admin.js renderAdminAccounts must protect Current Session against self-deactivation/deletion'
 );
 
+// 3.10 SuperAdmin Assign Member Role & Generated Admin Token Modal Contract
+assert(
+  adminCode.includes("res.generated_admin_token") &&
+  adminCode.includes("Token Login Admin: ' + res.generated_admin_token") &&
+  adminCode.includes("showInfoModal('Member ' + escapeHtml(wa) + ' berhasil diubah menjadi Admin!"),
+  'admin.js assignMemberRoleUI must display informative modal containing generated admin token when promoted to Admin'
+);
+
+
 // -----------------------------------------------------------------------------
 // 4. ADMIN MEMBER PAGINATION CONTRACT (admin.js)
 // -----------------------------------------------------------------------------
