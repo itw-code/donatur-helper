@@ -382,8 +382,12 @@ export function openBulkJoinModal() {
       </div>
       
       <div id="bj-custom-amount-wrap" class="hidden" style="margin-bottom:16px;">
+        <div style="background: rgba(2, 132, 199, 0.08); color: #0369a1; border: 1px solid rgba(2, 132, 199, 0.2); padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>ℹ️</span>
+          <span>Nominal khusus minimal <strong>Rp 50.000</strong> per campaign.</span>
+        </div>
         <label for="bj-custom-amount" style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">Nominal Per Campaign (Rp):</label>
-        <input type="number" id="bj-custom-amount" placeholder="Contoh: 50000" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
+        <input type="text" id="bj-custom-amount" inputmode="numeric" placeholder="Contoh: 50.000 (Minimal 50.000)" onkeyup="formatInputRibuan(event)" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
       </div>
 
       <div style="margin-bottom:20px;">
@@ -446,6 +450,11 @@ export function submitBulkJoin(campaignIdsStr) {
     const parsed = parseRibuan(rawAmt) || Number(rawAmt);
     if (!parsed || parsed <= 0) {
       showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
+      resetBtn();
+      return;
+    }
+    if (parsed < 50000) {
+      showInfoModal('Nominal khusus minimal adalah Rp 50.000 per campaign. Jika ingin patungan standar, gunakan opsi Patungan Rata.', 'Peringatan');
       resetBtn();
       return;
     }
@@ -595,8 +604,12 @@ export function renderCampaignCard(c, user, isPending) {
       html += '<div class="card" style="background:#f9f9f9;border:1px solid #eee;margin-top:8px;">';
       html += '<label style="margin-top:0; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto; min-height:unset;"> Saya ingin donasi dengan nominal khusus</label>';
       html += '<div id="wrap-custom-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
+      html += '<div style="background: rgba(2, 132, 199, 0.08); color: #0369a1; border: 1px solid rgba(2, 132, 199, 0.2); padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">';
+      html += '<span>ℹ️</span>';
+      html += '<span><strong>Ketentuan:</strong> Nominal khusus minimal <strong>Rp 50.000</strong>. Jika ingin patungan nominal standar, silakan tetap gunakan opsi patungan rata.</span>';
+      html += '</div>';
       html += '<label>Nominal Khusus (IDR)</label>';
-      html += '<input id="input-custom-' + c.campaignId + '" type="text" inputmode="numeric" placeholder="Contoh: 100.000" onkeyup="formatInputRibuan(event)">';
+      html += '<input id="input-custom-' + c.campaignId + '" type="text" inputmode="numeric" placeholder="Contoh: 50.000 (Minimal 50.000)" onkeyup="formatInputRibuan(event)">';
       html += '</div>';
 
       html += '<label style="margin-top:12px; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-alias-' + c.campaignId + '" onchange="document.getElementById(\'wrap-alias-\' + \'' + c.campaignId + '\').classList.toggle(\'hidden\')" style="width:auto; min-height:unset;"> Sembunyikan Nama Asli (Gunakan Alias)</label>';
@@ -660,7 +673,11 @@ export function joinCampaign(campaignId) {
     const inputEl = document.getElementById('input-custom-' + campaignId);
     const parsed = parseRibuan(inputEl ? inputEl.value : '');
     if (!parsed || parsed <= 0) {
-      showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
+      showInfoModal('Silakan masukkan nominal khusus yang ingin didonasikan.', 'Peringatan');
+      return;
+    }
+    if (parsed < 50000) {
+      showInfoModal('Nominal khusus minimal adalah Rp 50.000. Silakan masukkan minimal Rp 50.000 atau hapus centang nominal khusus untuk ikut patungan rata.', 'Peringatan');
       return;
     }
     customAmount = parsed;

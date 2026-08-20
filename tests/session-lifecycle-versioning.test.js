@@ -148,3 +148,31 @@ test('Admin UI Rendering: renderAdminCampaignViews correctly displays paidCount 
   assert.ok(html.includes('54/66 sudah bayar'), 'Card view must show 54/66 sudah bayar');
   assert.ok(html.includes('54/66'), 'Table view must show 54/66');
 });
+
+test('Donor Custom Amount Gate: joinCampaign validates minimum Rp 50.000 for custom amounts', () => {
+  const harness = createBrowserHarness();
+  const { joinCampaign } = harness.context;
+
+  harness.context.localStorage.setItem('donor_user', JSON.stringify({
+    name: 'Budi Test',
+    whatsapp: '08123456789',
+    status: 'active'
+  }));
+
+  // Create campaign custom amount DOM elements
+  const checkEl = harness.context.document.createElement('input');
+  checkEl.id = 'check-custom-C-TEST1';
+  checkEl.checked = true;
+  harness.context.document.body.appendChild(checkEl);
+
+  const inputEl = harness.context.document.createElement('input');
+  inputEl.id = 'input-custom-C-TEST1';
+  inputEl.value = '25.000'; // Under 50k threshold
+  harness.context.document.body.appendChild(inputEl);
+
+  joinCampaign('C-TEST1');
+
+  const msgEl = harness.context.document.getElementById('custom-info-message');
+  assert.ok(msgEl, 'Info message element must exist');
+  assert.ok(msgEl.textContent.includes('50.000'), 'Message must mention minimum Rp 50.000');
+});

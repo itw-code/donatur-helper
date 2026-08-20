@@ -564,6 +564,12 @@ export function submitLateDonor() {
     return;
   }
 
+  if (isCustom && (!amount || amount < 50000)) {
+    if (errEl) errEl.textContent = 'Nominal khusus minimal Rp 50.000.';
+    resetBtn();
+    return;
+  }
+
   const realToken = safeGet('deep_dive_return_token') || null;
   callQueued('requestLateDonor', currentToken(), name, wa, isCustom, amount, reason, realToken, alias).then(() => {
     resetBtn();
