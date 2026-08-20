@@ -568,7 +568,10 @@ export function renderCampaignCard(c, user, isPending) {
   if (c.reason) html += '<p class="muted">' + escapeHtml(c.reason) + '</p>';
 
   const giftText = c.giftAmount > 0 ? formatIDR(c.giftAmount) : 'Ditentukan nanti';
-  html += '<p class="muted">Total hadiah: ' + giftText + ' &middot; ' + c.donorCount + ' donatur' + (c.deadline ? ' &middot; deadline ' + c.deadline : '') + '</p>';
+  const donorCount = (c.donorCount !== undefined && c.donorCount !== null && !isNaN(c.donorCount))
+    ? Number(c.donorCount)
+    : (c.donor_count !== undefined && c.donor_count !== null && !isNaN(c.donor_count) ? Number(c.donor_count) : 0);
+  html += '<p class="muted">Total hadiah: ' + giftText + ' &middot; ' + donorCount + ' donatur' + (c.deadline ? ' &middot; deadline ' + c.deadline : '') + '</p>';
 
   if (c.status === 'Finalized' && (c.GiftLink || c.GiftImage)) {
     html += '<div style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap;">';

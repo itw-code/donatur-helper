@@ -745,7 +745,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
       if (error) throw new Error(error.message || 'Gagal memuat dashboard donatur.');
       if (data && data.error) throw new Error(data.message || data.error);
 
-      const joinedCampaigns = (data.joined_campaigns || []).map(c => {
+      const rawJoined = (data.joined_campaigns || []).map(c => {
         const camp = c.campaign || {};
         const cId = camp.campaign_id || c.campaign_id;
         const tName = camp.target_name || c.target_name;
@@ -759,11 +759,17 @@ async function _dispatchSupabaseRpc(action, args = []) {
         const aHolder = camp.account_holder || c.account_holder || '';
         const gLink = camp.gift_link || c.gift_link || '';
         const gImg = camp.gift_image || c.gift_image || '';
+        const dCount = Number(camp.donor_count !== undefined ? camp.donor_count : (c.donor_count !== undefined ? c.donor_count : c.donorCount)) || 0;
 
+        const dStatus = String(c.donor_status || 'PLEDGED').toUpperCase();
+        const isWithdrawn = dStatus === 'WITHDRAWN' || dStatus === 'CANCELLED';
         const isFinalized = stat === 'Finalized';
-        const actGrp = (isFinalized && !c.paid)
+        const isPaid = Boolean(c.paid);
+        const isJoined = !isWithdrawn || isPaid;
+
+        const actGrp = (isFinalized && !isPaid && isJoined)
           ? 'NEED_PAYMENT'
-          : (c.action_group === 'NEED_PAYMENT' && !isFinalized ? 'WAITING_FINALIZATION' : (c.action_group || ''));
+          : (c.action_group === 'NEED_PAYMENT' && !isFinalized ? 'WAITING_FINALIZATION' : (isWithdrawn ? 'WITHDRAWN' : (c.action_group || '')));
 
         return {
           ...camp,
@@ -772,15 +778,16 @@ async function _dispatchSupabaseRpc(action, args = []) {
           targetName: tName,
           reason: reas,
           giftAmount: gAmt,
+          donorCount: dCount,
           status: stat,
           startDate: sDate,
           deadline: dLine,
-          donorStatus: c.donor_status || 'joined',
+          donorStatus: c.donor_status || (isWithdrawn ? 'WITHDRAWN' : 'PLEDGED'),
           isCustom: Boolean(c.is_custom),
           customAmount: Number(c.custom_amount) || null,
           amountDue: Number(c.amount_due) || 0,
           amountPaid: Number(c.amount_paid) || 0,
-          paid: Boolean(c.paid),
+          paid: isPaid,
           verified: Boolean(c.verified),
           refunded: Boolean(c.refunded),
           proofLink: c.proof_link || '',
@@ -792,9 +799,24 @@ async function _dispatchSupabaseRpc(action, args = []) {
           accountHolder: aHolder,
           giftLink: gLink,
           giftImage: gImg,
-          joined: true,
+          joined: isJoined,
           action_group: actGrp
         };
+      });
+
+      const joinedCampaigns = [];
+      const withdrawnOpenCampaigns = [];
+
+      rawJoined.forEach(c => {
+        if (!c.joined && c.status === 'Open') {
+          withdrawnOpenCampaigns.push({
+            ...c,
+            joined: false,
+            action_group: ''
+          });
+        } else {
+          joinedCampaigns.push(c);
+        }
       });
 
       const openCampaigns = (data.open_campaigns || []).map(c => ({
@@ -806,14 +828,23 @@ async function _dispatchSupabaseRpc(action, args = []) {
         status: _normalizeCampaignStatus(c.status),
         startDate: c.start_date ? String(c.start_date).split('T')[0] : '',
         deadline: c.deadline ? String(c.deadline).split('T')[0] : '',
-        donorCount: c.donor_count || 0,
+        donorCount: Number(c.donor_count !== undefined ? c.donor_count : (c.donorCount !== undefined ? c.donorCount : 0)),
         totalCollected: Number(c.total_collected) || 0,
         joined: false
       }));
 
-      const allList = [...joinedCampaigns, ...openCampaigns];
+      const openMap = new Map();
+      openCampaigns.forEach(c => openMap.set(c.campaignId, c));
+      withdrawnOpenCampaigns.forEach(c => {
+        if (!openMap.has(c.campaignId)) {
+          openMap.set(c.campaignId, c);
+        }
+      });
+      const effectiveOpenCampaigns = Array.from(openMap.values());
+
+      const allList = [...joinedCampaigns, ...effectiveOpenCampaigns];
       allList.joined = joinedCampaigns;
-      allList.open = openCampaigns;
+      allList.open = effectiveOpenCampaigns;
       allList.member = data.member || data.identity || null;
       return allList;
     }

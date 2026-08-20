@@ -210,7 +210,13 @@ BEGIN
             c.round_to,
             c.bank_name,
             c.bank_account,
-            c.account_holder
+            c.account_holder,
+            (
+                SELECT COUNT(*)::INTEGER 
+                FROM donors d2 
+                WHERE d2.campaign_id = c.campaign_id 
+                  AND d2.donor_status = 'PLEDGED'
+            ) AS donor_count
         FROM donors d
         JOIN campaigns c ON d.campaign_id = c.campaign_id
         WHERE d.whatsapp = v_normalized_whatsapp
@@ -246,7 +252,8 @@ BEGIN
                     'round_to', dcd.round_to,
                     'bank_name', dcd.bank_name,
                     'bank_account', dcd.bank_account,
-                    'account_holder', dcd.account_holder
+                    'account_holder', dcd.account_holder,
+                    'donor_count', dcd.donor_count
                 )
             )
         ),
@@ -270,7 +277,7 @@ BEGIN
             donor_id ASC
     ) dcd;
 
-    -- 6. Build open_campaigns array (OPEN status, not already joined by donor)
+    -- 6. Build open_campaigns array (OPEN status, not actively pledged by donor)
     SELECT COALESCE(
         jsonb_agg(
             jsonb_build_object(
@@ -282,14 +289,21 @@ BEGIN
                 'start_date', to_char(oc.start_date AT TIME ZONE 'Asia/Jakarta', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
                 'deadline', to_char(oc.deadline AT TIME ZONE 'Asia/Jakarta', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
                 'gift_image', oc.gift_image,
-                'gift_link', oc.gift_link
+                'gift_link', oc.gift_link,
+                'donor_count', oc.donor_count
             )
         ),
         '[]'::jsonb
     )
     INTO v_open_campaigns
     FROM (
-        SELECT c.*
+        SELECT c.*,
+               (
+                   SELECT COUNT(*)::INTEGER 
+                   FROM donors d2 
+                   WHERE d2.campaign_id = c.campaign_id 
+                     AND d2.donor_status = 'PLEDGED'
+               ) AS donor_count
         FROM campaigns c
         WHERE c.status = 'OPEN'
           AND NOT EXISTS (
@@ -297,6 +311,7 @@ BEGIN
               FROM donors d 
               WHERE d.campaign_id = c.campaign_id 
                 AND d.whatsapp = v_normalized_whatsapp
+                AND d.donor_status = 'PLEDGED'
           )
         ORDER BY c.deadline ASC NULLS LAST, c.created_at DESC, c.id ASC
     ) oc;
