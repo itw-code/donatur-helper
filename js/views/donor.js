@@ -198,8 +198,14 @@ export function refreshCampaignList() {
         html += '<button class="btn secondary" style="margin-top: 16px;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
       }
     } else {
-      const pending = list.filter(c => (c.action_group === 'NEED_PAYMENT' || (c.status === 'Finalized' && c.joined && !c.paid)));
-      const others = list.filter(c => !(c.action_group === 'NEED_PAYMENT' || (c.status === 'Finalized' && c.joined && !c.paid)));
+      const isPendingPayment = c => (
+        c.status === 'Finalized' &&
+        c.joined &&
+        !c.paid &&
+        (Number(c.amountDue) > 0 || c.action_group === 'NEED_PAYMENT')
+      );
+      const pending = list.filter(isPendingPayment);
+      const others = list.filter(c => !isPendingPayment(c));
 
       if (pending.length > 0) {
         const attentionTarget = pending.length === 1
@@ -219,7 +225,16 @@ export function refreshCampaignList() {
         html += '<h3 style="margin-top:0;color:var(--red);">⚠️ Menunggu Pembayaran</h3>';
         const grouped = {};
         pending.forEach(c => {
-          const key = String(c.bankName || '').trim() + '_' + String(c.bankAccount || '').trim() + '_' + String(c.accountHolder || '').trim();
+          const bankName = String(c.bankName || '').trim().toLowerCase();
+          const bankAccount = String(c.bankAccount || '').replace(/\s+/g, '');
+          const accountHolder = String(c.accountHolder || '').trim().toLowerCase();
+
+          // Only merge if the campaign is finalized and has valid destination bank details
+          const isMergeable = Boolean(bankName && bankAccount);
+          const key = isMergeable
+            ? `${bankName}_${bankAccount}_${accountHolder}`
+            : `single_${c.campaignId}`;
+
           if (!grouped[key]) {
             grouped[key] = [];
           }
@@ -496,6 +511,7 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   });
   
   const cIdsStr = campaignIds.join(',');
+  const safeDomId = String(bankAccount).replace(/[^a-zA-Z0-9_-]/g, '') || 'combined';
   
   let html = '<div class="card donor-campaign-card donor-primary-card" style="border-left: 4px solid var(--blue); background: #f0f7ff; margin-bottom:16px;">';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
@@ -517,15 +533,20 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   html += '</div>';
   
   html += '<p class="muted" style="margin:8px 0; font-size:12px;">Ke: ' + escapeHtml(bankName) + ' ' + escapeHtml(bankAccount);
-  html += ' <button class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
-  html += ' a.n. ' + escapeHtml(accountHolder) + '</p>';
+  if (bankAccount) {
+    html += ' <button class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
+  }
+  if (accountHolder) {
+    html += ' a.n. ' + escapeHtml(accountHolder);
+  }
+  html += '</p>';
   
   html += '<div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:12px;">';
   html += '<label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">Upload satu bukti transfer untuk semua campaign di atas</label>';
   html += '<p class="muted" style="font-size:11px; margin:2px 0 6px 0;">Unggah bukti transfer (format JPG, PNG, atau PDF maks 2MB). Bukti hanya digunakan oleh PIC untuk verifikasi.</p>';
-  html += '<input type="file" id="combined-proof-' + bankAccount + '" accept="image/*,application/pdf" style="font-size:12px; padding:4px; width:100%; box-sizing:border-box;">';
-  html += '<button id="btn-submit-combined-' + bankAccount + '" class="btn blue" style="margin-top:8px; width:100%; font-size:12px; padding:8px;" onclick="submitCombinedProof(\'' + bankAccount + '\', \'' + cIdsStr + '\')">Konfirmasi Transfer</button>';
-  html += '<div id="combined-error-' + bankAccount + '" class="error" style="font-size:11px; margin-top:4px;"></div>';
+  html += '<input type="file" id="combined-proof-' + safeDomId + '" accept="image/*,application/pdf" style="font-size:12px; padding:4px; width:100%; box-sizing:border-box;">';
+  html += '<button id="btn-submit-combined-' + safeDomId + '" class="btn blue" style="margin-top:8px; width:100%; font-size:12px; padding:8px;" onclick="submitCombinedProof(\'' + escapeHtml(bankAccount) + '\', \'' + cIdsStr + '\')">Konfirmasi Transfer</button>';
+  html += '<div id="combined-error-' + safeDomId + '" class="error" style="font-size:11px; margin-top:4px;"></div>';
   html += '</div>';
   
   html += '</div>';
@@ -788,9 +809,10 @@ export async function submitCombinedProof(bankAccount, campaignIdsStr) {
     return;
   }
 
-  const fileInput = document.getElementById('combined-proof-' + bankAccount);
-  const errEl = document.getElementById('combined-error-' + bankAccount);
-  const submitBtn = document.getElementById('btn-submit-combined-' + bankAccount);
+  const safeDomId = String(bankAccount).replace(/[^a-zA-Z0-9_-]/g, '') || 'combined';
+  const fileInput = document.getElementById('combined-proof-' + safeDomId) || document.getElementById('combined-proof-' + bankAccount);
+  const errEl = document.getElementById('combined-error-' + safeDomId) || document.getElementById('combined-error-' + bankAccount);
+  const submitBtn = document.getElementById('btn-submit-combined-' + safeDomId) || document.getElementById('btn-submit-combined-' + bankAccount);
   if (errEl) errEl.textContent = '';
   const file = fileInput ? (fileInput.files && fileInput.files[0]) : null;
   if (!file) {

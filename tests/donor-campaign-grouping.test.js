@@ -170,3 +170,58 @@ test('Donor campaign list separates Bisa Diikuti, Sudah Diikuti, and Selesai dis
   assert.ok(joinableIdx !== -1 && historyIdx !== -1);
   assert.ok(joinableIdx < historyIdx, 'Bisa Diikuti should appear before History disclosure');
 });
+
+test('Donor pending payments only include Finalized campaigns and merge only when bank details match', async () => {
+  const harness = createBrowserHarness({
+    getUserPicCampaigns: [],
+    listActiveCampaigns: [
+      // 2 Open joined campaigns (MUST NOT be in Menunggu Pembayaran)
+      campaign('c-open-1', 'Open Pledged Campaign 1', { status: 'Open', joined: true, paid: false, amountDue: 0 }),
+      campaign('c-open-2', 'Open Pledged Campaign 2', { status: 'Open', joined: true, paid: false, amountDue: 25000 }),
+      // 2 Finalized campaigns sharing BCA 0101971057 a.n. Pindy (SHOULD be merged)
+      campaign('c-fin-bca1', 'Target Alpha', {
+        status: 'Finalized', joined: true, paid: false, amountDue: 35000,
+        bankName: 'BCA', bankAccount: '0101971057', accountHolder: 'Pindy Leliany'
+      }),
+      campaign('c-fin-bca2', 'Target Beta', {
+        status: 'Finalized', joined: true, paid: false, amountDue: 33333,
+        bankName: 'BCA', bankAccount: '0101971057', accountHolder: 'Pindy Leliany'
+      }),
+      // 1 Finalized campaign with Mandiri 987654321 a.n. Budi (SHOULD be standalone)
+      campaign('c-fin-mandiri', 'Target Gamma', {
+        status: 'Finalized', joined: true, paid: false, amountDue: 50000,
+        bankName: 'Mandiri', bankAccount: '987654321', accountHolder: 'Budi Santoso'
+      })
+    ]
+  });
+  harness.setUser({
+    name: 'Multi Campaign Donor',
+    whatsapp: '628123456789',
+    verified: true,
+    status: 'active'
+  });
+
+  harness.loadUserDashboard();
+  await settle();
+
+  const html = harness.elements.get('actual-campaign-list').innerHTML;
+
+  // Verify Menunggu Pembayaran heading exists
+  assert.match(html, /Menunggu Pembayaran/);
+
+  // Verify BCA campaigns are merged into 1 card with 2 campaigns
+  assert.match(html, /Pembayaran Gabungan \(2 Campaign\)/);
+  assert.match(html, /Target Alpha/);
+  assert.match(html, /Target Beta/);
+  assert.match(html, /Rp68\.333/); // 35000 + 33333 = 68333
+
+  // Verify Mandiri is separate standalone card
+  assert.match(html, /Target Gamma/);
+  assert.match(html, /Mandiri 987654321/);
+
+  // Verify Open campaigns are NOT in Menunggu Pembayaran and are under Campaign yang Diikuti
+  assert.match(html, /Campaign yang Diikuti/);
+  assert.match(html, /Open Pledged Campaign 1/);
+  assert.match(html, /Open Pledged Campaign 2/);
+  assert.match(html, /Menunggu finalisasi oleh PIC/);
+});

@@ -760,6 +760,11 @@ async function _dispatchSupabaseRpc(action, args = []) {
         const gLink = camp.gift_link || c.gift_link || '';
         const gImg = camp.gift_image || c.gift_image || '';
 
+        const isFinalized = stat === 'Finalized';
+        const actGrp = (isFinalized && !c.paid)
+          ? 'NEED_PAYMENT'
+          : (c.action_group === 'NEED_PAYMENT' && !isFinalized ? 'WAITING_FINALIZATION' : (c.action_group || ''));
+
         return {
           ...camp,
           ...c,
@@ -788,7 +793,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
           giftLink: gLink,
           giftImage: gImg,
           joined: true,
-          action_group: c.action_group || (stat === 'Finalized' && !c.paid ? 'NEED_PAYMENT' : '')
+          action_group: actGrp
         };
       });
 
