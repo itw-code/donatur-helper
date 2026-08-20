@@ -363,3 +363,34 @@ test('PIC queue priority: correctly classifies reminder, review, refund, and com
   // Verified donor -> complete
   assert.strictEqual(getPicDonorQueueState({ Paid: 'TRUE', Verified: 'TRUE' }, 'Finalized'), 'complete');
 });
+
+test('PIC getReminderInfo generates formatted WhatsApp reminder text on Supabase', async () => {
+  const harness = createPicHarness({
+    initialStorage: { auth_token: 'pic_token_999', auth_role: 'PIC' },
+    dashboardData: {
+      campaign: {
+        campaign_id: 'camp_123',
+        target_name: 'Pak Bos',
+        reason: 'Ulang Tahun',
+        gift_amount: 500000,
+        status: 'OPEN',
+        deadline: '2026-09-01'
+      },
+      donors: [
+        { name: 'Andi', whatsapp: '081111111', alias: 'Andi Cool', donor_status: 'PLEDGED' },
+        { name: 'Budi', whatsapp: '082222222', alias: '', donor_status: 'PLEDGED' }
+      ],
+      summary: { total_donors: 2, total_paid: 0 }
+    }
+  });
+
+  const { adapterFetchBackend } = harness.context;
+  const res = await adapterFetchBackend('getReminderInfo', ['pic_token_999', 'https://don4tpro.pages.dev']);
+
+  assert.ok(res, 'getReminderInfo must return a valid object');
+  assert.ok(res.bulkMessage, 'bulkMessage must be present');
+  assert.match(res.bulkMessage, /Pak Bos/);
+  assert.match(res.bulkMessage, /https:\/\/don4tpro\.pages\.dev\?c=camp_123/);
+  assert.match(res.bulkMessage, /Andi Cool/);
+  assert.strictEqual(res.totalDonors, 2);
+});

@@ -12,7 +12,7 @@ const MIGRATED_ACTIONS = new Set([
   'submitCombinedPaymentProof', 'createCampaign', 'closeCampaignList', 'reopenCampaignList',
   'finalizeCampaign', 'updateGiftProof', 'picVerifyPayment', 'picVerifyAllPayments',
   'picMarkRefunded', 'markDonorRefunded', 'requestLateDonor', 'archiveCampaign',
-  'deleteCampaign', 'adminUpdateMemberStatus', 'adminBulkUpdateMemberStatus', 'approveLateDonor',
+  'deleteCampaign', 'getReminderInfo', 'adminUpdateMemberStatus', 'adminBulkUpdateMemberStatus', 'approveLateDonor',
   'generatePicToken', 'adminGeneratePicToken', 'transferCampaignOwnershipAdmin', 'adminTransferCampaignOwnership',
   'adminRecalculateCampaign', 'adminUpdateGiftAmount', 'adminDeleteDonor', 'adminTogglePaidStatus',
   'updateDonorPaidAmountAdmin', 'adminUpdateDonorPaidAmount', 'setCampaignStatusAdmin', 'adminSetCampaignStatus',
@@ -1260,6 +1260,126 @@ async function _dispatchSupabaseRpc(action, args = []) {
       return data;
     }
 
+    case 'getReminderInfo': {
+      let token = '';
+      let baseUrl = '';
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = String(args[0].token || args[0].picToken || args[0].p_token || '').trim();
+        baseUrl = String(args[0].baseUrl || args[0].p_base_url || '').trim();
+      } else {
+        token = String(args[0] || '').trim();
+        baseUrl = String(args[1] || '').trim();
+      }
+
+      if (!baseUrl && typeof window !== 'undefined' && window.location) {
+        baseUrl = window.location.origin + window.location.pathname;
+      }
+
+      const detail = await _dispatchSupabaseRpc('getCampaignForPic', [token, 1, 1000]);
+      if (!detail || !detail.campaign) {
+        throw new Error('Campaign tidak ditemukan.');
+      }
+
+      const campaign = detail.campaign;
+      const donors = detail.donors || [];
+      const campaignId = campaign.CampaignID || campaign.campaign_id;
+      const shareUrl = baseUrl.includes('?')
+        ? `${baseUrl}&c=${campaignId}`
+        : `${baseUrl}?c=${campaignId}`;
+
+      let bulkMessage = '';
+      const stat = campaign.Status || campaign.status;
+
+      if (stat === 'Open' || stat === 'Closed') {
+        const donorNames = donors.map(d => d.Alias || d.alias || d.Name || d.name);
+        const deadlineText = campaign.Deadline || campaign.deadline || '-';
+        const lines = [
+          '🎁 *Yuk Patungan Donasi!*',
+          '',
+          `👤 Untuk: *${campaign.TargetName || campaign.target_name}*` + (campaign.Reason || campaign.reason ? `\n💬 Alasan: ${campaign.Reason || campaign.reason}` : ''),
+          `📅 Batas akhir pendaftaran: ${deadlineText}`,
+          '',
+          'Yuk, segera gabung dan klik "Count me in" melalui link dashboard ini:',
+          shareUrl,
+          '',
+          `Rekan-rekan yang sudah gabung (${donors.length} orang):`
+        ];
+        if (donorNames.length) {
+          donorNames.forEach(name => lines.push(`- ${name}`));
+        } else {
+          lines.push('(belum ada, yuk jadi yang pertama!)');
+        }
+        bulkMessage = lines.join('\n');
+      } else if (stat === 'Finalized') {
+        const unpaid = donors.filter(d => !d.paid && String(d.Paid).toUpperCase() !== 'TRUE');
+        if (unpaid.length > 0) {
+          const unpaidLines = unpaid.map(d => `* ${d.Alias || d.alias || d.Name || d.name}`);
+          const totalGift = Number(campaign.GiftAmount || campaign.gift_amount) || 0;
+          const totalDonors = donors.length;
+          const customDonors = donors.filter(d => Number(d.CustomAmount || d.custom_amount) > 0);
+          const customCount = customDonors.length;
+          const firstStandard = donors.find(d => !d.paid && String(d.Paid).toUpperCase() !== 'TRUE' && (!d.CustomAmount || Number(d.CustomAmount) <= 0));
+          const standardAmount = firstStandard ? Number(firstStandard.AmountDue || firstStandard.amount_due || 0) : 0;
+
+          const lines = [
+            `📢 *Reminder Patungan Donasi: ${campaign.TargetName || campaign.target_name}*`,
+            '',
+            `Terima kasih untuk teman-teman yang sudah berpartisipasi! Total partisipan: ${totalDonors} orang dengan total donasi Rp${totalGift.toLocaleString('id-ID')}` +
+            (customCount > 0 ? `, ${customCount} donasi nominal khusus dan pro-rata sebanyak Rp${standardAmount.toLocaleString('id-ID')}.` : '.'),
+            '',
+            `Mohon untuk segera transfer ke rekening berikut:`,
+            `🏦 *${campaign.BankName || campaign.bank_name}*: ${campaign.BankAccount || campaign.bank_account}`,
+            `👤 a.n. *${campaign.AccountHolder || campaign.account_holder}*`,
+            '',
+            `Jangan lupa unggah bukti transfer melalui link ini:`,
+            shareUrl,
+            '',
+            `Teman-teman yang belum transfer (${unpaid.length} orang):`,
+            ...unpaidLines,
+            '',
+            `Terima kasih banyak atas kerjasamanya! 🙏`
+          ];
+          bulkMessage = lines.join('\n');
+        } else {
+          const lines = [
+            `🎉 *Semua Pembayaran Lunas!*`,
+            '',
+            `Alhamdulillah, semua donatur untuk campaign *${campaign.TargetName || campaign.target_name}* sudah melunasi patungannya.`,
+            `Total donasi terkumpul: Rp${Number(campaign.GiftAmount || campaign.gift_amount || 0).toLocaleString('id-ID')}.`,
+            '',
+            `Terima kasih banyak atas kebaikan rekan-rekan semua! 🙏`
+          ];
+          bulkMessage = lines.join('\n');
+        }
+      } else {
+        throw new Error('Status campaign tidak didukung untuk membuat reminder.');
+      }
+
+      const unpaid = donors.filter(d => !d.paid && String(d.Paid).toUpperCase() !== 'TRUE');
+      const personal = unpaid.map(d => {
+        const dName = d.Name || d.name;
+        const dWa = d.WhatsApp || d.whatsapp;
+        const dAmt = Number(d.AmountDue || d.amount_due || 0);
+        return {
+          name: dName,
+          whatsapp: dWa,
+          amount: dAmt,
+          waLink: `https://wa.me/${String(dWa).replace(/\D/g, '')}?text=${encodeURIComponent(
+            `Hi ${dName}, reminder ya untuk donasi "${campaign.TargetName || campaign.target_name}". ` +
+            `Mohon transfer Rp${dAmt.toLocaleString('id-ID')} ke ${campaign.BankName || campaign.bank_name} ${campaign.BankAccount || campaign.bank_account} ` +
+            `a.n. ${campaign.AccountHolder || campaign.account_holder}, lalu konfirmasi di web. Makasih!`
+          )}`
+        };
+      });
+
+      return {
+        bulkMessage,
+        personal,
+        unpaidCount: unpaid.length,
+        totalDonors: donors.length
+      };
+    }
+
     case 'adminUpdateMemberStatus': {
       let token, wa, newStatus;
       if (args && typeof args === 'object' && !Array.isArray(args)) {
@@ -1303,63 +1423,6 @@ async function _dispatchSupabaseRpc(action, args = []) {
         p_is_approved: Boolean(isApprove)
       });
       if (error) throw new Error(error.message || 'Gagal memproses pengajuan donatur susulan.');
-      if (data && data.error) throw new Error(data.message || data.error);
-
-      return data;
-    }
-
-    case 'updateMemberProfile': {
-      let wa, name, email;
-      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
-        wa = args[0].whatsapp || args[0].wa || args[0].p_whatsapp;
-        name = args[0].name || args[0].p_name;
-        email = args[0].email || args[0].p_email;
-      } else {
-        [wa, name, email] = args;
-      }
-      const { data, error } = await client.rpc('update_member_profile', {
-        p_whatsapp: wa,
-        p_name: name,
-        p_email: email || null
-      });
-      if (error) throw new Error(error.message || 'Gagal memperbarui profil member.');
-      if (data && data.error) throw new Error(data.message || data.error);
-
-      return data;
-    }
-
-    case 'deleteDraftPicToken': {
-      let picToken = '';
-      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
-        picToken = args[0].picToken || args[0].token || args[0].p_pic_token || '';
-      } else {
-        picToken = String(args[0] || '').trim();
-      }
-      const { data, error } = await client.rpc('delete_draft_pic_token', {
-        p_pic_token: picToken
-      });
-      if (error) throw new Error(error.message || 'Gagal menghapus token draft PIC.');
-      if (data && data.error) throw new Error(data.message || data.error);
-
-      return data;
-    }
-
-    case 'picMarkRefunded':
-    case 'markDonorRefunded': {
-      let token, campaignId, wa;
-      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
-        token = args[0].token || args[0].picToken || args[0].p_token;
-        campaignId = args[0].campaignId || args[0].p_campaign_id;
-        wa = args[0].whatsapp || args[0].donorWhatsApp || args[0].p_whatsapp;
-      } else {
-        [token, campaignId, wa] = args;
-      }
-      const { data, error } = await client.rpc('mark_donor_refunded', {
-        p_token: token,
-        p_campaign_id: campaignId,
-        p_whatsapp: wa
-      });
-      if (error) throw new Error(error.message || 'Gagal menandai pengembalian dana donatur.');
       if (data && data.error) throw new Error(data.message || data.error);
 
       return data;
