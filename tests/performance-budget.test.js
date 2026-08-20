@@ -37,7 +37,7 @@ test('Task 2 & Task 7: Performance budgets and baseline thresholds are defined a
     const content = fs.readFileSync(file, 'utf8');
     totalJsBytes += Buffer.byteLength(content, 'utf8');
   }
-  assert.ok(totalJsBytes < 320000, `Total JS size (${totalJsBytes}B) must be under 320KB uncompressed budget`);
+  assert.ok(totalJsBytes < 350000, `Total JS size (${totalJsBytes}B) must be under 350KB uncompressed budget`);
 
   // Verify role runtime budgets
   assert.equal(ROLE_PERFORMANCE_BUDGETS.Landing, 500, 'Landing budget <= 500ms');

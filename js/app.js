@@ -1,7 +1,7 @@
 // Main Application Entry Point (ES Module)
 
 import { SCRIPT_URL, DEBUG } from './config.js';
-import { safeGet, safeSet, safeRemove } from './storage.js';
+import { safeGet, safeSet, safeRemove, getValidatedDonorSession, getValidatedTokenSession, clearAllSessions } from './storage.js';
 import {
   escapeHtml,
   sanitizeUrl,
@@ -21,7 +21,8 @@ import {
   statusBadge,
   paymentStatusIcon,
   actionArrowIcon,
-  renderOptimizedImage
+  renderOptimizedImage,
+  showUpdateBanner
 } from './utils.js';
 import {
   startViewTiming,
@@ -196,11 +197,15 @@ const globalBindings = {
   safeGet,
   safeSet,
   safeRemove,
+  getValidatedDonorSession,
+  getValidatedTokenSession,
+  clearAllSessions,
   escapeHtml,
   sanitizeUrl,
   formatUserErrorMessage,
   showToast,
   showInfoModal,
+  showUpdateBanner,
   closeConfirmModal,
   showConfirmModal,
   showView,
@@ -374,15 +379,61 @@ const globalBindings = {
   renderDebugPanelHtml,
   toggleDebugPanel,
   refreshDebugPanelUI,
-  mountDebugPanel
+  mountDebugPanel,
+  checkForAppUpdates,
+  initAppVersionCheck
 };
 
 if (typeof window !== 'undefined') {
   Object.assign(window, globalBindings);
 }
 
+/**
+ * Checks if a newer deployment exists by polling /version.json
+ */
+export async function checkForAppUpdates() {
+  if (typeof window === 'undefined' || !window.fetch) return;
+  try {
+    const res = await fetch(`/version.json?_t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.buildTime) {
+      if (!appState.currentBuildTime) {
+        appState.currentBuildTime = data.buildTime;
+      } else if (appState.currentBuildTime !== data.buildTime) {
+        showUpdateBanner(data);
+      }
+    }
+  } catch (err) {
+    // Offline / silent pass
+  }
+}
+
+/**
+ * Initializes visibility and focus listeners to detect updates when users return to tab
+ */
+export function initAppVersionCheck() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  checkForAppUpdates();
+
+  if (!appState.visibilityListenerRegistered && document.addEventListener) {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        checkForAppUpdates();
+      }
+    });
+    if (window.addEventListener) {
+      window.addEventListener('focus', () => {
+        checkForAppUpdates();
+      });
+    }
+    appState.visibilityListenerRegistered = true;
+  }
+}
+
 export function initApp() {
   initTargetCampaignId();
+  initAppVersionCheck();
 
   if (typeof window !== 'undefined' && window.location && window.location.search) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -394,15 +445,14 @@ export function initApp() {
     }
   }
 
-  const user = safeGet('donor_user');
-  const token = safeGet('auth_token');
-  const role = safeGet('auth_role');
+  const tokenSession = getValidatedTokenSession();
+  const validUser = getValidatedDonorSession();
 
-  if (token && role) {
-    if (role === 'PIC') loadPicDashboard();
-    else if (role === 'Admin') loadAdminDashboard();
-    else if (role === 'SuperAdmin') loadSuperAdminDashboard();
-  } else if (user) {
+  if (tokenSession) {
+    if (tokenSession.role === 'PIC') loadPicDashboard();
+    else if (tokenSession.role === 'Admin') loadAdminDashboard();
+    else if (tokenSession.role === 'SuperAdmin') loadSuperAdminDashboard();
+  } else if (validUser) {
     loadUserDashboard();
   } else {
     showView('landing');

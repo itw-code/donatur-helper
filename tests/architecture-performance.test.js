@@ -133,14 +133,14 @@ test('Task 3: Responsive and optimized image delivery utilities and layout shift
   assert.match(css, /\.gift-preview-img/i, 'gift-preview-img must be styled for layout stability');
 });
 
-test('Task 4: Caching headers in _headers and netlify.toml provide immutable caching and revalidation', () => {
+test('Task 4: Caching headers in _headers and netlify.toml provide revalidation and security', () => {
   const headersPath = path.join(__dirname, '..', '_headers');
   assert.ok(fs.existsSync(headersPath), '_headers must exist at root');
   const headers = fs.readFileSync(headersPath, 'utf8');
 
-  // Verify caching headers for assets and modules
-  assert.match(headers, /\/css\/\*\s*Cache-Control:\s*public,\s*max-age=\d+,\s*immutable/i, '_headers must configure immutable cache for css');
-  assert.match(headers, /\/js\/\*\s*Cache-Control:\s*public,\s*max-age=\d+,\s*immutable/i, '_headers must configure immutable cache for js modules');
+  // Verify caching headers for assets and modules (must-revalidate with ETags to prevent stale browser lock-in)
+  assert.match(headers, /\/css\/\*\s*Cache-Control:\s*public,\s*max-age=\d+,\s*must-revalidate/i, '_headers must configure revalidation cache for css');
+  assert.match(headers, /\/js\/\*\s*Cache-Control:\s*public,\s*max-age=\d+,\s*must-revalidate/i, '_headers must configure revalidation cache for js modules');
   assert.match(headers, /\/(index\.html)?\s*Cache-Control:\s*public,\s*max-age=0,\s*must-revalidate/i, '_headers must configure revalidation for HTML');
 
   // Verify security headers remain intact

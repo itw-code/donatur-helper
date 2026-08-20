@@ -1,6 +1,10 @@
 {
+  "name": "donatur-helper",
+  "version": "1.2.0",
   "scripts": {
     "build": "node scripts/deployment/build-static.cjs",
+    "test": "node --test tests/*.test.js",
+    "deploy": "npm run build && npx wrangler pages deploy dist --project-name=donatur-helper",
     "inventory:xlsx": "node scripts/migration/inventory-xlsx.mjs",
     "migrate:dry-run": "node scripts/migration/migrate-xlsx-to-supabase.mjs --dry-run",
     "migrate:write": "node scripts/migration/migrate-xlsx-to-supabase.mjs --write",

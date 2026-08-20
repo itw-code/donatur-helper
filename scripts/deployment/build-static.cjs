@@ -13,6 +13,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const { execSync } = require('node:child_process');
 
 // Project root directory
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
@@ -26,7 +27,8 @@ const ROOT_STATIC_FILES = [
   '_headers',
   'robots.txt',
   'manifest.json',
-  'favicon.ico'
+  'favicon.ico',
+  'version.json'
 ];
 
 // Directories allowed in dist
@@ -273,12 +275,44 @@ function build() {
     process.exit(1);
   }
 
+  // Generate version.json for runtime update detection
+  let appVersion = '1.2.0';
+  try {
+    const pkgPath = path.join(ROOT_DIR, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      if (pkg.version) appVersion = pkg.version;
+    }
+  } catch {}
+
+  let commitHash = process.env.CF_PAGES_COMMIT_SHA || '';
+  if (!commitHash) {
+    try {
+      commitHash = execSync('git rev-parse --short HEAD', { cwd: ROOT_DIR, encoding: 'utf8' }).trim();
+    } catch {
+      commitHash = 'dev-' + Date.now().toString(36);
+    }
+  }
+
+  const versionPayload = {
+    version: appVersion,
+    buildTime: new Date().toISOString(),
+    commit: commitHash.slice(0, 7)
+  };
+
+  const versionJsonContent = JSON.stringify(versionPayload, null, 2);
+  fs.writeFileSync(path.join(ROOT_DIR, 'version.json'), versionJsonContent, 'utf8');
+  fs.writeFileSync(path.join(DIST_DIR, 'version.json'), versionJsonContent, 'utf8');
+  totalFilesCopied += 1;
+
   // Print Safe Build Summary (NO SECRETS, NO KEYS, NO GAS_ENDPOINT)
   console.log('\n==================================================');
   console.log('  Donatur Helper - Static Build Complete');
   console.log('==================================================');
   console.log(`  Build Mode:          ${buildModeLabel}`);
   console.log(`  Dist Output Path:    ${DIST_DIR}`);
+  console.log(`  Version:             ${versionPayload.version} (${versionPayload.commit})`);
+  console.log(`  Build Time:          ${versionPayload.buildTime}`);
   console.log(`  Copied Assets:       ${totalFilesCopied} file(s), ${totalDirsCopied} folder(s)`);
   console.log(`  Backend Mode:        ${envConfig ? envConfig.BACKEND_MODE : 'unknown'}`);
   console.log(`  Allow GAS Fallback:  ${envConfig ? envConfig.ALLOW_GAS_FALLBACK : 'unknown'}`);

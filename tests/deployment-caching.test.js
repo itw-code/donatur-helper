@@ -6,14 +6,15 @@ import path from 'node:path';
 test('Task 3: Deployment configuration provides correct caching, MIME protection, and robots indexing rules', () => {
   const headers = fs.readFileSync(path.resolve('_headers'), 'utf8');
   
-  // HTML revalidation
+  // HTML & Script revalidation
   assert.ok(headers.includes('/index.html') && headers.includes('must-revalidate'), 'HTML must require revalidation');
   assert.ok(headers.includes('/\n') || headers.includes('/\r\n'), 'Root path must be configured');
+  assert.ok(headers.includes('/version.json') && headers.includes('must-revalidate'), 'version.json must require revalidation');
   
-  // Static asset caching (immutable 1 year)
-  assert.ok(headers.includes('/css/*') && headers.includes('max-age=31536000') && headers.includes('immutable'), 'CSS must have immutable cache');
-  assert.ok(headers.includes('/js/*') && headers.includes('max-age=31536000') && headers.includes('immutable'), 'JS must have immutable cache');
-  assert.ok(headers.includes('/assets/*') && headers.includes('max-age=31536000') && headers.includes('immutable'), 'Assets must have immutable cache');
+  // Unhashed static asset caching (must-revalidate with ETags to prevent stale browser lock-in)
+  assert.ok(headers.includes('/css/*') && headers.includes('must-revalidate'), 'CSS must have must-revalidate cache');
+  assert.ok(headers.includes('/js/*') && headers.includes('must-revalidate'), 'JS must have must-revalidate cache');
+  assert.ok(headers.includes('/assets/*') && headers.includes('max-age='), 'Assets must have cache configuration');
   
   // Security headers
   assert.ok(headers.includes('X-Content-Type-Options: nosniff'), 'nosniff header must be set');
@@ -26,8 +27,8 @@ test('Task 3: Deployment configuration provides correct caching, MIME protection
   assert.ok(netlifyToml.includes('[[redirects]]'), 'Netlify must contain redirects block');
   assert.ok(netlifyToml.includes('[[headers]]'), 'Netlify must contain headers block');
   assert.ok(netlifyToml.includes('X-Content-Type-Options = "nosniff"'), 'Netlify must include nosniff');
-  assert.ok(netlifyToml.includes('/css/*') && netlifyToml.includes('immutable'), 'Netlify must declare CSS cache');
-  assert.ok(netlifyToml.includes('/js/*') && netlifyToml.includes('immutable'), 'Netlify must declare JS cache');
+  assert.ok(netlifyToml.includes('/css/*') && netlifyToml.includes('must-revalidate'), 'Netlify must declare CSS cache');
+  assert.ok(netlifyToml.includes('/js/*') && netlifyToml.includes('must-revalidate'), 'Netlify must declare JS cache');
   
   // Robots indexing
   const robots = fs.readFileSync(path.resolve('robots.txt'), 'utf8');

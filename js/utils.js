@@ -222,3 +222,27 @@ export function renderOptimizedImage(src, alt = '', options = {}) {
   const heightAttr = options.height ? ' height="' + options.height + '"' : '';
   return '<img src="' + escapeHtml(safeSrc) + '" alt="' + safeAlt + '" loading="' + loading + '" decoding="' + decoding + '"' + className + widthAttr + heightAttr + '>';
 }
+
+/**
+ * Renders a sticky non-intrusive update notification when a new Cloudflare Pages build is detected
+ * @param {Object} [versionInfo]
+ */
+export function showUpdateBanner(versionInfo) {
+  if (typeof document === 'undefined' || !document.body) return;
+  const existing = document.getElementById('app-update-banner');
+  if (existing && existing.classList && existing.classList.contains('app-update-banner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'app-update-banner';
+  banner.className = 'app-update-banner';
+  if (banner.classList && banner.classList.add) banner.classList.add('app-update-banner');
+  banner.setAttribute('role', 'status');
+  banner.innerHTML = `
+    <p>
+      <span aria-hidden="true">✨</span>
+      <span>Pembaruan aplikasi tersedia</span>
+    </p>
+    <button class="app-update-btn" onclick="window.location.reload()">Muat Ulang</button>
+  `;
+  document.body.appendChild(banner);
+}

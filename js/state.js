@@ -1,6 +1,6 @@
 // Global In-Memory Application State & Session Accessors
 
-import { safeGet } from './storage.js';
+import { safeGet, getValidatedDonorSession } from './storage.js';
 
 export const appState = {
   targetCampaignId: null,
@@ -13,7 +13,8 @@ export const appState = {
   activePendingCount: 0,
   lastNotifiedCount: 0,
   pollIntervalId: null,
-  visibilityListenerRegistered: false
+  visibilityListenerRegistered: false,
+  currentBuildTime: null
 };
 
 export function initTargetCampaignId() {
@@ -37,9 +38,5 @@ export function currentRole() {
 }
 
 export function currentUser() {
-  try {
-    return JSON.parse(safeGet('donor_user') || 'null');
-  } catch (e) {
-    return null;
-  }
+  return getValidatedDonorSession();
 }
