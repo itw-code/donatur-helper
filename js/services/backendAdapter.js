@@ -919,7 +919,10 @@ async function _dispatchSupabaseRpc(action, args = []) {
       }
       let parsedCustomAmt = null;
       if (customAmount !== undefined && customAmount !== null && String(customAmount).trim() !== '') {
-        parsedCustomAmt = typeof customAmount === 'number' ? customAmount : Number(String(customAmount).replace(/\D/g, ''));
+        const num = typeof customAmount === 'number' ? customAmount : Number(String(customAmount).replace(/\D/g, ''));
+        if (!isNaN(num) && num > 0) {
+          parsedCustomAmt = num;
+        }
       }
       const { data, error } = await client.rpc('join_campaign', {
         p_campaign_id: campaignId,
@@ -946,11 +949,18 @@ async function _dispatchSupabaseRpc(action, args = []) {
         [campaignIds, name, wa, customAmount, alias] = args;
       }
       const ids = Array.isArray(campaignIds) ? campaignIds : String(campaignIds || '').split(',').map(s => s.trim()).filter(Boolean);
+      let parsedCustomAmt = null;
+      if (customAmount !== undefined && customAmount !== null && String(customAmount).trim() !== '') {
+        const num = typeof customAmount === 'number' ? customAmount : Number(String(customAmount).replace(/\D/g, ''));
+        if (!isNaN(num) && num > 0) {
+          parsedCustomAmt = num;
+        }
+      }
       const { data, error } = await client.rpc('join_campaigns_bulk', {
         p_campaign_ids: ids,
         p_name: name,
         p_whatsapp: wa,
-        p_custom_amount: customAmount ? Number(customAmount) : null,
+        p_custom_amount: parsedCustomAmt,
         p_alias: alias || null
       });
       if (error) throw new Error(error.message || 'Gagal bergabung secara massal.');

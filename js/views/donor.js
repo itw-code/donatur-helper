@@ -424,15 +424,17 @@ export function submitBulkJoin(campaignIdsStr) {
   const campaignIds = campaignIdsStr.split(',').map(s => s.trim()).filter(Boolean);
   const isBebasEl = document.getElementById('bj-type-bebas');
   const isBebas = isBebasEl ? isBebasEl.checked : false;
-  let customAmount = '';
+  let customAmount = null;
   if (isBebas) {
     const customAmtEl = document.getElementById('bj-custom-amount');
-    customAmount = customAmtEl ? customAmtEl.value : '';
-    if (!customAmount || Number(customAmount) <= 0) {
+    const rawAmt = customAmtEl ? customAmtEl.value : '';
+    const parsed = parseRibuan(rawAmt) || Number(rawAmt);
+    if (!parsed || parsed <= 0) {
       showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
       resetBtn();
       return;
     }
+    customAmount = parsed;
   }
   const aliasInput = document.getElementById('bj-alias');
   const alias = aliasInput ? aliasInput.value.trim() : '';
@@ -621,15 +623,16 @@ export function joinCampaign(campaignId) {
     return;
   }
 
-  let customAmount = 0;
+  let customAmount = null;
   const checkEl = document.getElementById('check-custom-' + campaignId);
   if (checkEl && checkEl.checked) {
     const inputEl = document.getElementById('input-custom-' + campaignId);
-    customAmount = parseRibuan(inputEl ? inputEl.value : '');
-    if (!customAmount || customAmount <= 0) {
+    const parsed = parseRibuan(inputEl ? inputEl.value : '');
+    if (!parsed || parsed <= 0) {
       showInfoModal('Silakan masukkan nominal khusus yang valid.', 'Peringatan');
       return;
     }
+    customAmount = parsed;
   }
 
   let alias = '';

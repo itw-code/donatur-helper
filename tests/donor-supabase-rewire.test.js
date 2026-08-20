@@ -400,6 +400,22 @@ test('Task 2: Join Campaign Mutation calls join_campaign RPC, updates UI toast, 
   // Verify toast shown
   assert.match(elements.get('toast').textContent, /Berhasil bergabung/);
 
+  // Test 1b: Successful Join WITHOUT custom amount (pro-rata/pool)
+  rpcCalls.length = 0;
+  checkCustom.checked = false;
+  inputCustom.value = '';
+  checkAlias.checked = true;
+  inputAlias.value = 'Nozerd';
+
+  context.joinCampaign('CAMP-10');
+  await new Promise(resolve => setTimeout(resolve, 50));
+
+  const joinCallNoCustom = rpcCalls.find(c => c.fn === 'join_campaign');
+  assert.ok(joinCallNoCustom, 'join_campaign RPC should be called for non-custom pledge');
+  assert.strictEqual(joinCallNoCustom.params.p_campaign_id, 'CAMP-10');
+  assert.strictEqual(joinCallNoCustom.params.p_custom_amount, null, 'p_custom_amount must be null when not custom');
+  assert.strictEqual(joinCallNoCustom.params.p_alias, 'Nozerd');
+
   // Test 2: Error handling when campaign is closed
   checkCustom.checked = false;
   checkAlias.checked = false;

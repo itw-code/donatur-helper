@@ -55,11 +55,15 @@ BEGIN
     END IF;
 
     -- 4. Validate custom amount if provided
-    IF p_custom_amount IS NOT NULL AND p_custom_amount <= 0 THEN
+    IF p_custom_amount IS NOT NULL AND p_custom_amount < 0 THEN
         RETURN jsonb_build_object(
             'error', 'invalid_input',
             'message', 'Nominal donasi harus lebih besar dari nol.'
         );
+    END IF;
+
+    IF p_custom_amount = 0 THEN
+        p_custom_amount := NULL;
     END IF;
 
     -- 5. Prepare clean name and alias

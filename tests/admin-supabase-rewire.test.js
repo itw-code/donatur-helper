@@ -416,8 +416,8 @@ test('filterTransferPicOptions filters active members by name or WhatsApp and up
   assert.equal(typeof filterTransferPicOptions, 'function', 'filterTransferPicOptions must be exported');
 
   // Setup DOM elements for modal
-  const selectEl = harness.elements.get('transfer-pic-select');
-  const countEl = harness.elements.get('transfer-pic-count');
+  const selectEl = harness.context.document.getElementById('transfer-pic-select');
+  const countEl = harness.context.document.getElementById('transfer-pic-count');
 
   // Mock modalTransferMembers via invoking adminView
   harness.storage.set('auth_token', 'valid-admin-token');
@@ -450,13 +450,15 @@ test('adminTransferOwnershipUI calls transferCampaignOwnershipAdmin and handles 
   harness.storage.set('auth_token', 'valid-admin-token');
   harness.storage.set('auth_role', 'Admin');
 
-  const selectEl = harness.elements.get('transfer-pic-select');
+  const selectEl = harness.context.document.getElementById('transfer-pic-select');
   selectEl.value = '081234567890';
 
   const { adminTransferOwnershipUI } = harness.context;
   assert.equal(typeof adminTransferOwnershipUI, 'function', 'adminTransferOwnershipUI must be exported');
 
   adminTransferOwnershipUI('C-12345678');
+  const okBtn = harness.context.document.getElementById('custom-confirm-ok');
+  if (okBtn) okBtn.click();
   await new Promise(resolve => setTimeout(resolve, 50));
 
   const transferRpc = harness.rpcCalls.find(c => c.fn === 'admin_transfer_campaign_ownership');
