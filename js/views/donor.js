@@ -582,8 +582,15 @@ export function renderCampaignCard(c, user, isPending) {
 
   if (c.status === 'Open') {
     if (c.joined) {
-      html += '<div class="success">✓ Kamu sudah daftar di list ini. Menunggu finalisasi oleh PIC.</div>';
-      html += '<button id="btn-withdraw-' + c.campaignId + '" class="btn secondary" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
+      const customAmt = Number(c.customAmount !== undefined ? c.customAmount : (c.CustomAmount !== undefined ? c.CustomAmount : (c.custom_amount !== undefined ? c.custom_amount : 0))) || 0;
+      let joinNotice = '<div class="success">✓ Kamu sudah daftar di list ini. Menunggu finalisasi oleh PIC.</div>';
+      if (customAmt > 0) {
+        joinNotice += '<div style="margin-top:6px; font-size:13px; color:#1e40af; font-weight:500;">🏷️ Komitmen nominal khusus: <strong>' + formatIDR(customAmt) + '</strong></div>';
+      } else {
+        joinNotice += '<div style="margin-top:6px; font-size:13px; color:var(--muted);">Partisipasi: Patungan rata-rata</div>';
+      }
+      html += joinNotice;
+      html += '<button id="btn-withdraw-' + c.campaignId + '" class="btn secondary" style="margin-top:8px;" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
     } else {
       html += '<div class="card" style="background:#f9f9f9;border:1px solid #eee;margin-top:8px;">';
       html += '<label style="margin-top:0; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto; min-height:unset;"> Saya ingin donasi dengan nominal khusus</label>';

@@ -778,12 +778,25 @@ export function adminView(campaignId) {
             ? '<span class="semantic-status success">' + paymentStatusIcon('verified') + '<span>Lunas</span></span>'
             : '<span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Belum</span></span>';
           const displayNameHtml = escapeHtml(displayName);
+          const customAmt = Number(d.CustomAmount !== undefined ? d.CustomAmount : (d.custom_amount !== undefined ? d.custom_amount : 0)) || 0;
+          const amtDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
+          let displayDue = '-';
+          if (customAmt > 0) {
+            displayDue = formatIDR(customAmt) + ' <span class="badge" style="font-size:10px; padding:2px 4px; background:#eff6ff; color:#1d4ed8;">Khusus</span>';
+          } else if (amtDue > 0) {
+            displayDue = formatIDR(amtDue);
+          } else if (c.Status === 'Open' || c.Status === 'Closed') {
+            displayDue = '<span class="muted">Rata-rata</span>';
+          } else {
+            displayDue = formatIDR(0);
+          }
+
           const paidText = d.AmountPaid ? formatIDR(d.AmountPaid) : '(Kosong)';
           const updateText = d.ModifiedBy ? (formatTime(d.ModifiedAt) + '<br><small>oleh ' + escapeHtml(d.ModifiedBy) + '</small>') : '-';
           const newPaidStatus = isPaid ? 'FALSE' : 'TRUE';
 
           donorCards += '<article class="admin-detail-donor-card"><div class="admin-data-card-header"><div class="admin-data-card-title"><span class="admin-data-card-label">Donatur</span><strong>' + displayNameHtml + '</strong></div>' + statusHtml + '</div>';
-          donorCards += '<dl class="admin-data-card-meta"><div><dt>WhatsApp</dt><dd>' + escapeHtml(d.WhatsApp) + '</dd></div><div><dt>Tagihan</dt><dd>' + formatIDR(d.AmountDue) + '</dd></div><div><dt>Nominal transfer</dt><dd>' + paidText + '</dd></div><div><dt>Terakhir diupdate</dt><dd class="muted">' + updateText + '</dd></div></dl>';
+          donorCards += '<dl class="admin-data-card-meta"><div><dt>WhatsApp</dt><dd>' + escapeHtml(d.WhatsApp) + '</dd></div><div><dt>Tagihan</dt><dd>' + displayDue + '</dd></div><div><dt>Nominal transfer</dt><dd>' + paidText + '</dd></div><div><dt>Terakhir diupdate</dt><dd class="muted">' + updateText + '</dd></div></dl>';
           if (role === 'Admin' || role === 'SuperAdmin') {
             donorCards += '<div class="admin-card-actions"><button type="button" class="btn secondary" aria-label="Tandai ' + displayNameHtml + ' sebagai ' + (isPaid ? 'belum lunas' : 'lunas') + '" onclick="adminTogglePaidUI(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + newPaidStatus + '\')">Tandai ' + (isPaid ? 'belum lunas' : 'lunas') + '</button>';
             donorCards += '<button type="button" class="btn secondary" aria-label="Edit nominal transfer ' + displayNameHtml + '" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">Edit nominal transfer</button>';
@@ -791,7 +804,7 @@ export function adminView(campaignId) {
           }
           donorCards += '</article>';
 
-          donorTable += '<tr><td>' + displayNameHtml + '<br>' + statusHtml + '</td><td>' + escapeHtml(d.WhatsApp) + '</td><td>' + formatIDR(d.AmountDue) + '</td>';
+          donorTable += '<tr><td>' + displayNameHtml + '<br>' + statusHtml + '</td><td>' + escapeHtml(d.WhatsApp) + '</td><td>' + displayDue + '</td>';
           donorTable += '<td>' + paidText;
           donorTable += '<button type="button" class="link-btn admin-inline-action" aria-label="Edit nominal transfer ' + displayNameHtml + '" onclick="editAmountPaid(\'' + c.CampaignID + '\', \'' + d.WhatsApp + '\', \'' + d.AmountPaid + '\')">Edit</button></td>';
           donorTable += '<td class="muted">' + updateText + '</td>';

@@ -878,6 +878,7 @@ export function renderDonorTable(detail) {
       const proofPath = d.proof_storage_path || d.ProofStoragePath || '';
       const proofLink = d._resolvedProofUrl || (proofPath && proofPath.startsWith('http') ? proofPath : '') || d.proof_link || d.ProofLink || '';
       const hasProof = Boolean(String(proofPath || proofLink || '').trim());
+      const customAmount = Number(d.CustomAmount !== undefined ? d.CustomAmount : (d.custom_amount !== undefined ? d.custom_amount : 0)) || 0;
       const amountDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
       const amountPaid = Number(d.AmountPaid !== undefined ? d.AmountPaid : d.amount_paid) || 0;
       const joinedAt = d.JoinedAt || d.joined_at || '';
@@ -908,8 +909,15 @@ export function renderDonorTable(detail) {
         (isRefunded ? ('<div class="milestone-item"><span class="milestone-dot refund"></span><span class="milestone-label">Refund' + picLabel + ':</span><span class="milestone-time">' + (modifiedAt ? formatTime(modifiedAt) : '-') + '</span></div>') : '') +
         '</div>';
 
-      let amountHtml = amountDue ? formatIDR(amountDue) : '-';
-      if (isPaid) amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
+      let amountHtml = '-';
+      if (customAmount > 0) {
+        amountHtml = '<strong>' + formatIDR(customAmount) + '</strong> <span class="badge" style="font-size:10px; padding:2px 5px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;">Khusus</span>';
+      } else if (amountDue > 0) {
+        amountHtml = formatIDR(amountDue);
+      } else if (!isFinalized) {
+        amountHtml = '<span class="muted" style="font-size:12px;">Rata-rata</span>';
+      }
+      if (isPaid && (amountDue > 0 || customAmount > 0)) amountHtml = '<s style="color:var(--muted);">' + amountHtml + '</s>';
 
       let refundHtml = '-';
       let needsRefund = false;
