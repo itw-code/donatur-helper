@@ -197,7 +197,7 @@ export function statusBadge(status) {
 }
 
 export function paymentStatusIcon(kind) {
-  const attrs = 'class="status-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const attrs = 'class="status-icon" width="16" height="16" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   if (kind === 'verified') {
     return '<svg ' + attrs + '><path d="m5 12 4 4L19 6"></path></svg>';
   }

@@ -172,6 +172,18 @@ label:first-child {
   color: #475569;
 }
 
+/* Base SVG Icon Defaults to prevent unbounded scaling */
+svg.status-icon,
+.status-icon {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  flex: 0 0 16px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .payment-status-badge {
   display: inline-flex;
   align-items: flex-start;
@@ -604,6 +616,30 @@ td .action-group {
 .dh-debug-footer {
   margin-top: 8px;
   text-align: right;
+}
+
+/* PIC State Callout Container */
+.pic-state-callout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #334155;
+  margin-top: 12px;
+  line-height: 1.4;
+}
+
+.pic-state-callout .status-icon {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+  color: #d97706;
 }
 
 /* App Update Notification Banner */

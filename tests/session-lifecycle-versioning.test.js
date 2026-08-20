@@ -111,3 +111,40 @@ test('UI: showUpdateBanner creates update banner in DOM', () => {
   assert.ok(banner, 'Update banner must be mounted into DOM');
   assert.ok(banner.innerHTML.includes('Pembaruan'), 'Banner text must inform user about update');
 });
+
+test('UI Icon Fix: paymentStatusIcon defines explicit width and height on SVG', () => {
+  const harness = createBrowserHarness();
+  const { paymentStatusIcon } = harness.context;
+
+  const verifiedSvg = paymentStatusIcon('verified');
+  const reviewSvg = paymentStatusIcon('review');
+  const unpaidSvg = paymentStatusIcon('unpaid');
+
+  assert.match(verifiedSvg, /width="16"/, 'Verified SVG must have width 16');
+  assert.match(verifiedSvg, /height="16"/, 'Verified SVG must have height 16');
+  assert.match(reviewSvg, /width="16"/, 'Review SVG must have width 16');
+  assert.match(reviewSvg, /height="16"/, 'Review SVG must have height 16');
+  assert.match(unpaidSvg, /width="16"/, 'Unpaid SVG must have width 16');
+  assert.match(unpaidSvg, /height="16"/, 'Unpaid SVG must have height 16');
+});
+
+test('Admin UI Rendering: renderAdminCampaignViews correctly displays paidCount / donorCount', () => {
+  const harness = createBrowserHarness();
+  const { renderAdminCampaignViews } = harness.context;
+
+  const mockCampaigns = [
+    {
+      CampaignID: 'C-901F15E0',
+      TargetName: 'Samuel Kant',
+      Status: 'Finalized',
+      Deadline: '2026-07-26',
+      picName: 'PIC Test',
+      donorCount: 66,
+      paidCount: 54
+    }
+  ];
+
+  const html = renderAdminCampaignViews(mockCampaigns);
+  assert.ok(html.includes('54/66 sudah bayar'), 'Card view must show 54/66 sudah bayar');
+  assert.ok(html.includes('54/66'), 'Table view must show 54/66');
+});
