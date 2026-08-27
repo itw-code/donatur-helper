@@ -93,13 +93,13 @@ export function loadUserDashboard() {
   let picBtnHtml = '';
   if (user.verified) {
     if (!user.email) {
-      picBtnHtml += '<div class="card" style="background:#fffbeb; border-left:4px solid var(--amber); margin-bottom:16px;"><p style="margin:0; font-size:14px;"><strong>Email belum diisi.</strong><br/>Tambahkan email di Profil agar Anda mendapat pengingat tagihan otomatis.</p></div>';
+      picBtnHtml += '<div class="card theme-surface-warning" style="border-left:4px solid var(--amber); margin-bottom:16px;"><p style="margin:0; font-size:14px;"><strong>Email belum diisi.</strong><br/>Tambahkan email di Profil agar Anda mendapat pengingat tagihan otomatis.</p></div>';
     }
     
     if (user.status === 'active') {
       picBtnHtml = '<button class="btn blue" style="margin-bottom:16px;" onclick="seamlessBecomePic()">+ Buat Campaign Baru (Jadi PIC)</button>';
     } else if (user.status === 'ex') {
-      picBtnHtml = '<div class="card" style="background:#f1efe8; border:none; margin-bottom:16px;"><p class="muted" style="margin:0;">Status Anda adalah Alumni. Anda dapat berpartisipasi dalam donasi, tetapi pembuatan campaign baru hanya dapat dilakukan oleh karyawan aktif.</p></div>';
+      picBtnHtml = '<div class="card theme-surface-muted" style="border:none; margin-bottom:16px;"><p class="muted" style="margin:0;">Status Anda adalah Alumni. Anda dapat berpartisipasi dalam donasi, tetapi pembuatan campaign baru hanya dapat dilakukan oleh karyawan aktif.</p></div>';
     }
   }
 
@@ -268,8 +268,8 @@ export function refreshCampaignList() {
       html += '<h3 style="margin-top:0;">Bisa Diikuti</h3>';
       if (canJoin.length > 0) {
         if (canJoin.length > 1) {
-          let bulkJoinHtml = '<div class="card" style="background:#f4fbf7; border: 1px solid #cceadb; margin-bottom: 16px; padding: 12px 16px;">';
-          bulkJoinHtml += '<h4 style="margin-top:0; color:#0f766e; font-size:14px; margin-bottom:4px;">📝 Gabung Banyak Campaign</h4>';
+          let bulkJoinHtml = '<div class="card theme-surface-success" style="margin-bottom: 16px; padding: 12px 16px;">';
+          bulkJoinHtml += '<h4 class="theme-success-heading" style="margin-top:0; font-size:14px; margin-bottom:4px;">📝 Gabung Banyak Campaign</h4>';
           bulkJoinHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Centang campaign di bawah, lalu klik tombol ini untuk gabung sekaligus.</p>';
           bulkJoinHtml += '<div style="display:flex; align-items:center; gap:8px;">';
           bulkJoinHtml += '<label style="margin:0; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="bulk-join-select-all" onclick="toggleSelectAllBulkJoin(this)" style="width:auto; margin:0; cursor:pointer;"> Pilih Semua</label>';
@@ -364,7 +364,7 @@ export function openBulkJoinModal() {
   }
 
   modal.innerHTML = `
-    <div class="card" style="width:90%; max-width:450px; background:white; padding:20px; border-radius:12px; position:relative; box-shadow:var(--shadow-lg); border:none;">
+    <div class="card theme-surface-modal" style="width:90%; max-width:450px; padding:20px; border-radius:12px; position:relative; box-shadow:var(--shadow-lg); border:none;">
       <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">&times;</button>
       <h3 style="margin-top:0; color:var(--blue); font-size:18px; font-weight:bold; margin-bottom:8px;">Ikut Patungan Massal</h3>
       <p style="font-size:13px; color:var(--text); margin-bottom:16px; line-height:1.4;">Anda memilih untuk bergabung ke <strong>${selectedIds.length} campaign</strong> sekaligus.</p>
@@ -382,7 +382,7 @@ export function openBulkJoinModal() {
       </div>
       
       <div id="bj-custom-amount-wrap" class="hidden" style="margin-bottom:16px;">
-        <div style="background: rgba(2, 132, 199, 0.08); color: #0369a1; border: 1px solid rgba(2, 132, 199, 0.2); padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+        <div class="theme-info-note" style="padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
           <span>ℹ️</span>
           <span>Nominal khusus minimal <strong>Rp 50.000</strong> per campaign.</span>
         </div>
@@ -522,10 +522,10 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   const cIdsStr = campaignIds.join(',');
   const safeDomId = String(bankAccount).replace(/[^a-zA-Z0-9_-]/g, '') || 'combined';
   
-  let html = '<div class="card donor-campaign-card donor-primary-card" style="border-left: 4px solid var(--blue); background: #f0f7ff; margin-bottom:16px;">';
+  let html = '<div class="card donor-campaign-card donor-primary-card theme-surface-blue" style="border-left: 4px solid var(--blue); margin-bottom:16px;">';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
   html += '<strong style="color:var(--blue); font-size:15px;">Pembayaran Gabungan (' + groupList.length + ' Campaign)</strong>';
-  html += '<span class="badge" style="background:var(--blue-light); color:var(--blue);">⏳ Menunggu Pembayaran</span>';
+  html += '<span class="badge theme-status-unpaid">⏳ Menunggu Pembayaran</span>';
   html += '</div>';
   
   html += '<p style="margin:4px 0; font-size:13px; line-height:1.4;">Menggabungkan patungan untuk:<br>';
@@ -534,7 +534,7 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   });
   html += '</p>';
   
-  html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin: 12px 0;">';
+  html += '<div class="theme-blue-total" style="padding:12px; border-radius:8px; margin: 12px 0;">';
   html += '<div style="font-size:12px; color:var(--text);">Total nominal gabungan yang harus ditransfer:</div>';
   html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; justify-content:center; gap:8px;">' + formatIDR(totalDue);
   html += ' <span class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">Salin</span>';
@@ -594,17 +594,17 @@ export function renderCampaignCard(c, user, isPending) {
       const customAmt = Number(c.customAmount !== undefined ? c.customAmount : (c.CustomAmount !== undefined ? c.CustomAmount : (c.custom_amount !== undefined ? c.custom_amount : 0))) || 0;
       let joinNotice = '<div class="success">✓ Kamu sudah daftar di list ini. Menunggu finalisasi oleh PIC.</div>';
       if (customAmt > 0) {
-        joinNotice += '<div style="margin-top:6px; font-size:13px; color:#1e40af; font-weight:500;">🏷️ Komitmen nominal khusus: <strong>' + formatIDR(customAmt) + '</strong></div>';
+        joinNotice += '<div class="theme-custom-amount-text" style="margin-top:6px; font-size:13px; font-weight:500;">🏷️ Komitmen nominal khusus: <strong>' + formatIDR(customAmt) + '</strong></div>';
       } else {
         joinNotice += '<div style="margin-top:6px; font-size:13px; color:var(--muted);">Partisipasi: Patungan rata-rata</div>';
       }
       html += joinNotice;
       html += '<button id="btn-withdraw-' + c.campaignId + '" class="btn secondary" style="margin-top:8px;" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
     } else {
-      html += '<div class="card" style="background:#f9f9f9;border:1px solid #eee;margin-top:8px;">';
+      html += '<div class="card theme-surface-muted" style="margin-top:8px;">';
       html += '<label style="margin-top:0; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto; min-height:unset;"> Saya ingin donasi dengan nominal khusus</label>';
       html += '<div id="wrap-custom-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
-      html += '<div style="background: rgba(2, 132, 199, 0.08); color: #0369a1; border: 1px solid rgba(2, 132, 199, 0.2); padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">';
+      html += '<div class="theme-info-note" style="padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">';
       html += '<span>ℹ️</span>';
       html += '<span><strong>Ketentuan:</strong> Nominal khusus minimal <strong>Rp 50.000</strong>. Jika ingin patungan nominal standar, silakan tetap gunakan opsi patungan rata.</span>';
       html += '</div>';
@@ -625,8 +625,8 @@ export function renderCampaignCard(c, user, isPending) {
     html += '<p class="muted">List sudah ditutup, menunggu PIC menentukan jumlah & rekening.</p>';
   } else if (c.status === 'Finalized') {
     if (c.joined) {
-      html += '<div class="card" style="background:#e6f1fb;border:none;">';
-      html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin-bottom:12px;">';
+      html += '<div class="card theme-surface-blue" style="border:none;">';
+      html += '<div class="theme-blue-total" style="padding:12px; border-radius:8px; margin-bottom:12px;">';
       html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
       html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; justify-content:center; gap:8px;">' + formatIDR(c.amountDue);
       html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">Salin</span>';

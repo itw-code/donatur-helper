@@ -379,7 +379,7 @@ export function renderPicActions(detail) {
 
   let isAchieved = Boolean(detail.donors && detail.donors.length > 0 && detail.donors.every(d => String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE'));
 
-  html += '<div class="pic-share-box" style="background:#eaf3de; padding:10px; border-radius:8px; margin-bottom:12px;">';
+  html += '<div class="pic-share-box" style="padding:10px; border-radius:8px; margin-bottom:12px;">';
   if (c.Status === 'Open' || c.Status === 'Closed') {
     html += '<strong>Bagikan Undangan Patungan:</strong><br><p class="muted" style="margin:4px 0;">Salin pesan undangan beserta daftar peserta yang sudah bergabung.</p><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
   } else if (c.Status === 'Finalized') {
@@ -434,7 +434,7 @@ export function renderPicActions(detail) {
   }
 
   html += '<div id="finalize-form" class="hidden"></div>';
-  html += '<div id="late-donor-form" class="hidden card" style="background:#f9f9f9; margin-top:16px; position:relative;">' +
+  html += '<div id="late-donor-form" class="hidden card theme-surface-muted" style="margin-top:16px; position:relative;">' +
     '<h4 style="margin-top:0;">Ajukan Donatur Susulan</h4><p class="muted" style="font-size:12px;">Tambahkan teman yang belum sempat daftar di list sebelumnya.</p>' +
     '<label>Nama Teman: <input type="text" id="late-name" placeholder="cth: Budi Susanto"></label>' +
     '<label>No WhatsApp: <input type="tel" id="late-wa" placeholder="cth: 08123456789"></label>' +
@@ -915,11 +915,11 @@ export function renderDonorTable(detail) {
       if (isVerified) {
         badgeHtml = '<span class="badge green payment-status-badge donor-queue-badge">' + paymentStatusIcon('verified') + '<span>' + (isFinalized ? 'Terverifikasi' : 'Terdaftar') + '</span></span>';
       } else if (isPaid && hasProof) {
-        badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Perlu Ditinjau</span></span>';
+        badgeHtml = '<span class="badge warning payment-status-badge theme-status-review">' + paymentStatusIcon('review') + '<span>Perlu Ditinjau</span></span>';
       } else if (isPaid) {
-        badgeHtml = '<span class="badge warning payment-status-badge" style="background:#fff3cd;color:#856404;">' + paymentStatusIcon('review') + '<span>Bukti Belum Diunggah</span></span>';
+        badgeHtml = '<span class="badge warning payment-status-badge theme-status-review">' + paymentStatusIcon('review') + '<span>Bukti Belum Diunggah</span></span>';
       } else {
-        badgeHtml = '<span class="badge warning payment-status-badge" style="background:#faeeda;color:var(--amber);">' + paymentStatusIcon('unpaid') + '<span>Belum Bayar</span></span>';
+        badgeHtml = '<span class="badge warning payment-status-badge theme-status-unpaid">' + paymentStatusIcon('unpaid') + '<span>Belum Bayar</span></span>';
       }
 
       const timeHtml = '<div class="milestone-stack">' +
@@ -931,7 +931,7 @@ export function renderDonorTable(detail) {
 
       let amountHtml = '-';
       if (customAmount > 0) {
-        amountHtml = '<strong>' + formatIDR(customAmount) + '</strong> <span class="badge" style="font-size:10px; padding:2px 5px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;">Khusus</span>';
+        amountHtml = '<strong>' + formatIDR(customAmount) + '</strong> <span class="badge theme-custom-amount-badge" style="font-size:10px; padding:2px 5px;">Khusus</span>';
       } else if (amountDue > 0) {
         amountHtml = formatIDR(amountDue);
       } else if (!isFinalized) {
@@ -1006,7 +1006,7 @@ export function renderDonorTable(detail) {
   cardContainer += '</div>';
 
   let tableHtml = '<div class="table-responsive"><table><thead><tr><th>Nama / WA</th><th>Waktu</th><th>Status</th><th>Tagihan</th><th>Refund</th><th>Bukti & Verifikasi</th></tr></thead><tbody>' + tableRows + '</tbody>';
-  if (totalTagihan > 0) tableHtml += '<tfoot style="background:#f5f7fa; font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
+  if (totalTagihan > 0) tableHtml += '<tfoot class="theme-surface-muted" style="font-weight:bold; border-top: 2px solid var(--border);"><tr><td colspan="3" style="text-align:right;">Total Keseluruhan Tagihan:</td><td style="color:var(--text);">' + formatIDR(totalTagihan) + '</td><td colspan="2"></td></tr></tfoot>';
   tableHtml += '</table></div>';
 
   el.innerHTML = html + cardContainer + tableHtml;

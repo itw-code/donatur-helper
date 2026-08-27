@@ -44,8 +44,8 @@
     <div class="card">
       <label>No. WhatsApp</label>
       <input id="u-wa" placeholder="08xxxxxxxxxx">
-      <div
-        style="background: rgba(0, 123, 255, 0.06); color: #0056b3; padding: 12px; border-radius: 8px; margin-top: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; border: 1px solid rgba(0, 123, 255, 0.15);">
+      <div class="theme-info-note privacy-notice"
+        style="padding: 12px; border-radius: 8px; margin-top: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px;">
         <span style="font-size: 16px; line-height: 1.1;">🔒</span>
         <span style="line-height: 1.4;"><strong>Kami menjaga privasi Anda.</strong> Nomor WhatsApp hanya digunakan untuk
           verifikasi login dan pengingat patungan donasi.</span>
@@ -67,7 +67,7 @@
           <div>
             <label>Status Karyawan</label>
             <select id="u-status"
-              style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#fff;">
+              style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px;">
               <option value="" disabled selected>-- Pilih Status --</option>
               <option value="active">Active (Karyawan Saat Ini)</option>
               <option value="ex">Ex (Alumni / Resign)</option>
@@ -265,7 +265,7 @@
       </div>
       <div id="admin-member-list"></div>
     </div>
-    <div id="admin-section-tools" class="card admin-section" style="background: #f8fafc; border: 1px dashed var(--border);">
+    <div id="admin-section-tools" class="card admin-section" style="border: 1px dashed var(--border);">
       <h3 style="margin-top:0; font-size:15px; color: var(--text);">Tools PIC</h3>
       <p class="muted" style="margin: 0 0 12px 0; font-size: 13px;">Gunakan untuk membuat akses token PIC baru secara manual.</p>
       <button class="btn secondary btn-auto" onclick="genPicToken()">+ Buat token PIC baru</button>
@@ -331,8 +331,8 @@
         <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
           onclick="document.getElementById('sa-gen-admin-form').classList.toggle('hidden')">+ Token Admin Baru</button>
       </div>
-      <div id="sa-gen-admin-form" class="hidden"
-        style="background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:12px; position:relative;">
+      <div id="sa-gen-admin-form" class="hidden theme-surface-muted"
+        style="padding:12px; border-radius:8px; margin-bottom:12px; position:relative;">
         <button
           style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
           onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
@@ -390,8 +390,8 @@
       </div>
       <div id="sa-member-list"></div>
 
-      <div id="sa-add-member-form" class="hidden"
-        style="background:#f9f9f9; padding:12px; border-radius:8px; margin-top:12px; position:relative;">
+      <div id="sa-add-member-form" class="hidden theme-surface-muted"
+        style="padding:12px; border-radius:8px; margin-top:12px; position:relative;">
         <button
           style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
           onclick="document.getElementById('sa-add-member-form').classList.add('hidden')">&times;</button>
@@ -444,7 +444,7 @@
   <div class="card" style="width:100%; max-width:400px; padding:24px; position:relative;">
     <h3 style="margin-top:0; margin-bottom:16px;">Profil Anda</h3>
     <label>Nomor WhatsApp (Tidak bisa diubah)</label>
-    <input type="text" id="prof-wa" disabled style="background:#f1f5f9; color:#64748b; cursor:not-allowed;">
+    <input type="text" id="prof-wa" disabled class="profile-disabled-input" style="cursor:not-allowed;">
     <label>Nama Anda</label>
     <input type="text" id="prof-name">
     <label>Email <span style="font-size:12px; color:var(--muted);">(Opsional, untuk pengingat otomatis)</span></label>

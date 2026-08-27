@@ -224,7 +224,7 @@ export function renderPendingMembersSection(elId, list) {
 
   if (bannerEl) {
     bannerEl.innerHTML = '<span class="semantic-status" style="color:inherit;">' + paymentStatusIcon('review') + '<span>Ada ' + list.length + ' pendaftaran member baru yang memerlukan persetujuan!</span></span>' +
-                          '<button type="button" class="link-btn" aria-label="Lihat detail pendaftaran member baru" onclick="scrollToPending(\'' + elId + '\')" style="color:white; font-size:12px; text-decoration:underline;">Lihat Detail</button>';
+                          '<button type="button" class="link-btn admin-notify-detail" aria-label="Lihat detail pendaftaran member baru" onclick="scrollToPending(\'' + elId + '\')" style="font-size:12px; text-decoration:underline;">Lihat Detail</button>';
     bannerEl.classList.remove('hidden');
   }
 
@@ -684,7 +684,7 @@ export function renderAdminCampaignViews(list) {
 
     let overdueCallout = '';
     if (c.Status === 'Open' && c.Deadline && new Date(c.Deadline) < new Date()) {
-      overdueCallout = '<div class="admin-overdue-callout" style="background:#fff1f2; border-left:4px solid var(--red); padding:8px 12px; margin-top:8px; border-radius:4px; font-size:12px; color:#991b1b;"><strong>Campaign terlewat:</strong> Hubungi PIC untuk menutup pendaftaran atau perbarui deadline.</div>';
+      overdueCallout = '<div class="admin-overdue-callout" style="border-left:4px solid var(--red); padding:8px 12px; margin-top:8px; border-radius:4px; font-size:12px;"><strong>Campaign terlewat:</strong> Hubungi PIC untuk menutup pendaftaran atau perbarui deadline.</div>';
     }
 
     cards += '<article class="admin-campaign-card admin-filterable admin-filter-canonical"' + dataAttrs + '>';
@@ -782,7 +782,7 @@ export function adminView(campaignId) {
           const amtDue = Number(d.AmountDue !== undefined ? d.AmountDue : d.amount_due) || 0;
           let displayDue = '-';
           if (customAmt > 0) {
-            displayDue = formatIDR(customAmt) + ' <span class="badge" style="font-size:10px; padding:2px 4px; background:#eff6ff; color:#1d4ed8;">Khusus</span>';
+            displayDue = formatIDR(customAmt) + ' <span class="badge theme-custom-amount-badge" style="font-size:10px; padding:2px 4px;">Khusus</span>';
           } else if (amtDue > 0) {
             displayDue = formatIDR(amtDue);
           } else if (c.Status === 'Open' || c.Status === 'Closed') {

@@ -173,6 +173,108 @@ label { color: var(--muted); }
 }
 .pic-state-callout .status-icon { color: #fcd34d; }
 
+/* ---------- semantic runtime surfaces ----------
+   Views render some states after the initial HTML has loaded. These classes
+   are the stable theme seam for those states; !important is intentional so a
+   legacy inline declaration cannot reintroduce a light island in production. */
+.theme-surface-warning {
+  background: rgba(251, 191, 36, 0.10) !important;
+  border-color: rgba(251, 191, 36, 0.38) !important;
+  color: var(--text) !important;
+}
+.theme-surface-muted {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+.theme-surface-success {
+  background: rgba(52, 211, 153, 0.07) !important;
+  border-color: rgba(52, 211, 153, 0.28) !important;
+  color: var(--text) !important;
+}
+.theme-surface-modal {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+.theme-surface-blue {
+  background: rgba(96, 165, 250, 0.10) !important;
+  border-color: rgba(147, 197, 253, 0.32) !important;
+  color: var(--text) !important;
+}
+.theme-info-note {
+  background: rgba(96, 165, 250, 0.09) !important;
+  border-color: rgba(147, 197, 253, 0.34) !important;
+  color: #bfdbfe !important;
+}
+.theme-success-heading {
+  color: #6ee7b7 !important;
+}
+.theme-custom-amount-text {
+  color: #93c5fd !important;
+}
+.theme-blue-total {
+  background: rgba(96, 165, 250, 0.12) !important;
+  color: var(--text) !important;
+}
+.theme-status-review {
+  background: rgba(251, 191, 36, 0.13) !important;
+  color: #fcd34d !important;
+}
+.theme-status-unpaid {
+  background: rgba(251, 191, 36, 0.10) !important;
+  color: #fcd34d !important;
+}
+.theme-custom-amount-badge {
+  background: rgba(96, 165, 250, 0.13) !important;
+  border-color: rgba(147, 197, 253, 0.45) !important;
+  color: #bfdbfe !important;
+}
+.pic-share-box {
+  background: rgba(52, 211, 153, 0.07) !important;
+  border-color: rgba(52, 211, 153, 0.25) !important;
+  color: var(--text) !important;
+}
+.admin-overdue-callout {
+  background: rgba(248, 113, 113, 0.10) !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+  color: #fca5a5 !important;
+}
+.profile-disabled-input {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #a8b8cf !important;
+}
+
+/* ---------- static view surfaces ----------
+   These selectors backstop CSS authored for the original light theme. Keep
+   the view structure intact, but ensure every high-area state panel stays
+   inside the Aurora contrast contract. */
+.verification-complete,
+.pic-complete-state {
+  background: rgba(52, 211, 153, 0.08) !important;
+  border-color: rgba(52, 211, 153, 0.30) !important;
+  color: #6ee7b7 !important;
+}
+.donor-dashboard-attention {
+  background: rgba(251, 191, 36, 0.10) !important;
+  border-color: rgba(251, 191, 36, 0.38) !important;
+}
+.donor-dashboard-attention-icon {
+  background: rgba(251, 191, 36, 0.18) !important;
+  color: #fcd34d !important;
+}
+.pic-progress-track {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+.admin-action-queue {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(52, 211, 153, 0.06)) !important;
+  border-color: rgba(52, 211, 153, 0.30) !important;
+}
+.admin-queue-icon {
+  background: rgba(52, 211, 153, 0.14) !important;
+  color: #6ee7b7 !important;
+}
+
 /* ---------- PIC workspace: "Tindakan berikutnya" block ----------
    views.css ships .pic-action-item on #f8fafc / primary on #eff6ff with a
    #bfdbfe border — unreadable on the dark canvas (owner finding #4).
