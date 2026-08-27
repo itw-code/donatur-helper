@@ -895,8 +895,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
       const { data, error } = await client.rpc('register_donor_member', {
         p_name: name,
         p_whatsapp: wa,
-        p_email: email || null,
-        p_alias: alias || null
+        p_emp_status: empStatus || 'active'
       });
       if (error) throw new Error(error.message || 'Gagal mendaftar.');
       if (data && data.error) throw new Error(data.message || data.error);
@@ -1136,7 +1135,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
         p_account_holder: b.accountHolder || b.account_holder || '',
         p_gift_link: b.giftLink || b.gift_link || null,
         p_gift_image: giftImagePath || b.giftImage || b.gift_image || null,
-        p_gift_amount: Number(rawFinalAmount) || 0
+        p_final_gift_amount: Number(rawFinalAmount) || 0
       });
       if (error) throw new Error(error.message || 'Gagal memfinalisasi campaign.');
       if (data && data.error) throw new Error(data.message || data.error);

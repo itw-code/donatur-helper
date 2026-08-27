@@ -142,6 +142,18 @@ assert(superadminCode.includes("currentToken()"), 'superadmin.js accesses auth t
 // -----------------------------------------------------------------------------
 console.log('\n--- 3. Backend Adapter RPC Signature Parity Check ---');
 
+// 3.0 register_donor_member RPC signature parity (p_name, p_whatsapp, p_emp_status)
+const registerRpcCall = adapterCode.match(/case 'registerUser':[\s\S]*?client\.rpc\('register_donor_member',\s*\{([\s\S]*?)\}\);/);
+assert(Boolean(registerRpcCall), 'backendAdapter.js has register_donor_member RPC dispatch');
+if (registerRpcCall) {
+  const regParams = registerRpcCall[1];
+  assert(regParams.includes('p_name'), 'register_donor_member RPC passes `p_name`');
+  assert(regParams.includes('p_whatsapp'), 'register_donor_member RPC passes `p_whatsapp`');
+  assert(regParams.includes('p_emp_status'), 'register_donor_member RPC passes `p_emp_status`');
+  assert(!regParams.includes('p_alias:'), 'register_donor_member RPC must NOT pass invalid `p_alias` key');
+  assert(!regParams.includes('p_email:'), 'register_donor_member RPC must NOT pass invalid `p_email` key');
+}
+
 // 3.1 joinCampaign RPC signature parity (must NOT pass p_is_custom)
 const joinRpcCall = adapterCode.match(/case 'joinCampaign':[\s\S]*?client\.rpc\('join_campaign',\s*\{([\s\S]*?)\}\);/);
 assert(Boolean(joinRpcCall), 'backendAdapter.js has join_campaign RPC dispatch');

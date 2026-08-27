@@ -1,0 +1,460 @@
+/* ============================================================
+   THEME OVERLAY: "dark OLED canvas with emerald aurora light"
+   Loaded last; overrides tokens + neutralizes hardcoded lights.
+   Revert = remove this file + its <link> in index.html.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+  --bg: #05080a;
+  --card: rgba(255, 255, 255, 0.045);
+  --bg-card: rgba(255, 255, 255, 0.045);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --text: #eef6f1;
+  --muted: #9db4aa;
+  --primary: #10b981;
+  --primary-hover: #0d9488;
+  --primary-rgb: 16, 185, 129;
+  --primary-transparent-20: rgba(16, 185, 129, 0.28);
+  --primary-transparent-15: rgba(16, 185, 129, 0.22);
+  --amber: #fbbf24;
+  --amber-hover: #f59e0b;
+  --blue: #60a5fa;
+  --blue-hover: #3b82f6;
+  --red: #f87171;
+  --red-hover: #ef4444;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.55);
+  --shadow-md: 0 14px 34px -10px rgba(0, 0, 0, 0.65);
+}
+
+/* ---------- ambient canvas ---------- */
+html { background: #05080a; }
+body {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  background: transparent;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(52vw 52vw at 12% -8%, rgba(6, 95, 70, 0.55), transparent 65%),
+    radial-gradient(42vw 42vw at 95% 12%, rgba(13, 148, 136, 0.35), transparent 62%),
+    radial-gradient(40vw 40vw at 50% 108%, rgba(4, 120, 87, 0.45), transparent 60%);
+  animation: dh-aurora-breathe 22s ease-in-out infinite alternate;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes dh-aurora-breathe {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-2.5%, 2%, 0) scale(1.07); }
+}
+
+/* ---------- header & landing ---------- */
+.app-header { padding-top: 48px; }
+.app-header h1 {
+  font-size: clamp(30px, 5vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  background: linear-gradient(100deg, #eef6f1 30%, #34d399 75%, #fbbf24 110%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sub { color: var(--muted); }
+
+/* ---------- surfaces ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 44px -18px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- controls ---------- */
+.btn {
+  border-radius: 999px;
+  min-height: 46px;
+  background: linear-gradient(135deg, #34d399, #0d9488);
+  color: #032019;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.35), 0 8px 30px -10px rgba(16, 185, 129, 0.6);
+}
+.btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4ade80, #14b8a6);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.5), 0 12px 38px -10px rgba(16, 185, 129, 0.75);
+}
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-hover);
+  color: var(--text);
+}
+.btn.secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.09);
+}
+.link-btn { color: #5eead4; }
+
+input, textarea, select {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: var(--border-hover);
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent, #34d399);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.22);
+}
+input:focus-visible, textarea:focus-visible, select:focus-visible,
+button:focus-visible, a:focus-visible {
+  outline: 2px solid #34d399;
+}
+input::placeholder, textarea::placeholder { color: #5c7268; }
+label { color: var(--muted); }
+
+/* ---------- badges & status ---------- */
+/* Light-theme badge pairs (#047857-on-#d1fae5 etc.) fail on dark canvas.
+   Flip to translucent tints + brightened same-hue text (>= 4.5:1 composited). */
+.badge.open      { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; }
+.badge.closed    { background: rgba(251, 191, 36, 0.13); color: #fcd34d; }
+.badge.finalized { background: rgba(96, 165, 250, 0.13); color: #93c5fd; }
+.badge.archived  { background: rgba(255, 255, 255, 0.07); color: #cbd5e1; }
+
+/* semantic-status chips were tuned for light surfaces (#047857 / #b45309);
+   on dark they drop below 4.5:1. */
+.semantic-status.success { color: #6ee7b7; }
+.semantic-status.warning { color: #fcd34d; }
+
+/* Deadline badges are JS-injected inline styles (donor.js getDeadlineBadge):
+   "background:<hex>22; color:<hex>". Attribute-match the inline color token.
+   !important required — inline declarations win specificity otherwise. */
+.badge[style*="color:#a32d2d"] {
+  background: rgba(248, 113, 113, 0.14) !important;
+  color: #fca5a5 !important;
+}
+.badge[style*="color:#d97706"],
+.badge[style*="color:#ca8a04"] {
+  background: rgba(251, 191, 36, 0.13) !important;
+  color: #fcd34d !important;
+}
+.badge[style*="color:#6b7280"] {
+  background: rgba(148, 163, 184, 0.15) !important;
+  color: #cbd5e1 !important;
+}
+.badge[style*="color:#1d9e75"] {
+  color: #34d399 !important;
+}
+
+.token-box {
+  background: rgba(0, 0, 0, 0.35);
+  color: #a7f3d0;
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.table-responsive th {
+  background: rgba(5, 8, 10, 0.85);
+  color: var(--muted);
+}
+
+.pic-state-callout {
+  background: rgba(255, 255, 255, 0.04);
+  color: #c9ded3;
+}
+.pic-state-callout .status-icon { color: #fcd34d; }
+
+/* ---------- PIC workspace: "Tindakan berikutnya" block ----------
+   views.css ships .pic-action-item on #f8fafc / primary on #eff6ff with a
+   #bfdbfe border — unreadable on the dark canvas (owner finding #4).
+   Dark-glass equivalents, primary keyed to the same blue family as .btn.blue. */
+.donor-card-settled { background: rgba(255, 255, 255, 0.03); }
+.donor-card-total { background: rgba(255, 255, 255, 0.04); }
+.donor-card-settled .donor-queue-badge { background: rgba(52, 211, 153, 0.13); color: #6ee7b7; }
+.pic-progress-metric,
+.pic-action-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+}
+.pic-action-item.primary {
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(96, 165, 250, 0.1);
+}
+.pic-action-item.primary .pic-action-copy strong { color: #dbeafe; }
+.pic-action-copy strong { color: var(--text); }
+.pic-action-copy span { color: var(--muted); }
+
+/* Blue secondary action ("Lihat detail", "Transfer", PIC next-action buttons).
+   Owner finding #2: raw bright #60a5fa chip clashes with the aurora palette.
+   Restyled as translucent blue-tinted glass, kept recognizably secondary;
+   #bfdbfe on the composited tint is ~10:1. Overrides .btn base color. */
+.btn.blue,
+.btn.blue.pic-next-action {
+  background: rgba(96, 165, 250, 0.13);
+  border: 1px solid rgba(147, 197, 253, 0.45);
+  color: #bfdbfe;
+  box-shadow: none;
+}
+.btn.blue:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.24);
+  border-color: rgba(147, 197, 253, 0.65);
+  color: #dbeafe;
+  box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.25);
+}
+
+/* ---------- inline-styled light spots (attribute-targeted) ----------
+   IMPORTANT: every declaration here carries !important because the target
+   elements carry their own inline style attributes — normal specificity loses.
+   Both "prop:value" and "prop: value" spellings are matched; the space-after-
+   colon variant previously escaped #admin-section-tools (owner finding #3).
+   [style*=] matching is case-sensitive, hence explicit uppercase variants. */
+[style*="background:#fff"], [style*="background: #fff"],
+[style*="background:#f9f9f9"], [style*="background: #f9f9f9"],
+[style*="background:#f1f5f9"], [style*="background: #f1f5f9"],
+[style*="background:#f8fafc"], [style*="background: #f8fafc"],
+[style*="background:#F8FAFC"], [style*="background-color:#f8fafc"] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text) !important;
+}
+
+/* Belt-and-braces: Tools PIC / token generator section (inline light bg). */
+#admin-section-tools {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px dashed var(--border-hover) !important;
+}
+#admin-section-tools h3,
+#admin-section-tools p,
+#admin-section-tools label { color: inherit; }
+
+/* Donor payment-instruction card (donor.js): inline #e6f1fb light panel —
+   its children (--text/--muted/#60a5fa/#5eead4/#10b981) all failed on it. */
+[style*="background:#e6f1fb"], [style*="background: #e6f1fb"] {
+  background: rgba(96, 165, 250, 0.08) !important;
+  border-color: rgba(96, 165, 250, 0.28) !important;
+  color: var(--text) !important;
+}
+[style*="background:#e6f1fb"] strong,
+[style*="background:#e6f1fb"] div:first-child { color: var(--text) !important; }
+
+/* PIC share/bill block (pic.js): inline #eaf3de light-green panel inside the
+   "Tindakan berikutnya" area (owner finding #4). */
+[style*="background:#eaf3de"], [style*="background: #eaf3de"] {
+  background: rgba(52, 211, 153, 0.07) !important;
+  border: 1px solid rgba(52, 211, 153, 0.25) !important;
+  color: var(--text) !important;
+}
+
+/* Member list totals footer (pic.js): inline #f5f7fa tfoot band. */
+[style*="background:#f5f7fa"], [style*="background: #f5f7fa"] {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text) !important;
+}
+tfoot[style*="#f5f7fa"] td { color: var(--text) !important; }
+
+/* Privacy notice (index.html): rgba(0,123,255,.06) panel + #0056b3 lock/text. */
+[style*="rgba(0, 123, 255"], [style*="rgba(0,123,255"] {
+  background: rgba(96, 165, 250, 0.09) !important;
+  border-color: rgba(96, 165, 250, 0.3) !important;
+}
+[style*="rgba(0, 123, 255"] span:last-child,
+[style*="rgba(0, 123, 255"] strong { color: #bfdbfe !important; }
+[style*="color: #0056b3"], [style*="color:#0056b3"],
+[style*="color: #0056B3"], [style*="color:#0056B3"] { color: #93c5fd !important; }
+
+/* Modal close "x" buttons carry inline color:#888 (admin.js) — borderline 4.85:1
+   composited; lift into comfortable range. */
+[style*="color:#888"] { color: #a8b8cf !important; }
+
+/* Notify banners (index.html): inline background:#d97706 + white bold text =
+   2.6:1. Amber-tinted glass keeps alert semantics at readable contrast. */
+#admin-notify-banner,
+#sa-notify-banner {
+  background: rgba(251, 191, 36, 0.1) !important;
+  color: #fde68a !important;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+/* ---------- admin & superadmin chrome ----------
+   Owner finding #1: sticky nav bar hardcoded #ffffff (+ #f1f5f9/#e2e8f0/#fef2f2
+   hovers) and filter toolbars on #f8fafc read as "whitey" islands. */
+.admin-nav-bar {
+  background: rgba(8, 13, 12, 0.88);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-hover);
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.8);
+}
+.admin-nav-link { color: var(--text); }
+.admin-nav-link:hover { background: rgba(52, 211, 153, 0.12); color: #ffffff; }
+.admin-nav-link:active { background: rgba(52, 211, 153, 0.22); color: #ffffff; }
+.admin-nav-logout:hover { background: rgba(248, 113, 113, 0.14); }
+
+.admin-data-toolbar {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+}
+.admin-data-toolbar label,
+.admin-data-toolbar-summary,
+.admin-data-toolbar-hint { color: var(--muted); }
+.admin-data-toolbar input,
+.admin-data-toolbar select {
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+/* ---------- flatpickr ----------
+   Calendar shell is darkened here, but flatpickr.min.css keeps day/weekday/
+   arrow ink at light-theme grays (#39393a-family) -> invisible on #0b1512. */
+.flatpickr-calendar {
+  background: #0b1512;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+.flatpickr-calendar.arrowTop:before { border-bottom-color: #0b1512; }
+.flatpickr-calendar.arrowBottom:before { border-top-color: #0b1512; }
+.flatpickr-calendar.arrowTop:after { border-bottom-color: #0b1512; }
+.flatpickr-calendar.arrowBottom:after { border-top-color: #0b1512; }
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month input.flatpickr-monthDropdown-months,
+.flatpickr-current-month .flatpickr-monthDropdown-month,
+.flatpickr-monthSelect-month:hover { color: var(--text); }
+select.flatpickr-monthDropdown-months option,
+.flatpickr-monthDropdown-month { background: #0b1512; color: var(--text); }
+.numInputWrapper span.arrowUp:after {
+  border-bottom-color: var(--text);
+}
+.numInputWrapper span.arrowDown:after {
+  border-top-color: var(--text);
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year { color: var(--text); }
+span.flatpickr-weekday,
+.flatpickr-weekdays { color: var(--muted); fill: var(--muted); }
+.flatpickr-prev-month svg,
+.flatpickr-next-month svg { fill: var(--text); }
+.flatpickr-prev-month:hover svg,
+.flatpickr-next-month:hover svg { fill: #34d399; }
+.flatpickr-day {
+  color: #d7e7de;
+}
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay { color: rgba(215, 231, 222, 0.35); }
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.notAllowed { color: rgba(215, 231, 222, 0.2); }
+.flatpickr-day.today { border-color: #34d399; }
+.flatpickr-day.today:hover { background: rgba(52, 211, 153, 0.15); color: var(--text); }
+.flatpickr-day.inRange {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text);
+}
+.flatpickr-calendar .flatpickr-day:hover { background: rgba(52, 211, 153, 0.15); }
+.flatpickr-calendar .flatpickr-day.selected {
+  background: #10b981;
+  border-color: #10b981;
+  color: #032019;
+}
+.flatpickr-time input,
+.flatpickr-time .flatpickr-time-separator,
+.flatpickr-time .flatpickr-am-pm { color: var(--text); }
+.flatpickr-time input:hover,
+.flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-time input:focus,
+.flatpickr-time .flatpickr-am-pm:focus { background: rgba(52, 211, 153, 0.12); }
+
+/* ============================================================
+   round 2: mechanical audit residuals
+   Fixes for .scratch/contrast-residual-real.json (true-alpha run).
+   ============================================================ */
+
+/* "Tinjau" review links (index.html .admin-queue-review): views.css ships
+   #047857, tuned for light rows — ~3:1 on the dark queue rows now.
+   Brighten into the overlay's mint family (~8.8:1 composited). */
+.admin-queue-review {
+  color: #34d399;
+}
+
+/* Danger status chips ("Terlewat N hari", admin.js): views.css keeps
+   var(--red) ink; pin the brightened red family used across this overlay
+   (~9.8:1 on the darkened card surface). */
+.semantic-status.danger {
+  color: #fca5a5;
+}
+
+/* Destructive buttons ("Hapus campaign"): raw #ef4444 keeps white text at
+   3.76:1. Deepen the surface to #b91c1c — white holds ~6.5:1 on it. */
+.btn.danger {
+  background: #b91c1c;
+  color: #ffffff;
+}
+.btn.danger:hover:not(:disabled) {
+  background: #991b1b;
+  box-shadow: 0 4px 6px -1px rgba(185, 28, 28, 0.35);
+}
+
+/* Amber action buttons ("Bersihkan Arsip Data", index.html .btn.amber):
+   white on #f59e0b is 2.15:1 — switch the ink to deep brown (~7:1) and keep
+   the alert-colored surface (also passes on the #d97706 hover at ~4.7:1). */
+.btn.amber {
+  color: #451a03;
+}
+
+/* Admin / SuperAdmin "Keluar" nav link: pin brightened red on its own dark
+   chip so it never leans on an inherited light surface (>= 6.5:1). */
+.admin-nav-bar .admin-nav-link.admin-nav-logout {
+  background: rgba(248, 113, 113, 0.08);
+  color: #f87171;
+}
+.admin-nav-bar .admin-nav-link.admin-nav-logout:hover,
+.admin-nav-bar .admin-nav-link.admin-nav-logout:focus-visible {
+  background: rgba(248, 113, 113, 0.16);
+}
+
+/* "Kembali ke Dashboard Admin" return buttons (view-pic-dashboard):
+   solid deep-blue secondary surface with near-white ink (~6.2:1),
+   matching the theme's secondary-blue semantics. */
+#btn-return-admin,
+#btn-return-member {
+  background: #1d4ed8;
+  border: 1px solid rgba(147, 197, 253, 0.45);
+  color: #eff6ff;
+  box-shadow: none;
+}
+#btn-return-admin:hover:not(:disabled),
+#btn-return-member:hover:not(:disabled) {
+  background: #1e40af;
+  color: #ffffff;
+}
+
+/* "Persetujuan Donatur Susulan" headings (index.html): inline
+   color:var(--amber) must resolve to the brightened token; pin #fcd34d with
+   !important against the inline declaration (~12.9:1 on the darkened card).
+   Both spacing variants matched; [style*=] is case-sensitive. */
+h2[style*="color:var(--amber"], h2[style*="color: var(--amber"] {
+  color: #fcd34d !important;
+}
+
+/* Modal close "×" (#888 on #f9f9f9 panels in index.html + JS templates):
+   widen the attribute match with spaced-colon and longhand variants so every
+   spelling of the inline style is caught; force readable muted slate
+   (~9.2:1 on the darkened panel). */
+[style*="color:#888"], [style*="color: #888"],
+[style*="color:#888888"], [style*="color: #888888"] {
+  color: #a8b8cf !important;
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}

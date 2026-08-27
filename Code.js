@@ -1482,7 +1482,8 @@ function withdrawCampaign(campaignId, whatsapp) {
 }
 
 /**
- * fileData: { base64: string, mimeType: string, fileName: string }
+ * fileData: either a Supabase Storage relative path (e.g. 'proofs/C-123/wa_1.png'),
+ * a direct http(s) URL, or the legacy object { base64: string, mimeType: string, fileName: string }.
  */
 function submitPaymentProof(campaignId, whatsapp, fileData) {
   const lock = LockService.getScriptLock();
@@ -1496,6 +1497,23 @@ function submitPaymentProof(campaignId, whatsapp, fileData) {
     // Idempotency: if they already uploaded proof, just return the existing proof URL
     if (String(existing.Paid).toUpperCase() === 'TRUE' && existing.ProofLink) {
       return existing.ProofLink;
+    }
+
+    const proofRef = (typeof fileData === 'string') ? fileData.trim() : '';
+    if (!proofRef && !(fileData && typeof fileData === 'object' && fileData.base64)) {
+      throw new Error('Data bukti pembayaran tidak valid.');
+    }
+
+    // New contract: frontend uploads to Supabase Storage and sends a storage path or URL.
+    // Store it as-is in ProofLink — no Drive upload. DONORS sheet has no ProofStoragePath column.
+    if (proofRef) {
+      const sh = sheet_(SHEETS.DONORS);
+      sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'Paid') + 1).setValue('TRUE');
+      sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'ProofLink') + 1).setValue(proofRef);
+      sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'PaidAt') + 1).setValue(new Date());
+      sh.getRange(existing._row, headerIndex_(SHEETS.DONORS, 'AmountPaid') + 1).setValue(existing.AmountDue || 0); // Snapshot original bill
+      SpreadsheetApp.flush();
+      return proofRef;
     }
 
     const folderId = getSetting('ProofsFolderId');
@@ -1525,12 +1543,24 @@ function submitCombinedPaymentProof(campaignIds, whatsapp, fileData) {
     whatsapp = normalizePhone_(whatsapp);
     if (!Array.isArray(campaignIds) || campaignIds.length === 0) throw new Error('Daftar Campaign tidak valid.');
 
-    const folderId = getSetting('ProofsFolderId');
-    const folder = DriveApp.getFolderById(folderId);
-    const blob = Utilities.newBlob(Utilities.base64Decode(fileData.base64), fileData.mimeType, fileData.fileName);
-    const file = folder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    const fileUrl = file.getUrl();
+    const proofRef = (typeof fileData === 'string') ? fileData.trim() : '';
+    if (!proofRef && !(fileData && typeof fileData === 'object' && fileData.base64)) {
+      throw new Error('Data bukti pembayaran tidak valid.');
+    }
+
+    let fileUrl;
+    if (proofRef) {
+      // New contract: Supabase Storage path or http(s) URL — store as-is, no Drive upload.
+      fileUrl = proofRef;
+    } else {
+      // Legacy object payload: upload to Drive.
+      const folderId = getSetting('ProofsFolderId');
+      const folder = DriveApp.getFolderById(folderId);
+      const blob = Utilities.newBlob(Utilities.base64Decode(fileData.base64), fileData.mimeType, fileData.fileName);
+      const file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      fileUrl = file.getUrl();
+    }
 
     const donorsSheet = sheet_(SHEETS.DONORS);
     const donors = getRows_(SHEETS.DONORS);

@@ -19,5 +19,7 @@ data/export/
 *.csv
 secrets/
 js/config/env.local.js
+__pycache__/
+*.pyc
 dist/
 supabase/.temp/

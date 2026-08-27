@@ -536,7 +536,7 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   
   html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin: 12px 0;">';
   html += '<div style="font-size:12px; color:var(--text);">Total nominal gabungan yang harus ditransfer:</div>';
-  html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(totalDue);
+  html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; justify-content:center; gap:8px;">' + formatIDR(totalDue);
   html += ' <span class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">Salin</span>';
   html += '</div>';
   html += '</div>';
@@ -628,7 +628,7 @@ export function renderCampaignCard(c, user, isPending) {
       html += '<div class="card" style="background:#e6f1fb;border:none;">';
       html += '<div style="background:var(--blue-light); padding:12px; border-radius:8px; margin-bottom:12px;">';
       html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
-      html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; gap:8px;">' + formatIDR(c.amountDue);
+      html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; justify-content:center; gap:8px;">' + formatIDR(c.amountDue);
       html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">Salin</span>';
       html += '</div>';
       html += '</div>';

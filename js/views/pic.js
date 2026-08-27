@@ -98,9 +98,16 @@ export async function resolvePicMediaUrls(detail) {
   if (Array.isArray(detail.donors)) {
     detail.donors.forEach(d => {
       const storagePath = d.proof_storage_path || d.ProofStoragePath;
-      if (storagePath && typeof storagePath === 'string' && !storagePath.startsWith('http')) {
+      // Fallback: backend stores the Supabase Storage path directly in ProofLink
+      const proofRefCandidate = d.ProofLink || d.proof_link;
+      const proofRef = (storagePath && typeof storagePath === 'string' && !storagePath.startsWith('http'))
+        ? storagePath
+        : ((proofRefCandidate && typeof proofRefCandidate === 'string' && !proofRefCandidate.startsWith('http'))
+          ? proofRefCandidate
+          : '');
+      if (proofRef) {
         promises.push(
-          getBuktiSignedUrl(storagePath).then(url => {
+          getBuktiSignedUrl(proofRef).then(url => {
             if (url) {
               d._resolvedProofUrl = url;
               d.ProofLink = url;
@@ -881,7 +888,14 @@ export function renderDonorTable(detail) {
       const isPaid = String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
       const isVerified = String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
       const isRefunded = String(d.Refunded || (d.refunded ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE';
-      const proofPath = d.proof_storage_path || d.ProofStoragePath || '';
+      let proofPath = d.proof_storage_path || d.ProofStoragePath || '';
+      // Fallback: backend may store the Supabase Storage path directly in ProofLink
+      if (!proofPath) {
+        const linkCandidate = d.ProofLink || d.proof_link;
+        if (linkCandidate && typeof linkCandidate === 'string' && !linkCandidate.startsWith('http')) {
+          proofPath = linkCandidate;
+        }
+      }
       const proofLink = d._resolvedProofUrl || (proofPath && proofPath.startsWith('http') ? proofPath : '') || d.proof_link || d.ProofLink || '';
       const hasProof = Boolean(String(proofPath || proofLink || '').trim());
       const customAmount = Number(d.CustomAmount !== undefined ? d.CustomAmount : (d.custom_amount !== undefined ? d.custom_amount : 0)) || 0;
