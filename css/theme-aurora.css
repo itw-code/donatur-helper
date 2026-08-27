@@ -6,6 +6,7 @@
 
 :root {
   color-scheme: dark;
+  accent-color: #10b981;
   --bg: #05080a;
   --card: rgba(255, 255, 255, 0.045);
   --bg-card: rgba(255, 255, 255, 0.045);
@@ -111,6 +112,14 @@ body::after {
 input, textarea, select {
   background: rgba(0, 0, 0, 0.35);
   border-color: var(--border-hover);
+  color: var(--text);
+}
+select option {
+  background: #0b1411;
+  color: var(--text);
+}
+input[type="checkbox"], input[type="radio"] {
+  accent-color: var(--primary, #10b981);
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent, #34d399);
@@ -120,16 +129,48 @@ input:focus-visible, textarea:focus-visible, select:focus-visible,
 button:focus-visible, a:focus-visible {
   outline: 2px solid #34d399;
 }
-input::placeholder, textarea::placeholder { color: #5c7268; }
+input::placeholder, textarea::placeholder { color: #8da89c; }
 label { color: var(--muted); }
+
+/* ---------- scrollbars ---------- */
+* {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
 
 /* ---------- badges & status ---------- */
 /* Light-theme badge pairs (#047857-on-#d1fae5 etc.) fail on dark canvas.
    Flip to translucent tints + brightened same-hue text (>= 4.5:1 composited). */
-.badge.open      { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; }
-.badge.closed    { background: rgba(251, 191, 36, 0.13); color: #fcd34d; }
-.badge.finalized { background: rgba(96, 165, 250, 0.13); color: #93c5fd; }
-.badge.archived  { background: rgba(255, 255, 255, 0.07); color: #cbd5e1; }
+.badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.badge.open      { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.3); }
+.badge.green,
+.badge.success   { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.3); }
+.badge.closed    { background: rgba(251, 191, 36, 0.13); color: #fcd34d; border-color: rgba(251, 191, 36, 0.3); }
+.badge.amber,
+.badge.warning   { background: rgba(251, 191, 36, 0.13); color: #fcd34d; border-color: rgba(251, 191, 36, 0.3); }
+.badge.finalized { background: rgba(96, 165, 250, 0.13); color: #93c5fd; border-color: rgba(96, 165, 250, 0.3); }
+.badge.blue,
+.badge.info      { background: rgba(96, 165, 250, 0.13); color: #93c5fd; border-color: rgba(96, 165, 250, 0.3); }
+.badge.red,
+.badge.danger    { background: rgba(248, 113, 113, 0.14); color: #fca5a5; border-color: rgba(248, 113, 113, 0.3); }
+.badge.archived  { background: rgba(255, 255, 255, 0.07); color: #cbd5e1; border-color: var(--border); }
 
 /* semantic-status chips were tuned for light surfaces (#047857 / #b45309);
    on dark they drop below 4.5:1. */
@@ -192,10 +233,18 @@ label { color: var(--muted); }
   border-color: rgba(52, 211, 153, 0.28) !important;
   color: var(--text) !important;
 }
-.theme-surface-modal {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: var(--border) !important;
+.theme-surface-modal,
+#custom-info-modal > .card,
+#custom-confirm-modal > .card,
+#custom-bulk-join-modal > .card,
+#edit-gift-modal > .card,
+#edit-amount-modal > .card,
+#admin-modal .card,
+#profile-modal .card {
+  background: #0b1411 !important;
+  border: 1px solid var(--border-hover) !important;
   color: var(--text) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85) !important;
 }
 .theme-surface-blue {
   background: rgba(96, 165, 250, 0.10) !important;

@@ -1,5 +1,29 @@
 /* Reusable UI Components */
 
+.badge.green,
+.badge.success {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.badge.amber,
+.badge.warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.badge.blue,
+.badge.info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge.red,
+.badge.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .card {
   background: var(--card);
   border: 1px solid var(--border);

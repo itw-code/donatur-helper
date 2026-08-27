@@ -85,3 +85,29 @@ test('Theme migration regression: every runtime surface seam has a dark-theme ov
     'Undefined --blue-light tokens must not create transparent/unstyled payment surfaces'
   );
 });
+
+test('Theme migration regression: badge variants, placeholders, select options, and modals have high contrast overrides', () => {
+  const themeCss = read('css/theme-aurora.css');
+
+  // Verify badge classes
+  const requiredBadgeSelectors = [
+    /\.badge\s*\{/,
+    /\.badge\.green/,
+    /\.badge\.success/,
+    /\.badge\.blue/,
+    /\.badge\.amber/,
+    /\.badge\.red/
+  ];
+  for (const pattern of requiredBadgeSelectors) {
+    assert.match(themeCss, pattern, `theme-aurora.css must define badge pattern ${pattern}`);
+  }
+
+  // Verify placeholder color
+  assert.match(themeCss, /input::placeholder[^{]*\{[^}]*color:\s*#8da89c/, 'input::placeholder must use high-contrast #8da89c');
+
+  // Verify select options
+  assert.match(themeCss, /select\s+option\s*\{[^}]*background:\s*#0b1411/, 'select option must have dark background');
+
+  // Verify modal cards
+  assert.match(themeCss, /#profile-modal\s+\.card/, 'profile modal card must have opaque dark background');
+});
