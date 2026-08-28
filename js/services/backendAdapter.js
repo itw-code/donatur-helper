@@ -6,7 +6,7 @@ export const DEFAULT_TIMEOUT_MS = 15000;
 const MIGRATED_ACTIONS = new Set([
   'loginWithToken', 'getDashboardSummary', 'getPendingMembers', 'getPendingLateRequests',
   'listAllCampaigns', 'fetchAllMembers', 'getCampaignForPic', 'getSettingsForSuperAdmin',
-  'checkDonorWhatsApp', 'listActiveCampaigns', 'getUserPicCampaigns', 'getPublicSettings',
+  'checkDonorWhatsApp', 'listActiveCampaigns', 'getUserPicCampaigns', 'claimPicCampaigns', 'getPublicSettings',
   'registerUser', 'updateMemberProfile', 'generateSeamlessPicToken', 'deleteDraftPicToken',
   'joinCampaign', 'joinCampaignsBulk', 'withdrawCampaign', 'submitPaymentProof',
   'submitCombinedPaymentProof', 'createCampaign', 'closeCampaignList', 'reopenCampaignList',
@@ -867,7 +867,35 @@ async function _dispatchSupabaseRpc(action, args = []) {
         giftAmount: Number(c.gift_amount) || 0,
         status: _normalizeCampaignStatus(c.status),
         deadline: c.deadline ? String(c.deadline).split('T')[0] : '',
-        token: c.token,
+        token: c.token || '',
+        picAlias: c.pic_alias || '',
+        picWhatsapp: c.pic_whatsapp || '',
+        donorCount: c.donor_count || 0,
+        totalCollected: Number(c.total_collected) || 0,
+        hasToken: Boolean(c.token),
+        ...c
+      }));
+    }
+
+    case 'claimPicCampaigns': {
+      let wa = '';
+      if (args[0] && typeof args[0] === 'object') {
+        wa = String(args[0].whatsapp || args[0].p_whatsapp || '').trim();
+      } else {
+        wa = String(args[0] || '').trim();
+      }
+      const { data, error } = await client.rpc('claim_pic_campaigns', { p_whatsapp: wa });
+      if (error) throw new Error(error.message || 'Gagal memuat campaign PIC.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return (data || []).map(c => ({
+        campaignId: c.campaign_id,
+        targetName: c.target_name,
+        reason: c.reason || '',
+        giftAmount: Number(c.gift_amount) || 0,
+        status: _normalizeCampaignStatus(c.status),
+        deadline: c.deadline ? String(c.deadline).split('T')[0] : '',
+        picAlias: c.pic_alias || '',
         donorCount: c.donor_count || 0,
         totalCollected: Number(c.total_collected) || 0,
         ...c

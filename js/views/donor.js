@@ -113,7 +113,65 @@ export function loadUserDashboard() {
 
   showView('user-dashboard');
   refreshCampaignList();
+  loadMyPicCampaigns(user.whatsapp);
 }
+
+// Option B: surface PIC-owned campaigns on the donor dashboard so a transferred
+// campaign (whose token is persisted) can be entered without hunting the token.
+export function loadMyPicCampaigns(whatsapp) {
+  const container = document.getElementById('my-pic-campaigns');
+  if (!container || !whatsapp) return;
+  container.innerHTML = '';
+  call('claimPicCampaigns', { whatsapp: whatsapp })
+    .then(list => {
+      container.innerHTML = renderMyPicCampaigns(list, whatsapp);
+    })
+    .catch(() => {
+      // Non-fatal: donor dashboard should still work if this discovery fails.
+      container.innerHTML = '';
+    });
+}
+
+function renderMyPicCampaigns(list, whatsapp) {
+  if (!Array.isArray(list) || !list.length) return '';
+  const rows = list.map(c => {
+    const statusBadgeHtml = statusBadge(c.status);
+    return '<div class="my-pic-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px dashed var(--border);flex-wrap:wrap;">'
+      + '<div style="min-width:0;flex:1;"><strong>' + escapeHtml(c.targetName || c.campaignId || '-') + '</strong> <span class="muted" style="font-size:12px;">(' + escapeHtml(c.campaignId || '') + ')</span><br>'
+      + '<span class="muted" style="font-size:12px;">' + String(c.donorCount || 0) + ' donatur &middot; Terkumpul ' + formatIDR(c.totalCollected || 0) + '</span></div>'
+      + statusBadgeHtml
+      + '<button class="btn secondary btn-auto" style="font-size:12px;padding:4px 10px;" onclick="openPicCampaignFromDonor(\\'' + String(c.campaignId || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\\')">Buka Dashboard PIC</button>'
+      + '</div>';
+  }).join('');
+  return '<div class="card" style="margin-bottom:16px;"><h3 style="margin-top:0;font-size:15px;">🛠️ Campaign yang kamu kelola sebagai PIC</h3>'
+    + rows
+    + '<p class="muted" style="font-size:12px;margin-top:8px;">Kampanye ini ditransfer kepadamu oleh admin. Buka untuk mengelola donatur & pembayaran.</p></div>';
+}
+
+export async function openPicCampaignFromDonor(campaignId) {
+  const user = JSON.parse(safeGet('donor_user') || 'null');
+  if (!user || !user.whatsapp) {
+    showInfoModal('Sesi login tidak valid. Silakan login kembali.', 'Peringatan');
+    return;
+  }
+  try {
+    const list = await call('getUserPicCampaigns', { whatsapp: user.whatsapp });
+    const row = Array.isArray(list) ? list.find(c => c.campaignId === campaignId) : null;
+    if (!row || !row.token) {
+      showInfoModal('Token PIC untuk campaign ini belum tersimpan. Hubungi admin untuk mendapatkan token PIC baru.', 'Info');
+      return;
+    }
+    // Use the global loginToken exposed by app.js (avoids circular import with auth.js).
+    if (typeof window !== 'undefined' && typeof window.loginToken === 'function') {
+      window.loginToken(String(row.token).trim());
+    } else {
+      showInfoModal('Mohon login manual dengan token PIC: ' + String(row.token), 'Info');
+    }
+  } catch (err) {
+    showInfoModal(formatUserErrorMessage(err), 'Kendala');
+  }
+}
+
 
 export function seamlessBecomePic(e) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
@@ -127,19 +185,44 @@ export function seamlessBecomePic(e) {
     btn.disabled = true;
   }
 
-  call('generateSeamlessPicToken', user.whatsapp).then(res => {
-    if (btn) {
-      btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";
-      btn.disabled = false;
-    }
-    const token = typeof res === 'object' && res ? (res.token || res) : res;
-    if (!token) {
-      throw new Error('Token PIC tidak ditemukan dalam respons server.');
-    }
-    safeSet('auth_token', token);
-    safeSet('auth_role', 'PIC');
-    showInfoModal('Token PIC Anda: ' + token + '\n\nToken telah disimpan dan Anda dialihkan ke pembuatan campaign.', 'Sukses');
-    loadPicDashboard();
+  // Option B: if the member already owns ACTIVE PIC campaigns (e.g. transferred
+  // by admin), reuse the latest login token instead of always minting a draft.
+  const reuseExisting = () => call('getUserPicCampaigns', { whatsapp: user.whatsapp })
+    .then(list => {
+      const owned = Array.isArray(list)
+        ? list.find(c => Boolean(c.token) && c.status !== 'Draft')
+        : null;
+      if (owned && owned.token) {
+        if (btn) {
+          btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";
+          btn.disabled = false;
+        }
+        safeSet('auth_token', String(owned.token).trim());
+        safeSet('auth_role', 'PIC');
+        showInfoModal('Anda sudah menjadi PIC untuk campaign ' + (owned.targetName || owned.campaignId) + '.\n\nAnda dialihkan ke dashboard PIC campaign tersebut.', 'Info');
+        loadPicDashboard();
+        return true;
+      }
+      return false;
+    })
+    .catch(() => false);
+
+  reuseExisting().then(used => {
+    if (used) return;
+    return call('generateSeamlessPicToken', user.whatsapp).then(res => {
+      if (btn) {
+        btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";
+        btn.disabled = false;
+      }
+      const token = typeof res === 'object' && res ? (res.token || res) : res;
+      if (!token) {
+        throw new Error('Token PIC tidak ditemukan dalam respons server.');
+      }
+      safeSet('auth_token', token);
+      safeSet('auth_role', 'PIC');
+      showInfoModal('Token PIC Anda: ' + token + '\n\nToken telah disimpan dan Anda dialihkan ke pembuatan campaign.', 'Sukses');
+      loadPicDashboard();
+    });
   }).catch(err => {
     if (btn) {
       btn.textContent = "+ Buat Campaign Baru (Jadi PIC)";

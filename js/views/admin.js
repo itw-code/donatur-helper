@@ -694,7 +694,7 @@ export function renderAdminCampaignViews(list) {
     cards += '<div><dt>Donatur</dt><dd>' + String(c.paidCount) + '/' + String(c.donorCount) + ' sudah bayar</dd></div>';
     cards += '</dl>';
     cards += overdueCallout;
-    cards += '<details class="admin-card-more" style="margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 6px;"><summary class="muted" style="cursor: pointer; font-size: 12px;">Info PIC & Log</summary><div style="font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4;"><span><strong>PIC:</strong> ' + escapeHtml(c.picName || '-') + '</span><br><span><strong>Terakhir diupdate:</strong> ' + updateText + '</span></div></details>';
+    cards += '<details class="admin-card-more" style="margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 6px;"><summary class="muted" style="cursor: pointer; font-size: 12px;">Info PIC & Log</summary><div style="font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4;"><span><strong>PIC:</strong> ' + escapeHtml(c.picName || '-') + '</span>' + (c.picWhatsapp ? '<br><span><strong>WhatsApp:</strong> ' + escapeHtml(c.picWhatsapp) + '</span>' : '') + '<br><span><strong>Terakhir diupdate:</strong> ' + updateText + '</span></div></details>';
     cards += renderAdminCampaignActions(c, role) + '</article>';
 
     table += '<tr class="admin-filterable"' + dataAttrs + '><td>' + targetName + '</td><td>' + statusBadge(c.Status) + '</td>';
@@ -924,13 +924,18 @@ export function adminTransferOwnershipUI(campaignId) {
           : '';
 
         let modalBody = successMsg;
+        const targetWa = (typeof res === 'object' && res !== null && res.target_whatsapp)
+          ? res.target_whatsapp
+          : '';
+
         if (newToken) {
           modalBody += '\n\nToken PIC Baru: ' + newToken;
         }
         if (targetName) {
-          modalBody += '\n\nCampaign ini otomatis muncul di dashboard ' + targetName + '.';
+          modalBody += '\n\n' + targetName + ' (' + (targetWa || 'nomor yang dipilih') + ') sekarang adalah PIC campaign ini.\n';
+          modalBody += '\n⚠️ Kampanye INI TIDAK otomatis muncul di dashboard donatur. ' + targetName + ' harus login melalui tombol "Saya punya token (PIC / Admin / Super Admin)" dengan token di atas, atau melalui "Buka Dashboard PIC" di dashboard donaturnya (jika pemilik token tersimpan).';
         } else {
-          modalBody += '\n\nCampaign ini otomatis muncul di dashboard member yang bersangkutan.';
+          modalBody += '\n\nKampanye ini otomatis muncul di dashboard member yang bersangkutan.';
         }
 
         showInfoModal(modalBody, 'Sukses');
