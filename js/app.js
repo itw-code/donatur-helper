@@ -88,7 +88,9 @@ import {
   withdraw,
   submitProof,
   submitCombinedProof,
-  deleteDraftCampaign
+  deleteDraftCampaign,
+  openMediaFile,
+  getDonorProofSignedUrl
 } from './views/donor.js';
 import {
   loadPicDashboard,
@@ -273,6 +275,8 @@ const globalBindings = {
   submitProof,
   submitCombinedProof,
   deleteDraftCampaign,
+  openMediaFile,
+  getDonorProofSignedUrl,
   loadPicDashboard,
   createCampaign,
   getPicProgress,

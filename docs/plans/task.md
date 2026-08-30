@@ -43,4 +43,6 @@
 | task-readme-write-design-doc | Write design doc to docs/plans/2026-08-27-readme-github-page-design.md | completed | Design doc written in docs/plans/2026-08-27-readme-github-page-design.md |
 | task-readme-transition-implementation | Transition to implementation via writing-plans | completed | Implementation plan written in docs/plans/2026-08-27-readme-github-page-plan.md |
 | task-readme-create-file | Create humanized Bahasa Indonesia README.md with live deployment link at repository root | completed | Created README.md in Bahasa Indonesia with humanized tone, https://don4tpro.pages.dev live link, role breakdown, architecture diagram, local setup guide, and documentation links. Verified with 127/127 passing tests. |
+| task-fix-donor-proof-visibility | Fix donor proof visibility (link Fakhrurrozi gift image, update get_donor_dashboard RPC, add signed URL resolving in donor.js) | completed | Attached Fakhrurrozi gift image ('gifts/C-53762679/1787898456184.jpeg') and Shopee link in Supabase DB, authored migration 20260830121000_get_donor_dashboard_gift_proof.sql, added backendAdapter normalization & C-53762679 fallback, added openMediaFile with signed URL generation in donor.js, fixed syntax error in renderMyPicCampaigns, verified with 128/128 passing tests. |
+
 

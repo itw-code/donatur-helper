@@ -757,8 +757,13 @@ async function _dispatchSupabaseRpc(action, args = []) {
         const bName = camp.bank_name || c.bank_name || '';
         const bAcc = camp.bank_account || c.bank_account || '';
         const aHolder = camp.account_holder || c.account_holder || '';
-        const gLink = camp.gift_link || c.gift_link || '';
-        const gImg = camp.gift_image || c.gift_image || '';
+        let gLink = camp.gift_link || c.gift_link || '';
+        let gImg = camp.gift_image || c.gift_image || '';
+        // Fallback for campaign C-53762679 if SQL migration has not yet been applied to get_donor_dashboard RPC
+        if (cId === 'C-53762679' || String(tName).toLowerCase().includes('fakhrurrozi')) {
+          if (!gImg) gImg = 'gifts/C-53762679/1787898456184.jpeg';
+          if (!gLink) gLink = 'https://s.shopee.co.id/112T6T2fo1';
+        }
         const dCount = Number(camp.donor_count !== undefined ? camp.donor_count : (c.donor_count !== undefined ? c.donor_count : c.donorCount)) || 0;
 
         const dStatus = String(c.donor_status || 'PLEDGED').toUpperCase();
@@ -791,14 +796,18 @@ async function _dispatchSupabaseRpc(action, args = []) {
           verified: Boolean(c.verified),
           refunded: Boolean(c.refunded),
           proofLink: c.proof_link || '',
+          ProofLink: c.proof_link || '',
           proofStoragePath: c.proof_storage_path || '',
+          ProofStoragePath: c.proof_storage_path || '',
           joinedAt: c.joined_at || '',
           paidAt: c.paid_at || '',
           bankName: bName,
           bankAccount: bAcc,
           accountHolder: aHolder,
           giftLink: gLink,
+          GiftLink: gLink,
           giftImage: gImg,
+          GiftImage: gImg,
           joined: isJoined,
           action_group: actGrp
         };

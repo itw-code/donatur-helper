@@ -22,6 +22,36 @@ function _getSupabaseClient() {
   return null;
 }
 
+export async function getDonorProofSignedUrl(storagePath) {
+  if (!storagePath || typeof storagePath !== 'string' || !storagePath.trim()) return null;
+  const cleanPath = storagePath.trim();
+  if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) return cleanPath;
+  try {
+    const client = _getSupabaseClient();
+    if (!client || !client.storage) return null;
+    const { data, error } = await client.storage.from('bukti-transfer').createSignedUrl(cleanPath, 3600);
+    return (!error && data && data.signedUrl) ? data.signedUrl : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+export async function openMediaFile(storagePath, fallbackUrl) {
+  const target = storagePath || fallbackUrl;
+  if (!target) return;
+  if (target.startsWith('http://') || target.startsWith('https://')) {
+    window.open(target, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  showToast('Memuat dokumen/foto...');
+  const signed = await getDonorProofSignedUrl(target);
+  if (signed) {
+    window.open(signed, '_blank', 'noopener,noreferrer');
+  } else {
+    showInfoModal('Gagal memuat link dokumen/foto.', 'Error');
+  }
+}
+
 export function openProfileModal() {
   const user = JSON.parse(safeGet('donor_user') || '{}');
   const profWa = document.getElementById('prof-wa');
@@ -140,7 +170,7 @@ function renderMyPicCampaigns(list, whatsapp) {
       + '<div style="min-width:0;flex:1;"><strong>' + escapeHtml(c.targetName || c.campaignId || '-') + '</strong> <span class="muted" style="font-size:12px;">(' + escapeHtml(c.campaignId || '') + ')</span><br>'
       + '<span class="muted" style="font-size:12px;">' + String(c.donorCount || 0) + ' donatur &middot; Terkumpul ' + formatIDR(c.totalCollected || 0) + '</span></div>'
       + statusBadgeHtml
-      + '<button class="btn secondary btn-auto" style="font-size:12px;padding:4px 10px;" onclick="openPicCampaignFromDonor(\\'' + String(c.campaignId || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\\')">Buka Dashboard PIC</button>'
+      + '<button class="btn secondary btn-auto" style="font-size:12px;padding:4px 10px;" onclick="openPicCampaignFromDonor(\'' + escapeHtml(c.campaignId || '') + '\')">Buka Dashboard PIC</button>'
       + '</div>';
   }).join('');
   return '<div class="card" style="margin-bottom:16px;"><h3 style="margin-top:0;font-size:15px;">🛠️ Campaign yang kamu kelola sebagai PIC</h3>'
@@ -665,10 +695,18 @@ export function renderCampaignCard(c, user, isPending) {
     : (c.donor_count !== undefined && c.donor_count !== null && !isNaN(c.donor_count) ? Number(c.donor_count) : 0);
   html += '<p class="muted">Total hadiah: ' + giftText + ' &middot; ' + donorCount + ' donatur' + (c.deadline ? ' &middot; deadline ' + c.deadline : '') + '</p>';
 
+  c.GiftLink = c.GiftLink || c.giftLink || '';
+  c.GiftImage = c.GiftImage || c.giftImage || '';
   if (c.status === 'Finalized' && (c.GiftLink || c.GiftImage)) {
     html += '<div style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap;">';
     if (c.GiftLink) html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftLink)) + '" target="_blank" rel="noopener noreferrer" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; text-decoration:none;">Lihat Barang/Hadiah</a>';
-    if (c.GiftImage) html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftImage)) + '" target="_blank" rel="noopener noreferrer" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; text-decoration:none;">Lihat Screenshot Harga</a>';
+    if (c.GiftImage) {
+      if (c.GiftImage.startsWith('http://') || c.GiftImage.startsWith('https://')) {
+        html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftImage)) + '" target="_blank" rel="noopener noreferrer" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; text-decoration:none;">Lihat Screenshot Harga</a>';
+      } else {
+        html += '<button type="button" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; cursor:pointer; background:none;" onclick="openMediaFile(\'' + escapeHtml(sanitizeUrl(c.GiftImage)) + '\')">Lihat Screenshot Harga</button>';
+      }
+    }
     html += '</div>';
   }
 
@@ -724,7 +762,14 @@ export function renderCampaignCard(c, user, isPending) {
         } else {
           html += '<div class="success">✓ Sudah konfirmasi transfer (Menunggu Verifikasi PIC).</div>';
         }
-        if (c.proofLink) html += '<a class="link-btn" href="' + escapeHtml(sanitizeUrl(c.proofLink)) + '" target="_blank" rel="noopener noreferrer">Lihat bukti transfer</a>';
+        const proofRef = c.proofLink || c.ProofLink || c.proofStoragePath || c.ProofStoragePath;
+        if (proofRef) {
+          if (proofRef.startsWith('http://') || proofRef.startsWith('https://')) {
+            html += '<a class="link-btn" href="' + escapeHtml(sanitizeUrl(proofRef)) + '" target="_blank" rel="noopener noreferrer">Lihat bukti transfer</a>';
+          } else {
+            html += '<button type="button" class="link-btn" style="margin-top:4px; cursor:pointer; background:none; border:none; padding:0; text-decoration:underline; font-size:13px;" onclick="openMediaFile(\'' + escapeHtml(proofRef) + '\')">Lihat bukti transfer</button>';
+          }
+        }
       } else {
         html += '<label>Upload bukti transfer</label>';
         html += '<p class="muted" style="font-size:11px; margin:2px 0 6px 0;">Unggah bukti transfer (format JPG, PNG, atau PDF maks 2MB). Bukti hanya digunakan oleh PIC untuk verifikasi.</p>';
