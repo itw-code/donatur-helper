@@ -127,6 +127,9 @@ import {
   verifyPaymentUI,
   picVerifyAllUI,
   markRefundedUI,
+  openManualVerifyModal,
+  closeManualVerifyModal,
+  submitManualVerifyDonor,
   copyLaporanSelesai
 } from './views/pic.js';
 import {
@@ -311,6 +314,9 @@ const globalBindings = {
   verifyPaymentUI,
   picVerifyAllUI,
   markRefundedUI,
+  openManualVerifyModal,
+  closeManualVerifyModal,
+  submitManualVerifyDonor,
   copyLaporanSelesai,
   renderSummaryCard,
   refreshSummary,

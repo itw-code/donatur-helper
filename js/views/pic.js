@@ -1,7 +1,7 @@
 // PIC Campaign Management, Donor Verification, Progress, and Finalization
 
 import { safeGet, safeRemove } from '../storage.js';
-import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, formatTime, parseRibuan, statusBadge, paymentStatusIcon, actionArrowIcon } from '../utils.js';
+import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, formatTime, parseRibuan, formatInputRibuan, statusBadge, paymentStatusIcon, actionArrowIcon } from '../utils.js';
 import { call, callQueued } from '../api.js';
 import { appState, currentToken } from '../state.js';
 import { loadUserDashboard } from './donor.js';
@@ -972,10 +972,15 @@ export function renderDonorTable(detail) {
         }
         verificationHtml += '</div>';
       } else if (isPaid && !isVerified) {
-        verificationHtml = '<div class="verification-stack"><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Bukti Transfer belum tersedia</span></span><span class="muted verification-warning">Minta Donor upload ulang sebelum verifikasi.</span></div>';
+        verificationHtml = '<div class="verification-stack"><span class="semantic-status warning">' + paymentStatusIcon('review') + '<span>Bukti Transfer belum tersedia</span></span>' +
+          '<button class="btn green btn-auto" type="button" style="font-size:12px; padding:4px 8px; margin-top:4px;" onclick="openManualVerifyModal(\'' + escapeHtml(detail.campaign.CampaignID) + '\', \'' + escapeHtml(donorWa) + '\', \'' + escapeHtml(displayName) + '\', ' + amountDue + ')">✓ Verifikasi Langsung</button>' +
+          '</div>';
       } else if (!isPaid && isFinalized) {
         const msg = encodeURIComponent("Halo " + (d.Name || d.name) + ", ini reminder untuk patungan *" + (detail.campaign.TargetName || 'Campaign') + "*. Tagihan kamu: " + formatIDR(amountDue) + ".\n\nBisa cek detail dan upload bukti transfer di sini ya: " + window.location.origin + window.location.pathname + "#c=" + detail.campaign.CampaignID);
-        verificationHtml = '<a href="https://wa.me/' + String(donorWa).replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder">Kirim pengingat WA</a>';
+        verificationHtml = '<div style="display:flex; flex-direction:column; gap:4px;">' +
+          '<a href="https://wa.me/' + String(donorWa).replace(/\D/g, '') + '?text=' + msg + '" target="_blank" rel="noopener noreferrer" class="btn secondary donor-reminder" style="font-size:12px; padding:4px 8px; text-align:center;">Kirim pengingat WA</a>' +
+          '<button class="btn green btn-auto" type="button" style="font-size:12px; padding:4px 8px;" onclick="openManualVerifyModal(\'' + escapeHtml(detail.campaign.CampaignID) + '\', \'' + escapeHtml(donorWa) + '\', \'' + escapeHtml(displayName) + '\', ' + amountDue + ')">✓ Konfirmasi Lunas / WA</button>' +
+          '</div>';
       }
 
       if (isVerified && isFinalized) {
@@ -1086,6 +1091,144 @@ export function markRefundedUI(campaignId, whatsapp) {
       return loadPicDashboard();
     }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
   });
+}
+
+export function openManualVerifyModal(campaignId, donorWa, donorName, amountDue) {
+  let modal = document.getElementById('pic-manual-verify-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'pic-manual-verify-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+    modal.innerHTML = `
+      <div class="card" style="max-width:440px;width:100%;position:relative;max-height:90vh;overflow-y:auto;box-sizing:border-box;">
+        <button type="button" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);" onclick="closeManualVerifyModal()">&times;</button>
+        <h3 style="margin-top:0;font-size:18px;">✓ Konfirmasi Pembayaran Manual</h3>
+        <p class="muted" style="font-size:13px;margin-bottom:14px;">Gunakan ini jika donatur mengirim bukti transfer lewat chat WhatsApp atau bayar langsung ke PIC.</p>
+        
+        <div style="background:var(--surface-muted, #f8f9fa);padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:13px;border:1px solid var(--border, #e5e7eb);">
+          <div><strong>Donatur:</strong> <span id="mv-donor-name">-</span></div>
+          <div style="color:var(--muted);font-size:12px;margin-top:2px;"><strong>No WhatsApp:</strong> <span id="mv-donor-wa">-</span></div>
+          <div style="margin-top:4px;"><strong>Tagihan Patungan:</strong> <span id="mv-amount-due">-</span></div>
+        </div>
+
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Nominal Diterima (Rp):</label>
+        <input type="text" id="mv-amount" style="width:100%;box-sizing:border-box;margin-bottom:10px;" oninput="formatInputRibuan(this)">
+
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Bukti Transfer dari WA (Opsional):</label>
+        <p class="muted" style="font-size:11px;margin:2px 0 6px 0;">Lampirkan screenshot dari chat WA jika ingin disimpan ke sistem (format JPG, PNG, HEIC, PDF maks 10MB).</p>
+        <input type="file" id="mv-file" accept="image/*,application/pdf" style="width:100%;box-sizing:border-box;margin-bottom:10px;">
+
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Catatan (Opsional):</label>
+        <input type="text" id="mv-note" placeholder="cth: Bukti dicek via WA / Transfer m-banking" style="width:100%;box-sizing:border-box;margin-bottom:12px;">
+
+        <div id="mv-error" class="error" style="margin-bottom:10px;"></div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="btn secondary" onclick="closeManualVerifyModal()">Batal</button>
+          <button type="button" class="btn green" id="btn-submit-mv">Konfirmasi Lunas</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  const nameEl = document.getElementById('mv-donor-name');
+  if (nameEl) nameEl.textContent = donorName || '-';
+  const waEl = document.getElementById('mv-donor-wa');
+  if (waEl) waEl.textContent = donorWa || '-';
+  const dueEl = document.getElementById('mv-amount-due');
+  if (dueEl) dueEl.textContent = formatIDR(amountDue || 0);
+
+  const amountInput = document.getElementById('mv-amount');
+  if (amountInput) {
+    amountInput.value = (amountDue || 0).toLocaleString('id-ID');
+  }
+  const fileInput = document.getElementById('mv-file');
+  if (fileInput) fileInput.value = '';
+  const noteInput = document.getElementById('mv-note');
+  if (noteInput) noteInput.value = 'Bukti dicek via chat WhatsApp';
+  const errEl = document.getElementById('mv-error');
+  if (errEl) errEl.textContent = '';
+
+  const submitBtn = document.getElementById('btn-submit-mv');
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Konfirmasi Lunas';
+    submitBtn.onclick = () => submitManualVerifyDonor(campaignId, donorWa);
+  }
+
+  modal.style.display = 'flex';
+}
+
+export function closeManualVerifyModal() {
+  const modal = document.getElementById('pic-manual-verify-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+export async function submitManualVerifyDonor(campaignId, donorWa) {
+  const errEl = document.getElementById('mv-error');
+  const submitBtn = document.getElementById('btn-submit-mv');
+  const amtInput = document.getElementById('mv-amount');
+  const fileInput = document.getElementById('mv-file');
+  const noteInput = document.getElementById('mv-note');
+
+  if (errEl) errEl.textContent = '';
+
+  const amount = amtInput ? parseRibuan(amtInput.value) : 0;
+  if (!amount || amount <= 0) {
+    if (errEl) errEl.textContent = 'Nominal diterima harus lebih dari 0.';
+    return;
+  }
+
+  const file = fileInput && fileInput.files && fileInput.files[0];
+  if (file && file.size > 10 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran file maksimal 10MB.';
+    return;
+  }
+
+  const note = noteInput ? noteInput.value.trim() : '';
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Memproses...';
+  }
+
+  try {
+    let storagePath = null;
+    if (file) {
+      if (errEl) errEl.textContent = 'Mengunggah bukti transfer...';
+      const client = _getSupabaseClient();
+      if (!client || !client.storage) {
+        throw new Error('Layanan penyimpanan Supabase belum siap.');
+      }
+      const cleanWa = String(donorWa).replace(/\D/g, '');
+      const timestamp = Date.now();
+      const fileName = file.name || 'wa_receipt.jpg';
+      const ext = (fileName.split('.').pop() || 'jpg').toLowerCase();
+      storagePath = `proofs/${campaignId}/${cleanWa}_${timestamp}.${ext}`;
+
+      const { error: uploadError } = await client.storage
+        .from('bukti-transfer')
+        .upload(storagePath, file, { upsert: true });
+
+      if (uploadError) {
+        throw new Error(uploadError.message || 'Gagal mengunggah file bukti transfer.');
+      }
+    }
+
+    if (errEl) errEl.textContent = 'Menyimpan verifikasi...';
+    await callQueued('picManualVerifyDonor', currentToken(), campaignId, donorWa, amount, storagePath, note);
+
+    showToast('Pembayaran donatur berhasil diverifikasi!');
+    closeManualVerifyModal();
+    loadPicDashboard();
+  } catch (e) {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Konfirmasi Lunas';
+    }
+    if (errEl) errEl.textContent = formatUserErrorMessage(e);
+  }
 }
 
 export function copyLaporanSelesai() {

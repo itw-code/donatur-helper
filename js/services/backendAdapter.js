@@ -10,7 +10,7 @@ const MIGRATED_ACTIONS = new Set([
   'registerUser', 'updateMemberProfile', 'generateSeamlessPicToken', 'deleteDraftPicToken',
   'joinCampaign', 'joinCampaignsBulk', 'withdrawCampaign', 'submitPaymentProof',
   'submitCombinedPaymentProof', 'createCampaign', 'closeCampaignList', 'reopenCampaignList',
-  'finalizeCampaign', 'updateGiftProof', 'picVerifyPayment', 'picVerifyAllPayments',
+  'finalizeCampaign', 'updateGiftProof', 'picVerifyPayment', 'picVerifyAllPayments', 'picManualVerifyDonor',
   'picMarkRefunded', 'markDonorRefunded', 'requestLateDonor', 'archiveCampaign',
   'deleteCampaign', 'getReminderInfo', 'adminUpdateMemberStatus', 'adminBulkUpdateMemberStatus', 'approveLateDonor',
   'generatePicToken', 'adminGeneratePicToken', 'transferCampaignOwnershipAdmin', 'adminTransferCampaignOwnership',
@@ -1238,6 +1238,52 @@ async function _dispatchSupabaseRpc(action, args = []) {
       if (data && data.error) throw new Error(data.message || data.error);
 
       return data.verified_count !== undefined ? data.verified_count : data;
+    }
+
+    case 'picManualVerifyDonor': {
+      let token, campaignId, whatsapp, amountPaid, storagePath, note;
+      if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        token = args[0].token || args[0].p_token;
+        campaignId = args[0].campaignId || args[0].p_campaign_id;
+        whatsapp = args[0].whatsapp || args[0].p_whatsapp;
+        amountPaid = args[0].amountPaid !== undefined ? args[0].amountPaid : args[0].p_amount_paid;
+        storagePath = args[0].storagePath || args[0].p_storage_path;
+        note = args[0].note || args[0].p_note;
+      } else {
+        [token, campaignId, whatsapp, amountPaid, storagePath, note] = args;
+      }
+      const { data, error } = await client.rpc('pic_manual_verify_donor', {
+        p_token: token,
+        p_campaign_id: campaignId,
+        p_whatsapp: whatsapp,
+        p_amount_paid: amountPaid !== null && amountPaid !== undefined && !isNaN(amountPaid) ? Number(amountPaid) : null,
+        p_storage_path: storagePath || null,
+        p_note: note || null
+      });
+
+      if (error && (error.code === 'PGRST202' || (error.message && error.message.includes('Could not find the function')))) {
+        const proofPath = storagePath || 'MANUAL_VERIFIED_VIA_WHATSAPP';
+        const { error: proofErr } = await client.rpc('submit_payment_proof', {
+          p_campaign_id: campaignId,
+          p_whatsapp: whatsapp,
+          p_storage_path: proofPath
+        });
+        if (proofErr) throw new Error(proofErr.message || 'Gagal menyimpan bukti pembayaran.');
+
+        const { data: verifData, error: verifErr } = await client.rpc('verify_donor_payment', {
+          p_token: token,
+          p_campaign_id: campaignId,
+          p_whatsapp: whatsapp,
+          p_is_valid: true
+        });
+        if (verifErr) throw new Error(verifErr.message || 'Gagal memverifikasi donatur.');
+        return verifData || { success: true, message: 'Pembayaran donatur berhasil diverifikasi secara manual.' };
+      }
+
+      if (error) throw new Error(error.message || 'Gagal memverifikasi pembayaran secara manual.');
+      if (data && data.error) throw new Error(data.message || data.error);
+
+      return data;
     }
 
     case 'requestLateDonor': {

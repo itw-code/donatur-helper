@@ -394,3 +394,46 @@ test('PIC getReminderInfo generates formatted WhatsApp reminder text on Supabase
   assert.match(res.bulkMessage, /Andi Cool/);
   assert.strictEqual(res.totalDonors, 2);
 });
+
+test('PIC manual verification: adapter dispatches pic_manual_verify_donor RPC and UI modal handles optional WA proof upload', async () => {
+  const harness = createPicHarness({
+    initialStorage: { auth_token: 'pic_token_777', auth_role: 'PIC' }
+  });
+  const { adapterFetchBackend, openManualVerifyModal, submitManualVerifyDonor } = harness.context;
+
+  // 1. Adapter call directly
+  await adapterFetchBackend('picManualVerifyDonor', [
+    'pic_token_777',
+    'camp_123',
+    '08123456789',
+    50000,
+    'proofs/camp_123/wa_proof.jpg',
+    'Bukti dicek via WA'
+  ]);
+
+  const verifyRpc = harness.rpcCalls.find(c => c.fn === 'pic_manual_verify_donor');
+  assert.ok(verifyRpc, 'pic_manual_verify_donor RPC must be called');
+  assert.strictEqual(verifyRpc.params.p_token, 'pic_token_777');
+  assert.strictEqual(verifyRpc.params.p_campaign_id, 'camp_123');
+  assert.strictEqual(verifyRpc.params.p_whatsapp, '08123456789');
+  assert.strictEqual(verifyRpc.params.p_amount_paid, 50000);
+  assert.strictEqual(verifyRpc.params.p_storage_path, 'proofs/camp_123/wa_proof.jpg');
+  assert.strictEqual(verifyRpc.params.p_note, 'Bukti dicek via WA');
+
+  // 2. UI Modal flow
+  openManualVerifyModal('camp_123', '08999888777', 'Budi Santoso', 75000);
+  const modal = harness.elements.get('pic-manual-verify-modal');
+  assert.ok(modal, 'Modal must be mounted');
+  assert.strictEqual(modal.style.display, 'flex');
+  assert.strictEqual(harness.elements.get('mv-donor-name').textContent, 'Budi Santoso');
+  assert.strictEqual(harness.elements.get('mv-donor-wa').textContent, '08999888777');
+
+  // Submit via modal without file
+  await submitManualVerifyDonor('camp_123', '08999888777');
+  const modalRpc = harness.rpcCalls.filter(c => c.fn === 'pic_manual_verify_donor')[1];
+  assert.ok(modalRpc, 'Second pic_manual_verify_donor RPC must be called from modal');
+  assert.strictEqual(modalRpc.params.p_whatsapp, '08999888777');
+  assert.strictEqual(modalRpc.params.p_amount_paid, 75000);
+  assert.strictEqual(modalRpc.params.p_storage_path, null);
+  assert.strictEqual(modal.style.display, 'none', 'Modal should be closed after submit');
+});
