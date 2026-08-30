@@ -906,8 +906,8 @@ export async function submitProof(campaignId) {
     return;
   }
 
-  if (file.size && file.size > 2 * 1024 * 1024) {
-    if (errEl) errEl.textContent = 'Ukuran file maksimal 2MB.';
+  if (file.size && file.size > 10 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran file maksimal 10MB.';
     return;
   }
 
@@ -975,8 +975,8 @@ export async function submitCombinedProof(bankAccount, campaignIdsStr) {
     return;
   }
 
-  if (file.size && file.size > 2 * 1024 * 1024) {
-    if (errEl) errEl.textContent = 'Ukuran file maksimal 2MB.';
+  if (file.size && file.size > 10 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran file maksimal 10MB.';
     return;
   }
 

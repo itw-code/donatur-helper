@@ -440,6 +440,7 @@ export function renderPicActions(detail) {
     '<label>No WhatsApp: <input type="tel" id="late-wa" placeholder="cth: 08123456789"></label>' +
     '<label>Tipe Nominal: <select id="late-amount-type" onchange="toggleLateCustomAmount()"><option value="fixed">Ikuti Nominal Rata-rata</option><option value="custom">Nominal Bebas (Custom)</option></select></label>' +
     '<div id="late-custom-amount-group" class="hidden"><label>Nominal Donasi (Rp): <input type="number" id="late-custom-amount" placeholder="cth: 50000"></label></div>' +
+    '<label>Alasan / Catatan (Opsional): <input type="text" id="late-reason" placeholder="cth: Tertinggal / Baru sempat buka WA"></label>' +
     '<div style="margin-top:12px;"><button id="btn-submit-late-donor" class="btn green" onclick="submitLateDonor(\'' + escapeHtml(c.CampaignID) + '\')">Simpan & Masukkan ke List</button> <button class="btn secondary" onclick="hideLateDonorForm()">Batal</button></div>' +
     '<div id="late-error" class="error" style="margin-top:8px;"></div></div>';
 
@@ -563,9 +564,9 @@ export function submitLateDonor() {
   const alias = aliasInput ? aliasInput.value.trim() : '';
   const isCustom = isCustomEl ? isCustomEl.checked : (document.getElementById('late-amount-type') && document.getElementById('late-amount-type').value === 'custom');
   const amount = isCustom && customAmtEl ? parseRibuan(customAmtEl.value) : null;
-  const reason = reasonInput ? reasonInput.value.trim() : '';
+  const reason = (reasonInput && reasonInput.value.trim()) ? reasonInput.value.trim() : 'Donatur susulan diajukan oleh PIC';
 
-  if (!name || !wa || !reason) {
+  if (!name || !wa) {
     if (errEl) errEl.textContent = 'Harap isi semua kolom.';
     resetBtn();
     return;
