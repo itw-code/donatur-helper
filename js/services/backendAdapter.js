@@ -764,7 +764,9 @@ async function _dispatchSupabaseRpc(action, args = []) {
           if (!gImg) gImg = 'gifts/C-53762679/1787898456184.jpeg';
           if (!gLink) gLink = 'https://s.shopee.co.id/112T6T2fo1';
         }
-        const dCount = Number(camp.donor_count !== undefined ? camp.donor_count : (c.donor_count !== undefined ? c.donor_count : c.donorCount)) || 0;
+        const rawDCount = camp.donor_count !== undefined ? camp.donor_count : (c.donor_count !== undefined ? c.donor_count : (c.donorCount !== undefined ? c.donorCount : (c.DonorCount !== undefined ? c.DonorCount : 0)));
+        const parsedDCount = Number(rawDCount);
+        const dCount = (!isNaN(parsedDCount) && rawDCount !== null && rawDCount !== '') ? parsedDCount : 0;
 
         const dStatus = String(c.donor_status || 'PLEDGED').toUpperCase();
         const isWithdrawn = dStatus === 'WITHDRAWN' || dStatus === 'CANCELLED';
@@ -784,6 +786,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
           reason: reas,
           giftAmount: gAmt,
           donorCount: dCount,
+          donor_count: dCount,
           status: stat,
           startDate: sDate,
           deadline: dLine,

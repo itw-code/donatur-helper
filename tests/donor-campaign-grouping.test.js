@@ -225,3 +225,63 @@ test('Donor pending payments only include Finalized campaigns and merge only whe
   assert.match(html, /Open Pledged Campaign 2/);
   assert.match(html, /Menunggu finalisasi oleh PIC/);
 });
+
+test('Donor pending payments exclude Archived campaigns, Rp0 amounts, and combined card safely formats bank info', async () => {
+  const harness = createBrowserHarness({
+    getUserPicCampaigns: [],
+    listActiveCampaigns: [
+      // Archived campaign with pending amount (MUST NOT be in Menunggu Pembayaran)
+      campaign('c-archived-1', 'Archived Target', {
+        status: 'Archived', joined: true, paid: false, amountDue: 33333,
+        bankName: null, bankAccount: null, accountHolder: null
+      }),
+      // Finalized campaign but amountDue is 0 (MUST NOT be in Menunggu Pembayaran)
+      campaign('c-fin-zero', 'Zero Target', {
+        status: 'Finalized', joined: true, paid: false, amountDue: 0,
+        bankName: null, bankAccount: null, accountHolder: null
+      }),
+      // 2 Finalized campaigns with valid positive amounts and identical bank
+      campaign('c-fin-1', 'Target First', {
+        status: 'Finalized', joined: true, paid: false, amountDue: 25000,
+        bankName: 'BCA', bankAccount: '1234567890', accountHolder: 'PIC Name',
+        donorCount: undefined // Test donorCount fallback
+      }),
+      campaign('c-fin-2', 'Target Second', {
+        status: 'Finalized', joined: true, paid: false, amountDue: 25000,
+        bankName: 'BCA', bankAccount: '1234567890', accountHolder: 'PIC Name'
+      })
+    ]
+  });
+  harness.setUser({
+    name: 'Regression Donor',
+    whatsapp: '628123456789',
+    verified: true,
+    status: 'active'
+  });
+
+  harness.loadUserDashboard();
+  await settle();
+
+  const html = harness.elements.get('actual-campaign-list').innerHTML;
+  const splitLeftHtml = html.split('<div class="split-right">')[0];
+
+  // Archived Target and Zero Target must NOT be in Menunggu Pembayaran section
+  assert.doesNotMatch(splitLeftHtml, /Archived Target/);
+  assert.doesNotMatch(splitLeftHtml, /Zero Target/);
+
+  // Valid campaigns must be in combined card
+  assert.match(splitLeftHtml, /Pembayaran Gabungan \(2 Campaign\)/);
+  assert.match(splitLeftHtml, /Target First/);
+  assert.match(splitLeftHtml, /Target Second/);
+  assert.match(splitLeftHtml, /Rp50\.000/);
+
+  // Must have text-align: left on combined card
+  assert.match(splitLeftHtml, /text-align:\s*left/);
+
+  // Bank line must not show "Ke: Salin a.n." without bank details
+  assert.doesNotMatch(html, /Ke:\s*<button[^>]*>Salin<\/button>\s*a\.n\./);
+  assert.match(splitLeftHtml, /Ke: BCA 1234567890/);
+
+  // Must never render undefined donatur
+  assert.doesNotMatch(html, /undefined donatur/);
+});

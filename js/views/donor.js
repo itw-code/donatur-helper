@@ -135,7 +135,7 @@ export function loadUserDashboard() {
 
   const el = document.getElementById('campaign-list');
   if (el) {
-    el.innerHTML = '<div id="actual-campaign-list" style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div>';
+    el.innerHTML = '<div id="actual-campaign-list"><div style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div></div>';
   }
 
   const picContainer = document.getElementById('pic-create-btn-container');
@@ -313,9 +313,10 @@ export function refreshCampaignList() {
     } else {
       const isPendingPayment = c => (
         c.status === 'Finalized' &&
+        c.status !== 'Archived' &&
         c.joined &&
         !c.paid &&
-        (Number(c.amountDue) > 0 || c.action_group === 'NEED_PAYMENT')
+        Number(c.amountDue) > 0
       );
       const pending = list.filter(isPendingPayment);
       const others = list.filter(c => !isPendingPayment(c));
@@ -635,7 +636,7 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   const cIdsStr = campaignIds.join(',');
   const safeDomId = String(bankAccount).replace(/[^a-zA-Z0-9_-]/g, '') || 'combined';
   
-  let html = '<div class="card donor-campaign-card donor-primary-card theme-surface-blue" style="border-left: 4px solid var(--blue); margin-bottom:16px;">';
+  let html = '<div class="card donor-campaign-card donor-primary-card theme-surface-blue" style="border-left: 4px solid var(--blue); margin-bottom:16px; text-align:left;">';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
   html += '<strong style="color:var(--blue); font-size:15px;">Pembayaran Gabungan (' + groupList.length + ' Campaign)</strong>';
   html += '<span class="badge theme-status-unpaid">⏳ Menunggu Pembayaran</span>';
@@ -654,14 +655,21 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   html += '</div>';
   html += '</div>';
   
-  html += '<p class="muted" style="margin:8px 0; font-size:12px;">Ke: ' + escapeHtml(bankName) + ' ' + escapeHtml(bankAccount);
-  if (bankAccount) {
-    html += ' <button class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
+  const trimmedAcc = String(bankAccount || '').trim();
+  const trimmedName = String(bankName || '').trim();
+  const trimmedHolder = String(accountHolder || '').trim();
+  if (trimmedAcc || trimmedName || trimmedHolder) {
+    html += '<p class="muted" style="margin:8px 0; font-size:12px;">Ke: ' + (trimmedName ? escapeHtml(trimmedName) + ' ' : '') + escapeHtml(trimmedAcc);
+    if (trimmedAcc) {
+      html += ' <button type="button" class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(trimmedAcc) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
+    }
+    if (trimmedHolder) {
+      html += ' a.n. ' + escapeHtml(trimmedHolder);
+    }
+    html += '</p>';
+  } else {
+    html += '<p class="muted" style="margin:8px 0; font-size:12px; font-style:italic;">Rekening tujuan belum ditentukan oleh PIC.</p>';
   }
-  if (accountHolder) {
-    html += ' a.n. ' + escapeHtml(accountHolder);
-  }
-  html += '</p>';
   
   html += '<div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:12px;">';
   html += '<label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">Upload satu bukti transfer untuk semua campaign di atas</label>';
@@ -690,9 +698,9 @@ export function renderCampaignCard(c, user, isPending) {
   if (c.reason) html += '<p class="muted">' + escapeHtml(c.reason) + '</p>';
 
   const giftText = c.giftAmount > 0 ? formatIDR(c.giftAmount) : 'Ditentukan nanti';
-  const donorCount = (c.donorCount !== undefined && c.donorCount !== null && !isNaN(c.donorCount))
-    ? Number(c.donorCount)
-    : (c.donor_count !== undefined && c.donor_count !== null && !isNaN(c.donor_count) ? Number(c.donor_count) : 0);
+  const rawCount = c.donorCount !== undefined ? c.donorCount : (c.donor_count !== undefined ? c.donor_count : (c.DonorCount !== undefined ? c.DonorCount : 0));
+  const parsedCount = Number(rawCount);
+  const donorCount = (!isNaN(parsedCount) && rawCount !== null && rawCount !== '') ? parsedCount : 0;
   html += '<p class="muted">Total hadiah: ' + giftText + ' &middot; ' + donorCount + ' donatur' + (c.deadline ? ' &middot; deadline ' + c.deadline : '') + '</p>';
 
   c.GiftLink = c.GiftLink || c.giftLink || '';
@@ -746,6 +754,10 @@ export function renderCampaignCard(c, user, isPending) {
     html += '<p class="muted">List sudah ditutup, menunggu PIC menentukan jumlah & rekening.</p>';
   } else if (c.status === 'Finalized') {
     if (c.joined) {
+      const cardBankName = String(c.bankName || c.BankName || '').trim();
+      const cardBankAccount = String(c.bankAccount || c.BankAccount || '').trim();
+      const cardHolder = String(c.accountHolder || c.AccountHolder || '').trim();
+
       html += '<div class="card theme-surface-blue" style="border:none;">';
       html += '<div class="theme-blue-total" style="padding:12px; border-radius:8px; margin-bottom:12px;">';
       html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
@@ -753,9 +765,18 @@ export function renderCampaignCard(c, user, isPending) {
       html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">Salin</span>';
       html += '</div>';
       html += '</div>';
-      html += '<p class="muted">Ke: ' + escapeHtml(c.bankName) + ' ' + escapeHtml(c.bankAccount);
-      html += ' <button class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(c.bankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
-      html += ' a.n. ' + escapeHtml(c.accountHolder) + '</p>';
+      if (cardBankAccount || cardBankName || cardHolder) {
+        html += '<p class="muted">Ke: ' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount);
+        if (cardBankAccount) {
+          html += ' <button type="button" class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(cardBankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
+        }
+        if (cardHolder) {
+          html += ' a.n. ' + escapeHtml(cardHolder);
+        }
+        html += '</p>';
+      } else {
+        html += '<p class="muted" style="font-style:italic;">Rekening tujuan belum ditentukan oleh PIC.</p>';
+      }
       if (c.paid) {
         if (c.verified) {
           html += '<div class="success">✓ Pembayaran terverifikasi oleh PIC.</div>';

@@ -904,11 +904,17 @@
 
 @media (max-width: 559px) {
   .donor-dashboard-attention {
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 12px;
+    align-items: center;
   }
 
   .donor-dashboard-attention .link-btn {
-    padding-right: 0;
+    grid-column: 2;
+    padding: 0;
+    min-height: auto;
+    width: fit-content;
   }
 
   .pic-progress-header,
