@@ -305,6 +305,79 @@ function build() {
   fs.writeFileSync(path.join(DIST_DIR, 'version.json'), versionJsonContent, 'utf8');
   totalFilesCopied += 1;
 
+  // ── Cache Busting ──────────────────────────────────────────────────
+  // Mobile browsers (Chrome Android, Safari iOS) aggressively cache
+  // ES modules by URL. Without a unique query string per deployment,
+  // users may see stale JS/CSS indefinitely despite correct
+  // Cache-Control headers. We rewrite all local asset references in
+  // dist/ to append ?v={commitHash}.
+  const cacheBustTag = `?v=${versionPayload.commit}`;
+
+  // Step 1: Rewrite dist/index.html — CSS href and JS src for local assets
+  const distIndexPath = path.join(DIST_DIR, 'index.html');
+  if (fs.existsSync(distIndexPath)) {
+    let indexHtml = fs.readFileSync(distIndexPath, 'utf8');
+
+    // Rewrite local stylesheet hrefs: href="css/..." → href="css/...?v=abc1234"
+    indexHtml = indexHtml.replace(
+      /(<link\s[^>]*href=")(css\/[^"?]+)(")/g,
+      `$1$2${cacheBustTag}$3`
+    );
+
+    // Rewrite local script srcs: src="js/..." → src="js/...?v=abc1234"
+    indexHtml = indexHtml.replace(
+      /(<script\s[^>]*src=")(js\/[^"?]+)(")/g,
+      `$1$2${cacheBustTag}$3`
+    );
+
+    fs.writeFileSync(distIndexPath, indexHtml, 'utf8');
+    console.log(`[Build] Cache bust: Rewrote index.html asset references with ${cacheBustTag}`);
+  }
+
+  // Step 2: Rewrite all ES module import specifiers in dist/js/**/*.js
+  // Matches: from './foo.js'  →  from './foo.js?v=abc1234'
+  //          from '../bar.js' →  from '../bar.js?v=abc1234'
+  function rewriteJsImports(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    let count = 0;
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        count += rewriteJsImports(fullPath);
+      } else if (entry.isFile() && entry.name.endsWith('.js') && entry.name !== 'env.local.js') {
+        let content = fs.readFileSync(fullPath, 'utf8');
+        const original = content;
+
+        // Rewrite static import/export from specifiers
+        // Matches: from './path.js' or from "../path.js"
+        content = content.replace(
+          /((?:from|import)\s+['"])(\.\.?\/[^'"]+\.js)(['"])/g,
+          `$1$2${cacheBustTag}$3`
+        );
+
+        // Rewrite dynamic import() calls
+        // Matches: import('./path.js') or import("../path.js")
+        content = content.replace(
+          /(import\s*\(\s*['"])(\.\.?\/[^'"]+\.js)(['"]\s*\))/g,
+          `$1$2${cacheBustTag}$3`
+        );
+
+        if (content !== original) {
+          fs.writeFileSync(fullPath, content, 'utf8');
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  const distJsDir = path.join(DIST_DIR, 'js');
+  if (fs.existsSync(distJsDir)) {
+    const rewrittenCount = rewriteJsImports(distJsDir);
+    console.log(`[Build] Cache bust: Rewrote import specifiers in ${rewrittenCount} JS file(s) with ${cacheBustTag}`);
+  }
+  // ── End Cache Busting ──────────────────────────────────────────────
+
   // Print Safe Build Summary (NO SECRETS, NO KEYS, NO GAS_ENDPOINT)
   console.log('\n==================================================');
   console.log('  Donatur Helper - Static Build Complete');
