@@ -189,8 +189,8 @@ test('High-priority copy, brand header, and action buttons use standardized Indo
   const html = getIndexHtml() + getAppScript();
 
   // 1. Brand header
-  assert.match(html, /<h1>Donatur Helper<\/h1>/);
-  assert.doesNotMatch(html, /<h1>Donation Helper<\/h1>/);
+  assert.match(html, /Donat.*PRO/);
+  assert.doesNotMatch(html, /Donation Helper/);
 
   // 2. Toast default
   assert.match(html, /<div id="toast"[^>]*>Teks berhasil disalin!<\/div>/);

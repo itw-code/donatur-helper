@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Donatur Helper — Patungan Hadiah & Donasi Kantor</title>
-  <meta name="description" content="Aplikasi pengelolaan patungan hadiah dan donasi kantor yang praktis, rapi, dan transparan.">
+  <title>DonatPRO — Patungan Kado Perpisahan Rekan SawitPRO</title>
+  <meta name="description" content="Platform patungan kado dan hadiah perpisahan rekan kerja SawitPRO yang praktis, rapi, dan transparan.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo/favicon.svg">
   <meta name="robots" content="index, follow">
   <!-- Preconnect & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,13 +26,26 @@
 </head>
 <body>
   <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
-  <header class="wrap app-header">
-    <h1>Donatur Helper</h1>
+  <header class="wrap app-header" style="text-align: center;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 6px;">
+      <img src="assets/logo/logo-icon.svg" width="36" height="36" alt="DonatPRO Logo" style="display: block;">
+      <h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Donat<span style="color: var(--amber, #f5d347);">PRO</span></h1>
+    </div>
+    <div class="dh-ticker-wrapper" id="dh-subtitle-ticker" role="region" aria-label="Motto DonatPRO" title="Klik untuk ganti pesan">
+      <div class="dh-ticker-track">
+        <p class="sub dh-ticker-text" id="dh-ticker-text" aria-live="polite">Satu Hadiah, Sejuta Cerita</p>
+      </div>
+      <div class="dh-ticker-dots" id="dh-ticker-dots" aria-hidden="true">
+        <span class="dh-dot active" data-index="0" title="Satu Hadiah, Sejuta Cerita"></span>
+        <span class="dh-dot" data-index="1" title="Satu Kado, Sejuta Kenangan"></span>
+        <span class="dh-dot" data-index="2" title="Dari Kita, untuk Cerita Berikutnya"></span>
+        <span class="dh-dot" data-index="3" title="Kado Bermakna, Cerita Bersama"></span>
+      </div>
+    </div>
   </header>
 
   <main id="main-content" class="wrap" tabindex="-1">
     <div id="view-landing">
-    <p class="sub">Bantu kumpulkan donasi untuk kolega yang resign, secara rapi dan transparan.</p>
     <div class="card">
       <button class="btn" onclick="showView('user-login')">Saya mau donasi</button>
       <button class="btn secondary" onclick="showView('token-login')">Saya punya token (PIC / Admin / Super
@@ -470,6 +484,47 @@
 <script type="module" src="js/services/supabaseClient.js"></script>
 <script type="module" src="js/services/backendAdapter.js"></script>
 <script type="module" src="js/app.js" defer></script>
+<script>
+  // Interactive Header Subtitle Ticker
+  (function() {
+    const phrases = [
+      "Satu Hadiah, Sejuta Cerita",
+      "Satu Kado, Sejuta Kenangan",
+      "Dari Kita, untuk Cerita Berikutnya",
+      "Kado Bermakna, Cerita Bersama"
+    ];
+    let idx = 0;
+    const textEl = document.getElementById('dh-ticker-text');
+    const dots = document.querySelectorAll('#dh-ticker-dots .dh-dot');
+    const container = document.getElementById('dh-subtitle-ticker');
+    if (!textEl || !container) return;
+
+    function update(newIdx) {
+      textEl.classList.add('slide-out');
+      setTimeout(() => {
+        idx = (newIdx + phrases.length) % phrases.length;
+        textEl.textContent = phrases[idx];
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        textEl.classList.remove('slide-out');
+        textEl.classList.add('slide-in-init');
+        void textEl.offsetHeight;
+        requestAnimationFrame(() => textEl.classList.remove('slide-in-init'));
+      }, 200);
+    }
+
+    let timer = setInterval(() => update(idx + 1), 4500);
+    container.addEventListener('mouseenter', () => clearInterval(timer));
+    container.addEventListener('mouseleave', () => { timer = setInterval(() => update(idx + 1), 4500); });
+    container.addEventListener('click', (e) => {
+      const dot = e.target.closest('.dh-dot');
+      if (dot) {
+        const i = parseInt(dot.getAttribute('data-index'), 10);
+        if (!isNaN(i)) { update(i); return; }
+      }
+      update(idx + 1);
+    });
+  })();
+</script>
 </body>
 </html>
 

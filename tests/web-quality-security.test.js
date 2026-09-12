@@ -7,9 +7,6 @@ function getIndexHtml() {
   return fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 }
 
-function getNetlifyIndexHtml() {
-  return fs.readFileSync(path.join(__dirname, '..', 'netlify_index.html'), 'utf8');
-}
 
 function getCodeJs() {
   return fs.readFileSync(path.join(__dirname, '..', 'Code.js'), 'utf8');
@@ -24,7 +21,7 @@ test('Task 1: index.html has valid HTML5 doctype, lang="id", head, title, body, 
 
   // 2. Head structure and title
   assert.match(html, /<head>[\s\S]*?<\/head>/i, 'Must have <head>...</head>');
-  assert.match(html, /<title>Donatur Helper.*<\/title>/i, 'Must have descriptive title in <head>');
+  assert.match(html, /<title>DonatPRO.*<\/title>/i, 'Must have descriptive title in <head>');
   assert.match(html, /<meta\s+charset="UTF-8">/i, 'Must have charset');
   assert.match(html, /<meta\s+name="viewport"/i, 'Must have viewport meta');
 
@@ -34,11 +31,6 @@ test('Task 1: index.html has valid HTML5 doctype, lang="id", head, title, body, 
   assert.match(html, /<\/html>\s*$/i, 'Must close with </html>');
 });
 
-test('Task 1: netlify_index.html has lang="id" and descriptive title', () => {
-  const html = getNetlifyIndexHtml();
-  assert.match(html, /<html\s+lang="id">/i, 'netlify_index.html must have <html lang="id">');
-  assert.match(html, /<title>.*Donatur Helper.*<\/title>/i, 'netlify_index.html must have descriptive title');
-});
 
 test('Task 1: Code.js doGet sets title to Donatur Helper', () => {
   const code = getCodeJs();

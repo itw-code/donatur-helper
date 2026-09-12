@@ -9,7 +9,7 @@ export const appState = {
   adminActionQueueState: { pending: null, late: null },
   memberPageSize: { admin: 20, sa: 20 },
   allActiveMembers: { admin: [], sa: [] },
-  originalTitle: (typeof document !== 'undefined' && document.title) ? document.title : 'Donatur Helper',
+  originalTitle: (typeof document !== 'undefined' && document.title) ? document.title : 'DonatPRO',
   activePendingCount: 0,
   lastNotifiedCount: 0,
   pollIntervalId: null,

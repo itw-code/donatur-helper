@@ -706,13 +706,16 @@ export function renderCampaignCard(c, user, isPending) {
   c.GiftLink = c.GiftLink || c.giftLink || '';
   c.GiftImage = c.GiftImage || c.giftImage || '';
   if (c.status === 'Finalized' && (c.GiftLink || c.GiftImage)) {
-    html += '<div style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap;">';
-    if (c.GiftLink) html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftLink)) + '" target="_blank" rel="noopener noreferrer" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; text-decoration:none;">Lihat Barang/Hadiah</a>';
+    const giftActionStyle = 'display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family:inherit; font-size:12px; font-weight:600; line-height:1.2; min-height:36px; padding:6px 12px; border:1px solid var(--border-hover); border-radius:6px; background:rgba(255,255,255,0.04); color:var(--amber,#f5d347); text-decoration:none; box-sizing:border-box; cursor:pointer; flex:1 1 auto; text-align:center;';
+    html += '<div class="donor-gift-actions" style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">';
+    if (c.GiftLink) {
+      html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftLink)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">🔗 Lihat Barang/Hadiah</a>';
+    }
     if (c.GiftImage) {
       if (c.GiftImage.startsWith('http://') || c.GiftImage.startsWith('https://')) {
-        html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftImage)) + '" target="_blank" rel="noopener noreferrer" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; text-decoration:none;">Lihat Screenshot Harga</a>';
+        html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftImage)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">📷 Lihat Screenshot Harga</a>';
       } else {
-        html += '<button type="button" class="link-btn" style="border:1px solid var(--border); border-radius:4px; padding:4px 8px; cursor:pointer; background:none;" onclick="openMediaFile(\'' + escapeHtml(sanitizeUrl(c.GiftImage)) + '\')">Lihat Screenshot Harga</button>';
+        html += '<button type="button" class="donor-gift-btn" style="' + giftActionStyle + '" onclick="openMediaFile(\'' + escapeHtml(sanitizeUrl(c.GiftImage)) + '\')">📷 Lihat Screenshot Harga</button>';
       }
     }
     html += '</div>';
@@ -758,47 +761,64 @@ export function renderCampaignCard(c, user, isPending) {
       const cardBankAccount = String(c.bankAccount || c.BankAccount || '').trim();
       const cardHolder = String(c.accountHolder || c.AccountHolder || '').trim();
 
-      html += '<div class="card theme-surface-blue" style="border:none;">';
-      html += '<div class="theme-blue-total" style="padding:12px; border-radius:8px; margin-bottom:12px;">';
-      html += '<div style="font-size:14px; color:var(--text);">Jumlah yang harus ditransfer:</div>';
-      html += '<div style="font-size:24px; font-weight:bold; color:var(--blue); display:flex; align-items:center; justify-content:center; gap:8px;">' + formatIDR(c.amountDue);
-      html += ' <span class="link-btn" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:14px;">Salin</span>';
-      html += '</div>';
-      html += '</div>';
-      if (cardBankAccount || cardBankName || cardHolder) {
-        html += '<p class="muted">Ke: ' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount);
-        if (cardBankAccount) {
-          html += ' <button type="button" class="link-btn" style="font-size:12px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(cardBankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
-        }
-        if (cardHolder) {
-          html += ' a.n. ' + escapeHtml(cardHolder);
-        }
-        html += '</p>';
-      } else {
-        html += '<p class="muted" style="font-style:italic;">Rekening tujuan belum ditentukan oleh PIC.</p>';
-      }
       if (c.paid) {
-        if (c.verified) {
-          html += '<div class="success">✓ Pembayaran terverifikasi oleh PIC.</div>';
-        } else {
-          html += '<div class="success">✓ Sudah konfirmasi transfer (Menunggu Verifikasi PIC).</div>';
-        }
         const proofRef = c.proofLink || c.ProofLink || c.proofStoragePath || c.ProofStoragePath;
-        if (proofRef) {
-          if (proofRef.startsWith('http://') || proofRef.startsWith('https://')) {
-            html += '<a class="link-btn" href="' + escapeHtml(sanitizeUrl(proofRef)) + '" target="_blank" rel="noopener noreferrer">Lihat bukti transfer</a>';
-          } else {
-            html += '<button type="button" class="link-btn" style="margin-top:4px; cursor:pointer; background:none; border:none; padding:0; text-decoration:underline; font-size:13px;" onclick="openMediaFile(\'' + escapeHtml(proofRef) + '\')">Lihat bukti transfer</button>';
-          }
+        const proofBtnHtml = proofRef
+          ? (proofRef.startsWith('http://') || proofRef.startsWith('https://')
+            ? '<a class="link-btn" href="' + escapeHtml(sanitizeUrl(proofRef)) + '" target="_blank" rel="noopener noreferrer" style="font-size:12px; text-decoration:none; padding:4px 10px; border:1px solid rgba(52,211,153,0.3); border-radius:4px; background:rgba(52,211,153,0.08); color:#6ee7b7;">Lihat Bukti</a>'
+            : '<button type="button" class="link-btn" style="cursor:pointer; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.3); border-radius:4px; padding:4px 10px; font-size:12px; color:#6ee7b7;" onclick="openMediaFile(\'' + escapeHtml(proofRef) + '\')">Lihat Bukti</button>')
+          : '';
+
+        html += '<div class="card theme-surface-blue theme-blue-total" style="padding:14px 16px; border-radius:10px; margin-top:8px; border:1px solid rgba(52,211,153,0.25); background:rgba(6,95,70,0.12);">';
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
+        html += '<div style="display:flex; align-items:center; gap:6px; color:#6ee7b7; font-weight:700; font-size:13px;">';
+        html += '<span>' + (c.verified ? '✓ Pembayaran Terverifikasi PIC' : '✓ Sudah konfirmasi transfer (Menunggu Verifikasi PIC)') + '</span>';
+        html += '</div>';
+        html += '<div style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:17px; font-weight:800; color:#eef6ed;">' + formatIDR(c.amountPaid || c.amountDue) + '</div>';
+        html += '</div>';
+
+        if (cardBankAccount || cardBankName || cardHolder) {
+          html += '<div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); font-size:12px; color:var(--muted); flex-wrap:wrap; gap:6px;">';
+          html += '<div style="line-height:1.35;">';
+          html += '<span>Transfer ke: <strong>' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</strong></span>';
+          if (cardHolder) html += '<span style="display:block; font-size:11px; opacity:0.85;">a.n. ' + escapeHtml(cardHolder) + '</span>';
+          html += '</div>';
+          if (proofBtnHtml) html += '<div>' + proofBtnHtml + '</div>';
+          html += '</div>';
+        } else if (proofBtnHtml) {
+          html += '<div style="padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); text-align:right;">' + proofBtnHtml + '</div>';
         }
+        html += '</div>';
       } else {
-        html += '<label>Upload bukti transfer</label>';
-        html += '<p class="muted" style="font-size:11px; margin:2px 0 6px 0;">Unggah bukti transfer (format JPG, PNG, atau PDF maks 2MB). Bukti hanya digunakan oleh PIC untuk verifikasi.</p>';
+        html += '<div class="card theme-surface-blue theme-blue-total" style="padding:16px; border-radius:10px; margin-top:8px; border:1px solid var(--border);">';
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">';
+        html += '<span style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Jumlah Tagihan</span>';
+        html += '<div style="display:flex; align-items:center; gap:8px;">';
+        html += '<span style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:22px; font-weight:800; color:var(--blue);">' + formatIDR(c.amountDue) + '</span>';
+        html += '<button type="button" class="btn secondary" style="padding:3px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')">Salin</button>';
+        html += '</div>';
+        html += '</div>';
+
+        if (cardBankAccount || cardBankName || cardHolder) {
+          html += '<div style="background:rgba(0,0,0,0.28); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
+          html += '<div style="line-height:1.4;">';
+          html += '<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">Rekening Tujuan PIC:</div>';
+          html += '<div style="font-weight:700; font-size:14px; color:#ffffff;">' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</div>';
+          if (cardHolder) html += '<div style="font-size:12px; color:var(--muted);">a.n. ' + escapeHtml(cardHolder) + '</div>';
+          html += '</div>';
+          if (cardBankAccount) {
+            html += '<button type="button" class="btn secondary" style="padding:4px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(cardBankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin Rek</button>';
+          }
+          html += '</div>';
+        }
+
+        html += '<label style="font-size:13px; font-weight:600;">Upload Bukti Transfer</label>';
+        html += '<p class="muted" style="font-size:11px; margin:2px 0 8px 0;">Format JPG, PNG, atau PDF (maks 2MB) untuk diverifikasi oleh PIC.</p>';
         html += '<input type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf" style="width:100%; box-sizing:border-box;">';
-        html += '<button id="btn-submit-proof-' + c.campaignId + '" class="btn" onclick="submitProof(\'' + c.campaignId + '\')">Sudah transfer, kirim bukti</button>';
+        html += '<button id="btn-submit-proof-' + c.campaignId + '" class="btn" style="margin-top:8px; width:100%;" onclick="submitProof(\'' + c.campaignId + '\')">Sudah Transfer, Kirim Bukti</button>';
         html += '<div id="proof-error-' + c.campaignId + '" class="error"></div>';
+        html += '</div>';
       }
-      html += '</div>';
     } else {
       html += '<p class="muted">Kamu tidak terdaftar sebagai donatur di campaign ini.</p>';
     }
