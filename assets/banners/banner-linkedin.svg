@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1584 396" width="1584" height="396" fill="none">
+  <rect width="1584" height="396" fill="#04090C" />
+  <circle cx="1300" cy="200" r="350" fill="#10B981" opacity="0.15" />
+
+  <g transform="translate(120, 90)">
+    <rect x="0" y="0" width="310" height="28" rx="14" fill="rgba(16, 185, 129, 0.12)" stroke="rgba(52, 211, 153, 0.3)" />
+    <text x="155" y="18" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="700" fill="#6EE7B7" letter-spacing="0.08em">SOLIDARITAS KARYAWAN &amp; ALUMNI SAWITPRO</text>
+
+    <text x="0" y="65" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="34" font-weight="800" fill="#FFFFFF">
+      DonatPRO: Solidaritas Nyata Insan SawitPRO.
+    </text>
+    <text x="0" y="100" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="400" fill="#CBD5E1">
+      Mengayomi rekan kerja aktif maupun alumni SawitPRO yang memerlukan bantuan darurat dan santunan.
+    </text>
+
+    <g transform="translate(0, 140)">
+      <text x="0" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#34D399">100% Sah</text>
+      <text x="0" y="44" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="500" fill="#9DB4AA">Verifikasi Dua Arah</text>
+
+      <line x1="160" y1="10" x2="160" y2="45" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+
+      <text x="190" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#60A5FA">0% Potongan</text>
+      <text x="190" y="44" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="500" fill="#9DB4AA">Murni Gotong Royong</text>
+
+      <line x1="360" y1="10" x2="360" y2="45" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+
+      <text x="390" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#FBBF24">Donatur Helper</text>
+      <text x="390" y="44" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="500" fill="#9DB4AA">Mesin Digital Terpadu</text>
+    </g>
+  </g>
+</svg>

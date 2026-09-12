@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 728 90" width="728" height="90" fill="none">
+  <rect width="728" height="90" fill="#05080A" stroke="#10B981" stroke-width="1" />
+  
+  <g transform="translate(24, 25)">
+    <circle cx="20" cy="20" r="18" fill="#10B981" opacity="0.2" />
+    <path d="M20 4 C27 4 33 7.5 35 15 C35 25 28 33 20 37 C12 33 5 25 5 15 C7 7.5 13 4 20 4 Z" fill="#10B981" />
+    <text x="48" y="22" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+    <text x="49" y="35" font-family="'Inter', system-ui, sans-serif" font-size="8" font-weight="700" fill="#9DB4AA" letter-spacing="0.12em">SOLIDARITAS SAWITPRO</text>
+  </g>
+
+  <g transform="translate(260, 32)">
+    <text x="0" y="16" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">Solidaritas Nyata Insan SawitPRO</text>
+    <text x="0" y="34" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="400" fill="#CBD5E1">Dari rekan, untuk rekan: saling menguatkan di kala musibah.</text>
+  </g>
+
+  <g transform="translate(560, 24)">
+    <rect x="0" y="0" width="144" height="42" rx="8" fill="#10B981" />
+    <text x="72" y="26" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Salurkan Donasi &rarr;</text>
+  </g>
+</svg>

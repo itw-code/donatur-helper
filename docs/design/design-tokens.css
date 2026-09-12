@@ -1,0 +1,241 @@
+/**
+ * DonatPRO - Official Design Tokens CSS
+ * Platform Solidaritas Insan SawitPRO (Powered by Donatur Helper engine)
+ * Generated from docs/design/design-tokens.json
+ * Version: 2.0.0
+ */
+
+:root {
+  /* ============================================================
+     1. PRIMITIVE TOKENS
+     ============================================================ */
+
+  /* Palette: Emerald Aurora */
+  --dh-color-emerald-50:  #ecfdf5;
+  --dh-color-emerald-100: #d1fae5;
+  --dh-color-emerald-200: #a7f3d0;
+  --dh-color-emerald-300: #6ee7b7;
+  --dh-color-emerald-400: #34d399;
+  --dh-color-emerald-500: #10b981;
+  --dh-color-emerald-600: #059669;
+  --dh-color-emerald-700: #047857;
+  --dh-color-emerald-800: #065f46;
+  --dh-color-emerald-900: #064e3b;
+
+  /* Palette: Ocean Cyan */
+  --dh-color-cyan-50:  #ecfeff;
+  --dh-color-cyan-100: #cffafe;
+  --dh-color-cyan-200: #a5f3fc;
+  --dh-color-cyan-300: #67e8f9;
+  --dh-color-cyan-400: #22d3ee;
+  --dh-color-cyan-500: #06b6d4;
+  --dh-color-cyan-600: #0891b2;
+  --dh-color-cyan-700: #0e7490;
+  --dh-color-cyan-800: #155e75;
+  --dh-color-cyan-900: #164e63;
+
+  /* Palette: Compassion Amber */
+  --dh-color-amber-50:  #fffbeb;
+  --dh-color-amber-100: #fef3c7;
+  --dh-color-amber-200: #fde68a;
+  --dh-color-amber-300: #fcd34d;
+  --dh-color-amber-400: #fbbf24;
+  --dh-color-amber-500: #f59e0b;
+  --dh-color-amber-600: #d97706;
+  --dh-color-amber-700: #b45309;
+  --dh-color-amber-800: #92400e;
+  --dh-color-amber-900: #78350f;
+
+  /* Palette: Alert Red */
+  --dh-color-red-50:  #fef2f2;
+  --dh-color-red-100: #fee2e2;
+  --dh-color-red-200: #fecaca;
+  --dh-color-red-300: #fca5a5;
+  --dh-color-red-400: #f87171;
+  --dh-color-red-500: #ef4444;
+  --dh-color-red-600: #dc2626;
+  --dh-color-red-700: #b91c1c;
+  --dh-color-red-800: #991b1b;
+  --dh-color-red-900: #7f1d1d;
+
+  /* Palette: Slate Neutrals */
+  --dh-color-slate-50:  #f8fafc;
+  --dh-color-slate-100: #f1f5f9;
+  --dh-color-slate-200: #e2e8f0;
+  --dh-color-slate-300: #cbd5e1;
+  --dh-color-slate-400: #94a3b8;
+  --dh-color-slate-500: #64748b;
+  --dh-color-slate-600: #475569;
+  --dh-color-slate-700: #334155;
+  --dh-color-slate-800: #1e293b;
+  --dh-color-slate-900: #0f172a;
+  --dh-color-slate-950: #020617;
+
+  /* Palette: Aurora Dark OLED Primitives */
+  --dh-aurora-void: #05080a;
+  --dh-aurora-surface: rgba(255, 255, 255, 0.045);
+  --dh-aurora-surface-hover: rgba(255, 255, 255, 0.07);
+  --dh-aurora-border: rgba(255, 255, 255, 0.09);
+  --dh-aurora-border-hover: rgba(255, 255, 255, 0.18);
+  --dh-aurora-ink-primary: #eef6f1;
+  --dh-aurora-ink-muted: #9db4aa;
+  --dh-aurora-glow: rgba(16, 185, 129, 0.28);
+
+  /* Spacing Scale (4px base) */
+  --dh-space-0: 0;
+  --dh-space-1: 4px;
+  --dh-space-2: 8px;
+  --dh-space-3: 12px;
+  --dh-space-4: 16px;
+  --dh-space-5: 20px;
+  --dh-space-6: 24px;
+  --dh-space-8: 32px;
+  --dh-space-10: 40px;
+  --dh-space-12: 48px;
+  --dh-space-16: 64px;
+
+  /* Typography Font Families */
+  --dh-font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --dh-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --dh-font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  /* Typography Scale */
+  --dh-text-xs: 12px;
+  --dh-text-sm: 14px;
+  --dh-text-base: 16px;
+  --dh-text-lg: 18px;
+  --dh-text-xl: 20px;
+  --dh-text-2xl: 24px;
+  --dh-text-3xl: 30px;
+  --dh-text-4xl: 36px;
+  --dh-text-5xl: 48px;
+
+  /* Border Radii */
+  --dh-radius-none: 0;
+  --dh-radius-sm: 4px;
+  --dh-radius-md: 8px;
+  --dh-radius-lg: 12px;
+  --dh-radius-xl: 16px;
+  --dh-radius-2xl: 24px;
+  --dh-radius-full: 9999px;
+
+  /* Shadows */
+  --dh-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --dh-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --dh-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --dh-shadow-glow: 0 0 24px -4px rgba(16, 185, 129, 0.35);
+
+  /* Transitions */
+  --dh-duration-fast: 150ms;
+  --dh-duration-normal: 200ms;
+  --dh-duration-slow: 300ms;
+  --dh-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ============================================================
+     2. SEMANTIC TOKENS (LIGHT DEFAULT)
+     ============================================================ */
+  --dh-semantic-canvas: var(--dh-color-slate-50);
+  --dh-semantic-surface: #ffffff;
+  --dh-semantic-surface-secondary: var(--dh-color-slate-100);
+  --dh-semantic-border: var(--dh-color-slate-200);
+  --dh-semantic-border-hover: var(--dh-color-slate-300);
+
+  --dh-semantic-text-primary: var(--dh-color-slate-900);
+  --dh-semantic-text-secondary: var(--dh-color-slate-600);
+  --dh-semantic-text-muted: var(--dh-color-slate-400);
+
+  --dh-semantic-brand-primary: var(--dh-color-emerald-600);
+  --dh-semantic-brand-hover: var(--dh-color-emerald-700);
+  --dh-semantic-brand-surface: var(--dh-color-emerald-50);
+  --dh-semantic-brand-secondary: var(--dh-color-cyan-600);
+
+  --dh-semantic-accent: var(--dh-color-amber-500);
+  --dh-semantic-success: var(--dh-color-emerald-600);
+  --dh-semantic-warning: var(--dh-color-amber-600);
+  --dh-semantic-danger: var(--dh-color-red-600);
+  --dh-semantic-info: var(--dh-color-cyan-600);
+}
+
+/* ============================================================
+   3. SEMANTIC TOKENS (AURORA DARK THEME - DEFAULT IN APP)
+   ============================================================ */
+[data-theme="dark"],
+body.theme-aurora,
+:root.theme-aurora {
+  --dh-semantic-canvas: var(--dh-aurora-void);
+  --dh-semantic-surface: var(--dh-aurora-surface);
+  --dh-semantic-surface-secondary: var(--dh-aurora-surface-hover);
+  --dh-semantic-border: var(--dh-aurora-border);
+  --dh-semantic-border-hover: var(--dh-aurora-border-hover);
+
+  --dh-semantic-text-primary: var(--dh-aurora-ink-primary);
+  --dh-semantic-text-secondary: var(--dh-aurora-ink-muted);
+  --dh-semantic-text-muted: #6e877d;
+
+  --dh-semantic-brand-primary: var(--dh-color-emerald-500);
+  --dh-semantic-brand-hover: var(--dh-color-emerald-400);
+  --dh-semantic-brand-surface: rgba(16, 185, 129, 0.14);
+  --dh-semantic-brand-secondary: #60a5fa;
+
+  --dh-semantic-accent: var(--dh-color-amber-400);
+  --dh-semantic-success: var(--dh-color-emerald-400);
+  --dh-semantic-warning: var(--dh-color-amber-400);
+  --dh-semantic-danger: var(--dh-color-red-400);
+  --dh-semantic-info: #93c5fd;
+
+  --dh-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --dh-shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.55);
+  --dh-shadow-lg: 0 14px 34px -10px rgba(0, 0, 0, 0.65);
+}
+
+/* ============================================================
+   4. COMPONENT LEVEL TOKENS
+   ============================================================ */
+.dh-btn-primary {
+  background-color: var(--dh-semantic-brand-primary);
+  color: #ffffff;
+  border-radius: var(--dh-radius-md);
+  font-family: var(--dh-font-body);
+  font-weight: 600;
+  transition: background-color var(--dh-duration-fast) var(--dh-ease-standard);
+}
+.dh-btn-primary:hover {
+  background-color: var(--dh-semantic-brand-hover);
+}
+
+.dh-card-surface {
+  background-color: var(--dh-semantic-surface);
+  border: 1px solid var(--dh-semantic-border);
+  border-radius: var(--dh-radius-lg);
+  box-shadow: var(--dh-shadow-md);
+  color: var(--dh-semantic-text-primary);
+}
+
+.dh-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-1);
+  padding: 4px 10px;
+  border-radius: var(--dh-radius-full);
+  font-size: var(--dh-text-xs);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.dh-badge-success {
+  background-color: rgba(52, 211, 153, 0.14);
+  color: var(--dh-semantic-success);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.dh-badge-warning {
+  background-color: rgba(251, 191, 36, 0.14);
+  color: var(--dh-semantic-warning);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.dh-badge-info {
+  background-color: rgba(96, 165, 250, 0.14);
+  color: var(--dh-semantic-info);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}

@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080" fill="none">
+  <defs>
+    <linearGradient id="igBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05080A" />
+      <stop offset="60%" stop-color="#071216" />
+      <stop offset="100%" stop-color="#030608" />
+    </linearGradient>
+    <linearGradient id="igGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#34D399" />
+    </linearGradient>
+    <linearGradient id="igShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#0EA5E9" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#igBg)" />
+  <circle cx="850" cy="250" r="380" fill="#10B981" opacity="0.14" />
+  <circle cx="200" cy="850" r="350" fill="#0EA5E9" opacity="0.1" />
+
+  <rect x="36" y="36" width="1008" height="1008" rx="28" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="none" />
+
+  <!-- Header -->
+  <g transform="translate(80, 80)">
+    <circle cx="28" cy="28" r="26" fill="#10B981" opacity="0.18" />
+    <path d="M28 6 C36 6 44 11 46 20 C46 34 37 45 28 50 C19 45 10 34 10 20 C12 11 20 6 28 6 Z" fill="url(#igShield)" />
+    <text x="68" y="32" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="34" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+    <text x="70" y="52" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#9DB4AA" letter-spacing="0.16em">SOLIDARITAS INSAN SAWITPRO</text>
+
+    <rect x="710" y="8" width="210" height="38" rx="19" fill="rgba(52, 211, 153, 0.14)" stroke="rgba(52, 211, 153, 0.35)" />
+    <circle cx="732" cy="27" r="6" fill="#34D399" />
+    <text x="748" y="32" font-family="'Inter', system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#6EE7B7">100% TERVERIFIKASI</text>
+  </g>
+
+  <!-- Title & Program -->
+  <g transform="translate(80, 200)">
+    <rect x="0" y="0" width="270" height="32" rx="6" fill="rgba(255, 255, 255, 0.08)" />
+    <text x="135" y="21" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="700" fill="#CBD5E1" letter-spacing="0.08em">LAPORAN PENYALURAN REKAN</text>
+
+    <text x="0" y="85" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="44" font-weight="800" fill="#FFFFFF">
+      Amanah Insan SawitPRO
+    </text>
+    <text x="0" y="145" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="44" font-weight="800" fill="url(#igGreen)">
+      Tersalurkan 100%
+    </text>
+    <text x="0" y="195" font-family="'Inter', system-ui, sans-serif" font-size="18" font-weight="400" fill="#9DB4AA">
+      Program: Bantuan Medis &amp; Duka Rekan Karyawan / Alumni SawitPRO (Batch 4)
+    </text>
+  </g>
+
+  <!-- Key Metrics Spotlight Card -->
+  <g transform="translate(80, 440)">
+    <rect width="920" height="280" rx="24" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+
+    <g transform="translate(50, 45)">
+      <text x="0" y="20" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="600" fill="#9DB4AA">TOTAL BANTUAN DISERAHKAN</text>
+      <text x="0" y="70" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="42" font-weight="800" fill="#34D399">Rp 24.500.000</text>
+      <text x="0" y="100" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="500" fill="#6EE7B7">✓ Diserahkan langsung ke keluarga rekan kerja</text>
+    </g>
+
+    <line x1="460" y1="35" x2="460" y2="245" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+
+    <g transform="translate(500, 45)">
+      <text x="0" y="20" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="600" fill="#9DB4AA">PARTISIPASI KELUARGA BESAR</text>
+      <text x="0" y="70" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="42" font-weight="800" fill="#60A5FA">49 Rekan</text>
+      <text x="0" y="100" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="500" fill="#93C5FD">Karyawan Aktif &amp; Eks-Karyawan SawitPRO</text>
+    </g>
+
+    <g transform="translate(50, 195)">
+      <line x1="0" y1="0" x2="820" y2="0" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+      <text x="0" y="28" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#CBD5E1">
+        Divalidasi oleh PIC SawitPRO: <tspan font-weight="700" fill="#FFFFFF">Ahmad Fauzi</tspan> • Dikelola via mesin Donatur Helper secara transparan
+      </text>
+    </g>
+  </g>
+
+  <!-- Bottom Proof Bar -->
+  <g transform="translate(80, 760)">
+    <rect width="920" height="180" rx="20" fill="rgba(16, 185, 129, 0.08)" stroke="rgba(52, 211, 153, 0.2)" />
+    <g transform="translate(40, 40)">
+      <circle cx="28" cy="28" r="28" fill="#10B981" />
+      <path d="M20 28 L26 34 L36 22" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" fill="none" />
+      <text x="76" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF">Kuitansi Sah &amp; Mutasi Kas Terbuka bagi Rekan</text>
+      <text x="76" y="50" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="400" fill="#9DB4AA">Setiap donatur memiliki akses langsung memantau bukti transfer &amp; kuitansi resmi.</text>
+      <text x="76" y="80" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="600" fill="#34D399">Tautan: https://don4tpro.pages.dev</text>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <g transform="translate(80, 990)">
+    <text x="0" y="0" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#64748B">#DonatPRO #InsanSawitPRO #SolidaritasSawitPRO #DariRekanUntukRekan</text>
+    <text x="920" y="0" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#94A3B8">Slide untuk melihat foto dokumentasi &rarr;</text>
+  </g>
+</svg>

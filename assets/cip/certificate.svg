@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 842 595" width="842" height="595" fill="none">
+  <defs>
+    <linearGradient id="certGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <linearGradient id="certGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+  </defs>
+
+  <rect width="842" height="595" fill="#080E11" />
+  <rect x="24" y="24" width="794" height="547" rx="8" stroke="url(#certGold)" stroke-width="2" fill="none" />
+  <rect x="32" y="32" width="778" height="531" rx="6" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" fill="none" />
+
+  <g transform="translate(421, 80)">
+    <circle cx="0" cy="0" r="26" fill="#10B981" opacity="0.15" />
+    <path d="M0 -18 C8 -18 14 -14 16 -6 C16 4 9 12 0 16 C-9 12 -16 4 -16 -6 C-14 -14 -8 -18 0 -18 Z" fill="url(#certGreen)" />
+  </g>
+
+  <text x="421" y="145" text-anchor="middle" font-family="'Plus Jakarta Sans', serif" font-size="28" font-weight="800" fill="url(#certGold)" letter-spacing="0.12em">PIAGAM PENGHARGAAN SOLIDARITAS</text>
+  <text x="421" y="168" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="700" fill="#9DB4AA" letter-spacing="0.22em">DONATPRO • INSAN SAWITPRO PEDULI</text>
+  <text x="421" y="190" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#64748B">NO. SERTIFIKAT: DPRO/SAWITPRO/2026/089</text>
+
+  <text x="421" y="230" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="400" fill="#CBD5E1">Dianugerahkan dengan penuh hormat dan apresiasi kepada:</text>
+  <text x="421" y="275" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="30" font-weight="800" fill="#FFFFFF">Rekan Donatur Insan SawitPRO</text>
+  <line x1="221" y1="292" x2="621" y2="292" stroke="url(#certGold)" stroke-width="1.5" />
+
+  <text x="421" y="330" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="400" fill="#EEF6F1">
+    Atas ketulusan, kepedulian, dan jiwa gotong royong dalam mendukung
+  </text>
+  <text x="421" y="352" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="700" fill="#34D399">
+    Dana Solidaritas Karyawan &amp; Alumni SawitPRO (DonatPRO)
+  </text>
+  <text x="421" y="374" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="400" fill="#9DB4AA">
+    Semoga setiap kebaikan membawa manfaat nyata, menguatkan persaudaraan, dan meringankan beban sesama.
+  </text>
+
+  <g transform="translate(421, 460)">
+    <circle cx="0" cy="0" r="42" fill="url(#certGold)" />
+    <circle cx="0" cy="0" r="37" stroke="#78350F" stroke-width="1.5" fill="none" />
+    <text x="0" y="-8" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="8" font-weight="800" fill="#78350F">DONATPRO</text>
+    <text x="0" y="4" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#451A03">★ SAWITPRO ★</text>
+    <text x="0" y="16" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#78350F">TERVERIFIKASI</text>
+  </g>
+
+  <g transform="translate(180, 460)">
+    <line x1="-80" y1="20" x2="80" y2="20" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1" />
+    <text x="0" y="36" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Ahmad Fauzi</text>
+    <text x="0" y="48" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#9DB4AA">Koordinator PIC Solidaritas</text>
+  </g>
+
+  <g transform="translate(660, 460)">
+    <line x1="-80" y1="20" x2="80" y2="20" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1" />
+    <text x="0" y="36" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Perwakilan Insan SawitPRO</text>
+    <text x="0" y="48" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#9DB4AA">Dewan Pengawas Amanah</text>
+  </g>
+</svg>

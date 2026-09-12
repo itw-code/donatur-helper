@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <rect width="800" height="500" rx="16" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+  <rect x="0" y="0" width="12" height="500" rx="6" fill="#10B981" />
+
+  <g transform="translate(40, 35)">
+    <circle cx="20" cy="20" r="18" fill="#10B981" opacity="0.12" />
+    <path d="M20 4 C27 4 33 7.5 35 15 C35 25 28 33 20 37 C12 33 5 25 5 15 C7 7.5 13 4 20 4 Z" fill="#10B981" />
+    <text x="48" y="22" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="24" font-weight="800" fill="#0F172A">Donat<tspan fill="#10B981">PRO</tspan></text>
+    <text x="49" y="35" font-family="'Inter', system-ui, sans-serif" font-size="8.5" font-weight="700" fill="#64748B" letter-spacing="0.14em">BUKTI PENERIMAAN DANA SOLIDARITAS INSAN SAWITPRO</text>
+
+    <text x="720" y="16" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="800" fill="#059669">KUITANSI RESMI</text>
+    <text x="720" y="32" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="600" fill="#334155">NO: KWT/DPRO/2026/09/0812</text>
+    <text x="720" y="46" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#64748B">Tanggal: 12 September 2026</text>
+  </g>
+
+  <line x1="40" y1="95" x2="760" y2="95" stroke="#E2E8F0" stroke-width="1" />
+
+  <g transform="translate(40, 120)">
+    <text x="0" y="20" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#64748B">Telah Diterima Dari</text>
+    <text x="160" y="20" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#0F172A">:  Rekan Karyawan SawitPRO (Donatur #SP-8821)</text>
+
+    <text x="0" y="55" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#64748B">Uang Sejumlah</text>
+    <rect x="160" y="38" width="560" height="30" rx="6" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1" />
+    <text x="175" y="58" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#065F46"># Lima Ratus Ribu Rupiah #</text>
+
+    <text x="0" y="95" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#64748B">Untuk Program</text>
+    <text x="160" y="95" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#0F172A">:  Solidaritas Bantuan Rekan &amp; Eks-Karyawan SawitPRO (Batch 4)</text>
+
+    <text x="0" y="125" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#64748B">ID Kampanye &amp; Hash</text>
+    <text x="160" y="125" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="500" fill="#0284C7">:  C-53762679 • TX-DPRO-9912048572</text>
+  </g>
+
+  <g transform="translate(40, 290)">
+    <rect x="0" y="0" width="280" height="75" rx="10" fill="#F8FAFC" stroke="#0F172A" stroke-width="1.5" />
+    <text x="20" y="26" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="600" fill="#64748B">TOTAL DONASI TERVALIDASI</text>
+    <text x="20" y="58" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="26" font-weight="800" fill="#0F172A">Rp 500.000,-</text>
+  </g>
+
+  <g transform="translate(540, 280)">
+    <text x="110" y="14" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="600" fill="#64748B">Petugas PIC Solidaritas</text>
+    <circle cx="110" cy="50" r="34" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="3,3" fill="none" opacity="0.8" />
+    <text x="110" y="48" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#DC2626" opacity="0.8">DONATPRO</text>
+    <text x="110" y="58" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="6.5" font-weight="700" fill="#DC2626" opacity="0.8">LUNAS &amp; SAH</text>
+
+    <line x1="20" y1="100" x2="200" y2="100" stroke="#0F172A" stroke-width="1" />
+    <text x="110" y="116" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="700" fill="#0F172A">Ahmad Fauzi (PIC)</text>
+  </g>
+
+  <g transform="translate(40, 460)">
+    <text x="0" y="0" font-family="'Inter', system-ui, sans-serif" font-size="8" font-weight="500" fill="#94A3B8">Kuitansi ini diterbitkan sah melalui sistem DonatPRO (Donatur Helper engine) tanpa potongan biaya sepeser pun.</text>
+    <text x="720" y="0" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="8" font-weight="600" fill="#10B981">https://don4tpro.pages.dev</text>
+  </g>
+</svg>

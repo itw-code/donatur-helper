@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DonatPRO • Patungan Kado Perpisahan Rekan SawitPRO • Brand &amp; Design System</title>
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="design-tokens.css">
+  <style>
+    /* Reset & Base Setup */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--dh-font-body);
+      background-color: var(--dh-semantic-canvas);
+      color: var(--dh-semantic-text-primary);
+      line-height: 1.6;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Hero Header */
+    .dh-showcase-hero {
+      position: relative;
+      padding: 40px 24px 24px;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, transparent 100%);
+      border-bottom: 1px solid var(--dh-semantic-border);
+    }
+    .dh-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .dh-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .dh-brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .dh-brand-logo-img {
+      width: 48px;
+      height: 48px;
+    }
+    .dh-brand-title {
+      font-family: var(--dh-font-display);
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .dh-brand-subtitle {
+      font-size: 13px;
+      color: var(--dh-semantic-text-secondary);
+      font-weight: 500;
+    }
+
+    .dh-btn-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .dh-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: var(--dh-semantic-surface);
+      border: 1px solid var(--dh-semantic-border);
+      border-radius: var(--dh-radius-full);
+      color: var(--dh-semantic-text-primary);
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+    .dh-action-btn:hover {
+      border-color: var(--dh-semantic-brand-primary);
+      box-shadow: var(--dh-shadow-sm);
+    }
+
+    /* Tab Navigation */
+    .dh-nav-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--dh-semantic-border);
+      scrollbar-width: none;
+    }
+    .dh-nav-tabs::-webkit-scrollbar { display: none; }
+    .dh-tab-btn {
+      padding: 12px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--dh-semantic-text-secondary);
+      font-family: var(--dh-font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .dh-tab-btn:hover {
+      color: var(--dh-semantic-text-primary);
+    }
+    .dh-tab-btn.active {
+      color: var(--dh-semantic-brand-primary);
+      border-bottom-color: var(--dh-semantic-brand-primary);
+    }
+
+    /* Tab Panels */
+    .dh-tab-panel {
+      display: none;
+      padding: 36px 0 80px;
+    }
+    .dh-tab-panel.active {
+      display: block;
+      animation: dhFade 0.25s ease-out;
+    }
+    @keyframes dhFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Section Typography */
+    .dh-section-title {
+      font-family: var(--dh-font-display);
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .dh-section-desc {
+      color: var(--dh-semantic-text-secondary);
+      font-size: 15px;
+      margin-bottom: 32px;
+      max-width: 820px;
+    }
+
+    /* Grid Layouts */
+    .dh-grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .dh-grid-full {
+      grid-column: 1 / -1;
+    }
+
+    .dh-card-box {
+      background: var(--dh-semantic-surface);
+      border: 1px solid var(--dh-semantic-border);
+      border-radius: var(--dh-radius-lg);
+      padding: 24px;
+      box-shadow: var(--dh-shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .dh-card-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .dh-card-box-title {
+      font-family: var(--dh-font-display);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Asset Previews */
+    .dh-preview-frame {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px dashed var(--dh-semantic-border);
+      border-radius: var(--dh-radius-md);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      overflow: hidden;
+      position: relative;
+    }
+    .dh-preview-frame.light-bg {
+      background: #FFFFFF;
+    }
+    .dh-preview-frame img, .dh-preview-frame object {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+    }
+
+    /* Color Swatches Grid */
+    .dh-swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .dh-swatch-item {
+      background: var(--dh-semantic-surface);
+      border: 1px solid var(--dh-semantic-border);
+      border-radius: var(--dh-radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .dh-swatch-item:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--dh-shadow-md);
+    }
+    .dh-swatch-color {
+      height: 75px;
+      width: 100%;
+    }
+    .dh-swatch-info {
+      padding: 10px 14px;
+    }
+    .dh-swatch-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--dh-semantic-text-primary);
+    }
+    .dh-swatch-hex {
+      font-family: var(--dh-font-mono);
+      font-size: 11px;
+      color: var(--dh-semantic-text-secondary);
+    }
+
+    /* Icons Grid */
+    .dh-icons-toolbar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .dh-search-input {
+      flex: 1;
+      min-width: 240px;
+      max-width: 380px;
+      padding: 10px 16px;
+      background: var(--dh-semantic-surface);
+      border: 1px solid var(--dh-semantic-border);
+      border-radius: var(--dh-radius-md);
+      color: var(--dh-semantic-text-primary);
+      font-size: 14px;
+      outline: none;
+    }
+    .dh-search-input:focus {
+      border-color: var(--dh-semantic-brand-primary);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+    .dh-icons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 16px;
+    }
+    .dh-icon-tile {
+      background: var(--dh-semantic-surface);
+      border: 1px solid var(--dh-semantic-border);
+      border-radius: var(--dh-radius-md);
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--dh-semantic-brand-primary);
+    }
+    .dh-icon-tile:hover {
+      border-color: var(--dh-semantic-brand-primary);
+      transform: translateY(-3px);
+      box-shadow: var(--dh-shadow-glow);
+    }
+    .dh-icon-tile img {
+      width: 28px;
+      height: 28px;
+    }
+    .dh-icon-tile-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dh-semantic-text-secondary);
+      font-family: var(--dh-font-mono);
+      text-align: center;
+    }
+
+    /* Copy Button */
+    .dh-copy-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--dh-radius-md);
+      border: 1px solid var(--dh-semantic-border);
+      background: transparent;
+      color: var(--dh-semantic-text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .dh-copy-btn:hover {
+      background: var(--dh-semantic-surface-secondary);
+      border-color: var(--dh-semantic-brand-primary);
+    }
+
+    /* Toast */
+    #dh-toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #10B981;
+      color: #FFFFFF;
+      padding: 12px 22px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      transform: translateY(120px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    #dh-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    /* Ticker Transition Styles */
+    .dh-ticker-text {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+    }
+    .dh-ticker-text.slide-out {
+      opacity: 0;
+      transform: translateY(-14px);
+    }
+    .dh-ticker-text.slide-in-init {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    .dh-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .dh-dot.active {
+      width: 14px;
+      border-radius: 3px;
+      background: #34D399;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <header class="dh-showcase-hero">
+    <div class="dh-container">
+      <div class="dh-header-row">
+        <div class="dh-brand-lockup">
+          <img src="../../assets/logo/logo-icon.svg" alt="DonatPRO Logo Mark" class="dh-brand-logo-img">
+          <div>
+            <h1 class="dh-brand-title">Donat<span style="color: var(--dh-semantic-brand-hover);">PRO</span></h1>
+            <div class="dh-ticker-wrapper" id="showcase-subtitle-ticker" style="cursor: pointer; display: inline-flex; flex-direction: column; align-items: flex-start;" title="Klik untuk ganti pesan">
+              <div class="dh-ticker-track" style="height: 22px; overflow: hidden; display: flex; align-items: center;">
+                <p class="dh-brand-subtitle dh-ticker-text" id="showcase-ticker-text" style="margin: 0; font-weight: 700; color: #34D399; letter-spacing: 0.08em; text-transform: uppercase;">Satu Hadiah, Sejuta Cerita</p>
+              </div>
+              <div class="dh-ticker-dots" id="showcase-ticker-dots" style="display: flex; gap: 5px; margin-top: 4px;">
+                <span class="dh-dot active" data-index="0" title="Satu Hadiah, Sejuta Cerita"></span>
+                <span class="dh-dot" data-index="1" title="Satu Kado, Sejuta Kenangan"></span>
+                <span class="dh-dot" data-index="2" title="Dari Kita, untuk Cerita Berikutnya"></span>
+                <span class="dh-dot" data-index="3" title="Kado Bermakna, Cerita Bersama"></span>
+              </div>
+            </div>
+        </div>
+
+        <div class="dh-btn-group">
+          <a href="https://don4tpro.pages.dev" target="_blank" rel="noopener noreferrer" class="dh-action-btn">
+            <span>🌐 Buka Aplikasi Live</span>
+          </a>
+          <button id="themeToggleBtn" class="dh-action-btn" type="button" aria-label="Ganti Tema Tampilan">
+            <span id="themeIcon">☀️</span> <span id="themeLabel">Mode Terang</span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="dh-nav-tabs" role="tablist">
+        <button class="dh-tab-btn active" role="tab" aria-selected="true" onclick="switchTab(event, 'brand')">Pedoman Merek</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'logo')">Logo Suite (6)</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'tokens')">Design Tokens</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'cip')">Dokumen CIP (6)</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'icons')">Ikon SVG (16)</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'banners')">Banner Suite (6)</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'social')">Media Sosial (4)</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'ui')">UI Components</button>
+        <button class="dh-tab-btn" role="tab" aria-selected="false" onclick="switchTab(event, 'mockups')">Mockup Implementasi (2)</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dh-container">
+    <!-- ==================== TAB 1: BRAND ==================== -->
+      <h2 class="dh-section-title">Identitas Merek &amp; Filosofi Patungan Kado Perpisahan DonatPRO</h2>
+      <p class="dh-section-desc">Pedoman resmi patungan kado kenang-kenangan perpisahan rekan kerja SawitPRO (resign/exit ~95%), adil tanpa drama selisih kas, praktis 100% digital.</p>
+
+      <div class="dh-grid-cards">
+        <div class="dh-card-box">
+          <h3 class="dh-card-box-title">Tiga Pilar Nilai Inti</h3>
+          <ul style="padding-left: 20px; color: var(--dh-semantic-text-secondary); font-size: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <li><strong>Persaudaraan (Inklusif):</strong> Mengayomi seluruh insan SawitPRO aktif maupun alumni lintas latar belakang dan keyakinan.</li>
+            <li><strong>Amanah (Akuntabilitas):</strong> 100% dana tersalurkan utuh tanpa potongan biaya, pencatatan tervalidasi dua arah.</li>
+            <li><strong>Cepat Tanggap:</strong> Menjangkau rekan kerja yang membutuhkan bantuan darurat secara sigap dan bermartabat.</li>
+          </ul>
+        </div>
+
+        <div class="dh-card-box">
+          <h3 class="dh-card-box-title">Gaya Tutur Baku-Luwes</h3>
+          <p style="font-size: 14px; color: var(--dh-semantic-text-secondary); margin-bottom: 8px;">
+            Tertib kaidah Bahasa Indonesia, hangat, solutif, empatik, dan bebas jargon korporat asing yang berlebihan.
+          </p>
+          <div style="background: var(--dh-semantic-surface-secondary); padding: 12px; border-radius: 8px; font-size: 13px; border-left: 3px solid var(--dh-semantic-brand-primary);">
+            <em>"Puji syukur dan terima kasih mendalam atas kepedulian rekan-rekan. Bantuan dana solidaritas telah diserahkan 100% kepada keluarga rekan kita."</em>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">Palet Warna Resmi &amp; Rasio Kontras (Klik untuk Salin Hex)</h3>
+      <div class="dh-swatch-grid">
+        <div class="dh-swatch-item" onclick="copyText('#10B981')">
+          <div class="dh-swatch-color" style="background: #10B981;"></div>
+          <div class="dh-swatch-info">
+            <div class="dh-swatch-name">Emerald Aurora (500)</div>
+            <div class="dh-swatch-hex">#10B981 • AAA 8.9:1</div>
+          </div>
+        </div>
+
+        <div class="dh-swatch-item" onclick="copyText('#34D399')">
+          <div class="dh-swatch-color" style="background: #34D399;"></div>
+          <div class="dh-swatch-info">
+            <div class="dh-swatch-name">Bright Mint (400)</div>
+            <div class="dh-swatch-hex">#34D399 • AAA 11.5:1</div>
+          </div>
+        </div>
+
+        <div class="dh-swatch-item" onclick="copyText('#0EA5E9')">
+          <div class="dh-swatch-color" style="background: #0EA5E9;"></div>
+          <div class="dh-swatch-info">
+            <div class="dh-swatch-name">Ocean Integrity (500)</div>
+            <div class="dh-swatch-hex">#0EA5E9 • AAA 7.8:1</div>
+          </div>
+        </div>
+
+        <div class="dh-swatch-item" onclick="copyText('#FBBF24')">
+          <div class="dh-swatch-color" style="background: #FBBF24;"></div>
+          <div class="dh-swatch-info">
+            <div class="dh-swatch-name">Compassion Amber (400)</div>
+            <div class="dh-swatch-hex">#FBBF24 • AAA 12.4:1</div>
+          </div>
+        </div>
+
+        <div class="dh-swatch-item" onclick="copyText('#05080A')">
+          <div class="dh-swatch-color" style="background: #05080A; border-bottom: 1px solid rgba(255,255,255,0.15);"></div>
+          <div class="dh-swatch-info">
+            <div class="dh-swatch-name">Aurora OLED Void</div>
+            <div class="dh-swatch-hex">#05080A • Dark Canvas</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: LOGO ==================== -->
+    <section id="tab-logo" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Vektor Logo Suite Resmi (6 Varian)</h2>
+      <p class="dh-section-desc">Koleksi format logo resmi untuk antarmuka web, kop surat, splash screen, kartu identitas, dan cetak dokumen.</p>
+
+      <div class="dh-grid-cards">
+        <!-- Logo Horizontal -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Primary Horizontal Lockup</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/logo/logo-horizontal.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/logo/logo-horizontal.svg" alt="Donatur Helper Logo Horizontal">
+          </div>
+          <p style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Gunakan pada Navbar situs, Header aplikasi, dan Kop Surat resmi.</p>
+        </div>
+
+        <!-- Logo Vertical -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Stacked Emblem Lockup</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/logo/logo-vertical.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/logo/logo-vertical.svg" alt="Donatur Helper Logo Vertical">
+          </div>
+          <p style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Gunakan pada Splash screen, Tanda Pengenal, dan Poster vertikal.</p>
+        </div>
+
+        <!-- Standalone Mark -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Caring Shield Brandmark</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/logo/logo-icon.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/logo/logo-icon.svg" alt="Donatur Helper Icon Mark" style="max-height: 120px;">
+          </div>
+          <p style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Simbol tunggal untuk Avatar profil, watermark, dan favicon aplikasi.</p>
+        </div>
+
+        <!-- Monochrome Dark -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Monochrome Dark (Pure White)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/logo/logo-monochrome-dark.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame" style="background: #05080A;">
+            <img src="../../assets/logo/logo-monochrome-dark.svg" alt="Donatur Helper Monochrome Dark">
+          </div>
+          <p style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Untuk sablon satu warna pada latar belakang gelap atau seragam kaos relawan.</p>
+        </div>
+
+        <!-- Monochrome Light -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Monochrome Light (Deep Slate)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/logo/logo-monochrome-light.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame light-bg">
+            <img src="../../assets/logo/logo-monochrome-light.svg" alt="Donatur Helper Monochrome Light">
+          </div>
+          <p style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Untuk cetak hitam putih, fotokopi, faks, dan arsip berkas perbankan.</p>
+        </div>
+
+        <!-- Favicon -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Favicon Vector (32 × 32)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/logo/favicon.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/logo/favicon.svg" alt="Donatur Helper Favicon" style="max-height: 80px;">
+          </div>
+          <p style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Ikon tab peramban berpresisi pixel-aligned.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: TOKENS ==================== -->
+    <section id="tab-tokens" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Design Tokens (W3C Community Format)</h2>
+      <p class="dh-section-desc">Struktur 3-layer tokens: Primitive (warna, tipografi, spacing) &rarr; Semantic &rarr; Component level.</p>
+
+      <div class="dh-card-box" style="margin-bottom: 24px;">
+        <div class="dh-card-box-header">
+          <span class="dh-card-box-title">Spesifikasi Token JSON (docs/design/design-tokens.json)</span>
+          <button class="dh-copy-btn" onclick="copyJsonTokens()">Salin Seluruh JSON</button>
+        </div>
+        <pre id="tokensDisplay" style="background: rgba(0,0,0,0.3); padding: 18px; border-radius: 8px; font-family: var(--dh-font-mono); font-size: 12px; max-height: 440px; overflow: auto; color: #34D399;"></pre>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: CIP ==================== -->
+    <section id="tab-cip" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Corporate Identity Program (CIP Deliverables)</h2>
+      <p class="dh-section-desc">Koleksi berkas resmi administrasi lapangan: Kop Surat, Kartu Nama, ID Card, Kuitansi Sah, Sertifikat, dan Cap Organisasi.</p>
+
+      <div class="dh-grid-cards">
+        <!-- Letterhead -->
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Kop Surat Resmi A4 (Letterhead)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/cip/letterhead.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame light-bg" style="min-height: 480px;">
+            <img src="../../assets/cip/letterhead.svg" alt="Donatur Helper Kop Surat Resmi" style="max-height: 600px;">
+          </div>
+        </div>
+
+        <!-- Business Card -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Kartu Nama PIC/Admin (Dual-Side)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/cip/business-card.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/cip/business-card.svg" alt="Donatur Helper Kartu Nama">
+          </div>
+        </div>
+
+        <!-- ID Badge -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Tanda Pengenal Relawan (ID Card CR80)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/cip/id-badge.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/cip/id-badge.svg" alt="Donatur Helper ID Card Relawan" style="max-height: 380px;">
+          </div>
+        </div>
+
+        <!-- Receipt Voucher -->
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Kuitansi Resmi &amp; Bukti Penyaluran Sah (Receipt Voucher)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/cip/receipt-voucher.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame light-bg">
+            <img src="../../assets/cip/receipt-voucher.svg" alt="Donatur Helper Kuitansi Resmi" style="max-height: 400px;">
+          </div>
+        </div>
+
+        <!-- Certificate -->
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Piagam Penghargaan Donatur (Certificate of Appreciation)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/cip/certificate.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/cip/certificate.svg" alt="Donatur Helper Piagam Penghargaan" style="max-height: 420px;">
+          </div>
+        </div>
+
+        <!-- Official Stamp -->
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Stempel Resmi Organisasi (Official Stamp)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/cip/official-stamp.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/cip/official-stamp.svg" alt="Donatur Helper Stempel Resmi" style="max-height: 180px;">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: ICONS ==================== -->
+    <section id="tab-icons" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Koleksi Ikon SVG Kustom (16 Ikon)</h2>
+      <p class="dh-section-desc">Ikon 24 × 24 px berpresisi tinggi, currentColor, stroke 1.75px, mendukung sistem sprite.</p>
+
+      <div class="dh-icons-toolbar">
+        <input type="text" id="iconSearchInput" class="dh-search-input" placeholder="Cari nama ikon (misal: home, wallet, shield)..." oninput="filterIcons()">
+        <span style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Klik pada kartu ikon untuk langsung menyalin kode SVG</span>
+      </div>
+
+      <div class="dh-icons-grid" id="iconsContainer">
+        <!-- 16 Icons listed dynamically or statically -->
+        <div class="dh-icon-tile" data-name="dh-home" onclick="copyIconSvg('dh-home')">
+          <img src="../../assets/icons/dh-home.svg" alt="dh-home">
+          <span class="dh-icon-tile-name">dh-home</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-campaign" onclick="copyIconSvg('dh-campaign')">
+          <img src="../../assets/icons/dh-campaign.svg" alt="dh-campaign">
+          <span class="dh-icon-tile-name">dh-campaign</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-heart" onclick="copyIconSvg('dh-heart')">
+          <img src="../../assets/icons/dh-heart.svg" alt="dh-heart">
+          <span class="dh-icon-tile-name">dh-heart</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-donor" onclick="copyIconSvg('dh-donor')">
+          <img src="../../assets/icons/dh-donor.svg" alt="dh-donor">
+          <span class="dh-icon-tile-name">dh-donor</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-pic" onclick="copyIconSvg('dh-pic')">
+          <img src="../../assets/icons/dh-pic.svg" alt="dh-pic">
+          <span class="dh-icon-tile-name">dh-pic</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-wallet" onclick="copyIconSvg('dh-wallet')">
+          <img src="../../assets/icons/dh-wallet.svg" alt="dh-wallet">
+          <span class="dh-icon-tile-name">dh-wallet</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-receipt" onclick="copyIconSvg('dh-receipt')">
+          <img src="../../assets/icons/dh-receipt.svg" alt="dh-receipt">
+          <span class="dh-icon-tile-name">dh-receipt</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-upload" onclick="copyIconSvg('dh-upload')">
+          <img src="../../assets/icons/dh-upload.svg" alt="dh-upload">
+          <span class="dh-icon-tile-name">dh-upload</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-shield-check" onclick="copyIconSvg('dh-shield-check')">
+          <img src="../../assets/icons/dh-shield-check.svg" alt="dh-shield-check">
+          <span class="dh-icon-tile-name">dh-shield-check</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-archive" onclick="copyIconSvg('dh-archive')">
+          <img src="../../assets/icons/dh-archive.svg" alt="dh-archive">
+          <span class="dh-icon-tile-name">dh-archive</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-key" onclick="copyIconSvg('dh-key')">
+          <img src="../../assets/icons/dh-key.svg" alt="dh-key">
+          <span class="dh-icon-tile-name">dh-key</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-bell" onclick="copyIconSvg('dh-bell')">
+          <img src="../../assets/icons/dh-bell.svg" alt="dh-bell">
+          <span class="dh-icon-tile-name">dh-bell</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-filter" onclick="copyIconSvg('dh-filter')">
+          <img src="../../assets/icons/dh-filter.svg" alt="dh-filter">
+          <span class="dh-icon-tile-name">dh-filter</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-search" onclick="copyIconSvg('dh-search')">
+          <img src="../../assets/icons/dh-search.svg" alt="dh-search">
+          <span class="dh-icon-tile-name">dh-search</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-whatsapp" onclick="copyIconSvg('dh-whatsapp')">
+          <img src="../../assets/icons/dh-whatsapp.svg" alt="dh-whatsapp">
+          <span class="dh-icon-tile-name">dh-whatsapp</span>
+        </div>
+        <div class="dh-icon-tile" data-name="dh-logout" onclick="copyIconSvg('dh-logout')">
+          <img src="../../assets/icons/dh-logout.svg" alt="dh-logout">
+          <span class="dh-icon-tile-name">dh-logout</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 6: BANNERS ==================== -->
+    <section id="tab-banners" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Responsive Banner Suite (6 Format)</h2>
+      <p class="dh-section-desc">Banner terukur untuk Website Hero, Twitter/X, LinkedIn, Facebook, dan Google Display Network Ads.</p>
+
+      <div class="dh-grid-cards">
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Website Full-Width Hero (1920 × 800)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/banners/banner-web-hero.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/banners/banner-web-hero.svg" alt="Website Hero Banner">
+          </div>
+        </div>
+
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Twitter / X Header (1500 × 500)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/banners/banner-twitter-header.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/banners/banner-twitter-header.svg" alt="Twitter Header Banner">
+          </div>
+        </div>
+
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">LinkedIn Organization Banner (1584 × 396)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/banners/banner-linkedin.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/banners/banner-linkedin.svg" alt="LinkedIn Banner">
+          </div>
+        </div>
+
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Facebook Page Cover (820 × 312)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/banners/banner-facebook-cover.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/banners/banner-facebook-cover.svg" alt="Facebook Page Cover">
+          </div>
+        </div>
+
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Display Ad Medium Rectangle (300 × 250)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/banners/banner-ad-300x250.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/banners/banner-ad-300x250.svg" alt="Display Ad 300x250">
+          </div>
+        </div>
+
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Display Ad Leaderboard (728 × 90)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/banners/banner-ad-728x90.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/banners/banner-ad-728x90.svg" alt="Display Ad Leaderboard">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 7: SOCIAL ==================== -->
+    <section id="tab-social" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Media Sosial &amp; Laporan Donasi (4 Template)</h2>
+      <p class="dh-section-desc">Grafis media sosial untuk Instagram Post, Story, Carousel, dan LinkedIn/Facebook Feed Post.</p>
+
+      <div class="dh-grid-cards">
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Instagram Post - Laporan Penyaluran (1080 × 1080)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/social/social-ig-post-1080x1080.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/social/social-ig-post-1080x1080.svg" alt="IG Post 1080x1080">
+          </div>
+        </div>
+
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Instagram Carousel - Alur Amanah (1080 × 1350)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/social/social-ig-carousel-1080x1350.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/social/social-ig-carousel-1080x1350.svg" alt="IG Carousel 1080x1350">
+          </div>
+        </div>
+
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Instagram Story - Urgensi Donasi (1080 × 1920)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/social/social-ig-story-1080x1920.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/social/social-ig-story-1080x1920.svg" alt="IG Story 1080x1920" style="max-height: 480px;">
+          </div>
+        </div>
+
+        <div class="dh-card-box">
+          <div class="dh-card-box-header">
+            <span class="dh-card-box-title">Feed Post - Dampak Tahunan (1200 × 630)</span>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/social/social-feed-1200x630.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame">
+            <img src="../../assets/social/social-feed-1200x630.svg" alt="Feed Post 1200x630">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 8: UI COMPONENTS ==================== -->
+    <section id="tab-ui" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Interactive UI Components Sandbox</h2>
+      <p class="dh-section-desc">Elemen antarmuka Donatur Helper berstandar shadcn/ui dan terhubung langsung ke token CSS.</p>
+
+      <div class="dh-grid-cards">
+        <div class="dh-card-box">
+          <h3 class="dh-card-box-title">Varian Tombol (Buttons)</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+            <button class="dh-btn-primary" style="padding: 10px 20px; border: none; cursor: pointer;">Primary Action</button>
+            <button style="background: transparent; border: 1px solid var(--dh-semantic-border); color: var(--dh-semantic-text-primary); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Secondary</button>
+            <button style="background: #B91C1C; border: none; color: #FFF; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Danger</button>
+          </div>
+        </div>
+
+        <div class="dh-card-box">
+          <h3 class="dh-card-box-title">Lencana Status (Status Badges)</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <span class="dh-badge dh-badge-success">● Terverifikasi</span>
+            <span class="dh-badge dh-badge-warning">● Menunggu Verifikasi</span>
+            <span class="dh-badge dh-badge-info">● Penyaluran Selesai</span>
+          </div>
+        </div>
+
+        <div class="dh-card-box dh-grid-full">
+          <h3 class="dh-card-box-title">Kartu Program Donasi (Campaign Card Preview)</h3>
+          <div class="dh-card-surface" style="padding: 24px; border-radius: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="dh-badge dh-badge-success">Campaign Aktif</span>
+              <span style="font-size: 13px; color: var(--dh-semantic-text-secondary);">Batch 4 • Ditutup 2 hari lagi</span>
+            </div>
+            <h4 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Bantuan Medis &amp; Duka Rekan SawitPRO</h4>
+            <p style="font-size: 14px; color: var(--dh-semantic-text-secondary); margin-bottom: 16px;">
+              Solidaritas gotong royong rekan kerja untuk pengobatan intensif dan santunan duka cita keluarga insan SawitPRO.
+            </p>
+
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px;">
+                <span>Terkumpul: <strong style="color: var(--dh-semantic-brand-hover);">Rp 24.500.000</strong></span>
+                <span>Target: Rp 25.000.000 (98%)</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                <div style="width: 98%; height: 100%; background: var(--dh-semantic-brand-primary);"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+              <button class="dh-btn-primary" style="padding: 10px 24px; border: none; cursor: pointer;">Gabung Donasi Sekarang</button>
+              <button style="background: transparent; border: 1px solid var(--dh-semantic-border); color: var(--dh-semantic-text-primary); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Lihat Bukti Lapangan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 9: MOCKUPS ==================== -->
+    <section id="tab-mockups" class="dh-tab-panel" role="tabpanel">
+      <h2 class="dh-section-title">Mockup Visual Implementasi Nyata (Digital-First Implementation)</h2>
+      <p class="dh-section-desc">Pratinjau visual nyata hasil implementasi desain DonatPRO pada antarmuka web patungan kado perpisahan rekan kerja dan alur konfirmasi WhatsApp otomatis.</p>
+
+      <div class="dh-grid-cards">
+        <!-- Mockup 1: Web App Screen -->
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <div>
+              <span class="dh-card-box-title">1. Mockup Layar Aplikasi Web DonatPRO (Desktop Browser - Patungan Kado)</span>
+              <p style="font-size: 13px; color: var(--dh-semantic-text-secondary); margin-top: 4px;">
+                Tampilan antarmuka nyata don4tpro.pages.dev: Banner patungan kado perpisahan rekan kerja, rincian bagi rata nominal, tombol WhatsApp share, dan riwayat partisipasi rekan tim.
+              </p>
+            </div>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/mockups/mockup-web-app.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame" style="padding: 10px;">
+            <img src="../../assets/mockups/mockup-web-app.svg" alt="Mockup Aplikasi Web DonatPRO" style="width: 100%; height: auto;">
+          </div>
+        </div>
+
+        <!-- Mockup 2: Physical Stationery & Collateral Scene -->
+        <div class="dh-card-box dh-grid-full">
+          <div class="dh-card-box-header">
+            <div>
+              <span class="dh-card-box-title">2. Mockup Alur Mobile Web &amp; Konfirmasi WhatsApp Otomatis (100% Digital)</span>
+              <p style="font-size: 13px; color: var(--dh-semantic-text-secondary); margin-top: 4px;">
+                Pengalaman praktis rekan kerja: Membuka kartu kado perpisahan di HP, transfer &amp; unggah bukti kilat, dan menerima notifikasi kuitansi sah "Alhamdulillah, puji syukur!" di WhatsApp.
+              </p>
+            </div>
+            <button class="dh-copy-btn" onclick="fetchAndCopy('../../assets/mockups/mockup-mobile-flow.svg')">Salin SVG</button>
+          </div>
+          <div class="dh-preview-frame" style="padding: 10px;">
+            <img src="../../assets/mockups/mockup-mobile-flow.svg" alt="Mockup Alur Mobile &amp; WhatsApp DonatPRO" style="width: 100%; height: auto;">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="dh-toast">Teks Disalin!</div>
+
+  <script>
+    // Tab switching
+    function switchTab(evt, tabId) {
+      document.querySelectorAll('.dh-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.dh-tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      evt.currentTarget.classList.add('active');
+      evt.currentTarget.setAttribute('aria-selected', 'true');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    // Theme toggle
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    let isDark = true;
+
+    themeBtn.addEventListener('click', () => {
+      isDark = !isDark;
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeLabel.textContent = 'Mode Terang';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeIcon.textContent = '🌙';
+        themeLabel.textContent = 'Mode Gelap';
+      }
+    });
+
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('dh-toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt).then(() => {
+        showToast('Disalin: ' + txt);
+      });
+    }
+
+    function fetchAndCopy(url) {
+      fetch(url)
+        .then(res => res.text())
+        .then(svg => {
+          navigator.clipboard.writeText(svg).then(() => {
+            showToast('Kode SVG berhasil disalin!');
+          });
+        })
+        .catch(() => {
+          showToast('Gagal memuat berkas SVG');
+        });
+    }
+
+    function copyIconSvg(iconName) {
+      fetchAndCopy('../../assets/icons/' + iconName + '.svg');
+    }
+
+    // Load and display tokens JSON
+    fetch('design-tokens.json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('tokensDisplay').textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(() => {
+        document.getElementById('tokensDisplay').textContent = '// Memuat berkas design-tokens.json...';
+      });
+
+    function copyJsonTokens() {
+      const text = document.getElementById('tokensDisplay').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('JSON Design Tokens disalin!');
+      });
+    }
+
+    // Icon search filter
+    function filterIcons() {
+      const q = document.getElementById('iconSearchInput').value.toLowerCase();
+      document.querySelectorAll('.dh-icon-tile').forEach(tile => {
+        const name = tile.getAttribute('data-name');
+        tile.style.display = name.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    // Interactive Header Subtitle Ticker
+    const scPhrases = [
+      "Satu Hadiah, Sejuta Cerita",
+      "Satu Kado, Sejuta Kenangan",
+      "Dari Kita, untuk Cerita Berikutnya",
+      "Kado Bermakna, Cerita Bersama"
+    ];
+    let scIdx = 0;
+    const scText = document.getElementById('showcase-ticker-text');
+    const scDots = document.getElementById('showcase-ticker-dots');
+    const scWrap = document.getElementById('showcase-subtitle-ticker');
+    if (scText && scWrap) {
+      function setScPhrase(idx) {
+        if (!scText) return;
+        scText.classList.add('slide-out');
+        setTimeout(() => {
+          scIdx = (idx + scPhrases.length) % scPhrases.length;
+          scText.textContent = scPhrases[scIdx];
+          if (scDots) {
+            scDots.querySelectorAll('.dh-dot').forEach((d, i) => {
+              d.classList.toggle('active', i === scIdx);
+            });
+          }
+          scText.classList.remove('slide-out');
+          scText.classList.add('slide-in-init');
+          void scText.offsetHeight;
+          requestAnimationFrame(() => scText.classList.remove('slide-in-init'));
+        }, 200);
+      }
+      let scTimer = setInterval(() => setScPhrase(scIdx + 1), 4500);
+      scWrap.addEventListener('mouseenter', () => clearInterval(scTimer));
+      scWrap.addEventListener('mouseleave', () => {
+        scTimer = setInterval(() => setScPhrase(scIdx + 1), 4500);
+      });
+      scWrap.addEventListener('click', (e) => {
+        const dot = e.target.closest('.dh-dot');
+        if (dot) {
+          const i = parseInt(dot.getAttribute('data-index'), 10);
+          if (!isNaN(i)) { setScPhrase(i); return; }
+        }
+        setScPhrase(scIdx + 1);
+      });
+    }
+  </script>
+</body>
+</html>

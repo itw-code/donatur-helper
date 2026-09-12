@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" fill="none">
+  <defs>
+    <linearGradient id="woodDesk" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070C0F" />
+      <stop offset="50%" stop-color="#0B1318" />
+      <stop offset="100%" stop-color="#05080A" />
+    </linearGradient>
+    <filter id="sceneShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.55" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#woodDesk)" />
+  <circle cx="900" cy="200" r="500" fill="#10B981" opacity="0.08" />
+
+  <!-- Title Header Label -->
+  <g transform="translate(60, 45)">
+    <text x="0" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="24" font-weight="800" fill="#FFFFFF">Mockup Perlengkapan Fisik &amp; Administrasi DonatPRO</text>
+    <text x="0" y="44" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="500" fill="#9DB4AA">Implementasi nyata Kop Surat Resmi, ID Badge Relawan Lanyard, Kartu Nama PIC, dan Kuitansi Sah.</text>
+  </g>
+
+  <!-- Item 1: Printed A4 Letterhead (Angled on Left) -->
+  <g transform="translate(70, 110) rotate(-2)" filter="url(#sceneShadow)">
+    <rect width="420" height="590" rx="6" fill="#FFFFFF" />
+    <!-- Letterhead Top Stripe -->
+    <rect x="0" y="0" width="420" height="5" fill="#10B981" />
+    <g transform="translate(24, 20)">
+      <circle cx="12" cy="12" r="10" fill="#10B981" />
+      <text x="30" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="800" fill="#0F172A">Donat<tspan fill="#10B981">PRO</tspan></text>
+      <text x="30" y="26" font-family="'Inter', sans-serif" font-size="5" font-weight="700" fill="#64748B">SOLIDARITAS INSAN SAWITPRO</text>
+      <line x1="0" y1="36" x2="372" y2="36" stroke="#0F172A" stroke-width="1" />
+
+      <!-- Body simulation lines -->
+      <text x="0" y="60" font-family="'Inter', sans-serif" font-size="7" font-weight="700" fill="#0F172A">Laporan Pertanggungjawaban DonatPRO</text>
+      <rect x="0" y="75" width="370" height="4" rx="2" fill="#E2E8F0" />
+      <rect x="0" y="85" width="350" height="4" rx="2" fill="#E2E8F0" />
+      <rect x="0" y="95" width="360" height="4" rx="2" fill="#E2E8F0" />
+      <rect x="0" y="105" width="320" height="4" rx="2" fill="#E2E8F0" />
+
+      <rect x="0" y="125" width="370" height="40" rx="4" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" />
+      <text x="12" y="142" font-family="'Inter', sans-serif" font-size="6" font-weight="700" fill="#059669">TOTAL PENYALURAN: RP 24.500.000,- (100% SAH)</text>
+
+      <rect x="0" y="180" width="370" height="4" rx="2" fill="#E2E8F0" />
+      <rect x="0" y="190" width="340" height="4" rx="2" fill="#E2E8F0" />
+
+      <!-- Official Stamp on Letterhead -->
+      <circle cx="280" cy="460" r="28" stroke="#10B981" stroke-width="1.5" stroke-dasharray="2,2" fill="none" opacity="0.8" />
+      <text x="280" y="458" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="6" font-weight="800" fill="#10B981">DONATPRO</text>
+      <text x="280" y="468" text-anchor="middle" font-family="'Inter', sans-serif" font-size="5" font-weight="700" fill="#10B981">SAWITPRO</text>
+    </g>
+  </g>
+
+  <!-- Item 2: ID Badge with Woven Emerald Lanyard (Center Right) -->
+  <g transform="translate(540, 110)" filter="url(#sceneShadow)">
+    <!-- Woven Emerald Lanyard Ribbon -->
+    <path d="M120 0 C120 -60 180 -60 180 0 L180 60 L120 60 Z" fill="#059669" />
+    <path d="M150 0 L150 60" stroke="#34D399" stroke-width="2" stroke-dasharray="4,4" fill="none" />
+    <!-- Metal Clip & Swivel Hook -->
+    <rect x="135" y="55" width="30" height="18" rx="3" fill="#94A3B8" />
+    <circle cx="150" cy="78" r="6" stroke="#94A3B8" stroke-width="3" fill="none" />
+
+    <!-- Acrylic Card Holder -->
+    <rect x="30" y="86" width="240" height="380" rx="14" fill="#081014" stroke="rgba(255, 255, 255, 0.2)" stroke-width="2" />
+    <rect x="125" y="96" width="50" height="8" rx="4" fill="#000000" />
+
+    <g transform="translate(48, 120)">
+      <circle cx="12" cy="12" r="10" fill="#10B981" />
+      <text x="30" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="800" fill="#FFFFFF">Donat<tspan fill="#34D399">PRO</tspan></text>
+      
+      <!-- Photo Frame -->
+      <rect x="52" y="36" width="100" height="110" rx="8" fill="#1E293B" stroke="#34D399" stroke-width="1.5" />
+      <circle cx="102" cy="80" r="22" fill="#334155" />
+      <path d="M72 135 C72 110 88 102 102 102 C116 102 132 110 132 135 Z" fill="#334155" />
+
+      <!-- Name & Role -->
+      <text x="102" y="172" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF">Ahmad Fauzi</text>
+      <text x="102" y="188" text-anchor="middle" font-family="'Inter', sans-serif" font-size="9" font-weight="700" fill="#34D399">PIC RELAWAN SAWITPRO</text>
+      <text x="102" y="202" text-anchor="middle" font-family="'Inter', sans-serif" font-size="8" font-weight="500" fill="#CBD5E1">ID: DH-PIC-SAWITPRO-084</text>
+
+      <!-- Mini QR code -->
+      <rect x="82" y="220" width="40" height="40" rx="4" fill="#FFFFFF" />
+      <rect x="86" y="224" width="12" height="12" fill="#0F172A" />
+      <rect x="106" y="224" width="12" height="12" fill="#0F172A" />
+      <rect x="86" y="244" width="12" height="12" fill="#0F172A" />
+      <text x="102" y="274" text-anchor="middle" font-family="'Inter', sans-serif" font-size="6" font-weight="600" fill="#94A3B8">VALIDASI MANDAT</text>
+    </g>
+  </g>
+
+  <!-- Item 3: Business Cards (Front & Back Overlapping) -->
+  <g transform="translate(850, 140)" filter="url(#sceneShadow)">
+    <!-- Back Card (Angled) -->
+    <g transform="rotate(8)">
+      <rect width="260" height="160" rx="10" fill="#060C0E" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
+      <text x="130" y="80" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="18" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+      <text x="130" y="98" text-anchor="middle" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#9DB4AA">SOLIDARITAS TANPA BATAS</text>
+    </g>
+
+    <!-- Front Card -->
+    <g transform="translate(-20, 80) rotate(-4)">
+      <rect width="260" height="160" rx="10" fill="#091216" stroke="#10B981" stroke-width="1.2" />
+      <text x="18" y="32" font-family="'Plus Jakarta Sans', sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">Ahmad Fauzi</text>
+      <text x="18" y="46" font-family="'Inter', sans-serif" font-size="8.5" font-weight="700" fill="#34D399">Koordinator PIC SawitPRO</text>
+      <text x="18" y="80" font-family="'Inter', sans-serif" font-size="8" font-weight="500" fill="#EEF6F1">📱 +62 812-8888-0192</text>
+      <text x="18" y="96" font-family="'Inter', sans-serif" font-size="8" font-weight="500" fill="#EEF6F1">✉️ fauzi@sawitpro.com</text>
+      <text x="18" y="112" font-family="'Inter', sans-serif" font-size="8" font-weight="500" fill="#EEF6F1">🌐 don4tpro.pages.dev</text>
+
+      <rect x="188" y="80" width="54" height="54" rx="4" fill="#FFFFFF" />
+      <rect x="194" y="86" width="16" height="16" fill="#0F172A" />
+      <rect x="220" y="86" width="16" height="16" fill="#0F172A" />
+      <rect x="194" y="112" width="16" height="16" fill="#0F172A" />
+    </g>
+  </g>
+
+  <!-- Item 4: Official Stamped Receipt Voucher (Bottom Right) -->
+  <g transform="translate(520, 480) rotate(1)" filter="url(#sceneShadow)">
+    <rect width="580" height="260" rx="12" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <rect x="0" y="0" width="10" height="260" rx="5" fill="#10B981" />
+
+    <g transform="translate(30, 24)">
+      <circle cx="12" cy="12" r="10" fill="#10B981" />
+      <text x="30" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="16" font-weight="800" fill="#0F172A">Donat<tspan fill="#10B981">PRO</tspan></text>
+      <text x="30" y="28" font-family="'Inter', sans-serif" font-size="6.5" font-weight="700" fill="#64748B">KUITANSI RESMI SOLIDARITAS SAWITPRO</text>
+      <text x="520" y="18" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#059669">NO: KWT/DPRO/0812</text>
+
+      <line x1="0" y1="40" x2="520" y2="40" stroke="#E2E8F0" stroke-width="1" />
+
+      <text x="0" y="65" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#64748B">Telah Terima Dari :</text>
+      <text x="110" y="65" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#0F172A">Rekan Karyawan SawitPRO (#SP-8821)</text>
+
+      <text x="0" y="90" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#64748B">Uang Sejumlah   :</text>
+      <rect x="110" y="78" width="280" height="18" rx="4" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="0.75" />
+      <text x="118" y="90" font-family="'Inter', sans-serif" font-size="8.5" font-weight="700" fill="#065F46"># Lima Ratus Ribu Rupiah #</text>
+
+      <!-- Big Highlight Box -->
+      <rect x="0" y="130" width="220" height="55" rx="8" fill="#F8FAFC" stroke="#0F172A" stroke-width="1.2" />
+      <text x="14" y="150" font-family="'Inter', sans-serif" font-size="8" font-weight="600" fill="#64748B">TOTAL VALIDASI PIC</text>
+      <text x="14" y="174" font-family="'Plus Jakarta Sans', sans-serif" font-size="18" font-weight="800" fill="#0F172A">Rp 500.000,-</text>
+
+      <!-- Red Stamp -->
+      <circle cx="380" cy="155" r="30" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="2,2" fill="none" opacity="0.8" />
+      <text x="380" y="152" text-anchor="middle" font-family="'Inter', sans-serif" font-size="7.5" font-weight="800" fill="#DC2626">DONATPRO</text>
+      <text x="380" y="162" text-anchor="middle" font-family="'Inter', sans-serif" font-size="6" font-weight="700" fill="#DC2626">LUNAS &amp; SAH</text>
+
+      <text x="470" y="180" text-anchor="middle" font-family="'Inter', sans-serif" font-size="9" font-weight="700" fill="#0F172A">Ahmad Fauzi (PIC)</text>
+    </g>
+  </g>
+</svg>

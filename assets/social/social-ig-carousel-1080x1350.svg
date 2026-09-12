@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" width="1080" height="1350" fill="none">
+  <defs>
+    <linearGradient id="carBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05080A" />
+      <stop offset="50%" stop-color="#081419" />
+      <stop offset="100%" stop-color="#04090C" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1350" fill="url(#carBg)" />
+  <circle cx="900" cy="300" r="350" fill="#10B981" opacity="0.14" />
+
+  <!-- Top Header -->
+  <g transform="translate(80, 80)">
+    <circle cx="24" cy="24" r="22" fill="#10B981" opacity="0.2" />
+    <path d="M24 6 C31 6 37 10 39 18 C39 30 31 39 24 44 C17 39 9 30 9 18 C11 10 17 6 24 6 Z" fill="#10B981" />
+    <text x="60" y="30" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="26" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+    
+    <rect x="700" y="8" width="220" height="34" rx="17" fill="rgba(255, 255, 255, 0.08)" />
+    <text x="810" y="30" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#6EE7B7">ALUR SOLIDARITAS</text>
+  </g>
+
+  <!-- Title -->
+  <g transform="translate(80, 190)">
+    <text x="0" y="60" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="44" font-weight="800" fill="#FFFFFF">
+      Alur Donasi Solidaritas
+    </text>
+    <text x="0" y="115" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="44" font-weight="800" fill="#34D399">
+      Rekan Insan SawitPRO
+    </text>
+    <text x="0" y="160" font-family="'Inter', system-ui, sans-serif" font-size="18" font-weight="400" fill="#9DB4AA">
+      Bantu sesama rekan secara transparan, mudah, dan terverifikasi digital.
+    </text>
+  </g>
+
+  <!-- 3 Steps -->
+  <g transform="translate(80, 420)">
+    <rect x="0" y="0" width="920" height="190" rx="20" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1.5" />
+    <circle cx="70" cy="95" r="36" fill="rgba(16, 185, 129, 0.18)" />
+    <text x="70" y="105" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="28" font-weight="800" fill="#34D399">01</text>
+    <g transform="translate(140, 50)">
+      <text x="0" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">Pilih Program Bantuan Rekan</text>
+      <text x="0" y="54" font-family="'Inter', system-ui, sans-serif" font-size="15" font-weight="400" fill="#CBD5E1">Lihat daftar kebutuhan bantuan rekan aktif maupun eks-karyawan SawitPRO.</text>
+    </g>
+
+    <g transform="translate(0, 220)">
+      <rect x="0" y="0" width="920" height="190" rx="20" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1.5" />
+      <circle cx="70" cy="95" r="36" fill="rgba(14, 165, 233, 0.18)" />
+      <text x="70" y="105" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="28" font-weight="800" fill="#60A5FA">02</text>
+      <g transform="translate(140, 50)">
+        <text x="0" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">Salurkan Donasi &amp; Unggah Bukti</text>
+        <text x="0" y="54" font-family="'Inter', system-ui, sans-serif" font-size="15" font-weight="400" fill="#CBD5E1">Transfer ke rekening resmi program dan unggah bukti transfer di DonatPRO.</text>
+      </g>
+    </g>
+
+    <g transform="translate(0, 440)">
+      <rect x="0" y="0" width="920" height="190" rx="20" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1.5" />
+      <circle cx="70" cy="95" r="36" fill="rgba(251, 191, 36, 0.18)" />
+      <text x="70" y="105" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="28" font-weight="800" fill="#FBBF24">03</text>
+      <g transform="translate(140, 50)">
+        <text x="0" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">Kuitansi Sah &amp; Pantau Bantuan Tiba</text>
+        <text x="0" y="54" font-family="'Inter', system-ui, sans-serif" font-size="15" font-weight="400" fill="#CBD5E1">PIC memvalidasi dan membagikan dokumentasi penyerahan bantuan ke rekan kita.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Carousel Swipe Hint -->
+  <g transform="translate(540, 1220)">
+    <text x="0" y="0" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="15" font-weight="600" fill="#34D399">Geser untuk melihat dampak program &rarr;</text>
+  </g>
+</svg>

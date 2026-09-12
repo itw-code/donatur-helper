@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" width="280" height="64" fill="none">
+  <defs>
+    <linearGradient id="dproHorizShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4A653B" />
+      <stop offset="60%" stop-color="#3D6E2E" />
+      <stop offset="100%" stop-color="#274E13" />
+    </linearGradient>
+    <linearGradient id="dproHorizSeed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D347" />
+      <stop offset="60%" stop-color="#FCD100" />
+      <stop offset="100%" stop-color="#C8D087" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left Icon Mark -->
+  <g transform="translate(6, 6)">
+    <circle cx="26" cy="26" r="24" fill="#4A653B" opacity="0.14" />
+    <path d="M26 4 C35 4 43 8.5 45 17.5 C45 31.5 36 41.5 26 47 C16 41.5 7 31.5 7 17.5 C9 8.5 17 4 26 4 Z" fill="url(#dproHorizShield)" />
+    <path d="M26 6.5 C33.5 6.5 40 10.5 41.5 18 C41.5 29.5 34 38 26 43 C18 38 10.5 29.5 10.5 18 C12 10.5 18.5 6.5 26 6.5 Z" stroke="rgba(245, 211, 71, 0.4)" stroke-width="1" fill="none" />
+    <path d="M14 29 C16 34 21 37.5 26 37.5 C31 37.5 36 34 38 29 C34.5 31.5 30.5 32.5 26 32.5 C21.5 32.5 17.5 31.5 14 29 Z" fill="#FFFFFF" opacity="0.95" />
+    <path d="M26 15 C28 12 31.5 11.5 34 14 C36.5 16.5 36.5 20 32.5 24 L26 29.5 L19.5 24 C15.5 20 15.5 16.5 18 14 C20.5 11.5 24 12 26 15 Z" fill="url(#dproHorizSeed)" />
+    <circle cx="30" cy="16" r="1.2" fill="#FFFFFF" opacity="0.9" />
+  </g>
+
+  <!-- Typography: Wordmark "DonatPRO" + Subtitle -->
+  <g transform="translate(68, 0)">
+    <text x="0" y="36" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="24" font-weight="800" fill="#EEF6ED" letter-spacing="-0.02em">
+      Donat<tspan fill="#F5D347" font-weight="800">PRO</tspan>
+    </text>
+
+    <text x="1" y="51" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="#A3B59D" letter-spacing="0.14em">
+      PATUNGAN KADO REKAN SAWITPRO
+    </text>
+  </g>
+</svg>

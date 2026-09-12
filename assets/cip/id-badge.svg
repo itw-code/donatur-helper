@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 640" width="400" height="640" fill="none">
+  <defs>
+    <linearGradient id="idGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#081216" />
+      <stop offset="100%" stop-color="#040709" />
+    </linearGradient>
+    <linearGradient id="idHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#0EA5E9" />
+    </linearGradient>
+  </defs>
+
+  <rect x="170" y="0" width="60" height="20" fill="#10B981" />
+  <rect x="180" y="16" width="40" height="8" rx="4" fill="#000000" />
+  <rect x="15" y="24" width="370" height="590" rx="20" fill="url(#idGrad)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
+  <rect x="175" y="38" width="50" height="10" rx="5" fill="#05080A" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" />
+
+  <g transform="translate(35, 68)">
+    <circle cx="18" cy="18" r="16" fill="#10B981" opacity="0.2" />
+    <path d="M18 4 C24 4 29 7 30 13 C30 22 24 29 18 32 C12 29 6 22 6 13 C7 7 12 4 18 4 Z" fill="url(#idHeader)" />
+    <text x="42" y="20" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF">Donat<tspan fill="#34D399">PRO</tspan></text>
+    <text x="43" y="31" font-family="'Inter', system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#9DB4AA" letter-spacing="0.14em">RELAWAN SOLIDARITAS SAWITPRO</text>
+  </g>
+
+  <g transform="translate(130, 135)">
+    <rect x="-4" y="-4" width="148" height="168" rx="16" fill="url(#idHeader)" />
+    <rect x="0" y="0" width="140" height="160" rx="12" fill="#1E293B" />
+    <circle cx="70" cy="60" r="32" fill="#334155" />
+    <path d="M20 140 C20 105 45 95 70 95 C95 95 120 105 120 140 Z" fill="#334155" />
+    <text x="70" y="150" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="600" fill="#94A3B8">FOTO RESMI PIC</text>
+  </g>
+
+  <g transform="translate(200, 335)">
+    <text x="0" y="0" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">Ahmad Fauzi</text>
+    <text x="0" y="20" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#34D399">KOORDINATOR PIC SAWITPRO</text>
+    <rect x="-85" y="32" width="170" height="22" rx="11" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.15)" />
+    <text x="0" y="46" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="600" fill="#CBD5E1">ID: DH-PIC-SAWITPRO-084</text>
+  </g>
+
+  <g transform="translate(50, 430)">
+    <line x1="0" y1="0" x2="300" y2="0" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+    <text x="0" y="24" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="500" fill="#94A3B8">Afiliasi Komunitas</text>
+    <text x="300" y="24" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">Insan SawitPRO</text>
+    <text x="0" y="46" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="500" fill="#94A3B8">Masa Mandat</text>
+    <text x="300" y="46" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="700" fill="#34D399">2026 / 2027</text>
+    <text x="0" y="68" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="500" fill="#94A3B8">Status Akreditasi</text>
+    <text x="300" y="68" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="700" fill="#60A5FA">Amanah Sah Terverifikasi</text>
+  </g>
+
+  <g transform="translate(50, 530)">
+    <rect x="0" y="0" width="54" height="54" rx="6" fill="#FFFFFF" />
+    <rect x="5" y="5" width="16" height="16" fill="#0F172A" />
+    <rect x="33" y="5" width="16" height="16" fill="#0F172A" />
+    <rect x="5" y="33" width="16" height="16" fill="#0F172A" />
+    <rect x="24" y="24" width="6" height="6" fill="#10B981" />
+    <text x="68" y="18" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="700" fill="#EEF6F1">Pindai Mandat PIC</text>
+    <text x="68" y="32" font-family="'Inter', system-ui, sans-serif" font-size="8" font-weight="400" fill="#94A3B8">Validasi digital via kamera</text>
+    <text x="68" y="44" font-family="'Inter', system-ui, sans-serif" font-size="8" font-weight="500" fill="#34D399">https://don4tpro.pages.dev</text>
+  </g>
+</svg>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920" fill="none">
+  <defs>
+    <linearGradient id="storyBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05080A" />
+      <stop offset="50%" stop-color="#081419" />
+      <stop offset="100%" stop-color="#020406" />
+    </linearGradient>
+    <linearGradient id="storyBtn" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1920" fill="url(#storyBg)" />
+  <circle cx="540" cy="650" r="500" fill="#10B981" opacity="0.16" />
+
+  <!-- Top Margin Y=270 -->
+  <g transform="translate(90, 270)">
+    <rect x="0" y="0" width="280" height="48" rx="24" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.15)" />
+    <circle cx="24" cy="24" r="12" fill="#10B981" />
+    <text x="48" y="30" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="18" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+
+    <rect x="680" y="0" width="220" height="48" rx="24" fill="rgba(251, 191, 36, 0.14)" stroke="rgba(251, 191, 36, 0.3)" />
+    <circle cx="705" cy="24" r="6" fill="#FBBF24" />
+    <text x="720" y="30" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#FCD34D">SOLIDARITAS REKAN</text>
+  </g>
+
+  <!-- Hero Message -->
+  <g transform="translate(90, 420)">
+    <text x="0" y="60" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="64" font-weight="800" fill="#FFFFFF" line-height="1.1">
+      Mari Bantu Rekan
+    </text>
+    <text x="0" y="140" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="64" font-weight="800" fill="#34D399">
+      SawitPRO Hari Ini
+    </text>
+    <text x="0" y="210" font-family="'Inter', system-ui, sans-serif" font-size="24" font-weight="400" fill="#CBD5E1">
+      Solidaritas gotong royong untuk rekan kerja / alumni
+    </text>
+    <text x="0" y="248" font-family="'Inter', system-ui, sans-serif" font-size="24" font-weight="400" fill="#CBD5E1">
+      SawitPRO yang sedang membutuhkan bantuan darurat.
+    </text>
+  </g>
+
+  <!-- Center Card -->
+  <g transform="translate(90, 750)">
+    <rect width="900" height="520" rx="32" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2" />
+    
+    <g transform="translate(60, 60)">
+      <text x="0" y="30" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="700" fill="#9DB4AA">PROGRAM SOLIDARITAS</text>
+      <text x="0" y="80" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="34" font-weight="800" fill="#FFFFFF">Bantuan Medis Rekan SawitPRO</text>
+      
+      <g transform="translate(0, 130)">
+        <text x="0" y="0" font-family="'Inter', system-ui, sans-serif" font-size="20" font-weight="600" fill="#CBD5E1">Terkumpul 80% dari Target Bantuan</text>
+        <text x="780" y="0" text-anchor="end" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="24" font-weight="800" fill="#34D399">80%</text>
+
+        <rect x="0" y="20" width="780" height="20" rx="10" fill="rgba(255, 255, 255, 0.1)" />
+        <rect x="0" y="20" width="624" height="20" rx="10" fill="#10B981" />
+      </g>
+
+      <g transform="translate(0, 240)">
+        <rect width="780" height="120" rx="16" fill="rgba(16, 185, 129, 0.1)" stroke="rgba(52, 211, 153, 0.25)" />
+        <circle cx="50" cy="60" r="26" fill="#10B981" />
+        <path d="M42 60 L48 66 L58 54" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" fill="none" />
+        <text x="96" y="52" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF">Dari Rekan, Untuk Rekan SawitPRO</text>
+        <text x="96" y="80" font-family="'Inter', system-ui, sans-serif" font-size="15" font-weight="400" fill="#CBD5E1">Kuitansi sah langsung dikirimkan ke nomor WhatsApp Anda.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Interactive Button -->
+  <g transform="translate(90, 1360)">
+    <rect width="900" height="130" rx="24" fill="url(#storyBtn)" />
+    <text x="450" y="60" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="30" font-weight="800" fill="#FFFFFF">GABUNG SOLIDARITAS SAWITPRO</text>
+    <text x="450" y="94" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="600" fill="#E2E8F0">Ketuk stiker tautan di bawah ini &uarr;</text>
+  </g>
+
+  <!-- Bottom Safe Zone -->
+  <g transform="translate(540, 1620)">
+    <path d="M-14 0 L0 -14 L14 0" stroke="#34D399" stroke-width="3" stroke-linecap="round" fill="none" />
+    <text x="0" y="44" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="600" fill="#9DB4AA">don4tpro.pages.dev</text>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <defs>
+    <linearGradient id="dproFavGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4A653B" />
+      <stop offset="100%" stop-color="#274E13" />
+    </linearGradient>
+  </defs>
+  <path d="M16 2 C22 2 28 5 29 11 C29 20 23 27 16 30 C9 27 3 20 3 11 C4 5 10 2 16 2 Z" fill="url(#dproFavGrad)" />
+  <path d="M16 4.5 C20.5 4.5 25 7 26 11.5 C26 18.5 21 24.5 16 27 C11 24.5 6 18.5 6 11.5 C7 7 11.5 4.5 16 4.5 Z" stroke="rgba(245, 211, 71, 0.4)" stroke-width="1" fill="none" />
+  <path d="M16 10 C17.8 7.8 21 7.5 23 9.5 C25 11.5 25 14.5 21.5 18 L16 23 L10.5 18 C7 14.5 7 11.5 9 9.5 C11 7.5 14.2 7.8 16 10 Z" fill="#F5D347" />
+  <circle cx="19" cy="11" r="1.2" fill="#FFFFFF" />
+</svg>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1130" width="800" height="1130" fill="none">
+  <rect width="800" height="1130" fill="#FFFFFF" />
+  <rect x="0" y="0" width="800" height="8" fill="url(#lhGrad)" />
+  
+  <defs>
+    <linearGradient id="lhGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="50%" stop-color="#0EA5E9" />
+      <stop offset="100%" stop-color="#FBBF24" />
+    </linearGradient>
+    <linearGradient id="lhShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#0891B2" />
+    </linearGradient>
+  </defs>
+
+  <!-- Header Section -->
+  <g transform="translate(50, 45)">
+    <circle cx="24" cy="24" r="22" fill="#10B981" opacity="0.12" />
+    <path d="M24 4 C32 4 39 8 41 16 C41 28 33 37 24 42 C15 37 7 28 7 16 C9 8 16 4 24 4 Z" fill="url(#lhShield)" />
+    <path d="M13 26 C15 30 19 33 24 33 C29 33 33 30 35 26 C32 28 28 29 24 29 C20 29 16 28 13 26 Z" fill="#FFFFFF" opacity="0.95" />
+    <path d="M24 13 C26 10.5 29 10 31 12 C33 14 33 17 29.5 20.5 L24 25.5 L18.5 20.5 C15 17 15 14 17 12 C19 10 22 10.5 24 13 Z" fill="#34D399" />
+    
+    <text x="60" y="26" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="25" font-weight="800" fill="#0F172A">Donat<tspan fill="#10B981">PRO</tspan></text>
+    <text x="61" y="41" font-family="'Inter', system-ui, sans-serif" font-size="8.5" font-weight="700" fill="#64748B" letter-spacing="0.14em">DANA SOLIDARITAS KARYAWAN &amp; EKS-KARYAWAN SAWITPRO • POWERED BY DONATUR HELPER</text>
+    
+    <text x="700" y="20" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="600" fill="#334155">Tautan Resmi: https://don4tpro.pages.dev</text>
+    <text x="700" y="33" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#64748B">PIC Solidaritas: +62 812-8888-0192</text>
+    <text x="700" y="46" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#64748B">Email: solidaritas@sawitpro.com</text>
+  </g>
+
+  <line x1="50" y1="115" x2="750" y2="115" stroke="#0F172A" stroke-width="2" />
+  <line x1="50" y1="119" x2="750" y2="119" stroke="#10B981" stroke-width="1" />
+
+  <!-- Body Content -->
+  <g transform="translate(50, 160)">
+    <text x="0" y="0" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#475569">Nomor : 088/DONATPRO-SP/IX/2026</text>
+    <text x="0" y="18" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#475569">Lamp. : 1 (Satu) Berkas Rekapitulasi Donasi &amp; Resi Penyaluran</text>
+    <text x="0" y="36" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#475569">Hal   : Laporan Pertanggungjawaban Bantuan Solidaritas Insan SawitPRO</text>
+
+    <text x="700" y="0" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#475569">Jakarta, 12 September 2026</text>
+
+    <text x="0" y="80" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#0F172A">Kepada Yth.</text>
+    <text x="0" y="98" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#334155">Seluruh Rekan Kerja, Karyawan Aktif &amp; Alumni SawitPRO</text>
+    <text x="0" y="116" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="400" fill="#64748B">Di Tempat</text>
+
+    <text x="0" y="160" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="400" fill="#1E293B">Dengan hormat dan salam persaudaraan,</text>
+    <text x="0" y="188" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="400" fill="#334155">
+      Puji syukur kita panjatkan atas kebersamaan dan kekeluargaan yang senantiasa terjaga di lingkungan SawitPRO.
+    </text>
+    <text x="0" y="208" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="400" fill="#334155">
+      Melalui platform DonatPRO (dikelola dengan mesin asistensi Donatur Helper), kami menyampaikan laporan
+    </text>
+    <text x="0" y="228" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="400" fill="#334155">
+      penyaluran dana solidaritas gotong royong yang telah diserahkan langsung kepada keluarga rekan kita.
+    </text>
+
+    <rect x="0" y="260" width="700" height="80" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" />
+    <text x="24" y="292" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="700" fill="#059669">PROGRAM: DUKUNGAN SOLIDARITAS REKAN SAWITPRO • 100% TERVERIFIKASI</text>
+    <text x="24" y="314" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#334155">Total Donasi Terkumpul: Rp 24.500.000,- (Dua Puluh Empat Juta Lima Ratus Ribu Rupiah)</text>
+    <text x="24" y="328" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="400" fill="#64748B">Diaudit dan diverifikasi dua arah oleh PIC SawitPRO pada tanggal 12 September 2026</text>
+  </g>
+
+  <g transform="translate(480, 890)">
+    <text x="110" y="0" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="500" fill="#475569">Hormat kami,</text>
+    <text x="110" y="16" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#0F172A">Tim PIC Solidaritas DonatPRO</text>
+    <line x1="10" y1="85" x2="210" y2="85" stroke="#0F172A" stroke-width="1" />
+    <text x="110" y="102" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#0F172A">Ahmad Fauzi (PIC)</text>
+    <text x="110" y="116" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="500" fill="#64748B">ID: DH-PIC-SAWITPRO-084</text>
+  </g>
+
+  <g transform="translate(50, 1075)">
+    <line x1="0" y1="0" x2="700" y2="0" stroke="#E2E8F0" stroke-width="1" />
+    <text x="0" y="20" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#94A3B8">DonatPRO • Dana Solidaritas Karyawan &amp; Eks-Karyawan SawitPRO • Dari Rekan, Untuk Rekan</text>
+    <text x="700" y="20" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="600" fill="#10B981">Halaman 1 dari 1</text>
+  </g>
+</svg>

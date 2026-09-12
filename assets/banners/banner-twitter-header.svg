@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" width="1500" height="500" fill="none">
+  <rect width="1500" height="500" fill="#05080A" />
+  <circle cx="1200" cy="250" r="400" fill="#10B981" opacity="0.18" />
+  <circle cx="300" cy="150" r="300" fill="#0EA5E9" opacity="0.12" />
+
+  <g transform="translate(480, 130)">
+    <g transform="translate(0, 0)">
+      <circle cx="22" cy="22" r="20" fill="#10B981" opacity="0.2" />
+      <path d="M22 6 C28 6 34 9 36 16 C36 26 29 33 22 37 C15 33 8 26 8 16 C10 9 16 6 22 6 Z" fill="#10B981" />
+      <text x="52" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="30" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+      <text x="53" y="42" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="700" fill="#9DB4AA" letter-spacing="0.14em">SOLIDARITAS INSAN SAWITPRO</text>
+    </g>
+
+    <text x="0" y="110" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="36" font-weight="800" fill="#FFFFFF">
+      Solidaritas Nyata Insan SawitPRO.
+    </text>
+    <text x="0" y="145" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="400" fill="#CBD5E1">
+      Dari rekan, untuk rekan: saling menguatkan di kala suka maupun duka.
+    </text>
+
+    <g transform="translate(0, 185)">
+      <rect x="0" y="0" width="220" height="34" rx="17" fill="rgba(16, 185, 129, 0.15)" stroke="rgba(52, 211, 153, 0.3)" />
+      <text x="110" y="21" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="700" fill="#6EE7B7">KARYAWAN &amp; ALUMNI</text>
+
+      <rect x="235" y="0" width="160" height="34" rx="17" fill="rgba(14, 165, 233, 0.15)" stroke="rgba(125, 211, 252, 0.3)" />
+      <text x="315" y="21" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#7DD3FC">100% AMANAH</text>
+
+      <rect x="410" y="0" width="220" height="34" rx="17" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.15)" />
+      <text x="520" y="21" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#EEF6F1">https://don4tpro.pages.dev</text>
+    </g>
+  </g>
+</svg>

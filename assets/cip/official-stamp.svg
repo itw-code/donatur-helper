@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <defs>
+    <path id="stampTextTop" d="M 32,120 A 88,88 0 1,1 208,120" fill="none" />
+    <path id="stampTextBottom" d="M 208,120 A 88,88 0 0,1 32,120" fill="none" />
+  </defs>
+
+  <circle cx="120" cy="120" r="112" stroke="#10B981" stroke-width="3.5" fill="none" />
+  <circle cx="120" cy="120" r="104" stroke="#10B981" stroke-width="1" fill="none" />
+  <circle cx="120" cy="120" r="74" stroke="#10B981" stroke-width="1.5" fill="none" />
+  <circle cx="120" cy="120" r="68" stroke="#10B981" stroke-width="0.75" stroke-dasharray="2,2" fill="none" />
+
+  <text fill="#10B981" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="14" font-weight="800" letter-spacing="0.25em">
+    <textPath href="#stampTextTop" startOffset="50%" text-anchor="middle">
+      DONATPRO
+    </textPath>
+  </text>
+
+  <text fill="#10B981" font-family="'Inter', system-ui, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.14em">
+    <textPath href="#stampTextBottom" startOffset="50%" text-anchor="middle">
+      ★ SOLIDARITAS INSAN SAWITPRO ★
+    </textPath>
+  </text>
+
+  <g transform="translate(120, 120) scale(0.9)">
+    <path d="M0 -24 C14 -24 24 -18 26 -7 C26 9 14 20 0 26 C-14 20 -26 9 -26 -7 C-24 -18 -14 -24 0 -24 Z" fill="#10B981" opacity="0.2" />
+    <path d="M0 -24 C14 -24 24 -18 26 -7 C26 9 14 20 0 26 C-14 20 -26 9 -26 -7 C-24 -18 -14 -24 0 -24 Z" stroke="#10B981" stroke-width="2" fill="none" />
+    <path d="M0 -10 C3 -13 8 -13.5 11 -10.5 C14 -7.5 14 -3.5 9.5 0.5 L0 8 L-9.5 0.5 C-14 -3.5 -14 -7.5 -11 -10.5 C-8 -13.5 -3 -13 0 -10 Z" fill="#10B981" />
+    <text x="0" y="18" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="6.5" font-weight="800" fill="#10B981">SAH</text>
+  </g>
+</svg>

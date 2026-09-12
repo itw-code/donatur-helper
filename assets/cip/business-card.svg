@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 440" width="740" height="440" fill="none">
+  <defs>
+    <linearGradient id="bcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#081014" />
+      <stop offset="100%" stop-color="#05080A" />
+    </linearGradient>
+    <linearGradient id="bcShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#0EA5E9" />
+    </linearGradient>
+  </defs>
+
+  <!-- FRONT CARD -->
+  <g transform="translate(20, 20)">
+    <rect width="330" height="400" rx="16" fill="url(#bcGrad)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+    <g transform="translate(24, 24)">
+      <circle cx="16" cy="16" r="16" fill="#10B981" opacity="0.15" />
+      <path d="M16 3 C22 3 27 6 28 12 C28 21 22 28 16 31 C10 28 4 21 4 12 C5 6 10 3 16 3 Z" fill="url(#bcShield)" />
+      <text x="40" y="18" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="18" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+      <text x="41" y="28" font-family="'Inter', system-ui, sans-serif" font-size="6.5" font-weight="700" fill="#9DB4AA" letter-spacing="0.12em">SOLIDARITAS INSAN SAWITPRO</text>
+    </g>
+
+    <g transform="translate(24, 110)">
+      <text x="0" y="0" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF">Ahmad Fauzi</text>
+      <text x="0" y="18" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="600" fill="#34D399">Koordinator PIC Solidaritas SawitPRO</text>
+      <rect x="0" y="30" width="105" height="18" rx="9" fill="rgba(52, 211, 153, 0.15)" stroke="rgba(52, 211, 153, 0.35)" />
+      <text x="52" y="42" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#6EE7B7">PIC TERVALIDASI</text>
+    </g>
+
+    <g transform="translate(24, 210)">
+      <text x="28" y="13" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="500" fill="#EEF6F1">+62 812-8888-0192</text>
+      <text x="28" y="41" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="500" fill="#EEF6F1">fauzi@sawitpro.com</text>
+      <text x="28" y="69" font-family="'Inter', system-ui, sans-serif" font-size="10" font-weight="500" fill="#EEF6F1">don4tpro.pages.dev</text>
+    </g>
+
+    <g transform="translate(240, 290)">
+      <rect x="0" y="0" width="66" height="66" rx="8" fill="#FFFFFF" />
+      <rect x="6" y="6" width="20" height="20" fill="#0F172A" />
+      <rect x="10" y="10" width="12" height="12" fill="#FFFFFF" />
+      <rect x="13" y="13" width="6" height="6" fill="#0F172A" />
+      <rect x="40" y="6" width="20" height="20" fill="#0F172A" />
+      <rect x="6" y="40" width="20" height="20" fill="#0F172A" />
+      <rect x="32" y="32" width="8" height="8" fill="#10B981" />
+      <text x="33" y="78" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="6" font-weight="700" fill="#94A3B8">PINDAI TOKEN</text>
+    </g>
+  </g>
+
+  <!-- BACK CARD -->
+  <g transform="translate(390, 20)">
+    <rect width="330" height="400" rx="16" fill="#060C0E" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+    <g transform="translate(165, 140)">
+      <circle cx="0" cy="0" r="60" fill="#10B981" opacity="0.1" />
+      <path d="M0 -30 C15 -30 25 -20 28 -8 C28 12 15 24 0 30 C-15 24 -28 12 -28 -8 C-25 -20 -15 -30 0 -30 Z" fill="url(#bcShield)" />
+    </g>
+    <text x="165" y="240" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="800" fill="#EEF6F1">Donat<tspan fill="#34D399">PRO</tspan></text>
+    <text x="165" y="260" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="700" fill="#9DB4AA" letter-spacing="0.16em">SOLIDARITAS INSAN SAWITPRO</text>
+    <text x="165" y="310" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="500" fill="#CBD5E1">Dari Rekan, Untuk Rekan</text>
+    <text x="165" y="330" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="8.5" font-weight="500" fill="#6EE7B7">Gotong Royong Karyawan &amp; Eks-Karyawan SawitPRO</text>
+  </g>
+</svg>

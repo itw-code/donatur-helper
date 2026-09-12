@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" fill="none">
+  <defs>
+    <linearGradient id="deskBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020406" />
+      <stop offset="100%" stop-color="#080F14" />
+    </linearGradient>
+    <linearGradient id="heroBtnGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="winShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="800" fill="url(#deskBg)" />
+  <circle cx="200" cy="200" r="400" fill="#10B981" opacity="0.08" />
+  <circle cx="1000" cy="600" r="350" fill="#0EA5E9" opacity="0.06" />
+
+  <!-- Browser Window Shell (1080 x 700) -->
+  <g transform="translate(60, 50)" filter="url(#winShadow)">
+    <rect width="1080" height="700" rx="16" fill="#05080A" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+    
+    <!-- macOS Window Bar -->
+    <rect width="1080" height="44" rx="16" fill="#090E13" />
+    <rect y="28" width="1080" height="16" fill="#090E13" />
+    <line x1="0" y1="44" x2="1080" y2="44" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+
+    <circle cx="24" cy="22" r="6" fill="#EF4444" />
+    <circle cx="44" cy="22" r="6" fill="#F59E0B" />
+    <circle cx="64" cy="22" r="6" fill="#10B981" />
+
+    <!-- URL Bar -->
+    <rect x="240" y="8" width="600" height="28" rx="14" fill="rgba(255, 255, 255, 0.06)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+    <circle cx="258" cy="22" r="4" fill="#10B981" />
+    <text x="272" y="27" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="500" fill="#CBD5E1">https://don4tpro.pages.dev</text>
+    <text x="820" y="26" text-anchor="end" font-family="'Inter', sans-serif" font-size="10" font-weight="600" fill="#34D399">🔒 DIGITAL SAWITPRO</text>
+
+    <!-- In-App Navbar -->
+    <g transform="translate(40, 64)">
+      <circle cx="16" cy="16" r="15" fill="#10B981" opacity="0.2" />
+      <path d="M16 4 C21 4 25 7 26 12 C26 19 21 24 16 27 C11 24 6 19 6 12 C7 7 11 4 16 4 Z" fill="#10B981" />
+      <text x="40" y="21" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF">Donat<tspan fill="#34D399">PRO</tspan></text>
+      
+      <text x="400" y="20" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Kado Perpisahan Rekan</text>
+      <text x="570" y="20" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="500" fill="#9DB4AA">Riwayat Patungan</text>
+      <text x="700" y="20" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="500" fill="#9DB4AA">Laporan PIC</text>
+
+      <g transform="translate(820, -2)">
+        <rect width="180" height="36" rx="18" fill="rgba(255, 255, 255, 0.06)" stroke="rgba(255, 255, 255, 0.1)" />
+        <circle cx="18" cy="18" r="12" fill="#34D399" opacity="0.2" />
+        <text x="18" y="22" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#34D399">SP</text>
+        <text x="38" y="16" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">Ahmad Fauzi</text>
+        <text x="38" y="28" font-family="'Inter', system-ui, sans-serif" font-size="9" font-weight="500" fill="#6EE7B7">PIC SawitPRO</text>
+      </g>
+    </g>
+    <line x1="40" y1="115" x2="1040" y2="115" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+
+    <!-- Main Dashboard Grid -->
+    <g transform="translate(40, 135)">
+      <!-- Left Column: Active Farewell Campaign Spotlight (640px) -->
+      <g transform="translate(0, 0)">
+        <rect width="640" height="500" rx="16" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.09)" stroke-width="1.5" />
+        
+        <g transform="translate(30, 30)">
+          <rect width="210" height="24" rx="12" fill="rgba(16, 185, 129, 0.15)" />
+          <text x="105" y="16" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#34D399">🎁 PATUNGAN KADO PERPISAHAN</text>
+
+          <text x="0" y="55" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="24" font-weight="800" fill="#FFFFFF">
+            Kado Kenang-kenangan Rekan Dimas
+          </text>
+          <text x="0" y="80" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="400" fill="#CBD5E1">
+            Hadiah dan kenang-kenangan hangat atas dedikasi hebat Rekan Dimas (Tim Product).
+          </text>
+
+          <!-- Progress Box -->
+          <g transform="translate(0, 105)">
+            <rect width="580" height="110" rx="12" fill="rgba(0, 0, 0, 0.3)" stroke="rgba(255, 255, 255, 0.06)" />
+            <text x="24" y="32" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#9DB4AA">DANA PATUNGAN TERKUMPUL</text>
+            <text x="24" y="65" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="30" font-weight="800" fill="#34D399">Rp 1.450.000</text>
+            
+            <text x="556" y="32" text-anchor="end" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#9DB4AA">TARGET BIAYA KADO</text>
+            <text x="556" y="65" text-anchor="end" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">Rp 1.500.000 (97%)</text>
+
+            <rect x="24" y="84" width="532" height="8" rx="4" fill="rgba(255, 255, 255, 0.1)" />
+            <rect x="24" y="84" width="516" height="8" rx="4" fill="#10B981" />
+          </g>
+
+          <!-- Action Buttons -->
+          <g transform="translate(0, 240)">
+            <rect width="210" height="46" rx="10" fill="#10B981" />
+            <text x="105" y="28" text-anchor="middle" font-family="'Inter', sans-serif" font-size="14" font-weight="700" fill="#FFFFFF">Ikut Patungan Kado</text>
+
+            <rect x="225" y="0" width="180" height="46" rx="10" fill="rgba(255, 255, 255, 0.06)" stroke="rgba(255, 255, 255, 0.12)" />
+            <text x="315" y="28" text-anchor="middle" font-family="'Inter', sans-serif" font-size="13" font-weight="600" fill="#EEF6F1">Lihat Pilihan Hadiah</text>
+
+            <rect x="420" y="0" width="160" height="46" rx="10" fill="rgba(34, 197, 94, 0.1)" stroke="rgba(34, 197, 94, 0.3)" />
+            <text x="500" y="28" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#4ADE80">Share Grup WhatsApp</text>
+          </g>
+
+          <g transform="translate(0, 315)">
+            <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="#9DB4AA">
+              ✓ Bagi rata nominal otomatis: bebas drama selisih kas patungan kantor.
+            </text>
+            <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="#9DB4AA">
+              ✓ Kuitansi digital sah langsung diterbitkan seketika bukti transfer diverifikasi PIC.
+            </text>
+            <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="#9DB4AA">
+              ✓ 100% digital tanpa ribet kertas fisik: praktis untuk rekan kantor maupun remote.
+            </text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Right Column: Contributors Feed (340px) -->
+      <g transform="translate(660, 0)">
+        <rect width="340" height="500" rx="16" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.09)" stroke-width="1.5" />
+        
+        <g transform="translate(24, 28)">
+          <text x="0" y="16" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">Partisipasi Rekan Tim</text>
+          <text x="0" y="36" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#9DB4AA">29 rekan telah bergabung patungan</text>
+
+          <g transform="translate(0, 56)">
+            <rect width="292" height="74" rx="10" fill="rgba(255, 255, 255, 0.03)" stroke="rgba(255, 255, 255, 0.06)" />
+            <circle cx="24" cy="37" r="14" fill="rgba(16, 185, 129, 0.15)" />
+            <path d="M19 37 L23 41 L29 33" stroke="#34D399" stroke-width="2" stroke-linecap="round" fill="none" />
+            <text x="48" y="28" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Tim Product Design</text>
+            <text x="48" y="44" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#34D399">Rp 150.000 • Terverifikasi</text>
+            <text x="48" y="58" font-family="'Inter', sans-serif" font-size="9" font-weight="500" fill="#64748B">5 menit yang lalu</text>
+          </g>
+
+          <g transform="translate(0, 142)">
+            <rect width="292" height="74" rx="10" fill="rgba(255, 255, 255, 0.03)" stroke="rgba(255, 255, 255, 0.06)" />
+            <circle cx="24" cy="37" r="14" fill="rgba(16, 185, 129, 0.15)" />
+            <path d="M19 37 L23 41 L29 33" stroke="#34D399" stroke-width="2" stroke-linecap="round" fill="none" />
+            <text x="48" y="28" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Rekan Tim Backend Engine</text>
+            <text x="48" y="44" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#34D399">Rp 100.000 • Terverifikasi</text>
+            <text x="48" y="58" font-family="'Inter', sans-serif" font-size="9" font-weight="500" fill="#64748B">18 menit yang lalu</text>
+          </g>
+
+          <g transform="translate(0, 228)">
+            <rect width="292" height="74" rx="10" fill="rgba(255, 255, 255, 0.03)" stroke="rgba(255, 255, 255, 0.06)" />
+            <circle cx="24" cy="37" r="14" fill="rgba(16, 185, 129, 0.15)" />
+            <path d="M19 37 L23 41 L29 33" stroke="#34D399" stroke-width="2" stroke-linecap="round" fill="none" />
+            <text x="48" y="28" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Tim Agronomi &amp; Operasional</text>
+            <text x="48" y="44" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#34D399">Rp 200.000 • Terverifikasi</text>
+            <text x="48" y="58" font-family="'Inter', sans-serif" font-size="9" font-weight="500" fill="#64748B">45 menit yang lalu</text>
+          </g>
+
+          <g transform="translate(0, 320)">
+            <rect width="292" height="90" rx="12" fill="rgba(16, 185, 129, 0.1)" stroke="rgba(52, 211, 153, 0.25)" />
+            <text x="20" y="30" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#6EE7B7">MESIN ASISTENSI DIGITAL</text>
+            <text x="20" y="52" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">Donatur Helper Engine</text>
+            <text x="20" y="72" font-family="'Inter', sans-serif" font-size="10.5" font-weight="500" fill="#CBD5E1">Pengelolaan patungan kado kantor otomatis</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

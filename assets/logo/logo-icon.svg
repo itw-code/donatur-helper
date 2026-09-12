@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="dproShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4A653B" />
+      <stop offset="60%" stop-color="#3D6E2E" />
+      <stop offset="100%" stop-color="#274E13" />
+    </linearGradient>
+    <linearGradient id="dproPalmSeed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D347" />
+      <stop offset="60%" stop-color="#FCD100" />
+      <stop offset="100%" stop-color="#C8D087" />
+    </linearGradient>
+    <filter id="dproGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4A653B" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <circle cx="32" cy="32" r="28" fill="#4A653B" opacity="0.16" />
+
+  <!-- Protective Shield in SawitPRO Forest Olive -->
+  <path d="M32 6 C43 6 53 11 55 22 C55 39 44 51 32 58 C20 51 9 39 9 22 C11 11 21 6 32 6 Z"
+        fill="url(#dproShield)"
+        filter="url(#dproGlow)" />
+
+  <!-- Shield Highlight Border in SawitPRO Gold -->
+  <path d="M32 9 C41 9 49 13.5 51 23 C51 37 41.5 47.5 32 53.5 C22.5 47.5 13 37 13 23 C15 13.5 23 9 32 9 Z"
+        stroke="rgba(245, 211, 71, 0.45)"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        fill="none" />
+
+  <!-- Helping Hands Cradling -->
+  <path d="M18 36 C20 42 26 46 32 46 C38 46 44 42 46 36 C42 39 37 40 32 40 C27 40 22 39 18 36 Z"
+        fill="#FFFFFF"
+        opacity="0.95" />
+
+  <!-- Palm Leaf & Heart Seed of Hope (SawitPRO Harvest Gold & Sprout) -->
+  <path d="M32 19 C34.5 15.5 39 15 42 18 C45 21 45 25.5 40 30 L32 37 L24 30 C19 25.5 19 21 22 18 C25 15 29.5 15.5 32 19 Z"
+        fill="url(#dproPalmSeed)" />
+  
+  <!-- Palm Sprout Central Leaf Line -->
+  <path d="M32 20 L32 33" stroke="#274E13" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
+  <circle cx="37" cy="20" r="1.5" fill="#FFFFFF" opacity="0.9" />
+</svg>

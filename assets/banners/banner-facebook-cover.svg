@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 312" width="820" height="312" fill="none">
+  <rect width="820" height="312" fill="#05080A" />
+  <circle cx="700" cy="156" r="220" fill="#10B981" opacity="0.18" />
+
+  <g transform="translate(60, 65)">
+    <circle cx="18" cy="18" r="16" fill="#10B981" opacity="0.2" />
+    <path d="M18 4 C24 4 29 7 30 13 C30 22 24 29 18 32 C12 29 6 22 6 13 C7 7 12 4 18 4 Z" fill="#10B981" />
+    <text x="42" y="20" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">Donat<tspan fill="#34D399">PRO</tspan></text>
+    <text x="43" y="32" font-family="'Inter', system-ui, sans-serif" font-size="8" font-weight="700" fill="#9DB4AA" letter-spacing="0.12em">DANA SOLIDARITAS INSAN SAWITPRO</text>
+
+    <text x="0" y="75" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF">
+      Dari Rekan, Untuk Rekan SawitPRO.
+    </text>
+    <text x="0" y="102" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="400" fill="#CBD5E1">
+      Gotong royong saling bantu karyawan dan alumni SawitPRO secara transparan.
+    </text>
+
+    <g transform="translate(0, 130)">
+      <rect x="0" y="0" width="170" height="36" rx="8" fill="#10B981" />
+      <text x="85" y="22" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Lihat Program Rekan &rarr;</text>
+      <text x="190" y="23" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="600" fill="#34D399">PIC: +62 812-8888-0192</text>
+    </g>
+  </g>
+</svg>
