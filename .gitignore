@@ -24,3 +24,6 @@ __pycache__/
 dist/
 supabase/.temp/
 nul
+# Wrangler / Cloudflare Workers local build artifacts
+.wrangler/
+.wrangler-dryrun/

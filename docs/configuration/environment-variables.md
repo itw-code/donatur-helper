@@ -43,10 +43,10 @@ Aplikasi Donatur Helper menggunakan model pemisahan keamanan *client-side* (fron
 | `APP_URL` | URL dasar aplikasi untuk tautan email dan redirect | URL lokal (`http://localhost:3000`) atau domain produksi | **Publik** | Frontend & Supabase Edge Functions |
 | `SUPABASE_PROJECT_REF` | Reference ID proyek Supabase (CLI/deployment) | **Supabase Dashboard** &rarr; Project Settings &rarr; General &rarr; *Reference ID* | **DevOps / CLI** | Lokal `.env` / CI-CD |
 | `SUPABASE_ACCESS_TOKEN` | Token akun untuk otomasi Supabase CLI | **Supabase Dashboard** &rarr; Account &rarr; *Access Tokens* | 🔒 **Rahasia Pengembang** | CLI Lokal / CI-CD Pipeline |
-| `SUPABASE_URL` (Actions) | Repo secret untuk *keep-alive* Free Plan | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project URL* | **Client-Safe (Publik)** | GitHub Actions (`.github/workflows/supabase-keep-alive.yml`) |
-| `SUPABASE_ANON_KEY` (Actions) | Repo secret kunci publishable/anon untuk *keep-alive* | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project API keys* | **Client-Safe (Publik)** | GitHub Actions (`.github/workflows/supabase-keep-alive.yml`) |
+| `SUPABASE_URL` (Worker) | Secret Worker *keep-alive* Free Plan | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project URL* | **Client-Safe (Publik)** | Cloudflare Worker (`workers/supabase-keepalive/`) |
+| `SUPABASE_PUBLISHABLE_KEY` (Worker) | Secret Worker *keep-alive* Free Plan | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project API keys* (`publishable` / `anon`) | **Client-Safe (Publik)** | Cloudflare Worker (`workers/supabase-keepalive/`) |
 
-> Detail mekanisme pencegahan penjedaan otomatis Free Plan ada di [Bagian 3A](#3a-menjaga-proyek-supabase-free-plan-tetap-aktif-keep-alive).
+> Detail mekanisme pencegahan penjedaan otomatis Free Plan ada di [Bagian 3.9](#39-keep-alive-free-plan-supabase-cloudflare-worker).
 
 ---
 
@@ -98,28 +98,57 @@ Aplikasi Donatur Helper menggunakan model pemisahan keamanan *client-side* (fron
 
 ---
 
-## 3A. Menjaga Proyek Supabase Free Plan Tetap Aktif (*Keep-Alive*)
+### 3.9 Keep-Alive Free Plan Supabase (Cloudflare Worker)
 
-Supabase otomatis **menjeda (*pause*)** proyek pada **Free Plan** yang tidak menerima cukup kueri basis data selama 7 hari berturut-turut. Status ini hanya berlaku untuk Free Plan — proyek berbayar (Pro) tidak dapat dijeda otomatis. Referensi resmi: [Free project pausing](https://supabase.com/docs/guides/platform/free-project-pausing).
+Supabase otomatis **menjeda (*pause*)** proyek pada **Free Plan** yang tidak menerima cukup kueri basis data selama 7 hari berturut-turut. Proyek berbayar (Pro) tidak dapat dijeda otomatis. Referensi resmi: [Free project pausing](https://supabase.com/docs/guides/platform/free-project-pausing).
 
-Mekanisme *keep-alive* di repositori ini:
+Mekanisme *keep-alive* di repositori ini menggunakan **Cloudflare Worker**, bukan GitHub Actions — proyek ini di-deploy sepenuhnya di Cloudflare, sehingga *heartbeat* berjalan di akun Cloudflare yang sama dengan situs produksi dan tidak bergantung pada runner pihak ketiga.
 
-- **Berkas:** `.github/workflows/supabase-keep-alive.yml`
-- **Jadwal:** Setiap Senin, Rabu, dan Jumat pukul 09:00 UTC (`cron: '0 9 * * 1,3,5'`), plus pemicu manual `workflow_dispatch`.
-- **Aksi:** Memanggil RPC `get_public_settings()` melalui `POST {SUPABASE_URL}/rest/v1/rpc/get_public_settings`. RPC ini bersifat baca-saja, tanpa argumen, `SECURITY DEFINER`, dan memang sudah di-*grant* ke role `anon`.
-- **Catatan:** Panggilan ke `GET /rest/v1/` (root REST) TIDAK dihitung, karena tidak menyentuh Postgres. Selalu gunakan RPC/kueri nyata.
+| Aspek | Nilai |
+| :--- | :--- |
+| **Nama Worker** | `donatur-helper-supabase-keepalive` |
+| **Berkas** | `workers/supabase-keepalive/wrangler.toml`, `workers/supabase-keepalive/src/index.js` |
+| **Jadwal (Cron Trigger)** | `0 9 * * 1,3,5` — Senin, Rabu, Jumat pukul 09:00 UTC |
+| **Aksi** | `POST {SUPABASE_URL}/rest/v1/rpc/get_public_settings` (baca-saja, tanpa argumen, *grant* ke `anon`) |
+| **Retry** | 3x percobaan dengan jeda 1,5 detik; kegagalan akhir melempar error agar tercatat di Workers Logs |
+| **URL Worker** | `https://donatur-helper-supabase-keepalive.ihsantriwanda.workers.dev` |
 
-**Prasyarat: dua Repository Secrets berikut (Settings &rarr; Secrets and variables &rarr; Actions):**
+> [!NOTE]
+> Panggilan ke `GET /rest/v1/` (root REST) TIDAK dihitung sebagai aktivitas basis data, karena tidak menyentuh Postgres. *Heartbeat* harus berupa kueri/RPC nyata — itulah alasan RPC `get_public_settings()` dipakai.
+
+**Secrets Worker** (sudah terpasang di akun Cloudflare; bukan variabel `.env` frontend):
 
 | Nama Secret | Nilai | Sumber |
 | :--- | :--- | :--- |
 | `SUPABASE_URL` | `https://hhgtospruzcjwlafvkhf.supabase.co` | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project URL* |
-| `SUPABASE_ANON_KEY` | Kunci `publishable` / `anon` | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project API keys* |
+| `SUPABASE_PUBLISHABLE_KEY` | Kunci `publishable` / `anon` | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project API keys* |
 
 > [!CAUTION]
-> Gunakan **hanya** kunci publishable/anon. JANGAN pernah menaruh `SUPABASE_SECRET_KEY` (service_role) pada secret GitHub Actions maupun bundle frontend.
+> Gunakan **hanya** kunci publishable/anon. JANGAN pernah menaruh `SUPABASE_SECRET_KEY` (service_role) pada Worker secret maupun bundle frontend.
 
-Cara cepat menjalankan *heartbeat* sekali secara manual (misal setelah menerima email peringatan):
+**Operasional Worker:**
+
+```bash
+# Deploy ulang setelah mengubah kode/nama Worker
+cd workers/supabase-keepalive
+npx wrangler deploy
+
+# Memutar (rotate) secret
+npx wrangler secret put SUPABASE_URL
+npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
+
+# Melihat daftar secret tanpa membocorkan nilainya
+npx wrangler secret list
+
+# Uji Cron Trigger secara lokal terhadap Supabase asli
+npx wrangler dev --test-scheduled --env-file ../../.env
+curl -X POST "http://127.0.0.1:8787/__scheduled?cron=0+9+*+*+1,3,5"
+
+# Log heartbeat produksi
+npx wrangler tail donatur-helper-supabase-keepalive
+```
+
+Cara cepat menjalankan *heartbeat* sekali secara manual (misal setelah menerima email peringatan), tanpa Worker:
 
 ```bash
 curl --fail-with-body -X POST "https://hhgtospruzcjwlafvkhf.supabase.co/rest/v1/rpc/get_public_settings" \
