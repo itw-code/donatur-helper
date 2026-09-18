@@ -1,0 +1,46 @@
+# Supabase Free-plan keep-alive.
+#
+# Supabase pauses Free-plan projects that receive too few user database queries
+# over a 7-day window (https://supabase.com/docs/guides/platform/free-project-pausing).
+# It counts queries that actually reach Postgres, so hitting the project root or
+# `GET /rest/v1/` is not reliable. This workflow issues a real, read-only RPC
+# call three times a week — well inside the 7-day window.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL         e.g. https://hhgtospruzcjwlafvkhf.supabase.co
+#   SUPABASE_ANON_KEY    the publishable/anon key — NEVER the secret/service_role key
+
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Mon / Wed / Fri at 09:00 UTC
+    - cron: '0 9 * * 1,3,5'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call get_public_settings() to register database activity
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "SUPABASE_URL or SUPABASE_ANON_KEY secret is not set." >&2
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-connrefused --retry-delay 5 \
+            -X POST "${SUPABASE_URL}/rest/v1/rpc/get_public_settings" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{}'
+          echo
+          echo "OK: database activity registered."

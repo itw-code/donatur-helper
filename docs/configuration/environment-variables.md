@@ -43,6 +43,10 @@ Aplikasi Donatur Helper menggunakan model pemisahan keamanan *client-side* (fron
 | `APP_URL` | URL dasar aplikasi untuk tautan email dan redirect | URL lokal (`http://localhost:3000`) atau domain produksi | **Publik** | Frontend & Supabase Edge Functions |
 | `SUPABASE_PROJECT_REF` | Reference ID proyek Supabase (CLI/deployment) | **Supabase Dashboard** &rarr; Project Settings &rarr; General &rarr; *Reference ID* | **DevOps / CLI** | Lokal `.env` / CI-CD |
 | `SUPABASE_ACCESS_TOKEN` | Token akun untuk otomasi Supabase CLI | **Supabase Dashboard** &rarr; Account &rarr; *Access Tokens* | 🔒 **Rahasia Pengembang** | CLI Lokal / CI-CD Pipeline |
+| `SUPABASE_URL` (Actions) | Repo secret untuk *keep-alive* Free Plan | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project URL* | **Client-Safe (Publik)** | GitHub Actions (`.github/workflows/supabase-keep-alive.yml`) |
+| `SUPABASE_ANON_KEY` (Actions) | Repo secret kunci publishable/anon untuk *keep-alive* | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project API keys* | **Client-Safe (Publik)** | GitHub Actions (`.github/workflows/supabase-keep-alive.yml`) |
+
+> Detail mekanisme pencegahan penjedaan otomatis Free Plan ada di [Bagian 3A](#3a-menjaga-proyek-supabase-free-plan-tetap-aktif-keep-alive).
 
 ---
 
@@ -91,6 +95,40 @@ Aplikasi Donatur Helper menggunakan model pemisahan keamanan *client-side* (fron
 ### 3.8 `SUPABASE_PROJECT_REF` & `SUPABASE_ACCESS_TOKEN` (Opsional)
 - **Fungsi:** Digunakan untuk eksekusi perintah CLI lokal Supabase (migrasi database, deployment Edge Functions, sinkronisasi schema).
 - **Penggunaan:** Hanya di terminal pengembang lokal atau GitHub Actions CI/CD.
+
+---
+
+## 3A. Menjaga Proyek Supabase Free Plan Tetap Aktif (*Keep-Alive*)
+
+Supabase otomatis **menjeda (*pause*)** proyek pada **Free Plan** yang tidak menerima cukup kueri basis data selama 7 hari berturut-turut. Status ini hanya berlaku untuk Free Plan — proyek berbayar (Pro) tidak dapat dijeda otomatis. Referensi resmi: [Free project pausing](https://supabase.com/docs/guides/platform/free-project-pausing).
+
+Mekanisme *keep-alive* di repositori ini:
+
+- **Berkas:** `.github/workflows/supabase-keep-alive.yml`
+- **Jadwal:** Setiap Senin, Rabu, dan Jumat pukul 09:00 UTC (`cron: '0 9 * * 1,3,5'`), plus pemicu manual `workflow_dispatch`.
+- **Aksi:** Memanggil RPC `get_public_settings()` melalui `POST {SUPABASE_URL}/rest/v1/rpc/get_public_settings`. RPC ini bersifat baca-saja, tanpa argumen, `SECURITY DEFINER`, dan memang sudah di-*grant* ke role `anon`.
+- **Catatan:** Panggilan ke `GET /rest/v1/` (root REST) TIDAK dihitung, karena tidak menyentuh Postgres. Selalu gunakan RPC/kueri nyata.
+
+**Prasyarat: dua Repository Secrets berikut (Settings &rarr; Secrets and variables &rarr; Actions):**
+
+| Nama Secret | Nilai | Sumber |
+| :--- | :--- | :--- |
+| `SUPABASE_URL` | `https://hhgtospruzcjwlafvkhf.supabase.co` | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project URL* |
+| `SUPABASE_ANON_KEY` | Kunci `publishable` / `anon` | **Supabase Dashboard** &rarr; Project Settings &rarr; API &rarr; *Project API keys* |
+
+> [!CAUTION]
+> Gunakan **hanya** kunci publishable/anon. JANGAN pernah menaruh `SUPABASE_SECRET_KEY` (service_role) pada secret GitHub Actions maupun bundle frontend.
+
+Cara cepat menjalankan *heartbeat* sekali secara manual (misal setelah menerima email peringatan):
+
+```bash
+curl --fail-with-body -X POST "https://hhgtospruzcjwlafvkhf.supabase.co/rest/v1/rpc/get_public_settings" \
+  -H "apikey: <publishable-key>" \
+  -H "Authorization: Bearer <publishable-key>" \
+  -H "Content-Type: application/json" -d '{}'
+```
+
+Jika proyek tetap dijeda, buka **Supabase Dashboard &rarr; Organizations &rarr; pilih proyek &rarr; Resume project**. Data tetap utuh dan dapat dipulihkan hingga 1 tahun setelah tanggal jeda.
 
 ---
 
