@@ -15,6 +15,10 @@ _skill-stage/
 *.local.md
 data/source/
 data/export/
+# Local backup output from scripts/migration/export-backup.mjs — contains PII.
+backup/
+*.dhbak
+restored/
 *.xlsx
 *.csv
 secrets/

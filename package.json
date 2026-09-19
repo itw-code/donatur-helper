@@ -13,6 +13,9 @@
     "migrate:fresh-diff": "node scripts/migration/upsert-fresh-diff.mjs --dry-run",
     "migrate:fresh-write": "node scripts/migration/upsert-fresh-diff.mjs --write",
     "verify:db": "node scripts/migration/verify-supabase-data.mjs",
+    "backup": "node scripts/migration/export-backup.mjs --out backup",
+    "backup:encrypt": "node scripts/migration/encrypt-backup.mjs --in backup --out backup.dhbak",
+    "backup:decrypt": "node scripts/migration/decrypt-backup.mjs --in backup.dhbak --out restored",
     "test:smtp": "node scripts/email/test-gmail-smtp.mjs"
   },
   "devDependencies": {

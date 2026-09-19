@@ -2,21 +2,35 @@
 #
 # Supabase pauses Free-plan projects that receive too few user database queries
 # over a 7-day window (https://supabase.com/docs/guides/platform/free-project-pausing).
-# Only queries that actually reach Postgres count, so hitting the project root or
-# `GET /rest/v1/` is not reliable. This Worker issues a real, read-only RPC call
-# three times a week — comfortably inside the 7-day window.
+# The docs' own guidance is "a few user requests to the database each day over
+# the previous week". Only queries that actually reach Postgres count, so hitting
+# the project root or `GET /rest/v1/` is not reliable. This Worker issues a real,
+# read-only RPC call twice a day — comfortably inside the 7-day window and with
+# no 3-day weekend gap.
+#
+# Two heartbeat paths, so no single scheduler is a point of failure:
+#   1. Cron Trigger below — primary.
+#   2. `GET|POST /ping` on the Worker URL — manual runs and an external free
+#      scheduler (cron-job.org, UptimeRobot, …) as redundancy.
 #
 # Deploy:  cd workers/supabase-keepalive && npx wrangler deploy
 # Secrets: npx wrangler secret put SUPABASE_URL
 #          npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
+#          npx wrangler secret put HEARTBEAT_URL   # optional, dead-man's switch
 
 name = "donatur-helper-supabase-keepalive"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
 
-# No route/custom domain: the Worker is triggered only by its Cron Trigger and
-# by manual `wrangler dev`/fetch. It is not part of the don4tpro Pages site.
+# No route/custom domain: the Worker is triggered only by its Cron Trigger,
+# by `GET|POST /ping` on the workers.dev URL, and by manual
+# `wrangler dev`/fetch. It is not part of the don4tpro Pages site.
 workers_dev = true
 
 [triggers]
-crons = ["0 9 * * 1,3,5"]
+crons = ["0 9,21 * * *"]
+
+# Persist logs so a failed scheduled run is diagnosable after the fact.
+# Before this, `wrangler tail` was the only way to see a heartbeat failure.
+[observability]
+enabled = true

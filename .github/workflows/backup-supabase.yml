@@ -1,0 +1,92 @@
+name: Supabase Backup
+
+# Offsite weekly logical backup of the Supabase project: every table plus the
+# `bukti-transfer` Storage bucket (the Bukti Transfer images).
+#
+# The artifact is ENCRYPTED before upload. This repository is public, and
+# workflow artifacts of a public repository are downloadable by anyone with
+# read access, so an unencrypted upload would publish Member names, WhatsApp
+# numbers, e-mail addresses and payment proofs. Never remove the encryption step.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL           https://<project-ref>.supabase.co
+#   SUPABASE_SECRET_KEY    secret/service_role key — NEVER the publishable key
+#   BACKUP_PASSPHRASE      long random passphrase; store it in a password manager
+#
+# The backup is USELESS without BACKUP_PASSPHRASE. It is not recoverable.
+
+on:
+  schedule:
+    # Weekly — Sunday 04:00 UTC.
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check required secrets are configured
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          missing=""
+          [ -n "${SUPABASE_URL:-}" ] || missing="${missing} SUPABASE_URL"
+          [ -n "${SUPABASE_SECRET_KEY:-}" ] || missing="${missing} SUPABASE_SECRET_KEY"
+          [ -n "${BACKUP_PASSPHRASE:-}" ] || missing="${missing} BACKUP_PASSPHRASE"
+          if [ -n "${missing}" ]; then
+            echo "Missing repository secret(s):${missing}" >&2
+            exit 1
+          fi
+          echo "All required secrets are present."
+
+      - name: Export database and storage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: node scripts/migration/export-backup.mjs --out backup
+
+      - name: Report row and object counts
+        run: |
+          set -euo pipefail
+          node -e '
+            const m = require("./backup/manifest.json");
+            console.log("exported at :", m.exportedAt);
+            console.log("host        :", m.supabaseHost);
+            console.log("total rows  :", m.totalRows);
+            console.log("storage     :", m.storage.objectCount, "objects,", m.storage.bytes, "bytes");
+          '
+
+      - name: Encrypt archive
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: node scripts/migration/encrypt-backup.mjs --in backup --out backup.dhbak
+
+      - name: Delete plaintext export
+        # Runs even if encryption failed, so plaintext never lingers in the runner.
+        if: always()
+        run: rm -rf backup
+
+      - name: Upload encrypted artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-backup-${{ github.run_number }}
+          path: backup.dhbak
+          retention-days: 90
+          if-no-files-found: error
