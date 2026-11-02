@@ -20,6 +20,10 @@ _Avoid_: One-size-fits-all navigation, mandatory bottom navigation
 The owner and manager of a specific Campaign, responsible for closing registration, finalizing bill splits, and verifying payments.
 _Avoid_: Coordinator, owner, manager
 
+
+**Draft PIC Token**:
+A newly minted PIC token (`role = 'PIC'`, `status = 'UNUSED'`, `linked_campaign_id = NULL`) created by `generate_seamless_pic_token` or `admin_generate_pic_token` before a Campaign exists. Loading the PIC dashboard with a Draft PIC Token must resolve to `{ campaign: null }` without promoting `status` to `'ACTIVE'`, routing the user to `#view-pic-create` until `create_campaign_for_pic` atomically links the new `campaign_id` and activates the token.
+_Avoid_: Treating unlinked `UNUSED` tokens as unauthorized, promoting `status` to `'ACTIVE'` before a Campaign is linked
 **Member**:
 A registered user who is approved to access the application and participate in campaigns.
 _Avoid_: User, developer, participant

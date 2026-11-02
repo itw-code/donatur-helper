@@ -174,4 +174,5 @@ signatures, and verified end-to-end with real data:
 | Donor login | `js/views/auth.js` `userLogin` → `checkDonorWhatsApp` |
 | Token verify (hash) | `supabase/migrations/20260818010000_verify_auth_token.sql` |
 | PIC campaigns RPC (dead/broken) | `supabase/migrations/20260825100000_add_missing_public_settings_and_user_pic_campaigns.sql` |
-| PIC token generation | `supabase/migrations/20260818160000_generate_seamless_pic_token.sql`, `20260819070000_admin_generate_pic_token.sql` |
+| PIC token generation | `supabase/migrations/20260818160000_generate_seamless_pic_token.sql`, `20260819070000_admin_generate_pic_token.sql`, `20261102120000_fix_pic_draft_token_dashboard_and_persistence.sql` |
+| PIC draft token & campaign creation incident | `docs/reports/incident-pic-draft-token-campaign-creation.md`, `docs/adr/0057-use-the-migrated-shell-for-pic-campaign-creation.md` |

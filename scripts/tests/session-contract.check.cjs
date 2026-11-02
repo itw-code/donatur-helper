@@ -355,6 +355,28 @@ assert(
   'admin.js adminTransferOwnershipUI must defensively extract token and message without [object Object] coercion'
 );
 
+// -----------------------------------------------------------------------------
+// 6. PIC DRAFT TOKEN & UNLINKED CAMPAIGN CREATION CONTRACT (backendAdapter.js & pic.js)
+// -----------------------------------------------------------------------------
+console.log('\n--- 6. PIC Draft Token & Unlinked Campaign Creation Contract ---');
+assert(
+  adapterCode.includes("case 'getCampaignForPic':") &&
+  adapterCode.includes("client.rpc('verify_auth_token', { p_token: token })") &&
+  adapterCode.includes("if (statusUpper === 'UNUSED')") &&
+  adapterCode.includes("return { campaign: null, donors: [], summary: null };"),
+  'backendAdapter.js getCampaignForPic must resolve unlinked UNUSED PIC draft tokens to { campaign: null } via verify_auth_token fallback'
+);
+assert(
+  adapterCode.includes("Token ini tercatat sudah aktif tapi kehilangan link ke Campaign"),
+  'backendAdapter.js getCampaignForPic must guard against orphaned ACTIVE PIC tokens with missing linked_campaign_id'
+);
+assert(
+  picCode.includes("safeRemove('auth_token');") &&
+  picCode.includes("safeRemove('auth_role');") &&
+  picCode.includes("loadUserDashboard();"),
+  'pic.js loadPicDashboard catch handler must purge stale/expired auth_token and recover to loadUserDashboard or landing'
+);
+
 
 // -----------------------------------------------------------------------------
 // SUMMARY & VERDICT
