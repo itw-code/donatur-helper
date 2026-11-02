@@ -54,6 +54,40 @@ function _normalizeCampaignStatus(rawStatus) {
   return rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
 }
 
+function _normalizeDonorRow(d) {
+  const isPaid = String(d.paid !== undefined ? d.paid : (d.Paid || 'FALSE')).toUpperCase() === 'TRUE';
+  const isVer = String(d.verified !== undefined ? d.verified : (d.Verified || 'FALSE')).toUpperCase() === 'TRUE';
+  const isRef = String(d.refunded !== undefined ? d.refunded : (d.Refunded || 'FALSE')).toUpperCase() === 'TRUE';
+  const isCus = String(d.is_custom !== undefined ? d.is_custom : (d.IsCustom || 'FALSE')).toUpperCase() === 'TRUE';
+  const proofPath = d.proof_storage_path || d.ProofStoragePath || '';
+  const proofLink = proofPath && proofPath.startsWith('http') ? proofPath : (d.proof_link || d.ProofLink || '');
+  const amtDue = Number(d.amount_due !== undefined ? d.amount_due : d.AmountDue) || 0;
+  const amtPaid = Number(d.amount_paid !== undefined ? d.amount_paid : d.AmountPaid) || 0;
+  const name = d.name || d.Name || '';
+  const wa = d.whatsapp || d.WhatsApp || '';
+  const alias = d.alias || d.Alias || '';
+  const cusAmt = d.custom_amount !== undefined ? d.custom_amount : d.CustomAmount;
+  const status = d.donor_status || d.DonorStatus || 'joined';
+  const actGrp = d.action_group || d.ActionGroup || '';
+  const jAt = d.joined_at || d.JoinedAt || '';
+  const pAt = d.paid_at || d.PaidAt || '';
+  const mAt = d.modified_at || d.ModifiedAt || '';
+  const mBy = d.modified_by || d.ModifiedBy || '';
+  return {
+    id: d.id, name, whatsapp: wa, alias, donor_status: status, is_custom: isCus,
+    custom_amount: Number(cusAmt) || null, amount_due: amtDue, amount_paid: amtPaid,
+    paid: isPaid, verified: isVer, refunded: isRef, proof_storage_path: proofPath,
+    proof_link: proofLink, action_group: actGrp, joined_at: jAt, paid_at: pAt,
+    modified_at: mAt, modified_by: mBy,
+    Name: name, WhatsApp: wa, Alias: alias, DonorStatus: status,
+    IsCustom: isCus ? 'TRUE' : 'FALSE', CustomAmount: cusAmt, AmountDue: amtDue,
+    AmountPaid: amtPaid, Paid: isPaid ? 'TRUE' : 'FALSE', Verified: isVer ? 'TRUE' : 'FALSE',
+    Refunded: isRef ? 'TRUE' : 'FALSE', ProofStoragePath: proofPath, ProofLink: proofLink,
+    ActionGroup: actGrp, JoinedAt: jAt, PaidAt: pAt, ModifiedAt: mAt, ModifiedBy: mBy,
+    ...d
+  };
+}
+
 /**
  * Executes a legacy HTTP request to Google Apps Script endpoint.
  */
@@ -460,7 +494,30 @@ async function _dispatchSupabaseRpc(action, args = []) {
         p_page_size: pageSize
       });
       if (error) throw new Error(error.message || 'Gagal memuat dashboard PIC.');
-      if (data && data.error) throw new Error(data.message || data.error);
+      if (data && data.error) {
+        if (data.error === 'unauthorized') {
+          const { data: verifyData, error: verifyErr } = await client.rpc('verify_auth_token', { p_token: token });
+          if (!verifyErr && Array.isArray(verifyData) && verifyData.length > 0) {
+            const authRow = verifyData[0];
+            const roleUpper = String(authRow.role || '').trim().toUpperCase();
+            const statusUpper = String(authRow.status || '').trim().toUpperCase();
+            const linkedId = String(authRow.linked_campaign_id || '').trim();
+            const isExpired = statusUpper === 'EXPIRED'
+              || statusUpper === 'REVOKED'
+              || (authRow.expires_at && new Date(authRow.expires_at).getTime() < Date.now());
+
+            if (roleUpper === 'PIC' && !isExpired && !linkedId) {
+              if (statusUpper === 'ACTIVE') {
+                throw new Error('Token ini tercatat sudah aktif tapi kehilangan link ke Campaign. Silakan hubungi Admin untuk mengecek database.');
+              }
+              if (statusUpper === 'UNUSED') {
+                return { campaign: null, donors: [], summary: null };
+              }
+            }
+          }
+        }
+        throw new Error(data.message || data.error);
+      }
 
       if (!data || !data.campaign) {
         return { campaign: null, donors: [], summary: null };
@@ -487,40 +544,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
         status: normalizedStatus
       };
 
-      const normalizedDonors = (data.donors || []).map(d => {
-        const isPaid = String(d.paid !== undefined ? d.paid : (d.Paid || 'FALSE')).toUpperCase() === 'TRUE';
-        const isVer = String(d.verified !== undefined ? d.verified : (d.Verified || 'FALSE')).toUpperCase() === 'TRUE';
-        const isRef = String(d.refunded !== undefined ? d.refunded : (d.Refunded || 'FALSE')).toUpperCase() === 'TRUE';
-        const isCus = String(d.is_custom !== undefined ? d.is_custom : (d.IsCustom || 'FALSE')).toUpperCase() === 'TRUE';
-        const proofPath = d.proof_storage_path || d.ProofStoragePath || '';
-        const proofLink = proofPath && proofPath.startsWith('http') ? proofPath : (d.proof_link || d.ProofLink || '');
-        const amtDue = Number(d.amount_due !== undefined ? d.amount_due : d.AmountDue) || 0;
-        const amtPaid = Number(d.amount_paid !== undefined ? d.amount_paid : d.AmountPaid) || 0;
-        const name = d.name || d.Name || '';
-        const wa = d.whatsapp || d.WhatsApp || '';
-        const alias = d.alias || d.Alias || '';
-        const cusAmt = d.custom_amount !== undefined ? d.custom_amount : d.CustomAmount;
-        const status = d.donor_status || d.DonorStatus || 'joined';
-        const actGrp = d.action_group || d.ActionGroup || '';
-        const jAt = d.joined_at || d.JoinedAt || '';
-        const pAt = d.paid_at || d.PaidAt || '';
-        const mAt = d.modified_at || d.ModifiedAt || '';
-        const mBy = d.modified_by || d.ModifiedBy || '';
-
-        return {
-          id: d.id, name, whatsapp: wa, alias, donor_status: status, is_custom: isCus,
-          custom_amount: Number(cusAmt) || null, amount_due: amtDue, amount_paid: amtPaid,
-          paid: isPaid, verified: isVer, refunded: isRef, proof_storage_path: proofPath,
-          proof_link: proofLink, action_group: actGrp, joined_at: jAt, paid_at: pAt,
-          modified_at: mAt, modified_by: mBy,
-          Name: name, WhatsApp: wa, Alias: alias, DonorStatus: status,
-          IsCustom: isCus ? 'TRUE' : 'FALSE', CustomAmount: cusAmt, AmountDue: amtDue,
-          AmountPaid: amtPaid, Paid: isPaid ? 'TRUE' : 'FALSE', Verified: isVer ? 'TRUE' : 'FALSE',
-          Refunded: isRef ? 'TRUE' : 'FALSE', ProofStoragePath: proofPath, ProofLink: proofLink,
-          ActionGroup: actGrp, JoinedAt: jAt, PaidAt: pAt, ModifiedAt: mAt, ModifiedBy: mBy,
-          ...d
-        };
-      });
+      const normalizedDonors = (data.donors || []).map(_normalizeDonorRow);
 
       return {
         campaign: normalizedCampaign,
@@ -590,67 +614,7 @@ async function _dispatchSupabaseRpc(action, args = []) {
         status: normalizedStatus
       };
 
-      const normalizedDonors = (data.donors || []).map(d => {
-        const isPaid = String(d.paid !== undefined ? d.paid : (d.Paid || 'FALSE')).toUpperCase() === 'TRUE';
-        const isVer = String(d.verified !== undefined ? d.verified : (d.Verified || 'FALSE')).toUpperCase() === 'TRUE';
-        const isRef = String(d.refunded !== undefined ? d.refunded : (d.Refunded || 'FALSE')).toUpperCase() === 'TRUE';
-        const isCus = String(d.is_custom !== undefined ? d.is_custom : (d.IsCustom || 'FALSE')).toUpperCase() === 'TRUE';
-        const proofPath = d.proof_storage_path || d.ProofStoragePath || '';
-        const proofLink = proofPath && proofPath.startsWith('http') ? proofPath : (d.proof_link || d.ProofLink || '');
-        const amtDue = Number(d.amount_due !== undefined ? d.amount_due : d.AmountDue) || 0;
-        const amtPaid = Number(d.amount_paid !== undefined ? d.amount_paid : d.AmountPaid) || 0;
-        const name = d.name || d.Name || '';
-        const wa = d.whatsapp || d.WhatsApp || '';
-        const alias = d.alias || d.Alias || '';
-        const cusAmt = d.custom_amount !== undefined ? d.custom_amount : d.CustomAmount;
-        const status = d.donor_status || d.DonorStatus || 'joined';
-        const actGrp = d.action_group || d.ActionGroup || '';
-        const jAt = d.joined_at || d.JoinedAt || '';
-        const pAt = d.paid_at || d.PaidAt || '';
-        const mAt = d.modified_at || d.ModifiedAt || '';
-        const mBy = d.modified_by || d.ModifiedBy || '';
-
-        return {
-          id: d.id,
-          name,
-          whatsapp: wa,
-          alias,
-          donor_status: status,
-          is_custom: isCus,
-          custom_amount: Number(cusAmt) || null,
-          amount_due: amtDue,
-          amount_paid: amtPaid,
-          paid: isPaid,
-          verified: isVer,
-          refunded: isRef,
-          proof_storage_path: proofPath,
-          proof_link: proofLink,
-          action_group: actGrp,
-          joined_at: jAt,
-          paid_at: pAt,
-          modified_at: mAt,
-          modified_by: mBy,
-          Name: name,
-          WhatsApp: wa,
-          Alias: alias,
-          DonorStatus: status,
-          IsCustom: isCus ? 'TRUE' : 'FALSE',
-          CustomAmount: cusAmt,
-          AmountDue: amtDue,
-          AmountPaid: amtPaid,
-          Paid: isPaid ? 'TRUE' : 'FALSE',
-          Verified: isVer ? 'TRUE' : 'FALSE',
-          Refunded: isRef ? 'TRUE' : 'FALSE',
-          ProofStoragePath: proofPath,
-          ProofLink: proofLink,
-          ActionGroup: actGrp,
-          JoinedAt: jAt,
-          PaidAt: pAt,
-          ModifiedAt: mAt,
-          ModifiedBy: mBy,
-          ...d
-        };
-      });
+      const normalizedDonors = (data.donors || []).map(_normalizeDonorRow);
 
       const normalizedLateRequests = (data.late_requests || []).map(lr => {
         return {

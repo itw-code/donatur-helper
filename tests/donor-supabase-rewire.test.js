@@ -611,7 +611,24 @@ test('Task 5: seamlessBecomePic generates PIC token via generate_seamless_pic_to
       }
       if (fn === 'get_pic_dashboard') {
         return {
-          data: { campaign: null, donors: [] },
+          data: {
+            error: 'unauthorized',
+            message: 'Token PIC tidak valid atau tidak terhubung ke campaign.'
+          },
+          error: null
+        };
+      }
+      if (fn === 'verify_auth_token') {
+        return {
+          data: [{
+            token_id: '00000000-0000-0000-0000-000000000001',
+            role: 'PIC',
+            status: 'UNUSED',
+            linked_campaign_id: null,
+            alias: 'Rudi',
+            created_by: '+6281234567777',
+            expires_at: '2099-09-18T00:00:00Z'
+          }],
           error: null
         };
       }
@@ -645,8 +662,12 @@ test('Task 5: seamlessBecomePic generates PIC token via generate_seamless_pic_to
   assert.strictEqual(localStorageStore.get('auth_token'), 'PIC-A1B2C3D4');
   assert.strictEqual(localStorageStore.get('auth_role'), 'PIC');
 
-  // Verify token modal presented
+  // Verify token modal presented (must remain 'Sukses' and NOT be overwritten by 'Kendala Sistem')
+  assert.strictEqual(elements.get('custom-info-title').textContent, 'Sukses');
   assert.match(elements.get('custom-info-message').textContent, /PIC-A1B2C3D4/);
+
+  // Verify view transitioned to pic-create
+  assert.strictEqual(elements.get('view-pic-create').classList.contains('hidden'), false);
 });
 
 test('Task 6 & 7: Combined payment proof submission across multiple campaigns and GAS fallback in auto mode', async () => {

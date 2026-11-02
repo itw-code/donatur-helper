@@ -158,7 +158,18 @@ export function loadPicDashboard() {
       if (returnMember) returnMember.classList.add('hidden');
       if (picLogout) picLogout.classList.remove('hidden');
     }
-  }).catch(e => showInfoModal(formatUserErrorMessage(e), 'Error'));
+  }).catch(e => {
+    if (safeGet('donor_user')) {
+      safeRemove('auth_token');
+      safeRemove('auth_role');
+      loadUserDashboard();
+    } else if (!safeGet('deep_dive_return_token')) {
+      safeRemove('auth_token');
+      safeRemove('auth_role');
+      showView('landing');
+    }
+    showInfoModal(formatUserErrorMessage(e), 'Error');
+  });
 }
 
 export function createCampaign() {
