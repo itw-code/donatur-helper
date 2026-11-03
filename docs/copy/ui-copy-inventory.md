@@ -540,12 +540,13 @@ Dokumen ini berisi inventaris lengkap seluruh teks dan pesan antarmuka pengguna 
 |---|---|
 | **Modal Edit Hadiah** | |
 | Judul Modal | `Edit Total Hadiah` |
-| Petunjuk Modal | `Masukkan nominal Total Hadiah baru (IDR):` |
+| Petunjuk Modal | `Isi nominal baru. Ketik 0 untuk mengosongkan target selama campaign masih terbuka.` |
 | Label Input Hadiah | `Total Hadiah` |
 | Placeholder Hadiah | `Contoh: 1.000.000` |
 | Tombol Batal & Simpan | `Batal` \| `Simpan` |
 | Validasi Nominal Salah | InfoModal (`Kendala Sistem`): `Nominal tidak valid.` |
-| Konfirmasi Ubah Hadiah | `Yakin ingin mengubah Total Hadiah menjadi {newVal}? (Jangan lupa Hitung Ulang Tagihan Donatur setelah ini!)` |
+| Konfirmasi Ubah Hadiah | `Yakin ingin mengubah Total Hadiah menjadi {newVal}?` |
+| Konfirmasi Kosongkan Hadiah | `Kosongkan total hadiah? Campaign yang masih terbuka akan menampilkan Belum ditentukan. Tagihan baru dihitung saat finalisasi.` |
 | Toast Sukses Ubah Hadiah | `Total Hadiah berhasil diperbarui.` |
 | **Modal Edit Nominal Transfer** | |
 | Judul Modal | `Edit Nominal Transfer` |

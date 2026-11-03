@@ -83,3 +83,7 @@ _Avoid_: Bulk payment, mass transfer
 **Refund**:
 An amount paid above a Donor's recorded Campaign obligation and owed back to that Donor. A Refund remains outstanding until the PIC records that it was returned; the PIC-facing state is **Refund perlu diselesaikan**.
 _Avoid_: Discount, payment correction, duplicate payment
+
+**Gift amount**:
+The campaign target stored in `campaigns.gift_amount`. Before finalization it is a display estimate. `0` means **Belum ditentukan** / donor copy **Ditentukan nanti**, not a bill of zero. After `FINALIZED`, it is the bill invariant: `SUM(amount_due)` for pledged donors equals `gift_amount`. Admin may set it to `0` only while status is `OPEN` or `CLOSED` via `admin_update_gift_amount`. That write does not change donor rows. `FINALIZED` and `ARCHIVED` reject `0`. PIC has no edit. The real split is still `finalize_campaign`, which requires an amount greater than `0` and at least the sum of custom pledges.
+_Avoid_: Treating create-form input as a locked bill, using late-donor requests to correct the target, using finalize as the amount editor, setting a finalized campaign to `0`

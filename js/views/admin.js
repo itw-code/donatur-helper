@@ -968,7 +968,7 @@ export function adminEditGiftAmountUI(campaignId, currentGiftAmount) {
       <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
         <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeEditGiftModal()">&times;</button>
         <h3 style="margin-top:0;">Edit Total Hadiah</h3>
-        <p class="muted">Masukkan nominal Total Hadiah baru (IDR):</p>
+        <p class="muted">Isi nominal baru. Ketik 0 untuk mengosongkan target selama campaign masih terbuka.</p>
         <label>Total Hadiah</label>
         <input type="text" id="edit-gift-input" inputmode="numeric" onkeyup="formatInputRibuan(event)" placeholder="Contoh: 1.000.000">
         <div class="modal-actions" style="display:flex;gap:8px;margin-top:16px;">
@@ -997,7 +997,10 @@ export function adminEditGiftAmountUI(campaignId, currentGiftAmount) {
         return;
       }
       closeEditGiftModal();
-      showConfirmModal('Yakin ingin mengubah Total Hadiah menjadi ' + formatIDR(newVal) + '? (Jangan lupa Hitung Ulang Tagihan Donatur setelah ini!)', () => {
+      const confirmText = newVal === 0
+        ? 'Kosongkan total hadiah? Campaign yang masih terbuka akan menampilkan Belum ditentukan. Tagihan baru dihitung saat finalisasi.'
+        : 'Yakin ingin mengubah Total Hadiah menjadi ' + formatIDR(newVal) + '?';
+      showConfirmModal(confirmText, () => {
         callQueued('adminUpdateGiftAmount', currentToken(), campaignId, newVal)
           .then(() => {
             showToast('Total Hadiah berhasil diperbarui.');
