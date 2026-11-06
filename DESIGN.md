@@ -139,3 +139,23 @@ inside a refactor.
 
 Runs syntax, the token-reference guard, the no-restyle guard, the full suite, and the invariants
 (inline-style / testid counts per file). If it says REVERT, the change is not ready.
+
+---
+
+## 9. Adding an interactive control
+
+A control is **broken** if it is visible in a state where its precondition cannot be met — even if
+its handler runs perfectly. Three controls shipped that way on 2026-11-06; the landing "jadi
+pengelola" link demanded a session the landing page can never have.
+
+Before adding one:
+
+1. Write down the precondition: session, role, loaded data, an element from another view.
+2. Compare it to where the control will be **visible**. If those can disagree, gate it.
+3. Nothing destructive may be enabled before its data has loaded. Ship `disabled`, enable it only
+   from the render that proves the data arrived.
+4. If the server can refuse it (ex-employee, archived, readonly), the UI must not offer it.
+5. Clear one-shot intents (`sessionStorage`) on cancel, not only on success.
+
+`tests/control-preconditions.test.js` enforces this for the landing and the settings card. Full
+write-up: `docs/reports/2026-11-06-design-system-and-control-audit.md`.

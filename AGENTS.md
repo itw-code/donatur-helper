@@ -29,3 +29,10 @@ Before claiming a design change is done, run:
 It checks syntax, undefined `var(--token)` references, that a refactor did not silently restyle
 off-grid values, the full test suite, and the per-file invariants. If it prints REVERT, the change
 is not ready.
+
+### Known gaps (do not re-discover these)
+
+`docs/reports/2026-11-06-design-system-and-control-audit.md` §5 lists what is deliberately
+unfinished: the PIC view's controls were never audited, four backend actions run on the GAS
+fallback only, 236 inline `style=` attributes remain, and `theme-dark.css` still carries 77
+`!important` flags. Read it before proposing work, so you do not "fix" something already decided.
