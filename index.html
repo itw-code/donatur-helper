@@ -67,7 +67,7 @@
            has to get them through the door. -->
       <button data-testid="btn-donasi" class="btn" onclick="showView('user-login')">Saya mau donasi</button>
       <button data-testid="btn-pengelola" class="btn secondary" onclick="showView('token-login')">Saya pengelola</button>
-      <p class="field-note">Belum punya token? Kamu bisa <button type="button" class="link-btn" data-testid="link-become-pic" aria-label="Jadi pengelola tanpa token" onclick="seamlessBecomePic()">jadi pengelola</button> dalam satu menit.</p>
+      <p class="field-note">Belum punya token? Kamu bisa <button type="button" class="link-btn" data-testid="link-become-pic" aria-label="Jadi pengelola tanpa token: masuk dulu dengan WhatsApp, lalu buat campaign" onclick="becomePicFromLanding()">jadi pengelola</button> dalam satu menit.</p>
     </div>
   </div>
 
@@ -449,7 +449,8 @@
         <input data-testid="input-notification-emails" id="sa-notification-emails" type="text" placeholder="admin1@example.com, admin2@example.com">
         <label>URL Aplikasi (untuk link di email reminder)</label>
         <input data-testid="input-app-url" id="sa-app-url" type="text" placeholder="https://don4pro.com">
-        <button data-testid="btn-save-settings" class="btn" style="margin-top:8px;" onclick="saveSettings()">Simpan pengaturan</button>
+        <!-- [audit-fix] Starts disabled: settings are not loaded until renderSuperAdminSettings runs. Without this, one click on a failed load wrote FALSE over member validation and rounding. -->
+        <button data-testid="btn-save-settings" class="btn" style="margin-top:8px;" disabled title="Muat pengaturan terlebih dahulu" onclick="saveSettings()">Simpan pengaturan</button>
         <div data-testid="settings-message" id="sa-settings-msg"></div>
       </div>
       <div class="card" style="flex:1; min-width:300px; margin-top:0;">

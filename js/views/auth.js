@@ -4,10 +4,36 @@ import { safeGet, safeSet, safeRemove } from '../storage.js';
 import { escapeHtml, formatUserErrorMessage, showInfoModal, showToast, showView } from '../utils.js';
 import { call, callQueued } from '../api.js';
 import { appState, currentToken } from '../state.js';
-import { loadUserDashboard } from './donor.js';
+import { loadUserDashboard, seamlessBecomePic } from './donor.js';
 import { loadPicDashboard } from './pic.js';
 import { loadAdminDashboard, refreshPendingMembers, refreshLateRequests, refreshSummary } from './admin.js';
 import { loadSuperAdminDashboard } from './superadmin.js';
+
+
+/**
+ * [B12-fix] If the visitor arrived from the landing "jadi pengelola" link, continue the journey:
+ * they logged in with WhatsApp intending to create a campaign, so take them to PIC creation
+ * instead of stopping at the donor dashboard. Clears the intent so a later normal login is
+ * unaffected.
+ */
+function continueBecomePicIntent() {
+  let intent = null;
+  try { intent = sessionStorage.getItem('donatpro.intent'); } catch (_) {}
+  if (intent !== 'become-pic') return false;
+  try { sessionStorage.removeItem('donatpro.intent'); } catch (_) {}
+
+  // [audit-fix] Showing the create form is not enough. btn-create-campaign submits with
+  // currentToken(), which is null until a PIC token exists, so the user landed on a form that
+  // could never submit ("Token PIC tidak valid."). Mint the token first, exactly as the donor
+  // dashboard's own button does, then show the form.
+  try {
+    seamlessBecomePic();
+  } catch (e) {
+    showView('user-dashboard');
+    showInfoModal('Tidak bisa menyiapkan pembuatan campaign. Silakan coba dari dashboard.', 'Info');
+  }
+  return true;
+}
 
 export function resetUserLoginForm() {
   const regFields = document.getElementById('u-register-fields');
@@ -28,6 +54,9 @@ export function resetUserLoginForm() {
 }
 
 export function cancelUserLogin() {
+  // [audit-fix] Clear the become-PIC intent on cancel. Leaving it set meant the user backed out,
+  // then logged in normally later in the same tab, and got hijacked into PIC creation.
+  try { sessionStorage.removeItem('donatpro.intent'); } catch (_) {}
   resetUserLoginForm();
   showView('landing');
 }
@@ -80,6 +109,7 @@ export function userLogin() {
         safeSet('donor_user', JSON.stringify(userSession));
         resetUserLoginForm();
         loadUserDashboard();
+        continueBecomePicIntent();
       } else {
         // STEP 2: Show Registration Fields
         registerFields.classList.remove('hidden');
@@ -142,6 +172,7 @@ export function userLogin() {
     safeSet('donor_user', JSON.stringify(userSession));
     resetUserLoginForm();
     loadUserDashboard();
+    continueBecomePicIntent();
   }).catch(e => {
     if (errEl) errEl.textContent = formatUserErrorMessage(e);
     if (btn) {

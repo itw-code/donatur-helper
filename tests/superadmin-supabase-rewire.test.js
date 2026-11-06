@@ -402,7 +402,18 @@ test('SuperAdmin Mutations execute mapped Supabase RPCs', async () => {
   harness.storage.set('auth_token', 'sa-secret-token');
   harness.storage.set('auth_role', 'SuperAdmin');
 
-  const { saveSettings, genAdminToken } = harness.context;
+  const { saveSettings, genAdminToken, renderSuperAdminSettings } = harness.context;
+
+  // [audit-fix] saveSettings() now refuses unless settings have actually loaded — that guard is
+  // the point: the old behaviour wrote FALSE over validation/rounding when the load had failed.
+  // Render the settings first, as a real user must, then save.
+  renderSuperAdminSettings([
+    { key: 'EnableRounding', value: 'TRUE' },
+    { key: 'RequireMemberValidation', value: 'TRUE' },
+    { key: 'RoundToNearest', value: '500' },
+    { key: 'AdminNotificationEmails', value: 'ops@example.test' },
+    { key: 'AppUrl', value: 'https://example.test' }
+  ]);
 
   // Test saveSettings RPC
   harness.rpcCalls.length = 0;

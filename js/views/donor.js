@@ -207,6 +207,27 @@ export async function openPicCampaignFromDonor(campaignId) {
 }
 
 
+/**
+ * [B12-fix] Entry point from the landing page.
+ *
+ * The landing-page link cannot call seamlessBecomePic() directly: that function requires a
+ * `donor_user` session and shows "Sesi login tidak valid" to anyone who is not logged in — which
+ * is everyone on the landing page. Reported live after deploy.
+ *
+ * So: if there is no session, go to the WhatsApp login with an intent flag; the login flow then
+ * continues into the PIC creation. If there IS a session, hand straight over.
+ */
+export function becomePicFromLanding() {
+  const user = JSON.parse(safeGet('donor_user') || 'null');
+  if (user && user.whatsapp) {
+    seamlessBecomePic();
+    return;
+  }
+  try { sessionStorage.setItem('donatpro.intent', 'become-pic'); } catch (_) {}
+  showView('user-login');
+  showToast('Masuk dengan WhatsApp dulu, lalu kamu bisa buat campaign.');
+}
+
 export function seamlessBecomePic(e) {
   const user = JSON.parse(safeGet('donor_user') || 'null');
   if (!user || !user.whatsapp) {
@@ -764,7 +785,15 @@ export function renderCampaignPaymentSection(c) {
     html += '</div>';
     html += '<div data-testid="donor-total" style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:17px; font-weight:800; color:#eef6ed;">' + formatIDR(c.amountPaid || c.amountDue) + '</div>';
     html += '</div>';
-    html += c.verified ? '<p class="muted">Butuh patungan untuk orang lain? Kamu bisa <button type="button" class="link-btn" data-testid="cta-become-pic-after-pay" onclick="seamlessBecomePic()">buat campaign sendiri</button>.</p>' : '';
+    // [audit-fix] Gate on member status too, not just payment verification. A verified EX
+    // (alumni) donor saw this CTA, and the RPC refuses them outright:
+    // "Alumni tidak dapat membuat campaign baru." Offering a control the server will reject is
+    // the same class of bug as the landing link that demanded a session it could not have.
+    const _canBecomePic = (() => {
+      const u = JSON.parse(safeGet('donor_user') || 'null');
+      return !!(u && u.whatsapp && String(u.status || '').toLowerCase() === 'active');
+    })();
+    html += (c.verified && _canBecomePic) ? '<p class="muted">Butuh patungan untuk orang lain? Kamu bisa <button type="button" class="link-btn" data-testid="cta-become-pic-after-pay" onclick="seamlessBecomePic()">buat campaign sendiri</button>.</p>' : '';
 
     if (cardBankAccount || cardBankName || cardHolder) {
       html += '<div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); font-size:12px; color:var(--muted); flex-wrap:wrap; gap:6px;">';

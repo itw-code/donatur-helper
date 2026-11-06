@@ -76,6 +76,12 @@ export function renderSuperAdminSettings(settingsInput) {
   if (appUrlEl) {
     appUrlEl.value = (appUrlVal !== undefined && appUrlVal !== null) ? appUrlVal : '';
   }
+
+  // [audit-fix] Only now are real values on the page, so only now may Save be pressed.
+  // Reaching this line with an empty settingsMap would mean the load produced nothing, and
+  // rendering defaults over the user's real config is exactly what we must not allow.
+  const haveAny = Object.keys(settingsMap).length > 0;
+  if (haveAny) markSettingsLoaded(); else _settingsReady();
 }
 
 export function loadSuperAdminSettings() {
@@ -253,7 +259,35 @@ export function runDataSweep() {
     });
 }
 
+// [audit-fix] Settings must not be writable before they have been read. On a failed
+// loadSuperAdminStage1 the card shows an error but the button stayed enabled, and saveSettings()
+// reads unchecked checkboxes as 'FALSE' and empty inputs as ''. One click therefore turned OFF
+// member validation and rounding and blanked the notification emails and AppUrl.
+let _settingsLoaded = false;
+
+/** Called by the settings renderer once real values are on the page. */
+export function markSettingsLoaded() {
+  _settingsLoaded = true;
+  const btn = document.getElementById('btn-save-settings');
+  if (btn) {
+    btn.disabled = false;
+    // Guarded: some harnesses and older elements lack removeAttribute. Never let a cosmetic
+    // tooltip clear take down the settings render.
+    if (typeof btn.removeAttribute === 'function') btn.removeAttribute('title');
+    else btn.title = '';
+  }
+}
+
+function _settingsReady() {
+  const btn = document.getElementById('btn-save-settings');
+  if (btn) { btn.disabled = true; btn.title = 'Muat pengaturan terlebih dahulu'; }
+}
+
 export function saveSettings() {
+  if (!_settingsLoaded) {
+    showInfoModal('Pengaturan belum termuat. Muat ulang halaman lalu coba lagi.', 'Peringatan');
+    return;
+  }
   const roundingEl = document.getElementById('sa-rounding');
   const roundToEl = document.getElementById('sa-roundto');
   const validationEl = document.getElementById('sa-validation');
