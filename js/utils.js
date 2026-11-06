@@ -140,10 +140,86 @@ export function showConfirmModal(message, onConfirm) {
   };
 }
 
+/* [B1 · P0-2] Screen names for the compact app bar. Only authenticated screens get a
+   title; the landing screen keeps the full brand block + tagline. */
+const VIEW_TITLES = {
+  'user-dashboard': 'Donasi',
+  'pic-dashboard': 'Campaign',
+  'pic-create': 'Buat campaign',
+  'admin-dashboard': 'Admin',
+  'superadmin-dashboard': 'Super Admin'
+};
+
 export function showView(name) {
   document.querySelectorAll('.wrap > div[id^="view-"]').forEach(v => v.classList.add('hidden'));
   const target = document.getElementById('view-' + name);
   if (target) target.classList.remove('hidden');
+
+  /* [B1 · P0-2] Compact app bar. Guarded: several unit-test harnesses stub a partial document,
+     so every capability is checked before use. Real browsers always pass. */
+  if (typeof document !== 'undefined' && typeof document.querySelector === 'function') {
+    const header = document.querySelector('.app-header');
+    if (header && typeof header.setAttribute === 'function' && typeof header.removeAttribute === 'function') {
+      const title = VIEW_TITLES[name];
+      /* [B1-fix2 · audit #10] The previous version computed `slot` as `title && ...`, so in the
+         else branch slot was ALWAYS null and the clear never ran — the "verified fix" comment
+         above it was false. Resolve the element unconditionally, then branch. */
+      const slot = typeof header.querySelector === 'function' ? header.querySelector('.app-bar-title') : null;
+      if (title) {
+        header.setAttribute('data-compact', '');
+        if (slot) slot.textContent = title;
+      } else {
+        header.removeAttribute('data-compact');
+        if (slot) slot.textContent = '';
+      }
+    }
+  }
+}
+
+/**
+ * [B2 · P0-3] Render an empty state. One component for every "nothing here" screen.
+ * Anatomy taken from the donor dashboard, which was the only good one in the app:
+ *   icon + one sentence + at most one next action.
+ * Copy rule (Q12): donor-facing screens may use plain language; PIC/Admin/SuperAdmin keep
+ * the domain vocabulary from CONTEXT.md, because those words are the operator's own job terms.
+ *
+ * [B2-fix] Navigation only, deliberately. An earlier version accepted an `action` string and
+ * interpolated it into onclick="..."; escapeHtml produces HTML entities, which the browser
+ * decodes before the JS engine sees them, so a quote in that string escaped the JS context.
+ * No caller used that branch, but the hole was live. Empty states now take `href` only —
+ * if a caller ever needs a JS callback, pass a real element or a listener, never a string.
+ *
+ * @param {Object} opts
+ * @param {string} opts.title   One sentence stating the state. Required.
+ * @param {string} [opts.note]  Optional single clarifying line. Omit it if the title suffices.
+ * @param {string} [opts.href]  Optional link for the one next action.
+ * @param {string} [opts.action] Link text, used only with `href`.
+ * @param {string} [opts.icon]  paymentStatusIcon() key, e.g. 'verified'.
+ * @param {boolean} [opts.inline] Quieter variant for admin tables/cards.
+ */
+export function emptyState(opts) {
+  const o = opts || {};
+  const cls = 'empty-state' + (o.inline ? ' is-inline' : '');
+  let html = '<div class="' + cls + '">';
+  if (o.icon) html += '<div class="empty-state-icon">' + paymentStatusIcon(o.icon) + '</div>';
+  html += '<strong class="empty-state-title">' + escapeHtml(o.title || '') + '</strong>';
+  if (o.note) html += '<p class="empty-state-note">' + escapeHtml(o.note) + '</p>';
+  /* [B2-fix2 · audit #2] A half-configured action used to render nothing at all, re-creating
+     the "empty state with no next step" defect B2 exists to remove. One of the pair is a bug. */
+  if (o.href !== undefined && !o.action) console.warn('[emptyState] href without action: no next step rendered');
+  if (o.action && o.href === undefined) console.warn('[emptyState] action without href: no next step rendered');
+  /* [B2-fix2 · audit #1] sanitizeUrl, not just escapeHtml. Every other <a href> in the
+     codebase wraps it (donor.js:713, donor.js:769, pic.js:974); omitting it here left a
+     `javascript:` scheme alive in the one shared component that 10 call sites use. Verified:
+     emptyState({href:'javascript:...'}) previously produced a clickable script URL. */
+  if (o.href && o.action) {
+    const safeHref = sanitizeUrl(o.href);
+    if (safeHref) {
+      html += '<a class="btn secondary btn-auto" href="' + escapeHtml(safeHref) + '">'
+        + escapeHtml(o.action) + '</a>';
+    }
+  }
+  return html + '</div>';
 }
 
 export function formatIDR(n) {

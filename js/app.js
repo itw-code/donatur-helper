@@ -20,6 +20,7 @@ import {
   parseRibuan,
   statusBadge,
   paymentStatusIcon,
+  emptyState,
   actionArrowIcon,
   renderOptimizedImage,
   showUpdateBanner
@@ -225,6 +226,7 @@ const globalBindings = {
   parseRibuan,
   statusBadge,
   paymentStatusIcon,
+  emptyState,
   actionArrowIcon,
   renderOptimizedImage,
   fetchBackend,
@@ -455,6 +457,11 @@ export function initApp() {
     if (urlToken && urlToken.trim()) {
       loginToken(urlToken.trim());
       mountDebugPanel();
+      /* [B3-fix2 · audit #12] This early return is the PRIMARY PIC/Admin entry path, and it
+         skipped constrainDateInputs() entirely — verified: on ?token=... the date inputs had
+         empty min/max, so a user could pick any past or far-future deadline. The form is static
+         HTML, so applying the bounds here is enough. */
+      constrainDateInputs();
       return;
     }
   }
@@ -475,19 +482,46 @@ export function initApp() {
   // Mount localhost performance HUD if in dev environment
   mountDebugPanel();
 
-  // Initialize Flatpickr for date inputs if available
-  if (typeof flatpickr !== 'undefined') {
-    const maxD = new Date();
-    maxD.setMonth(maxD.getMonth() + 2);
+  // [B3 · P1-5] Native date inputs, per ADR-0018. Flatpickr used to rewrite every
+  // <input type="date"> to type="text" (disableMobile:"true") and force a desktop calendar
+  // onto phones. The bounds it provided are now real `min`/`max` attributes, which the
+  // native control honours natively — and native inputs already emit Y-m-d for the backend.
+  constrainDateInputs();
+}
 
-    flatpickr("input[type='date']", {
-      dateFormat: "Y-m-d",
-      allowInput: true,
-      disableMobile: "true",
-      minDate: "today",
-      maxDate: maxD
-    });
-  }
+/* [B3 · P1-5] Apply today .. today+2 months as native min/max. Kept as a function so it can
+   be re-applied after dynamically rendered forms (PIC create is inline, but this is the
+   pattern to reuse if a form is ever rendered from JS).
+   [B3-fix] The old `max.setMonth(getMonth() + 2)` overflows at year end: Dec 31 + 2 months
+   produced 2027-03-03 instead of 2027-02-28, handing users a date beyond the intended window.
+   This bug was inherited from the removed flatpickr config, not introduced here. Clamp the
+   day instead so it always lands on a real date inside the window. */
+export function constrainDateInputs(root) {
+  if (typeof document === 'undefined' || typeof document.querySelectorAll !== 'function') return;
+  const scope = root || document;
+  if (typeof scope.querySelectorAll !== 'function') return;
+  const inputs = scope.querySelectorAll('input[type="date"]');
+  if (!inputs || typeof inputs.forEach !== 'function') return;
+  const pad = n => String(n).padStart(2, '0');
+  const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const today = new Date();
+  const max = addMonthsClamped(today, 2);
+  inputs.forEach(input => {
+    if (!input || input.type !== 'date') return;
+    if (!input.min) input.min = iso(today);
+    if (!input.max) input.max = iso(max);
+  });
+}
+
+/* Add whole months, clamping the day to the target month's length (Dec 31 + 2 => Feb 28/29). */
+function addMonthsClamped(date, months) {
+  const d = new Date(date.getTime());
+  const day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + months);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
+  return d;
 }
 
 if (typeof document !== 'undefined') {

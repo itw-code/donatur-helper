@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { resolveToken } = require('./token-util');
 const test = require('node:test');
 
 function getIndexHtml() {
@@ -113,9 +114,15 @@ test('Task 2: index.html and JS modules wrap dynamic links and images with sanit
   const code = getIndexHtml() + getAppScript();
 
   // Check proof and gift links use sanitizeUrl
-  assert.match(code, /sanitizeUrl\(d\.ProofLink\)/, 'ProofLink must pass through sanitizeUrl');
-  assert.match(code, /sanitizeUrl\(c\.GiftLink\)/, 'GiftLink must pass through sanitizeUrl');
-  assert.match(code, /sanitizeUrl\(c\.GiftImage\)/, 'GiftImage must pass through sanitizeUrl');
+  // [B7a] The donor render blocks were extracted into pure functions with a view-model
+  // argument, so the local alias is no longer literally `c`. The property being protected is
+  // unchanged and still asserted: a user-supplied proof/gift URL must reach an href only
+  // through sanitizeUrl(). Match any identifier, not one variable name.
+  assert.match(code, /sanitizeUrl\(\s*[A-Za-z_$][\w$]*\.ProofLink\s*\)/, 'ProofLink must pass through sanitizeUrl');
+  assert.match(code, /sanitizeUrl\(\s*(?:[A-Za-z_$][\w$]*\.)?giftLink\s*\)/,
+    'GiftLink must pass through sanitizeUrl');
+  assert.match(code, /sanitizeUrl\(\s*(?:[A-Za-z_$][\w$]*\.)?giftImage\s*\)/,
+    'GiftImage must pass through sanitizeUrl');
 
   // Check that raw e.message or e is not inserted without escapeHtml or formatUserErrorMessage
   assert.doesNotMatch(code, /innerHTML\s*=\s*['"][^'"]*['"]\s*\+\s*\(?e\.message\s*\|\|\s*e\)?\s*\+\s*['"]/, 'Raw e.message || e must not be concatenated directly into innerHTML');
@@ -135,14 +142,23 @@ test('Task 3: robots.txt exists at root and index.html has meta robots policy', 
   assert.match(html, /<meta\s+name="robots"\s+content="index,\s*follow">/i, 'index.html must declare meta robots policy');
 });
 
-test('Task 4: Flatpickr assets are pinned to 4.6.13 with SRI integrity and defer', () => {
+test('Task 4: Flatpickr is absent; date inputs are native per ADR-0018', () => {
   const html = getIndexHtml();
 
-  // 1. CSS SRI
-  assert.match(html, /<link\s+rel="stylesheet"\s+href="https:\/\/cdn\.jsdelivr\.net\/npm\/flatpickr@4\.6\.13\/dist\/flatpickr\.min\.css"\s+integrity="sha384-RkASv\+6KfBMW9eknReJIJ6b3UnjKOKC5bOUaNgIY778NFbQ8MtWq9Lr\/khUgqtTt"\s+crossorigin="anonymous">/, 'Flatpickr CSS must have exact 4.6.13 SRI');
+  // [B3 · P1-5] This test previously pinned flatpickr 4.6.13 with SRI + defer. Flatpickr was
+  // removed because ADR-0018 commits to the browser's native mobile date control, and the
+  // init passed disableMobile:"true", which rewrote <input type="date"> to type="text" and
+  // forced a desktop calendar onto phones. The invariant flips from "pinned" to "absent".
+  // Absence must be asserted against tags, not prose: the explanatory comment in <head>
+  // mentions flatpickr by name.
+  assert.doesNotMatch(html, /<script[^>]+flatpickr|flatpickr[^>]*\.min\.(?:js|css)"/i,
+    'Flatpickr must not be loaded as a script or stylesheet');
 
-  // 2. JS SRI with defer
-  assert.match(html, /<script\s+src="https:\/\/cdn\.jsdelivr\.net\/npm\/flatpickr@4\.6\.13\/dist\/flatpickr\.min\.js"\s+integrity="sha384-5JqMv4L\/Xa0hfvtF06qboNdhvuYXUku9ZrhZh3bSk8VXF0A\/RuSLHpLsSV9Zqhl6"\s+crossorigin="anonymous"\s+defer><\/script>/, 'Flatpickr JS must have exact 4.6.13 SRI and defer');
+  // The replacement must keep native date inputs and give them real bounds.
+  // [B7a] Match the attribute relationship, not one exact attribute order — adding
+  // data-testid is allowed and must not look like "we stopped using native date inputs".
+  assert.match(html, /<input[^>]*id="pc-start"[^>]*type="date"/, 'Date inputs must stay native');
+  assert.match(html, /<input[^>]*id="pc-deadline"[^>]*type="date"/, 'Date inputs must stay native');
 });
 
 test('Task 5: _headers and netlify.toml define security headers and report-only CSP', () => {
@@ -190,17 +206,28 @@ test('Task 6: Accessibility hardening: primary color contrast >= 4.5:1, skip-lin
   const html = getIndexHtml();
   const baseCssPath = path.join(__dirname, '..', 'css', 'base.css');
   const baseCss = fs.existsSync(baseCssPath) ? fs.readFileSync(baseCssPath, 'utf8') : '';
-  const allStyles = html + '\n' + baseCss;
+  // [B6 · P1-3] Include the token layer: colours moved out of base.css so that themes can
+  // own them. Concatenating it keeps this test measuring the same thing — the primary colour
+  // actually in force — instead of pinning a file path.
+  const tokensCssPath = path.join(__dirname, '..', 'css', 'tokens.css');
+  const tokensCss = fs.existsSync(tokensCssPath) ? fs.readFileSync(tokensCssPath, 'utf8') : '';
+  const allStyles = html + '\n' + tokensCss + '\n' + baseCss;
 
   // 1. Primary color contrast
-  const primaryMatch = allStyles.match(/--primary:\s*(#[0-9a-fA-F]{6})/);
-  assert.ok(primaryMatch, '--primary variable must be defined in :root');
-  const primaryHex = primaryMatch[1];
+  // [B6-fix2 · audit #4] --primary may be a var() indirection into the --forest-* ramp, so
+  // resolve the chain instead of requiring a literal hex at the declaration site.
+  const primaryHex = resolveToken(tokensCss, 'primary') || (allStyles.match(/--primary:\s*(#[0-9a-fA-F]{6})/) || [])[1];
+  assert.ok(primaryHex, '--primary variable must resolve to a concrete colour');
   const ratio = contrastRatio(primaryHex, '#ffffff');
   assert.ok(ratio >= 4.5, `Contrast ratio for ${primaryHex} on white must be >= 4.5 (was ${ratio.toFixed(2)})`);
 
   // 2. Skip link presence and style
-  assert.match(html, /<a\s+href="#main-content"\s+class="skip-link">Lewati ke konten utama<\/a>/, 'Must have skip-link to #main-content');
+  // [B7a] Behaviour, not literal markup: the link must exist, target #main-content and carry
+  // its label. Attribute order/additional attributes are not part of the contract.
+  const skipAnchor = html.match(/<a[^>]*class="skip-link"[^>]*>([^<]*)<\/a>/);
+  assert.ok(skipAnchor, 'Must have a .skip-link anchor');
+  assert.match(skipAnchor[0], /href="#main-content"/, 'Must have skip-link to #main-content');
+  assert.match(skipAnchor[1], /Lewati ke konten utama/, 'Skip link must keep its Indonesian label');
   assert.match(allStyles, /\.skip-link\s*\{[\s\S]*?position:\s*absolute;/, 'Must define .skip-link styles');
   assert.match(allStyles, /\.skip-link:focus\s*\{[\s\S]*?top:\s*16px;/, 'Must define .skip-link:focus styles');
 
@@ -219,8 +246,17 @@ test('Task 7: Performance critical path: Google Fonts link tags, preconnect orig
   assert.match(html, /<link\s+rel="preconnect"\s+href="https:\/\/fonts\.gstatic\.com"\s+crossorigin>/, 'Must preconnect to fonts.gstatic.com with crossorigin');
   assert.match(html, /<link\s+rel="preconnect"\s+href="https:\/\/cdn\.jsdelivr\.net">/, 'Must preconnect to cdn.jsdelivr.net');
 
-  // 2. Font stylesheet link
-  assert.match(html, /<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com\/css2\?family=Inter:wght@400;500;600;700&display=swap">/, 'Must load Inter font via <link>');
+  // 2. Font stylesheet link.
+  // [B0 · P1-8] Changed from Inter to Plus Jakarta Sans: Inter was declared in base.css
+  // but overridden by theme-aurora's body rule, so it downloaded without being used.
+  // Fraunces was likewise downloaded and referenced by zero elements. Both removed to
+  // load exactly one family.
+  assert.match(html, /<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com\/css2\?family=Plus\+Jakarta\+Sans:wght@200\.\.800&display=swap">/, 'Must load exactly one font family via <link>');
+
+  // 2b. [B0 · P1-8] No second family may come back through a separate request.
+  const fontLinks = [...html.matchAll(/href="https:\/\/fonts\.googleapis\.com\/css2\?([^"]+)"/g)];
+  assert.equal(fontLinks.length, 1, 'Exactly one Google Fonts stylesheet request is allowed');
+  assert.doesNotMatch(fontLinks[0][1], /Inter|Fraunces/, 'Inter and Fraunces must not be requested');
 
   // 3. No @import inside <style>
   assert.doesNotMatch(html, /@import\s+url\(['"]https:\/\/fonts\.googleapis\.com/, 'Must not use @import for fonts inside <style>');

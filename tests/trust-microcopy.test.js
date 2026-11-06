@@ -155,11 +155,18 @@ test('Privacy callout and upload microcopy use reassuring, transparent Indonesia
   const { getAppScript } = require('./test-harness');
   const html = getIndexHtml() + getAppScript();
 
-  // Reassuring privacy notice on login
-  assert.match(html, /Kami menjaga privasi Anda/);
-  assert.match(html, /verifikasi login dan pengingat patungan/);
+  // [B1 · P0-5] The login privacy reassurance moved from an 81px bordered panel with a lock
+  // emoji to a single muted line, because the panel read as a tappable card competing with the
+  // primary action. The promise is kept in substance (what the number is used for), reduced in
+  // visual weight. Asserting the meaning, not the old phrasing.
+  assert.match(html, /hanya untuk masuk dan pengingat donasi/);
 
-  // Payment proof microcopy
+  // [B10 REVERTED] B10 asserted this helper line was gone, but the batch was rolled back before it
+  // removed it (it broke js/views/donor.js structure). The line is still present, so assert what is
+  // actually true: the upload helper names the accepted formats, because a user who uploads a .docx
+  // gets a rejection they cannot explain. This is one of the four Q13 "prevents a real error" lines.
   assert.match(html, /format JPG, PNG, atau PDF maks 2MB/);
+  // [B10 REVERTED] same rollback: the privacy sentence is still present. It is load-bearing —
+  // a donor uploading a bank transfer screenshot needs to know who can see it, or they don't upload.
   assert.match(html, /Bukti hanya digunakan oleh PIC untuk verifikasi/);
 });

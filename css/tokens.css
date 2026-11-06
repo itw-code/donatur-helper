@@ -1,0 +1,50 @@
+:root { --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --forest-900:#26351f; --forest-800:#304329; --forest-700:#38502d; --forest-600:#416036; --forest-500:#4a653b; --forest-400:#587947; --forest-300:#78936a; --forest-200:#a3b59d; --forest-100:#dbe8d7; --forest-50:#f1f6ef; --gold-950:#26200a; --gold-900:#453806; --gold-800:#5f4b06; --gold-700:#7a6108; --gold-600:#a0830b; --gold-500:#c3a928; --gold-400:#f5d347; }
+:root, [data-theme="light"] {
+  color-scheme: light;
+  --canvas: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9; --surface-muted: #f8f9fa; --border: #e2e8f0; --border-strong: #cbd5e1;
+  --ink: #0f172a; --ink-muted: #64748b; --primary: var(--forest-500); --primary-hover: var(--forest-700); --primary-ink: #ffffff;
+  --accent-fill: var(--gold-400); --accent-ink-on-fill: var(--gold-950); --accent-soft: #fef3c7; --accent-soft-ink: var(--gold-700);
+  --danger: #b91c1c; --warning: #92400e; --info: #1d4ed8; --success: #047857;
+  --bg: var(--canvas); --card: var(--surface); --bg-card: var(--surface); --text: var(--ink); --muted: var(--ink-muted);
+  --border-hover: #94a3b8; --amber: var(--accent-soft-ink); --amber-hover: #5f4b06; --blue: var(--info); --blue-hover: #1e40af; --red: var(--danger); --red-hover: #991b1b;
+  --primary-rgb: 74,101,59; --primary-transparent-20: rgba(74,101,59,.2); --primary-transparent-15: rgba(74,101,59,.15);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05); --shadow: 0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06); --shadow-md: 0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+  /* [fix] --shadow-lg was referenced by donor.js:486 (bulk-join modal) but NEVER DEFINED,
+     so the modal rendered with no shadow at all — it read as a flat panel over the page
+     instead of a dialog. Found by muse-spark while reviewing tokens. */
+  --shadow-lg: 0 24px 48px -12px rgba(0,0,0,.18), 0 12px 24px -8px rgba(0,0,0,.12);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #060a07; --surface: rgba(255,255,255,.045); --surface-2: rgba(255,255,255,.07); --surface-muted: rgba(255,255,255,.04);
+  --border: rgba(255,255,255,.08); --border-strong: rgba(255,255,255,.16);
+  --ink: #eef6ee; --ink-muted: var(--forest-200); --primary: var(--forest-500); --primary-hover: #587947; --primary-ink: #ffffff;
+  --accent-fill: transparent; --accent-ink-on-fill: #f5d347; --accent-soft: rgba(245,211,71,.14); --accent-soft-ink: var(--gold-400);
+  --danger: #f87171; --warning: #fcd34d; --info: #93c5fd; --success: #6ee7b7;
+  --bg: var(--canvas); --card: var(--surface); --bg-card: var(--surface); --text: var(--ink); --muted: var(--ink-muted);
+  --border-hover: rgba(74,101,59,.35); --amber: var(--accent-ink-on-fill); --amber-hover: #fcd100; --blue: #60a5fa; --blue-hover: #3b82f6; --red: var(--danger); --red-hover: #ef4444;
+  --primary-rgb: 74,101,59; --primary-transparent-20: rgba(74,101,59,.35); --primary-transparent-15: rgba(74,101,59,.25);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.45); --shadow: 0 6px 20px -6px rgba(0,0,0,.65); --shadow-md: 0 14px 34px -10px rgba(0,0,0,.75);
+  --shadow-lg: 0 0 0 1px rgba(255,255,255,.02), 0 32px 70px -16px rgba(0,0,0,.9);
+}
+
+/* ============================================================
+   [B6-fix] Structural corrections to the token file the worker left behind.
+   The worker RENAMED theme-aurora.css to tokens.css and prepended a token
+   block, so ~570 lines of dark-only !important overrides applied in BOTH
+   themes. Consequences it left in place, each fixed below:
+     1. `html { background:#060a07 }` painted every theme near-black.
+     2. `body { font-family:"Plus Jakarta Sans" }` overrode base.css's Inter,
+        so light silently changed font while steps 1-3 still said "implemented".
+     3. Every dark rule was unscoped, so light mode rendered the dark look.
+   The dark rules now live in css/theme-dark.css, loaded LAST, wrapped in
+   [data-theme="dark"] — that also restores the cascade position the overlay
+   originally occupied, which is why body{background:transparent} only works
+   there.
+   ============================================================ */
+
+/* Page paint. Both themes paint the canvas on <html>; in dark the body stays
+   transparent so the aurora pseudo-element (theme-dark.css) shows through. */
+html { background: var(--canvas); }

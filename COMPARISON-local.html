@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DonatPRO — OG vs Sekarang (langsung)</title>
+<style>
+:root{
+  --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --bg:#f8fafc; --card:#fff;
+  --forest:#3a5529; --gold:#f5d347; --gold-ink:#26200a;
+  --red:#b91c1c; --red-soft:#fef2f2; --green:#2f4a24; --green-soft:#eef4ea;
+  --amber:#b45309; --r:12px; --rs:8px;
+  --f:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--f);background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5}
+.shell{max-width:1400px;margin:0 auto;padding:28px 20px 72px}
+header.mast{padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:20px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}
+.mast p{margin:6px 0 0;color:var(--muted);font-size:14px;max-width:80ch}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#eef2f6;padding:1px 6px;border-radius:5px}
+.bar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  padding:10px 14px;margin:0 0 20px;background:rgba(255,255,255,.95);
+  backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 6px 20px -14px rgba(15,23,42,.4)}
+.bar label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:#eef2f6;border:1px solid var(--line)}
+.seg button{border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:999px;
+  cursor:pointer;font:inherit;font-size:13px;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--forest);color:#fff}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;
+  padding:7px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.btn:hover{background:#eef2f6}
+.btn.primary{background:var(--forest);color:#fff;border-color:var(--forest)}
+.spacer{margin-left:auto}
+.stage{display:grid;gap:18px;align-items:start}
+.stage.side{grid-template-columns:1fr 1fr}
+@media (max-width:940px){.stage.side{grid-template-columns:1fr}}
+.pane{min-width:0}
+.tagrow{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.tag.old{background:var(--red-soft);color:var(--red)}
+.tag.new{background:var(--green-soft);color:var(--green)}
+.tag .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.tag small{font-weight:500;letter-spacing:0;text-transform:none;opacity:.85}
+.frame{position:relative;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  background:#fff;box-shadow:0 10px 30px -18px rgba(15,23,42,.5);margin:0 auto}
+.frame iframe{display:block;border:0;width:100%;height:100%;background:#fff}
+.frame.mobile{height:820px;max-width:390px}
+.frame.desktop{height:800px;max-width:100%}
+.overlaywrap{position:relative;height:820px;max-width:390px;margin:0 auto;border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden;background:#fff}
+.overlaywrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.slider{display:flex;align-items:center;gap:12px;margin:12px auto 0;max-width:390px}
+.slider input{flex:1;accent-color:var(--forest)}
+.slider span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.timeline{display:flex;gap:6px;flex-wrap:wrap;margin-top:18px}
+.tl{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#eef2f6;color:var(--muted)}
+.tl.done{background:var(--green-soft);color:var(--green)}
+.tl.now{background:var(--gold);color:var(--gold-ink)}
+.tl.todo{background:#fff;color:var(--muted);border:1px dashed var(--line)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:18px}
+.m{background:var(--card);border:1px solid var(--line);border-radius:var(--rs);padding:12px 14px}
+.m span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.m .split{display:flex;gap:10px;align-items:baseline;margin-top:2px}
+.m b{font-size:16px;font-variant-numeric:tabular-nums}
+.m .og{color:var(--red);text-decoration:line-through;font-size:13px;opacity:.85}
+.note{border-left:3px solid var(--gold);background:#fdf6d8;color:var(--gold-ink);
+  padding:12px 14px;border-radius:0 var(--rs) var(--rs) 0;font-size:13.5px;margin-top:16px}
+.note strong{color:inherit}
+footer{border-top:1px solid var(--line);padding-top:18px;margin-top:32px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="mast">
+    <h1>DonatPRO — OG vs sekarang, <em>langsung</em></h1>
+    <p>
+      Bukan tangkapan layar. Dua iframe hidup: kiri aplikasi <strong>asli</strong> dari
+      <code>git archive HEAD</code>, kanan working tree setelah semua batch. Keduanya dimuat ulang
+      saat kamu menekan <em>Muat ulang</em>, jadi selalu mencerminkan kode yang sedang berjalan —
+      termasuk batch yang baru selesai. Satu origin, jadi satu kontrol menggerakkan kedua sisi.
+    </p>
+  </header>
+
+  <div class="bar">
+    <label>Mode</label>
+    <div class="seg" role="group" aria-label="Mode">
+      <button type="button" data-mode="side" aria-pressed="true">Berdampingan</button>
+      <button type="button" data-mode="overlay" aria-pressed="false">Tumpang tindih</button>
+    </div>
+    <label>Perangkat</label>
+    <div class="seg" role="group" aria-label="Perangkat">
+      <button type="button" data-dev="mobile" aria-pressed="true">390</button>
+      <button type="button" data-dev="desktop" aria-pressed="false">1440</button>
+    </div>
+    <label>Layar</label>
+    <div class="seg" role="group" aria-label="Layar">
+      <button type="button" data-screen="landing" aria-pressed="true">Awal</button>
+      <button type="button" data-screen="user-login" aria-pressed="false">Masuk</button>
+      <button type="button" data-screen="token-login" aria-pressed="false">Token</button>
+      <button type="button" data-screen="user-dashboard" aria-pressed="false">Dasbor</button>
+      <button type="button" data-screen="pic-create" aria-pressed="false">Buat</button>
+    </div>
+    <span class="spacer"></span>
+    <button type="button" class="btn" id="reload">Muat ulang</button>
+    <button type="button" class="btn" id="measureBtn">Ukur</button>
+    <button type="button" class="btn primary" id="themeBtn">Tema</button>
+  </div>
+
+  <div id="lockBanner" hidden style="border-left:3px solid #b91c1c;background:#fef2f2;color:#7f1d1d;
+       padding:12px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin-bottom:16px"></div>
+
+  <div class="stage side" id="stageSide">
+    <div class="pane">
+      <div class="tagrow"><span class="tag old"><span class="dot"></span>Sebelum <small>HEAD · be5fb8c</small></span></div>
+      <div class="frame mobile" id="wrapOg"><iframe id="frOg" title="Versi asli"></iframe></div>
+    </div>
+    <div class="pane">
+      <div class="tagrow"><span class="tag new"><span class="dot"></span>Sesudah <small>working tree</small></span></div>
+      <div class="frame mobile" id="wrapNew"><iframe id="frNew" title="Versi sekarang"></iframe></div>
+    </div>
+  </div>
+
+  <div class="stage" id="stageOverlay" hidden>
+    <div>
+      <div class="overlaywrap" id="ovWrap">
+        <iframe id="ovOg" title="Versi asli"></iframe>
+        <iframe id="ovNew" title="Versi sekarang"></iframe>
+      </div>
+      <div class="slider">
+        <span>Sebelum</span>
+        <input type="range" id="opacity" min="0" max="100" value="100" aria-label="Opasitas versi baru">
+        <span id="opacityVal">100% baru</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+  <div class="timeline" id="timeline"></div>
+  <div class="note" id="caveat"></div>
+
+  <footer>
+    Sumber: <code>git archive HEAD</code> → <code>.scratch/og-snapshot/</code>, dilayani di
+    <code>/.scratch/og-snapshot/index.html</code>; working tree di <code>/index.html</code>.
+    Satu origin &rarr; kontrol di atas menggerakkan kedua iframe sekaligus.
+    <br><br>
+    <strong>Batas:</strong> "OG" = commit <code>be5fb8c</code>. Sesi login tidak dibagi, jadi layar
+    dasbor di sisi OG tetap kosong tanpa sesi — itu perilaku aslinya, bukan bug halaman ini.
+  </footer>
+</div>
+
+<script>
+var OG  = '/.scratch/og-snapshot/index.html';
+var NEW = '/index.html';
+var state = { mode:'side', dev:'mobile', screen:'landing', theme:null };
+
+function frameDoc(id) {
+  try { return document.getElementById(id).contentDocument; } catch (e) { return null; }
+}
+function whenReady(id, cb) {
+  var tries = 0;
+  (function poll() {
+    var d = frameDoc(id);
+    if (d && d.readyState === 'complete' && d.querySelector('.app-header')) return cb(d);
+    if (++tries > 150) return cb(null);
+    setTimeout(poll, 100);
+  })();
+}
+function boot() {
+  var q = '?live=' + Date.now();
+  ['frOg','ovOg'].forEach(function (id) { document.getElementById(id).src = OG + q; });
+  ['frNew','ovNew'].forEach(function (id) { document.getElementById(id).src = NEW + q; });
+}
+function applyScreen(id) {
+  whenReady(id, function (d) {
+    if (!d) return;
+    try { d.defaultView.showView(state.screen); } catch (e) {}
+  });
+}
+function applyDevice() {
+  ['wrapOg','wrapNew'].forEach(function (id) {
+    var w = document.getElementById(id);
+    w.classList.toggle('mobile', state.dev === 'mobile');
+    w.classList.toggle('desktop', state.dev === 'desktop');
+  });
+  var ov = document.getElementById('ovWrap');
+  ov.style.maxWidth = state.dev === 'mobile' ? '390px' : '100%';
+  ov.style.height   = state.dev === 'mobile' ? '820px' : '800px';
+}
+function applyMode() {
+  document.getElementById('stageSide').hidden    = state.mode !== 'side';
+  document.getElementById('stageOverlay').hidden = state.mode !== 'overlay';
+}
+document.querySelectorAll('[data-mode]').forEach(function (b) {
+  b.onclick = function () {
+    state.mode = b.dataset.mode;
+    document.querySelectorAll('[data-mode]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    applyMode();
+  };
+});
+document.querySelectorAll('[data-dev]').forEach(function (b) {
+  b.onclick = function () {
+    state.dev = b.dataset.dev;
+    document.querySelectorAll('[data-dev]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    applyDevice();
+  };
+});
+document.querySelectorAll('[data-screen]').forEach(function (b) {
+  b.onclick = function () {
+    state.screen = b.dataset.screen;
+    document.querySelectorAll('[data-screen]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    ['frOg','frNew','ovOg','ovNew'].forEach(applyScreen);
+  };
+});
+document.getElementById('reload').onclick = boot;
+document.getElementById('themeBtn').onclick = function () {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  this.textContent = 'Tema: ' + (state.theme === 'dark' ? 'gelap' : 'terang');
+  ['frOg','frNew','ovOg','ovNew'].forEach(function (id) {
+    var d = frameDoc(id);
+    if (!d) return;
+    try { d.documentElement.setAttribute('data-theme', state.theme); } catch (e) {}
+    try { d.defaultView.localStorage.setItem('donatpro.theme', state.theme); } catch (e) {}
+  });
+};
+var op = document.getElementById('opacity');
+op.oninput = function () {
+  document.getElementById('ovNew').style.opacity = Number(op.value) / 100;
+  document.getElementById('opacityVal').textContent = op.value + '% baru';
+};
+document.getElementById('measureBtn').onclick = function () {
+  whenReady('frOg', function (dOg) {
+    whenReady('frNew', function (dNew) {
+      var box = document.getElementById('metrics');
+      if (!dOg || !dNew) { box.innerHTML = '<div class="m"><span>galat</span><b>iframe belum siap</b></div>'; return; }
+      var hdr = function (d) { var h = d.querySelector('.app-header'); return h ? Math.round(h.getBoundingClientRect().height) + 'px' : null; };
+      var bodyFont = function (d) { return d.defaultView.getComputedStyle(d.body).fontSize; };
+      var btnFont = function (d) { var b = d.querySelector('.btn'); return b ? d.defaultView.getComputedStyle(b).fontFamily.split(',')[0].replace(/["']/g, '') : null; };
+      var secondBtn = function (d) { var e = d.querySelector('#view-landing button:nth-of-type(2)'); return e ? e.textContent.trim().slice(0, 30) : null; };
+      var cards = function (d) { return String(d.querySelectorAll('.card').length); };
+      var rows = [['Header', hdr(dOg), hdr(dNew)], ['Font body', bodyFont(dOg), bodyFont(dNew)],
+                  ['Font tombol', btnFont(dOg), btnFont(dNew)], ['Tombol ke-2', secondBtn(dOg), secondBtn(dNew)],
+                  ['Jumlah .card', cards(dOg), cards(dNew)]];
+      box.innerHTML = rows.map(function (r) {
+        var same = String(r[1]) === String(r[2]);
+        return '<div class="m"><span>' + r[0] + '</span><div class="split">'
+          + (same ? '' : '<span class="og">' + (r[1] === null ? '—' : r[1]) + '</span>')
+          + '<b>' + (r[2] === null ? '—' : r[2]) + '</b></div></div>';
+      }).join('');
+    });
+  });
+};
+var BATCHES = [
+  ['B0','font',1],['B1','app bar',1],['B2','empty state',1],['B3','date',1],
+  ['B4','type',1],['B5','spacing',1],['B6','dual theme',1],['B7a','testids',1],
+  ['B7c','supabase',1],['B8','PIC desktop',1],['B10','copy diet',1],['B11','DESIGN.md',1]
+];
+document.getElementById('timeline').innerHTML = BATCHES.map(function (b) {
+  var cls = b[2] === 1 ? 'done' : (b[2] === 2 ? 'now' : 'todo');
+  return '<span class="tl ' + cls + '">' + b[0] + ' ' + b[1] + '</span>';
+}).join('');
+document.getElementById('caveat').innerHTML =
+  '<strong>Semua batch selesai.</strong> B0–B8, B10, B11 landed; B7b (pemindahan inline style) ' +
+  '<em>gagal dan dibatalkan</em> \u2014 worker-nya diam-diam mengubah 39 nilai deklarasi, jadi ' +
+  'dikembalikan dan sekarang dijaga oleh test. <strong>138/138 test hijau.</strong> ' +
+  'Sisi kiri tetap aplikasi asli (HEAD); sisi kanan kode sekarang. Tombol Tema mengubah keduanya.';
+
+applyDevice(); applyMode(); boot(); checkLock();
+setInterval(checkLock, 5000);
+</script>
+</body>
+</html>

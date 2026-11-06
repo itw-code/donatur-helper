@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { resolveToken } = require('./token-util');
 const test = require('node:test');
 
 function getIndexHtml() {
@@ -24,7 +25,16 @@ test('Task 1: CSS files exist and are properly modularized', () => {
 
   // Base CSS assertions
   assert.match(baseCss, /:root\s*\{/, 'css/base.css must define :root tokens');
-  assert.match(baseCss, /--primary:\s*#047857/, 'css/base.css must contain --primary token');
+  // [B6 · P1-3] Colour tokens moved to css/tokens.css when the theme layer landed: base.css
+  // no longer declares colours at all, because a light block there would re-assert light in
+  // every theme (it did, and it broke dark). Q1 made forest #4a653b the canonical primary;
+  // emerald #047857 survives only as the light "success" role. Assert the token where it now
+  // lives, and keep the intent: a primary colour must be defined.
+  const tokensCss = fs.readFileSync(path.resolve('css/tokens.css'), 'utf8');
+  assert.equal(resolveToken(tokensCss, 'primary'), '#4a653b',
+    'css/tokens.css must resolve the primary colour to forest #4a653b');
+  assert.equal(resolveToken(tokensCss, 'success'), '#047857',
+    'css/tokens.css must keep the AA-light success role');
   assert.match(baseCss, /\.skip-link/, 'css/base.css must contain .skip-link styles');
   assert.match(baseCss, /:focus-visible/, 'css/base.css must contain :focus-visible styles');
 

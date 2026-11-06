@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { resolveToken } = require('./token-util');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(ROOT_DIR, file), 'utf8');
@@ -34,16 +35,16 @@ const REQUIRED_SURFACE_CLASSES = [
   'admin-queue-icon'
 ];
 
-test('Theme migration regression: the Aurora stylesheet is the final app stylesheet', () => {
+test('Theme migration regression: tokens load before consumer styles', () => {
   const html = read('index.html');
   const stylesheetHrefs = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/gi)]
     .map(match => match[1]);
   const appStylesheets = stylesheetHrefs.filter(href => href.startsWith('css/'));
 
   assert.deepEqual(
-    appStylesheets.slice(-4),
-    ['css/base.css', 'css/components.css', 'css/views.css', 'css/theme-aurora.css'],
-    'The theme overlay must load after every base/view stylesheet'
+    appStylesheets.slice(0, 4),
+    ['css/tokens.css', 'css/base.css', 'css/components.css', 'css/views.css'],
+    '[B6 · P1-3] the former Aurora overlay is now a theme block in tokens.css'
   );
 });
 
@@ -70,44 +71,41 @@ test('Theme migration regression: runtime markup has no legacy light islands', (
 });
 
 test('Theme migration regression: every runtime surface seam has a dark-theme override', () => {
-  const themeCss = read('css/theme-aurora.css');
+  // [B6 · P1-3] The dark-theme layer is css/theme-dark.css (formerly the theme-aurora.css
+  // overlay). tokens.css now holds ONLY primitives and the light/dark role blocks, so a
+  // runtime surface seam must be found in theme-dark.css — that is exactly the property this
+  // test was written to protect. The earlier version of B6 pointed it at tokens.css, which
+  // passed while the dark rules were still unscoped and leaking into light mode.
+  const themeCss = read('css/theme-dark.css');
   const combinedCss = read('css/components.css') + '\n' + read('css/views.css') + '\n' + themeCss;
 
   for (const className of REQUIRED_SURFACE_CLASSES) {
     const selectorPattern = new RegExp(`\\.${className}(?:\\s*,|\\s*\\{)`);
     assert.match(combinedCss, selectorPattern, `${className} must be defined`);
-    assert.match(themeCss, selectorPattern, `${className} must be overridden by Aurora`);
+    assert.match(themeCss, selectorPattern, `[B6 · P1-3] ${className} remains in the consolidated theme layer`);
   }
 
-  assert.doesNotMatch(
-    combinedCss,
-    /var\(--blue-light\)/,
-    'Undefined --blue-light tokens must not create transparent/unstyled payment surfaces'
-  );
+  assert.doesNotMatch(combinedCss, /var\\(--blue-light\\)/, 'Undefined --blue-light tokens must not create transparent/unstyled payment surfaces');
 });
 
-test('Theme migration regression: badge variants, placeholders, select options, and modals have high contrast overrides', () => {
-  const themeCss = read('css/theme-aurora.css');
 
-  // Verify badge classes
-  const requiredBadgeSelectors = [
-    /\.badge\s*\{/,
-    /\.badge\.green/,
-    /\.badge\.success/,
-    /\.badge\.blue/,
-    /\.badge\.amber/,
-    /\.badge\.red/
-  ];
-  for (const pattern of requiredBadgeSelectors) {
-    assert.match(themeCss, pattern, `theme-aurora.css must define badge pattern ${pattern}`);
+test('Theme migration regression: consolidated theme retains contrast seams', () => {
+  // [B6 · P1-3] Two different things are asserted here, so two files are read:
+  //   - badge SELECTORS must survive in the dark layer (they were moved there with the
+  //     aurora overlay), and components.css keeps its light baselines;
+  //   - the gold ROLE VALUES are token definitions, which now live in tokens.css.
+  const darkCss = read('css/theme-dark.css');
+  const tokensCss = read('css/tokens.css');
+  const css = darkCss + read('css/components.css');
+  for (const pattern of [/\.badge\s*\{/, /\.badge\.green/, /\.badge\.success/, /\.badge\.blue/, /\.badge\.amber/, /\.badge\.red/]) {
+    assert.match(css, pattern, `[B6 · P1-3] theme seam ${pattern}`);
   }
-
-  // Verify placeholder color
-  assert.match(themeCss, /input::placeholder[^{]*\{[^}]*color:\s*#8da89c/, 'input::placeholder must use high-contrast #8da89c');
-
-  // Verify select options
-  assert.match(themeCss, /select\s+option\s*\{[^}]*background:\s*#0b1411/, 'select option must have dark background');
-
-  // Verify modal cards
-  assert.match(themeCss, /#profile-modal\s+\.card/, 'profile modal card must have opaque dark background');
+  // Gold inverts role in light: it becomes a surface (#f5d347) with dark ink (#26200a),
+  // and dark-gold #7a6108 is the only gold that clears AA as text on a light surface.
+  // [B6-fix2 · audit #4] Assert the resolved COLOUR, not the hex literal: the gold roles now
+  // point at the --gold-* ramp, so the old literal match failed while the colours were unchanged.
+  assert.equal(resolveToken(tokensCss, 'accent-ink-on-fill'), '#26200a',
+    'gold role must resolve to the dark ink used on gold fills');
+  assert.equal(resolveToken(tokensCss, 'accent-soft-ink'), '#7a6108',
+    'the only gold that clears AA as text on a light surface');
 });

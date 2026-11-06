@@ -1,7 +1,7 @@
 // PIC Campaign Management, Donor Verification, Progress, and Finalization
 
 import { safeGet, safeRemove } from '../storage.js';
-import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, formatTime, parseRibuan, formatInputRibuan, statusBadge, paymentStatusIcon, actionArrowIcon } from '../utils.js';
+import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, formatTime, parseRibuan, formatInputRibuan, statusBadge, paymentStatusIcon, actionArrowIcon, emptyState } from '../utils.js';
 import { call, callQueued } from '../api.js';
 import { appState, currentToken } from '../state.js';
 import { loadUserDashboard } from './donor.js';
@@ -392,12 +392,12 @@ export function renderPicActions(detail) {
 
   html += '<div class="pic-share-box" style="padding:10px; border-radius:8px; margin-bottom:12px;">';
   if (c.Status === 'Open' || c.Status === 'Closed') {
-    html += '<strong>Bagikan Undangan Patungan:</strong><br><p class="muted" style="margin:4px 0;">Salin pesan undangan beserta daftar peserta yang sudah bergabung.</p><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
+    html += '<strong>Bagikan Undangan Patungan:</strong><br><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
   } else if (c.Status === 'Finalized') {
     if (isAchieved) {
-      html += '<strong>Target Terkumpul! 🎉</strong><br><p class="muted" style="margin:4px 0;">Semua pembayaran terverifikasi. Salin pesan terima kasih untuk grup.</p><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Laporan Selesai</button>';
+      html += '<strong>Target Terkumpul! 🎉</strong><br><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Laporan Selesai</button>';
     } else {
-      html += '<strong>Tagihan Patungan (Grup):</strong><br><p class="muted" style="margin:4px 0;">Salin rincian tagihan pro-rata, nominal bebas, dan nomor rekening untuk dibagikan ke grup.</p><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Rincian Tagihan</button>';
+      html += '<strong>Tagihan Patungan (Grup):</strong><br><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Rincian Tagihan</button>';
     }
   } else {
     html += '<strong>Campaign Selesai:</strong><br><p class="muted" style="margin:4px 0;">Campaign sudah selesai/diarsipkan.</p>';
@@ -446,7 +446,7 @@ export function renderPicActions(detail) {
 
   html += '<div id="finalize-form" class="hidden"></div>';
   html += '<div id="late-donor-form" class="hidden card theme-surface-muted" style="margin-top:16px; position:relative;">' +
-    '<h4 style="margin-top:0;">Ajukan Donatur Susulan</h4><p class="muted" style="font-size:12px;">Tambahkan teman yang belum sempat daftar di list sebelumnya.</p>' +
+    '<h4 style="margin-top:0;">Ajukan Donatur Susulan</h4>' +
     '<label>Nama Teman: <input type="text" id="late-name" placeholder="cth: Budi Susanto"></label>' +
     '<label>No WhatsApp: <input type="tel" id="late-wa" placeholder="cth: 08123456789"></label>' +
     '<label>Tipe Nominal: <select id="late-amount-type" onchange="toggleLateCustomAmount()"><option value="fixed">Ikuti Nominal Rata-rata</option><option value="custom">Nominal Bebas (Custom)</option></select></label>' +
@@ -828,7 +828,8 @@ export function renderDonorTable(detail) {
   const el = document.getElementById('pic-donor-list');
   if (!el) return;
   if (!detail.donors || !detail.donors.length) {
-    el.innerHTML = '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>0 item</span></div><p class="muted">Belum ada donatur.</p>';
+    el.innerHTML = '<div class="pic-section-heading"><h3>Donatur perlu tindakan</h3><span>0 item</span></div>'
+      + emptyState({ title: 'Belum ada donatur', note: 'Bagikan tautan campaign agar rekan-rekan bisa ikut.', inline: true });
     return;
   }
 

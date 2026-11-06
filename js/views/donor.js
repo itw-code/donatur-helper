@@ -1,5 +1,5 @@
 import { safeGet, safeSet, safeRemove } from '../storage.js';
-import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, parseRibuan, statusBadge, paymentStatusIcon } from '../utils.js';
+import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, parseRibuan, statusBadge, paymentStatusIcon, emptyState } from '../utils.js';
 import { call, callQueued } from '../api.js';
 import { appState } from '../state.js';
 import { loadPicDashboard } from './pic.js';
@@ -93,7 +93,11 @@ export function saveProfile() {
     user.email = res.email;
     safeSet('donor_user', JSON.stringify(user));
 
-    if (msgEl) msgEl.innerHTML = '<span class="success" style="color:var(--primary);">Profil berhasil diperbarui.</span>';
+    // [B6-fix2 · audit #2] The inline style forced forest #4a653b as INK, which is 3.05:1 on the
+    // dark canvas and 2.87:1 on the dark modal #0b1411 — so the confirmation was least readable
+    // exactly when it mattered. .success already resolves to --success (5.24:1 light, 13.07:1 dark)
+    // and the inline declaration was overriding it. Removed so the class does its job.
+    if (msgEl) msgEl.innerHTML = '<span class="success">Profil berhasil diperbarui.</span>';
     
     loadUserDashboard();
     setTimeout(() => closeProfileModal(), 1500);
@@ -123,19 +127,19 @@ export function loadUserDashboard() {
   let picBtnHtml = '';
   if (user.verified) {
     if (!user.email) {
-      picBtnHtml += '<div class="card theme-surface-warning" style="border-left:4px solid var(--amber); margin-bottom:16px;"><p style="margin:0; font-size:14px;"><strong>Email belum diisi.</strong><br/>Tambahkan email di Profil agar Anda mendapat pengingat tagihan otomatis.</p></div>';
+      picBtnHtml += '<div class="card theme-surface-warning" data-testid="email-warning" style="border-left:4px solid var(--amber); margin-bottom:16px;"><p style="margin:0; font-size:14px;"><strong>Email belum diisi.</strong><br/>Tambahkan email di Profil agar Anda mendapat pengingat tagihan otomatis.</p></div>';
     }
     
     if (user.status === 'active') {
-      picBtnHtml = '<button class="btn blue" style="margin-bottom:16px;" onclick="seamlessBecomePic()">+ Buat Campaign Baru (Jadi PIC)</button>';
+      picBtnHtml = '<button data-testid="btn-create-pic" class="btn blue" style="margin-bottom:16px;" onclick="seamlessBecomePic()">+ Buat Campaign Baru (Jadi PIC)</button>';
     } else if (user.status === 'ex') {
-      picBtnHtml = '<div class="card theme-surface-muted" style="border:none; margin-bottom:16px;"><p class="muted" style="margin:0;">Status Anda adalah Alumni. Anda dapat berpartisipasi dalam donasi, tetapi pembuatan campaign baru hanya dapat dilakukan oleh karyawan aktif.</p></div>';
+      picBtnHtml = '<div class="card theme-surface-muted" data-testid="pic-permission-notice" style="border:none; margin-bottom:16px;"><p class="muted" style="margin:0;">Status Anda adalah Alumni. Anda dapat berpartisipasi dalam donasi, tetapi pembuatan campaign baru hanya dapat dilakukan oleh karyawan aktif.</p></div>';
     }
   }
 
   const el = document.getElementById('campaign-list');
   if (el) {
-    el.innerHTML = '<div id="actual-campaign-list"><div style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div></div>';
+    el.innerHTML = '<div id="actual-campaign-list" data-testid="campaign-list"><div data-testid="campaign-list-loading" style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div></div>';
   }
 
   const picContainer = document.getElementById('pic-create-btn-container');
@@ -162,20 +166,20 @@ export function loadMyPicCampaigns(whatsapp) {
     });
 }
 
-function renderMyPicCampaigns(list, whatsapp) {
+export function renderMyPicCampaigns(list, whatsapp) {
   if (!Array.isArray(list) || !list.length) return '';
   const rows = list.map(c => {
     const statusBadgeHtml = statusBadge(c.status);
-    return '<div class="my-pic-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px dashed var(--border);flex-wrap:wrap;">'
+    return '<div class="my-pic-row" data-testid="pic-campaign-row" data-id="' + escapeHtml(c.campaignId || '') + '" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px dashed var(--border);flex-wrap:wrap;">'
       + '<div style="min-width:0;flex:1;"><strong>' + escapeHtml(c.targetName || c.campaignId || '-') + '</strong> <span class="muted" style="font-size:12px;">(' + escapeHtml(c.campaignId || '') + ')</span><br>'
       + '<span class="muted" style="font-size:12px;">' + String(c.donorCount || 0) + ' donatur &middot; Terkumpul ' + formatIDR(c.totalCollected || 0) + '</span></div>'
       + statusBadgeHtml
-      + '<button class="btn secondary btn-auto" style="font-size:12px;padding:4px 10px;" onclick="openPicCampaignFromDonor(\'' + escapeHtml(c.campaignId || '') + '\')">Buka Dashboard PIC</button>'
+      + '<button data-testid="btn-open-pic-campaign" class="btn secondary btn-auto" style="font-size:12px;padding:4px 10px;" onclick="openPicCampaignFromDonor(\'' + escapeHtml(c.campaignId || '') + '\')">Buka Dashboard PIC</button>'
       + '</div>';
   }).join('');
-  return '<div class="card" style="margin-bottom:16px;"><h3 style="margin-top:0;font-size:15px;">🛠️ Campaign yang kamu kelola sebagai PIC</h3>'
+  return '<div class="card" data-testid="my-pic-campaigns" style="margin-bottom:16px;"><h3 style="margin-top:0;font-size:15px;">🛠️ Campaign yang kamu kelola sebagai PIC</h3>'
     + rows
-    + '<p class="muted" style="font-size:12px;margin-top:8px;">Kampanye ini ditransfer kepadamu oleh admin. Buka untuk mengelola donatur & pembayaran.</p></div>';
+    + '</div>';
 }
 
 export async function openPicCampaignFromDonor(campaignId) {
@@ -290,13 +294,13 @@ export function refreshCampaignList() {
 
   const el = document.getElementById('actual-campaign-list');
   if (el) {
-    el.innerHTML = '<div style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div>';
+    el.innerHTML = '<div data-testid="campaign-list-loading" style="padding:24px;text-align:center;"><span style="font-size:24px;">⏳</span><br><span style="color:var(--muted);">Memuat daftar campaign...</span></div>';
   }
 
   call('listActiveCampaigns', user.whatsapp).then(list => {
     let html = '';
     if (!list || !list.length) {
-      if (el) el.innerHTML = '<div class="card muted">Belum ada campaign aktif saat ini.</div>';
+      if (el) el.innerHTML = renderDonorEmptyState({ title: 'Belum ada campaign aktif', note: 'Campaign akan muncul di sini saat pengelola membukanya.' });
       return;
     }
 
@@ -305,10 +309,10 @@ export function refreshCampaignList() {
       if (targetedCampaign) {
         html += '<h3 style="margin-top:0;">✨ Campaign Undangan</h3>';
         html += renderCampaignCard(targetedCampaign, user, false);
-        html += '<button class="btn secondary" style="margin-top: 16px; display: block; width: 100%; text-align: center;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
+        html += '<button data-testid="btn-back-campaigns" class="btn secondary" style="margin-top: 16px; display: block; width: 100%; text-align: center;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
       } else {
-        html += '<div class="card error">Campaign tidak ditemukan atau sudah diarsipkan.</div>';
-        html += '<button class="btn secondary" style="margin-top: 16px;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
+        html += '<div data-testid="campaign-not-found" class="card error">Campaign tidak ditemukan atau sudah diarsipkan.</div>';
+        html += '<button data-testid="btn-back-campaigns" class="btn secondary" style="margin-top: 16px;" onclick="clearTargetCampaign()">⬅️ Lihat Semua Campaign</button>';
       }
     } else {
       const isPendingPayment = c => (
@@ -326,10 +330,10 @@ export function refreshCampaignList() {
           ? '#card-' + escapeHtml(pending[0].campaignId)
           : '#actual-campaign-list';
         const attentionAction = pending.length === 1 ? 'Lihat tagihan' : 'Lihat tagihan gabungan';
-        html += '<div class="donor-dashboard-attention" role="status">';
+        html += '<div class="donor-dashboard-attention" data-testid="payment-attention" role="status">';
         html += '<span class="donor-dashboard-attention-icon">' + paymentStatusIcon('review') + '</span>';
         html += '<span class="donor-dashboard-attention-copy"><strong>' + pending.length + ' pembayaran menunggu</strong><span>Bayar sebelum deadline agar campaign selesai tepat waktu.</span></span>';
-        html += '<a class="link-btn" href="' + attentionTarget + '">' + attentionAction + '</a>';
+        html += '<a data-testid="link-payment-attention" class="link-btn" href="' + attentionTarget + '">' + attentionAction + '</a>';
         html += '</div>';
       }
 
@@ -363,12 +367,13 @@ export function refreshCampaignList() {
           }
         });
       } else {
-        html += '<div class="card donor-empty-state" style="padding: 24px 16px; text-align: center;">';
-        html += '<div style="margin-bottom: 8px;">' + paymentStatusIcon('verified') + '</div>';
-        html += '<strong style="display: block; font-size: 15px; margin-bottom: 4px;">Tidak ada tagihan tertunda</strong>';
-        html += '<p class="muted" style="margin: 0 0 16px 0; font-size: 13px;">Semua partisipasi donasi Anda sudah lunas atau belum ada tagihan baru.</p>';
-        html += '<a class="btn secondary btn-auto" href="#donor-group-open" style="display: inline-flex; font-size: 13px;">Lihat campaign yang masih terbuka</a>';
-        html += '</div>';
+        html += renderDonorEmptyState({
+          icon: 'verified',
+          title: 'Tidak ada tagihan tertunda',
+          note: 'Semua partisipasi donasi Anda sudah lunas atau belum ada tagihan baru.',
+          href: '#donor-group-open',
+          action: 'Lihat campaign yang masih terbuka'
+        });
       }
       html += '</div>';
 
@@ -378,16 +383,15 @@ export function refreshCampaignList() {
       const history = others.filter(c => c.status === 'Archived' || (c.status !== 'Open' && !c.joined));
 
       // Group 1: Bisa Diikuti
-      html += '<div id="donor-group-open">';
+      html += '<div id="donor-group-open" data-testid="campaign-group-open">';
       html += '<h3 style="margin-top:0;">Bisa Diikuti</h3>';
       if (canJoin.length > 0) {
         if (canJoin.length > 1) {
-          let bulkJoinHtml = '<div class="card theme-surface-success" style="margin-bottom: 16px; padding: 12px 16px;">';
+          let bulkJoinHtml = '<div class="card theme-surface-success" data-testid="bulk-join-options" style="margin-bottom: 16px; padding: 12px 16px;">';
           bulkJoinHtml += '<h4 class="theme-success-heading" style="margin-top:0; font-size:14px; margin-bottom:4px;">📝 Gabung Banyak Campaign</h4>';
-          bulkJoinHtml += '<p class="muted" style="font-size:11px; margin-bottom:8px; line-height:1.4;">Centang campaign di bawah, lalu klik tombol ini untuk gabung sekaligus.</p>';
-          bulkJoinHtml += '<div style="display:flex; align-items:center; gap:8px;">';
-          bulkJoinHtml += '<label style="margin:0; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="bulk-join-select-all" onclick="toggleSelectAllBulkJoin(this)" style="width:auto; margin:0; cursor:pointer;"> Pilih Semua</label>';
-          bulkJoinHtml += '<button id="bulk-join-btn" class="btn green btn-auto" style="display:none; margin:0; padding:6px 12px; font-size:12px; margin-left:auto;" onclick="openBulkJoinModal()">Ikut Patungan Massal</button>';
+                    bulkJoinHtml += '<div style="display:flex; align-items:center; gap:8px;">';
+          bulkJoinHtml += '<label style="margin:0; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input data-testid="input-bulk-join-all" type="checkbox" id="bulk-join-select-all" onclick="toggleSelectAllBulkJoin(this)" style="width:auto; margin:0; cursor:pointer;"> Pilih Semua</label>';
+          bulkJoinHtml += '<button data-testid="btn-bulk-join" id="bulk-join-btn" class="btn green btn-auto" style="display:none; margin:0; padding:6px 12px; font-size:12px; margin-left:auto;" onclick="openBulkJoinModal()">Ikut Patungan Massal</button>';
           bulkJoinHtml += '</div>';
           bulkJoinHtml += '</div>';
           html += bulkJoinHtml;
@@ -395,13 +399,13 @@ export function refreshCampaignList() {
         const sortedCanJoin = sortCampaignsForDonorDashboard(canJoin);
         html += sortedCanJoin.map(c => renderCampaignCard(c, user, false)).join('');
       } else {
-        html += '<div class="card muted">Tidak ada campaign terbuka untuk diikuti saat ini.</div>';
+        html += renderDonorEmptyState({ title: 'Tidak ada campaign terbuka', note: 'Semua campaign yang kamu ikuti sedang berjalan atau sudah selesai.' });
       }
       html += '</div>';
 
       // Group 2: Campaign yang Diikuti
       if (alreadyJoined.length > 0) {
-        html += '<div id="donor-group-joined" style="margin-top:24px;">';
+        html += '<div id="donor-group-joined" data-testid="campaign-group-joined" style="margin-top:24px;">';
         html += '<h3 style="margin-top:0;">Campaign yang Diikuti</h3>';
         const sortedJoined = sortCampaignsForDonorDashboard(alreadyJoined);
         html += sortedJoined.map(c => renderCampaignCard(c, user, false)).join('');
@@ -410,7 +414,7 @@ export function refreshCampaignList() {
 
       // Group 3: Selesai / Riwayat
       if (history.length > 0) {
-        html += '<details class="donor-history-disclosure" style="margin-top:24px;">';
+        html += '<details class="donor-history-disclosure" data-testid="campaign-history" style="margin-top:24px;">';
         html += '<summary style="cursor:pointer; font-weight:600; color:var(--muted); font-size:13px; padding:8px 0;">Riwayat Campaign Selesai (' + history.length + ')</summary>';
         html += '<div style="margin-top:12px;">';
         const sortedHistory = sortCampaignsForDonorDashboard(history);
@@ -425,7 +429,7 @@ export function refreshCampaignList() {
 
     if (el) el.innerHTML = html;
   }).catch(e => {
-    if (el) el.innerHTML = '<div class="card error">Gagal memuat: ' + escapeHtml(formatUserErrorMessage(e)) + '</div>';
+    if (el) el.innerHTML = '<div data-testid="campaign-error" class="card error">Gagal memuat: ' + escapeHtml(formatUserErrorMessage(e)) + '</div>';
   });
 }
 
@@ -478,40 +482,40 @@ export function openBulkJoinModal() {
   }
 
   modal.innerHTML = `
-    <div class="card theme-surface-modal" style="width:90%; max-width:450px; padding:20px; border-radius:12px; position:relative; box-shadow:var(--shadow-lg); border:none;">
-      <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">&times;</button>
+    <div class="card theme-surface-modal" data-testid="bulk-join-modal" style="width:90%; max-width:450px; padding:20px; border-radius:12px; position:relative; box-shadow:var(--shadow-lg); border:none;">
+      <button data-testid="btn-close-bulk-join" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">&times;</button>
       <h3 style="margin-top:0; color:var(--blue); font-size:18px; font-weight:bold; margin-bottom:8px;">Ikut Patungan Massal</h3>
       <p style="font-size:13px; color:var(--text); margin-bottom:16px; line-height:1.4;">Anda memilih untuk bergabung ke <strong>${selectedIds.length} campaign</strong> sekaligus.</p>
       
       <div style="margin-bottom:16px;">
         <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:8px;">Tipe Patungan:</label>
         <div style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-          <input type="radio" id="bj-type-rata" name="bj-type" value="rata" checked onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
+          <input data-testid="input-bulk-type-rata" type="radio" id="bj-type-rata" name="bj-type" value="rata" checked onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
           <label for="bj-type-rata" style="font-size:13px; cursor:pointer; margin:0;">Patungan Rata (bagi rata tagihan nanti)</label>
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
-          <input type="radio" id="bj-type-bebas" name="bj-type" value="bebas" onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
+          <input data-testid="input-bulk-type-bebas" type="radio" id="bj-type-bebas" name="bj-type" value="bebas" onclick="toggleBulkJoinFields()" style="width:auto; cursor:pointer;">
           <label for="bj-type-bebas" style="font-size:13px; cursor:pointer; margin:0;">Nominal Bebas (tulis nominal sendiri)</label>
         </div>
       </div>
       
-      <div id="bj-custom-amount-wrap" class="hidden" style="margin-bottom:16px;">
+      <div data-testid="bulk-custom-amount-fields" id="bj-custom-amount-wrap" class="hidden" style="margin-bottom:16px;">
         <div class="theme-info-note" style="padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
           <span>ℹ️</span>
           <span>Nominal khusus minimal <strong>Rp 50.000</strong> per campaign.</span>
         </div>
         <label for="bj-custom-amount" style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">Nominal Per Campaign (Rp):</label>
-        <input type="text" id="bj-custom-amount" inputmode="numeric" placeholder="Contoh: 50.000 (Minimal 50.000)" onkeyup="formatInputRibuan(event)" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
+        <input data-testid="input-bulk-custom-amount" type="text" id="bj-custom-amount" inputmode="numeric" placeholder="Contoh: 50.000 (Minimal 50.000)" onkeyup="formatInputRibuan(event)" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
       </div>
 
       <div style="margin-bottom:20px;">
         <label for="bj-alias" style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">Nama Alias (Opsional, jika ingin nama disamarkan):</label>
-        <input type="text" id="bj-alias" placeholder="Contoh: Hamba Allah" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
+        <input data-testid="input-bulk-alias" type="text" id="bj-alias" placeholder="Contoh: Hamba Allah" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid var(--border);">
       </div>
 
       <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px;">
-        <button class="btn secondary" style="margin:0; padding:8px 16px; font-size:13px;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">Batal</button>
-        <button id="btn-submit-bulk-join" class="btn blue" style="margin:0; padding:8px 16px; font-size:13px;" onclick="submitBulkJoin('${selectedIds.join(',')}')">Gabung</button>
+        <button data-testid="btn-cancel-bulk-join" class="btn secondary" style="margin:0; padding:8px 16px; font-size:13px;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">Batal</button>
+        <button data-testid="btn-submit-bulk-join" id="btn-submit-bulk-join" class="btn blue" style="margin:0; padding:8px 16px; font-size:13px;" onclick="submitBulkJoin('${selectedIds.join(',')}')">Gabung</button>
       </div>
     </div>
   `;
@@ -592,7 +596,7 @@ export function submitBulkJoin(campaignIdsStr) {
 }
 
 export function getDeadlineBadge(deadlineStr) {
-  if (!deadlineStr) return '<span class="badge" style="background:#6b728022; color:#6b7280; margin-left:8px;">⏳ Deadline belum ditentukan</span>';
+  if (!deadlineStr) return '<span data-testid="deadline-badge" class="badge" style="background:#6b728022; color:#6b7280; margin-left:8px;">⏳ Deadline belum ditentukan</span>';
   const diffDays = Math.ceil((new Date(deadlineStr) - new Date()) / (1000 * 60 * 60 * 24));
   let color = '#1d9e75';
   let text = 'Aman';
@@ -601,7 +605,11 @@ export function getDeadlineBadge(deadlineStr) {
   else if (diffDays <= 2) { color = '#d97706'; text = diffDays + ' hari lagi'; }
   else if (diffDays <= 5) { color = '#ca8a04'; text = diffDays + ' hari lagi'; }
 
-  return '<span class="badge" style="background:' + color + '22; color:' + color + '; margin-left:8px;">⏳ ' + text + '</span>';
+  return '<span data-testid="deadline-badge" class="badge" style="background:' + color + '22; color:' + color + '; margin-left:8px;">⏳ ' + text + '</span>';
+}
+
+export function renderDonorEmptyState(options) {
+  return emptyState(options).replace('<div ', '<div data-testid="campaign-card-emptystate" ');
 }
 
 export function copyAmount(amount, formattedText) {
@@ -636,7 +644,7 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   const cIdsStr = campaignIds.join(',');
   const safeDomId = String(bankAccount).replace(/[^a-zA-Z0-9_-]/g, '') || 'combined';
   
-  let html = '<div class="card donor-campaign-card donor-primary-card theme-surface-blue" style="border-left: 4px solid var(--blue); margin-bottom:16px; text-align:left;">';
+  let html = '<div class="card donor-campaign-card donor-primary-card theme-surface-blue" data-testid="campaign-card" data-id="' + escapeHtml(cIdsStr) + '" style="border-left: 4px solid var(--blue); margin-bottom:16px; text-align:left;">';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
   html += '<strong style="color:var(--blue); font-size:15px;">Pembayaran Gabungan (' + groupList.length + ' Campaign)</strong>';
   html += '<span class="badge theme-status-unpaid">⏳ Menunggu Pembayaran</span>';
@@ -648,10 +656,10 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   });
   html += '</p>';
   
-  html += '<div class="theme-blue-total" style="padding:12px; border-radius:8px; margin: 12px 0;">';
+  html += '<div class="theme-blue-total" data-testid="donor-total" style="padding:12px; border-radius:8px; margin: 12px 0;">';
   html += '<div style="font-size:12px; color:var(--text);">Total nominal gabungan yang harus ditransfer:</div>';
   html += '<div style="font-size:20px; font-weight:bold; color:var(--blue); display:flex; align-items:center; justify-content:center; gap:8px;">' + formatIDR(totalDue);
-  html += ' <span class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">Salin</span>';
+  html += ' <span data-testid="btn-copy-total" class="link-btn" onclick="copyAmount(' + totalDue + ', \'' + formatIDR(totalDue) + '\')" style="margin-left: 8px; cursor: pointer; font-size:12px;">Salin</span>';
   html += '</div>';
   html += '</div>';
   
@@ -661,7 +669,7 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   if (trimmedAcc || trimmedName || trimmedHolder) {
     html += '<p class="muted" style="margin:8px 0; font-size:12px;">Ke: ' + (trimmedName ? escapeHtml(trimmedName) + ' ' : '') + escapeHtml(trimmedAcc);
     if (trimmedAcc) {
-      html += ' <button type="button" class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(trimmedAcc) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
+      html += ' <button data-testid="btn-copy-account" type="button" class="link-btn" style="font-size:11px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(trimmedAcc) + '\'); showToast(\'Nomor rekening disalin!\');">Salin</button>';
     }
     if (trimmedHolder) {
       html += ' a.n. ' + escapeHtml(trimmedHolder);
@@ -674,23 +682,141 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
   html += '<div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:12px;">';
   html += '<label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">Upload satu bukti transfer untuk semua campaign di atas</label>';
   html += '<p class="muted" style="font-size:11px; margin:2px 0 6px 0;">Unggah bukti transfer (format JPG, PNG, atau PDF maks 2MB). Bukti hanya digunakan oleh PIC untuk verifikasi.</p>';
-  html += '<input type="file" id="combined-proof-' + safeDomId + '" accept="image/*,application/pdf" style="font-size:12px; padding:4px; width:100%; box-sizing:border-box;">';
-  html += '<button id="btn-submit-combined-' + safeDomId + '" class="btn blue" style="margin-top:8px; width:100%; font-size:12px; padding:8px;" onclick="submitCombinedProof(\'' + escapeHtml(bankAccount) + '\', \'' + cIdsStr + '\')">Konfirmasi Transfer</button>';
-  html += '<div id="combined-error-' + safeDomId + '" class="error" style="font-size:11px; margin-top:4px;"></div>';
+  html += '<input data-testid="proof-upload" type="file" id="combined-proof-' + safeDomId + '" accept="image/*,application/pdf" style="font-size:12px; padding:4px; width:100%; box-sizing:border-box;">';
+  html += '<button data-testid="btn-verify" id="btn-submit-combined-' + safeDomId + '" class="btn blue" style="margin-top:8px; width:100%; font-size:12px; padding:8px;" onclick="submitCombinedProof(\'' + escapeHtml(bankAccount) + '\', \'' + cIdsStr + '\')">Konfirmasi Transfer</button>';
+  html += '<div data-testid="proof-error" id="combined-error-' + safeDomId + '" class="error" style="font-size:11px; margin-top:4px;"></div>';
   html += '</div>';
   
   html += '</div>';
   return html;
 }
 
+export function renderCampaignGiftActions(c) {
+  const giftLink = c.GiftLink || c.giftLink || '';
+  const giftImage = c.GiftImage || c.giftImage || '';
+  if (c.status !== 'Finalized' || (!giftLink && !giftImage)) return '';
+
+  const giftActionStyle = 'display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family:inherit; font-size:12px; font-weight:600; line-height:1.2; min-height:36px; padding:6px 12px; border:1px solid var(--border-hover); border-radius:6px; background:rgba(255,255,255,0.04); color:var(--amber,#f5d347); text-decoration:none; box-sizing:border-box; cursor:pointer; flex:1 1 auto; text-align:center;';
+  let html = '<div class="donor-gift-actions" data-testid="gift-actions" style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">';
+  if (giftLink) {
+    html += '<a data-testid="link-gift" href="' + escapeHtml(sanitizeUrl(giftLink)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">🔗 Lihat Barang/Hadiah</a>';
+  }
+  if (giftImage) {
+    if (giftImage.startsWith('http://') || giftImage.startsWith('https://')) {
+      html += '<a data-testid="link-gift-image" href="' + escapeHtml(sanitizeUrl(giftImage)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">📷 Lihat Screenshot Harga</a>';
+    } else {
+      html += '<button data-testid="btn-gift-image" type="button" class="donor-gift-btn" style="' + giftActionStyle + '" onclick="openMediaFile(\'' + escapeHtml(sanitizeUrl(giftImage)) + '\')">📷 Lihat Screenshot Harga</button>';
+    }
+  }
+  return html + '</div>';
+}
+
+export function renderCampaignJoinOptions(c) {
+  if (c.joined) {
+    const customAmt = Number(c.customAmount !== undefined ? c.customAmount : (c.CustomAmount !== undefined ? c.CustomAmount : (c.custom_amount !== undefined ? c.custom_amount : 0))) || 0;
+    let html = '<div class="success" data-testid="join-status">✓ Kamu sudah daftar di list ini. Menunggu finalisasi oleh PIC.</div>';
+    if (customAmt > 0) {
+      html += '<div class="theme-custom-amount-text" data-testid="custom-amount-status" style="margin-top:6px; font-size:13px; font-weight:500;">🏷️ Komitmen nominal khusus: <strong>' + formatIDR(customAmt) + '</strong></div>';
+    } else {
+      html += '<div data-testid="join-type-status" style="margin-top:6px; font-size:13px; color:var(--muted);">Partisipasi: Patungan rata-rata</div>';
+    }
+    return html + '<button data-testid="btn-withdraw" id="btn-withdraw-' + c.campaignId + '" class="btn secondary" style="margin-top:8px;" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
+  }
+
+  let html = '<div class="card theme-surface-muted" data-testid="donation-options" style="margin-top:8px;">';
+  html += '<label style="margin-top:0; display:flex; align-items:center; gap:8px; cursor:pointer;"><input data-testid="input-custom-toggle" type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto; min-height:unset;"> Saya ingin donasi dengan nominal khusus</label>';
+  html += '<div data-testid="custom-amount-fields" id="wrap-custom-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
+  html += '<div class="theme-info-note" style="padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">';
+  html += '<span>ℹ️</span>';
+  html += '<span><strong>Ketentuan:</strong> Nominal khusus minimal <strong>Rp 50.000</strong>. Jika ingin patungan nominal standar, silakan tetap gunakan opsi patungan rata.</span>';
+  html += '</div>';
+  html += '<label>Nominal Khusus (IDR)</label>';
+  html += '<input data-testid="input-custom-amount" id="input-custom-' + c.campaignId + '" type="text" inputmode="numeric" placeholder="Contoh: 50.000 (Minimal 50.000)" onkeyup="formatInputRibuan(event)">';
+  html += '</div>';
+
+  html += '<label style="margin-top:12px; display:flex; align-items:center; gap:8px; cursor:pointer;"><input data-testid="input-alias-toggle" type="checkbox" id="check-alias-' + c.campaignId + '" onchange="document.getElementById(\'wrap-alias-\' + \'' + c.campaignId + '\').classList.toggle(\'hidden\')" style="width:auto; min-height:unset;"> Sembunyikan Nama Asli (Gunakan Alias)</label>';
+  html += '<div data-testid="alias-fields" id="wrap-alias-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
+  html += '<label>Nama Alias / Samaran</label>';
+  html += '<input data-testid="input-alias" id="input-alias-' + c.campaignId + '" type="text" placeholder="Contoh: Hamba Allah">';
+  html += '</div>';
+
+  return html + '<button data-testid="btn-donasi" id="btn-join-' + c.campaignId + '" class="btn" style="margin-top:12px;" onclick="joinCampaign(\'' + c.campaignId + '\')">Gabung Donasi untuk ' + escapeHtml(c.targetName) + '</button></div>';
+}
+
+export function renderCampaignPaymentSection(c) {
+  const cardBankName = String(c.bankName || c.BankName || '').trim();
+  const cardBankAccount = String(c.bankAccount || c.BankAccount || '').trim();
+  const cardHolder = String(c.accountHolder || c.AccountHolder || '').trim();
+  let html = '';
+
+  if (c.paid) {
+    const proofRef = c.proofLink || c.ProofLink || c.proofStoragePath || c.ProofStoragePath;
+    const proofBtnHtml = proofRef
+      ? (proofRef.startsWith('http://') || proofRef.startsWith('https://')
+        ? '<a data-testid="link-proof" class="link-btn" href="' + escapeHtml(sanitizeUrl(proofRef)) + '" target="_blank" rel="noopener noreferrer" style="font-size:12px; text-decoration:none; padding:4px 10px; border:1px solid rgba(52,211,153,0.3); border-radius:4px; background:rgba(52,211,153,0.08); color:#6ee7b7;">Lihat Bukti</a>'
+        : '<button data-testid="btn-proof" type="button" class="link-btn" style="cursor:pointer; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.3); border-radius:4px; padding:4px 10px; font-size:12px; color:#6ee7b7;" onclick="openMediaFile(\'' + escapeHtml(proofRef) + '\')">Lihat Bukti</button>')
+      : '';
+
+    html += '<div class="card theme-surface-blue theme-blue-total" data-testid="payment-status" style="padding:14px 16px; border-radius:10px; margin-top:8px; border:1px solid rgba(52,211,153,0.25); background:rgba(6,95,70,0.12);">';
+    html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
+    html += '<div style="display:flex; align-items:center; gap:6px; color:#6ee7b7; font-weight:700; font-size:13px;">';
+    html += '<span>' + (c.verified ? '✓ Pembayaran Terverifikasi PIC' : '✓ Sudah konfirmasi transfer (Menunggu Verifikasi PIC)') + '</span>';
+    html += '</div>';
+    html += '<div data-testid="donor-total" style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:17px; font-weight:800; color:#eef6ed;">' + formatIDR(c.amountPaid || c.amountDue) + '</div>';
+    html += '</div>';
+    html += c.verified ? '<p class="muted">Butuh patungan untuk orang lain? Kamu bisa <button type="button" class="link-btn" data-testid="cta-become-pic-after-pay" onclick="seamlessBecomePic()">buat campaign sendiri</button>.</p>' : '';
+
+    if (cardBankAccount || cardBankName || cardHolder) {
+      html += '<div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); font-size:12px; color:var(--muted); flex-wrap:wrap; gap:6px;">';
+      html += '<div style="line-height:1.35;">';
+      html += '<span>Transfer ke: <strong>' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</strong></span>';
+      if (cardHolder) html += '<span style="display:block; font-size:11px; opacity:0.85;">a.n. ' + escapeHtml(cardHolder) + '</span>';
+      html += '</div>';
+      if (proofBtnHtml) html += '<div>' + proofBtnHtml + '</div>';
+      html += '</div>';
+    } else if (proofBtnHtml) {
+      html += '<div style="padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); text-align:right;">' + proofBtnHtml + '</div>';
+    }
+    return html + '</div>';
+  }
+
+  html += '<div class="card theme-surface-blue theme-blue-total" data-testid="payment-form" style="padding:16px; border-radius:10px; margin-top:8px; border:1px solid var(--border);">';
+  html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">';
+  html += '<span style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Jumlah Tagihan</span>';
+  html += '<div style="display:flex; align-items:center; gap:8px;">';
+  html += '<span data-testid="donor-total" style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:22px; font-weight:800; color:var(--blue);">' + formatIDR(c.amountDue) + '</span>';
+  html += '<button data-testid="btn-copy-total" type="button" class="btn secondary" style="padding:3px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')">Salin</button>';
+  html += '</div>';
+  html += '</div>';
+
+  if (cardBankAccount || cardBankName || cardHolder) {
+    html += '<div style="background:rgba(0,0,0,0.28); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<div style="line-height:1.4;">';
+    html += '<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">Rekening Tujuan PIC:</div>';
+    html += '<div style="font-weight:700; font-size:14px; color:#ffffff;">' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</div>';
+    if (cardHolder) html += '<div style="font-size:12px; color:var(--muted);">a.n. ' + escapeHtml(cardHolder) + '</div>';
+    html += '</div>';
+    if (cardBankAccount) {
+      html += '<button data-testid="btn-copy-account" type="button" class="btn secondary" style="padding:4px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(cardBankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin Rek</button>';
+    }
+    html += '</div>';
+  }
+
+  html += '<label style="font-size:13px; font-weight:600;">Upload Bukti Transfer</label>';
+  html += '<p class="muted" style="font-size:11px; margin:2px 0 8px 0;">Format JPG, PNG, atau PDF (maks 2MB) untuk diverifikasi oleh PIC.</p>';
+  html += '<input data-testid="proof-upload" type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf" style="width:100%; box-sizing:border-box;">';
+  html += '<button data-testid="btn-pay" id="btn-submit-proof-' + c.campaignId + '" class="btn" style="margin-top:8px; width:100%;" onclick="submitProof(\'' + c.campaignId + '\')">Sudah Transfer, Kirim Bukti</button>';
+  return html + '<div data-testid="proof-error" id="proof-error-' + c.campaignId + '" class="error"></div></div>';
+}
+
 export function renderCampaignCard(c, user, isPending) {
   let checkboxHtml = '';
   if (c.status === 'Open' && !c.joined) {
-    checkboxHtml = '<input type="checkbox" class="bulk-join-checkbox" value="' + c.campaignId + '" data-name="' + escapeHtml(c.targetName) + '" onchange="updateBulkJoinBtnVisibility()" style="width:16px; height:16px; margin-right:8px; cursor:pointer; vertical-align:middle;"> ';
+    checkboxHtml = '<input data-testid="input-bulk-join" type="checkbox" class="bulk-join-checkbox" value="' + c.campaignId + '" data-name="' + escapeHtml(c.targetName) + '" onchange="updateBulkJoinBtnVisibility()" style="width:16px; height:16px; margin-right:8px; cursor:pointer; vertical-align:middle;"> ';
   }
 
   const cardClass = isPending ? 'card donor-campaign-card donor-primary-card' : 'card donor-campaign-card';
-  let html = '<div class="' + cardClass + '" id="card-' + c.campaignId + '">';
+  let html = '<div class="' + cardClass + '" data-testid="campaign-card" data-id="' + escapeHtml(c.campaignId) + '" id="card-' + c.campaignId + '">';
   html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
   html += '<div style="display:flex;align-items:center;">' + checkboxHtml + '<strong>' + escapeHtml(c.targetName) + '</strong></div>';
   html += '<div>' + statusBadge(c.status) + getDeadlineBadge(c.deadline) + '</div>';
@@ -702,131 +828,18 @@ export function renderCampaignCard(c, user, isPending) {
   const parsedCount = Number(rawCount);
   const donorCount = (!isNaN(parsedCount) && rawCount !== null && rawCount !== '') ? parsedCount : 0;
   html += '<p class="muted">Total hadiah: ' + giftText + ' &middot; ' + donorCount + ' donatur' + (c.deadline ? ' &middot; deadline ' + c.deadline : '') + '</p>';
-
-  c.GiftLink = c.GiftLink || c.giftLink || '';
-  c.GiftImage = c.GiftImage || c.giftImage || '';
-  if (c.status === 'Finalized' && (c.GiftLink || c.GiftImage)) {
-    const giftActionStyle = 'display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family:inherit; font-size:12px; font-weight:600; line-height:1.2; min-height:36px; padding:6px 12px; border:1px solid var(--border-hover); border-radius:6px; background:rgba(255,255,255,0.04); color:var(--amber,#f5d347); text-decoration:none; box-sizing:border-box; cursor:pointer; flex:1 1 auto; text-align:center;';
-    html += '<div class="donor-gift-actions" style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">';
-    if (c.GiftLink) {
-      html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftLink)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">🔗 Lihat Barang/Hadiah</a>';
-    }
-    if (c.GiftImage) {
-      if (c.GiftImage.startsWith('http://') || c.GiftImage.startsWith('https://')) {
-        html += '<a href="' + escapeHtml(sanitizeUrl(c.GiftImage)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">📷 Lihat Screenshot Harga</a>';
-      } else {
-        html += '<button type="button" class="donor-gift-btn" style="' + giftActionStyle + '" onclick="openMediaFile(\'' + escapeHtml(sanitizeUrl(c.GiftImage)) + '\')">📷 Lihat Screenshot Harga</button>';
-      }
-    }
-    html += '</div>';
-  }
+  html += renderCampaignGiftActions(c);
 
   if (c.status === 'Open') {
-    if (c.joined) {
-      const customAmt = Number(c.customAmount !== undefined ? c.customAmount : (c.CustomAmount !== undefined ? c.CustomAmount : (c.custom_amount !== undefined ? c.custom_amount : 0))) || 0;
-      let joinNotice = '<div class="success">✓ Kamu sudah daftar di list ini. Menunggu finalisasi oleh PIC.</div>';
-      if (customAmt > 0) {
-        joinNotice += '<div class="theme-custom-amount-text" style="margin-top:6px; font-size:13px; font-weight:500;">🏷️ Komitmen nominal khusus: <strong>' + formatIDR(customAmt) + '</strong></div>';
-      } else {
-        joinNotice += '<div style="margin-top:6px; font-size:13px; color:var(--muted);">Partisipasi: Patungan rata-rata</div>';
-      }
-      html += joinNotice;
-      html += '<button id="btn-withdraw-' + c.campaignId + '" class="btn secondary" style="margin-top:8px;" onclick="withdraw(\'' + c.campaignId + '\')">Batal ikut</button>';
-    } else {
-      html += '<div class="card theme-surface-muted" style="margin-top:8px;">';
-      html += '<label style="margin-top:0; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-custom-' + c.campaignId + '" onchange="toggleCustomAmount(\'' + c.campaignId + '\')" style="width:auto; min-height:unset;"> Saya ingin donasi dengan nominal khusus</label>';
-      html += '<div id="wrap-custom-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
-      html += '<div class="theme-info-note" style="padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">';
-      html += '<span>ℹ️</span>';
-      html += '<span><strong>Ketentuan:</strong> Nominal khusus minimal <strong>Rp 50.000</strong>. Jika ingin patungan nominal standar, silakan tetap gunakan opsi patungan rata.</span>';
-      html += '</div>';
-      html += '<label>Nominal Khusus (IDR)</label>';
-      html += '<input id="input-custom-' + c.campaignId + '" type="text" inputmode="numeric" placeholder="Contoh: 50.000 (Minimal 50.000)" onkeyup="formatInputRibuan(event)">';
-      html += '</div>';
-
-      html += '<label style="margin-top:12px; display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="check-alias-' + c.campaignId + '" onchange="document.getElementById(\'wrap-alias-\' + \'' + c.campaignId + '\').classList.toggle(\'hidden\')" style="width:auto; min-height:unset;"> Sembunyikan Nama Asli (Gunakan Alias)</label>';
-      html += '<div id="wrap-alias-' + c.campaignId + '" class="hidden" style="margin-top:8px;">';
-      html += '<label>Nama Alias / Samaran</label>';
-      html += '<input id="input-alias-' + c.campaignId + '" type="text" placeholder="Contoh: Hamba Allah">';
-      html += '</div>';
-
-      html += '<button id="btn-join-' + c.campaignId + '" class="btn" style="margin-top:12px;" onclick="joinCampaign(\'' + c.campaignId + '\')">Gabung Donasi untuk ' + escapeHtml(c.targetName) + '</button>';
-      html += '</div>';
-    }
+    html += renderCampaignJoinOptions(c);
   } else if (c.status === 'Closed') {
     html += '<p class="muted">List sudah ditutup, menunggu PIC menentukan jumlah & rekening.</p>';
   } else if (c.status === 'Finalized') {
-    if (c.joined) {
-      const cardBankName = String(c.bankName || c.BankName || '').trim();
-      const cardBankAccount = String(c.bankAccount || c.BankAccount || '').trim();
-      const cardHolder = String(c.accountHolder || c.AccountHolder || '').trim();
-
-      if (c.paid) {
-        const proofRef = c.proofLink || c.ProofLink || c.proofStoragePath || c.ProofStoragePath;
-        const proofBtnHtml = proofRef
-          ? (proofRef.startsWith('http://') || proofRef.startsWith('https://')
-            ? '<a class="link-btn" href="' + escapeHtml(sanitizeUrl(proofRef)) + '" target="_blank" rel="noopener noreferrer" style="font-size:12px; text-decoration:none; padding:4px 10px; border:1px solid rgba(52,211,153,0.3); border-radius:4px; background:rgba(52,211,153,0.08); color:#6ee7b7;">Lihat Bukti</a>'
-            : '<button type="button" class="link-btn" style="cursor:pointer; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.3); border-radius:4px; padding:4px 10px; font-size:12px; color:#6ee7b7;" onclick="openMediaFile(\'' + escapeHtml(proofRef) + '\')">Lihat Bukti</button>')
-          : '';
-
-        html += '<div class="card theme-surface-blue theme-blue-total" style="padding:14px 16px; border-radius:10px; margin-top:8px; border:1px solid rgba(52,211,153,0.25); background:rgba(6,95,70,0.12);">';
-        html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
-        html += '<div style="display:flex; align-items:center; gap:6px; color:#6ee7b7; font-weight:700; font-size:13px;">';
-        html += '<span>' + (c.verified ? '✓ Pembayaran Terverifikasi PIC' : '✓ Sudah konfirmasi transfer (Menunggu Verifikasi PIC)') + '</span>';
-        html += '</div>';
-        html += '<div style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:17px; font-weight:800; color:#eef6ed;">' + formatIDR(c.amountPaid || c.amountDue) + '</div>';
-        html += '</div>';
-
-        if (cardBankAccount || cardBankName || cardHolder) {
-          html += '<div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); font-size:12px; color:var(--muted); flex-wrap:wrap; gap:6px;">';
-          html += '<div style="line-height:1.35;">';
-          html += '<span>Transfer ke: <strong>' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</strong></span>';
-          if (cardHolder) html += '<span style="display:block; font-size:11px; opacity:0.85;">a.n. ' + escapeHtml(cardHolder) + '</span>';
-          html += '</div>';
-          if (proofBtnHtml) html += '<div>' + proofBtnHtml + '</div>';
-          html += '</div>';
-        } else if (proofBtnHtml) {
-          html += '<div style="padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); text-align:right;">' + proofBtnHtml + '</div>';
-        }
-        html += '</div>';
-      } else {
-        html += '<div class="card theme-surface-blue theme-blue-total" style="padding:16px; border-radius:10px; margin-top:8px; border:1px solid var(--border);">';
-        html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">';
-        html += '<span style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Jumlah Tagihan</span>';
-        html += '<div style="display:flex; align-items:center; gap:8px;">';
-        html += '<span style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:22px; font-weight:800; color:var(--blue);">' + formatIDR(c.amountDue) + '</span>';
-        html += '<button type="button" class="btn secondary" style="padding:3px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')">Salin</button>';
-        html += '</div>';
-        html += '</div>';
-
-        if (cardBankAccount || cardBankName || cardHolder) {
-          html += '<div style="background:rgba(0,0,0,0.28); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
-          html += '<div style="line-height:1.4;">';
-          html += '<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">Rekening Tujuan PIC:</div>';
-          html += '<div style="font-weight:700; font-size:14px; color:#ffffff;">' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</div>';
-          if (cardHolder) html += '<div style="font-size:12px; color:var(--muted);">a.n. ' + escapeHtml(cardHolder) + '</div>';
-          html += '</div>';
-          if (cardBankAccount) {
-            html += '<button type="button" class="btn secondary" style="padding:4px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(cardBankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin Rek</button>';
-          }
-          html += '</div>';
-        }
-
-        html += '<label style="font-size:13px; font-weight:600;">Upload Bukti Transfer</label>';
-        html += '<p class="muted" style="font-size:11px; margin:2px 0 8px 0;">Format JPG, PNG, atau PDF (maks 2MB) untuk diverifikasi oleh PIC.</p>';
-        html += '<input type="file" id="proof-' + c.campaignId + '" accept="image/*,application/pdf" style="width:100%; box-sizing:border-box;">';
-        html += '<button id="btn-submit-proof-' + c.campaignId + '" class="btn" style="margin-top:8px; width:100%;" onclick="submitProof(\'' + c.campaignId + '\')">Sudah Transfer, Kirim Bukti</button>';
-        html += '<div id="proof-error-' + c.campaignId + '" class="error"></div>';
-        html += '</div>';
-      }
-    } else {
-      html += '<p class="muted">Kamu tidak terdaftar sebagai donatur di campaign ini.</p>';
-    }
+    html += c.joined ? renderCampaignPaymentSection(c) : '<p class="muted">Kamu tidak terdaftar sebagai donatur di campaign ini.</p>';
   } else {
     html += '<p class="muted">Campaign sudah selesai/diarsipkan.</p>';
   }
-  html += '</div>';
-  return html;
+  return html + '</div>';
 }
 
 export function joinCampaign(campaignId) {

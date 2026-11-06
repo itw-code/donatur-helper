@@ -11,27 +11,41 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&family=Fraunces:ital,opsz,wght@1,9..144,300..600&display=swap">
+  <!-- One family only. Inter was declared in base.css but overridden by the theme,
+       and Fraunces was downloaded and used by zero elements. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap">
 
-  <!-- Flatpickr CSS & JS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" integrity="sha384-RkASv+6KfBMW9eknReJIJ6b3UnjKOKC5bOUaNgIY778NFbQ8MtWq9Lr/khUgqtTt" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" integrity="sha384-5JqMv4L/Xa0hfvtF06qboNdhvuYXUku9ZrhZh3bSk8VXF0A/RuSLHpLsSV9Zqhl6" crossorigin="anonymous" defer></script>
+  <!-- [B3 · P1-5] Flatpickr removed. ADR-0018 commits to the browser's native mobile date control;
+       flatpickr was initialised with disableMobile:"true", which rewrote <input type="date"> to
+       type="text" and forced a desktop calendar onto phone users. Removing it also drops 2 CDN
+       requests, one integrity hash and ~2.5KB of theme CSS written solely to restyle it.
+       Native inputs yield Y-m-d, which is the format the backend already expects. -->
 
   <!-- Application Stylesheets -->
+  <script>
+    (() => { const stored = localStorage.getItem('donatpro.theme'); const theme = stored === 'dark' || stored === 'light' ? stored : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', theme); })();
+  </script>
+  <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/views.css">
-  <link rel="stylesheet" href="css/theme-aurora.css">
+  <!-- Dark theme must load last: it neutralises light-only declarations in the sheets above
+       and restores the cascade position the old theme-aurora.css overlay occupied. [B6-fix] -->
+  <link rel="stylesheet" href="css/theme-dark.css">
 </head>
 <body>
-  <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
-  <header class="wrap app-header" style="text-align: center;">
-    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 6px;">
-      <img src="assets/logo/logo-icon.svg" width="36" height="36" alt="DonatPRO Logo" style="display: block;">
-      <h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Donat<span style="color: var(--amber, #f5d347);">PRO</span></h1>
+  <a data-testid="link-skip-content" href="#main-content" class="skip-link">Lewati ke konten utama</a>
+  <header class="wrap app-header">
+    <div class="app-header-brand">
+      <img src="assets/logo/logo-icon.svg" width="36" height="36" alt="DonatPRO Logo">
+      <h1>Donat<span class="brand-accent">PRO</span></h1>
     </div>
-    <div class="dh-ticker-wrapper" id="dh-subtitle-ticker" role="region" aria-label="Motto DonatPRO" title="Klik untuk ganti pesan">
+    <span data-testid="app-bar-title" class="app-bar-title" id="app-bar-title"></span>
+    <button data-testid="theme-toggle" class="theme-toggle" id="theme-toggle" type="button" aria-label="Ganti ke tema terang"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 5.34l-1.41 1.41"/></svg></button>
+    <!-- [B1 · P0-2] The brand block is public-landing theatre. Authenticated screens collapse
+         to a 44px app bar (see .app-header[data-compact] in views.css) so the top 16% of every
+         phone screen stops being a tagline carousel. -->
+    <div data-testid="subtitle-ticker" class="dh-ticker-wrapper" id="dh-subtitle-ticker" role="region" aria-label="Motto DonatPRO" title="Klik untuk ganti pesan">
       <div class="dh-ticker-track">
         <p class="sub dh-ticker-text" id="dh-ticker-text" aria-live="polite">Satu Hadiah, Sejuta Cerita</p>
       </div>
@@ -45,33 +59,35 @@
   </header>
 
   <main id="main-content" class="wrap" tabindex="-1">
-    <div id="view-landing">
+    <div id="view-landing" data-testid="view-landing">
     <div class="card">
-      <button class="btn" onclick="showView('user-login')">Saya mau donasi</button>
-      <button class="btn secondary" onclick="showView('token-login')">Saya punya token (PIC / Admin / Super
-        Admin)</button>
+      <!-- [B1 · P0-4] Two doors, no role taxonomy. The old second label made a first-time user
+           know what a "token" is AND pick which of three staff roles they are before they could
+           proceed. Role resolution already happens after login (ADR-0009), so the label only
+           has to get them through the door. -->
+      <button data-testid="btn-donasi" class="btn" onclick="showView('user-login')">Saya mau donasi</button>
+      <button data-testid="btn-pengelola" class="btn secondary" onclick="showView('token-login')">Saya pengelola</button>
+      <p class="field-note">Belum punya token? Kamu bisa <button type="button" class="link-btn" data-testid="link-become-pic" aria-label="Jadi pengelola tanpa token" onclick="seamlessBecomePic()">jadi pengelola</button> dalam satu menit.</p>
     </div>
   </div>
 
-  <div id="view-user-login" class="hidden">
+  <div id="view-user-login" data-testid="view-user-login" class="hidden">
     <h2>Masuk sebagai donatur</h2>
     <div class="card">
       <label>No. WhatsApp</label>
-      <input id="u-wa" placeholder="08xxxxxxxxxx">
-      <div class="theme-info-note privacy-notice"
-        style="padding: 12px; border-radius: 8px; margin-top: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px;">
-        <span style="font-size: 16px; line-height: 1.1;">🔒</span>
-        <span style="line-height: 1.4;"><strong>Kami menjaga privasi Anda.</strong> Nomor WhatsApp hanya digunakan untuk
-          verifikasi login dan pengingat patungan donasi.</span>
-      </div>
+      <input data-testid="input-whatsapp" id="u-wa" placeholder="08xxxxxxxxxx">
+      <!-- [B1 · P0-5] Was a 324x81px bordered panel with a lock emoji between the field and the
+           button — it read as a tappable card and competed with the primary action. Now one
+           muted line: same reassurance, no visual weight, no emoji. -->
+      <p class="field-note">Nomor ini hanya untuk masuk dan pengingat donasi.</p>
 
-      <div id="u-register-fields" class="hidden"
+      <div data-testid="register-fields" id="u-register-fields" class="hidden"
         style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
         <div style="font-weight:600; font-size:15px; margin-bottom:16px; color:var(--text);">Pendaftaran Baru</div>
         <div class="form-row">
           <div>
             <label>Nama Lengkap</label>
-            <input id="u-name" placeholder="Nama kamu">
+            <input data-testid="input-donor-name" id="u-name" placeholder="Nama kamu">
             <div
               style="font-size: 12px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; margin-bottom: 16px;">
               <span style="font-size: 14px; line-height: 1;">ℹ️</span>
@@ -80,7 +96,7 @@
           </div>
           <div>
             <label>Status Karyawan</label>
-            <select id="u-status"
+            <select data-testid="select-donor-status" id="u-status"
               style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px;">
               <option value="" disabled selected>-- Pilih Status --</option>
               <option value="active">Active (Karyawan Saat Ini)</option>
@@ -90,111 +106,111 @@
         </div>
       </div>
 
-      <button id="btn-u-login" class="btn" onclick="userLogin()">Lanjut</button>
-      <button class="btn secondary" onclick="cancelUserLogin()">Kembali</button>
-      <div id="u-login-error" class="error"></div>
+      <button data-testid="btn-submit-donor-login" id="btn-u-login" class="btn" onclick="userLogin()">Lanjut</button>
+      <button data-testid="btn-cancel-donor-login" class="btn secondary" onclick="cancelUserLogin()">Kembali</button>
+      <div data-testid="donor-login-error" id="u-login-error" class="error"></div>
     </div>
   </div>
 
-  <div id="view-user-dashboard" class="hidden">
+  <div id="view-user-dashboard" data-testid="view-user-dashboard" class="hidden">
     <div class="role-dashboard-heading">
       <span class="role-eyebrow">DONOR</span>
       <h2>Perlu tindakan</h2>
       <p>Halo, <span id="u-display-name"></span></p>
     </div>
-    <div id="my-pic-campaigns"></div>
-    <div id="campaign-list"></div>
-    <div id="pic-create-btn-container"></div>
-    <button class="btn secondary" onclick="openProfileModal()">Profil</button>
+    <div data-testid="my-pic-campaigns-container" id="my-pic-campaigns"></div>
+    <div data-testid="campaign-list-container" id="campaign-list"></div>
+    <div data-testid="pic-create-container" id="pic-create-btn-container"></div>
+    <button data-testid="btn-profile" class="btn secondary" onclick="openProfileModal()">Profil</button>
   </div>
 
-  <div id="view-token-login" class="hidden">
+  <div id="view-token-login" data-testid="view-token-login" class="hidden">
     <h2>Masuk dengan token</h2>
     <div class="card">
       <label>Token</label>
-      <input id="t-token" placeholder="contoh: PIC-AB12CD34">
-      <button id="btn-t-login" class="btn" onclick="tokenLogin()">Lanjut</button>
-      <button class="btn secondary" onclick="showView('landing')">Kembali</button>
-      <div id="t-login-error" class="error"></div>
+      <input data-testid="input-token" id="t-token" placeholder="contoh: PIC-AB12CD34">
+      <button data-testid="btn-submit-token-login" id="btn-t-login" class="btn" onclick="tokenLogin()">Lanjut</button>
+      <button data-testid="btn-cancel-token-login" class="btn secondary" onclick="showView('landing')">Kembali</button>
+      <div data-testid="token-login-error" id="t-login-error" class="error"></div>
     </div>
   </div>
 
-  <div id="view-pic-create" class="hidden">
+  <div id="view-pic-create" data-testid="view-pic-create" class="hidden">
     <h2>Buat campaign donasi baru</h2>
     <div class="card">
       <div class="form-row">
         <div>
           <label>Nama target (yang resign)</label>
-          <input id="pc-target" placeholder="contoh: Ihsan Wanda">
+          <input data-testid="input-pic-target" id="pc-target" placeholder="contoh: Ihsan Wanda">
         </div>
         <div>
           <label>Total nilai hadiah (IDR)</label>
-          <input id="pc-amount" type="text" inputmode="numeric" placeholder="1.000.000" onkeyup="formatInputRibuan(event)">
+          <input data-testid="input-pic-amount" id="pc-amount" type="text" inputmode="numeric" placeholder="1.000.000" onkeyup="formatInputRibuan(event)">
         </div>
       </div>
       <label>Alasan / catatan (opsional)</label>
-      <textarea id="pc-reason" rows="2" placeholder="contoh: resign per 1 Juli 2026"></textarea>
+      <textarea data-testid="input-pic-reason" id="pc-reason" rows="2" placeholder="contoh: resign per 1 Juli 2026"></textarea>
       <div class="form-row">
         <div>
           <label>Tanggal mulai (opsional)</label>
-          <input id="pc-start" type="date">
+          <input data-testid="input-pic-start" id="pc-start" type="date">
         </div>
         <div>
           <label>Deadline donasi</label>
-          <input id="pc-deadline" type="date">
+          <input data-testid="input-pic-deadline" id="pc-deadline" type="date">
         </div>
       </div>
-      <button id="btn-create-campaign" class="btn" onclick="createCampaign()">Buat campaign</button>
-      <button class="btn secondary" onclick="cancelPicCreate()">Keluar / Batal</button>
-      <div id="pc-error" class="error"></div>
+      <button data-testid="btn-create-campaign" id="btn-create-campaign" class="btn" onclick="createCampaign()">Buat campaign</button>
+      <button data-testid="btn-cancel-pic-create" class="btn secondary" onclick="cancelPicCreate()">Keluar / Batal</button>
+      <div data-testid="pic-create-error" id="pc-error" class="error"></div>
     </div>
   </div>
 
-  <div id="view-pic-dashboard" class="hidden">
+  <div id="view-pic-dashboard" data-testid="view-pic-dashboard" class="hidden">
     <div class="role-dashboard-heading">
       <span class="role-eyebrow">PIC · CAMPAIGN</span>
       <h2 id="pic-dashboard-title">Dashboard PIC</h2>
       <p id="pic-dashboard-subtitle">Lihat progres campaign dan tindakan berikutnya.</p>
     </div>
-    <div id="pic-campaign-info" class="card"></div>
-    <div id="pic-actions" class="card"></div>
-    <div id="pic-donor-list" class="card"></div>
-    <div id="pic-reminder" class="card hidden"></div>
-    <div id="pic-danger-zone" class="card hidden"></div>
-    <button id="btn-pic-logout" class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button>
-    <button id="btn-return-admin" class="btn blue hidden" onclick="returnFromDeepDive()" style="margin-top:8px;">Kembali
+    <div data-testid="pic-campaign-info" id="pic-campaign-info" class="card"></div>
+    <div data-testid="pic-actions" id="pic-actions" class="card"></div>
+    <div data-testid="pic-donor-list" id="pic-donor-list" class="card"></div>
+    <div data-testid="pic-reminder" id="pic-reminder" class="card hidden"></div>
+    <div data-testid="pic-danger-zone" id="pic-danger-zone" class="card hidden"></div>
+    <button data-testid="btn-pic-logout" id="btn-pic-logout" class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button>
+    <button data-testid="btn-return-admin" id="btn-return-admin" class="btn blue hidden" onclick="returnFromDeepDive()" style="margin-top:8px;">Kembali
       ke Dashboard Admin</button>
-    <button id="btn-return-member" class="btn blue hidden" onclick="returnToMemberDashboard()"
+    <button data-testid="btn-return-member" id="btn-return-member" class="btn blue hidden" onclick="returnToMemberDashboard()"
       style="margin-top:8px;">🔙 Kembali ke Dashboard Member</button>
   </div>
 
-  <div id="view-admin-dashboard" class="hidden">
+  <div id="view-admin-dashboard" data-testid="view-admin-dashboard" class="hidden">
     <nav class="admin-nav-bar" aria-label="Navigasi admin">
-      <a href="#admin-summary" class="admin-nav-link">Ringkasan</a>
-      <a href="#admin-section-campaigns" class="admin-nav-link">Campaign</a>
-      <a href="#admin-section-members" class="admin-nav-link">Members</a>
-      <a href="#admin-section-tools" class="admin-nav-link">Tools PIC</a>
-      <a href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
+      <a data-testid="link-admin-summary" href="#admin-summary" class="admin-nav-link">Ringkasan</a>
+      <a data-testid="link-admin-campaigns" href="#admin-section-campaigns" class="admin-nav-link">Campaign</a>
+      <a data-testid="link-admin-members" href="#admin-section-members" class="admin-nav-link">Members</a>
+      <a data-testid="link-admin-tools" href="#admin-section-tools" class="admin-nav-link">Tools PIC</a>
+      <a data-testid="btn-admin-logout-nav" href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
     </nav>
     <div class="admin-dashboard-heading">
       <span class="admin-data-card-label">ADMIN · OPERATIONS</span>
       <h2 id="admin-dashboard-title">Perlu ditinjau</h2>
       <p id="admin-dashboard-greeting">Persetujuan dan pengecualian campaign berada di urutan teratas.</p>
     </div>
-    <div id="admin-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
-    <section id="admin-action-queue" class="card admin-action-queue" aria-labelledby="admin-action-queue-title">
+    <div data-testid="admin-notify-banner" id="admin-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
+    <section data-testid="action-queue" id="admin-action-queue" class="card admin-action-queue" aria-labelledby="admin-action-queue-title">
       <div class="admin-action-queue-heading">
         <div>
           <span class="admin-data-card-label">ADMIN · OPERATIONS</span>
           <h3 id="admin-action-queue-title">Perlu ditinjau</h3>
           <p>Persetujuan dan pengecualian tampil lebih dulu supaya tindakan berikutnya selalu jelas.</p>
         </div>
-        <span id="admin-action-queue-total" class="semantic-status warning" role="status">
+        <span data-testid="action-queue-total" id="admin-action-queue-total" class="semantic-status warning" role="status">
           <span>Memuat antrean...</span>
         </span>
       </div>
       <div class="admin-queue-list">
-        <a id="admin-queue-pending" class="admin-queue-row hidden" href="#admin-pending-card">
+        <a data-testid="link-queue-pending" id="admin-queue-pending" class="admin-queue-row hidden" href="#admin-pending-card">
           <span class="admin-queue-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="8" r="4"></circle>
@@ -207,7 +223,7 @@
           </span>
           <span class="admin-queue-review">Tinjau</span>
         </a>
-        <a id="admin-queue-late" class="admin-queue-row hidden" href="#admin-late-card">
+        <a data-testid="link-queue-late" id="admin-queue-late" class="admin-queue-row hidden" href="#admin-late-card">
           <span class="admin-queue-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -222,27 +238,27 @@
           <span class="admin-queue-review">Tinjau</span>
         </a>
       </div>
-      <p id="admin-action-queue-empty" class="muted admin-queue-empty hidden">Tidak ada item yang perlu ditinjau.</p>
+      <p data-testid="action-queue-empty" id="admin-action-queue-empty" class="muted admin-queue-empty hidden">Tidak ada item yang perlu ditinjau.</p>
     </section>
-    <div id="admin-pending-card" class="card">
+    <div data-testid="admin-pending-card" id="admin-pending-card" class="card">
       <h2 style="margin-top:0">Menunggu Persetujuan Member</h2>
-      <div id="admin-pending-members"></div>
+      <div data-testid="admin-pending-members" id="admin-pending-members"></div>
     </div>
-    <div id="admin-late-card" class="card">
+    <div data-testid="admin-late-card" id="admin-late-card" class="card">
       <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
-      <div id="admin-late-donors"></div>
+      <div data-testid="admin-late-donors" id="admin-late-donors"></div>
     </div>
-    <div id="admin-summary" class="card admin-section"></div>
+    <div data-testid="admin-summary" id="admin-summary" class="card admin-section"></div>
     <div id="admin-section-campaigns" class="card admin-section">
       <h2 style="margin-top:0">Semua campaign</h2>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
           <label for="admin-campaign-search">Cari campaign
-            <input id="admin-campaign-search" type="search" placeholder="Target atau nama PIC..."
+            <input data-testid="input-admin-campaign-search" id="admin-campaign-search" type="search" placeholder="Target atau nama PIC..."
               oninput="filterAdminCampaigns('admin-campaign-list', 'admin-campaign-search', 'admin-campaign-status-filter', 'admin-campaign-filter-summary')">
           </label>
           <label for="admin-campaign-status-filter">Filter status
-            <select id="admin-campaign-status-filter"
+            <select data-testid="select-admin-campaign-status" id="admin-campaign-status-filter"
               onchange="filterAdminCampaigns('admin-campaign-list', 'admin-campaign-search', 'admin-campaign-status-filter', 'admin-campaign-filter-summary')">
               <option value="all">Semua status</option>
               <option value="open">Terbuka</option>
@@ -252,21 +268,20 @@
             </select>
           </label>
         </div>
-        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
-        <p id="admin-campaign-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat campaign...</p>
+        <p data-testid="admin-campaign-filter-summary" id="admin-campaign-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat campaign...</p>
       </div>
-      <div id="admin-campaign-list"></div>
+      <div data-testid="admin-campaign-list" id="admin-campaign-list"></div>
     </div>
     <div id="admin-section-members" class="card admin-section">
       <h2 style="margin-top:0">Daftar Members</h2>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
           <label for="admin-search-member">Cari member
-            <input id="admin-search-member" type="search" placeholder="Nama atau nomor WhatsApp..."
+            <input data-testid="input-admin-member-search" id="admin-search-member" type="search" placeholder="Nama atau nomor WhatsApp..."
               oninput="filterMembers('admin-member-list', 'admin-search-member', 'admin-member-status-filter', 'admin-member-filter-summary')">
           </label>
           <label for="admin-member-status-filter">Filter status
-            <select id="admin-member-status-filter"
+            <select data-testid="select-admin-member-status" id="admin-member-status-filter"
               onchange="filterMembers('admin-member-list', 'admin-search-member', 'admin-member-status-filter', 'admin-member-filter-summary')">
               <option value="all">Semua status</option>
               <option value="active">Active</option>
@@ -275,43 +290,41 @@
             </select>
           </label>
         </div>
-        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
-        <p id="admin-member-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat member...</p>
+        <p data-testid="admin-member-filter-summary" id="admin-member-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat member...</p>
       </div>
-      <div id="admin-member-list"></div>
+      <div data-testid="admin-member-list" id="admin-member-list"></div>
     </div>
     <div id="admin-section-tools" class="card admin-section" style="border: 1px dashed var(--border);">
       <h3 style="margin-top:0; font-size:15px; color: var(--text);">Tools PIC</h3>
-      <p class="muted" style="margin: 0 0 12px 0; font-size: 13px;">Gunakan untuk membuat akses token PIC baru secara manual.</p>
-      <button class="btn secondary btn-auto" onclick="genPicToken()">+ Buat token PIC baru</button>
-      <div id="admin-new-token"></div>
+      <button data-testid="btn-generate-pic-token" class="btn secondary btn-auto" onclick="genPicToken()">+ Buat token PIC baru</button>
+      <div data-testid="admin-new-token" id="admin-new-token"></div>
     </div>
-    <button class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button> <!-- ADD THIS -->
+    <button data-testid="btn-admin-logout" class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button> <!-- ADD THIS -->
   </div>
 
-  <div id="view-superadmin-dashboard" class="hidden">
+  <div id="view-superadmin-dashboard" data-testid="view-superadmin-dashboard" class="hidden">
     <nav class="admin-nav-bar" aria-label="Navigasi super admin">
-      <a href="#sa-summary" class="admin-nav-link">Ringkasan</a>
-      <a href="#sa-section-campaigns" class="admin-nav-link">Campaign</a>
-      <a href="#sa-section-admins" class="admin-nav-link">Admin</a>
-      <a href="#sa-section-members" class="admin-nav-link">Members</a>
-      <a href="#sa-section-settings" class="admin-nav-link">Pengaturan</a>
-      <a href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
+      <a data-testid="link-superadmin-summary" href="#sa-summary" class="admin-nav-link">Ringkasan</a>
+      <a data-testid="link-superadmin-campaigns" href="#sa-section-campaigns" class="admin-nav-link">Campaign</a>
+      <a data-testid="link-superadmin-admins" href="#sa-section-admins" class="admin-nav-link">Admin</a>
+      <a data-testid="link-superadmin-members" href="#sa-section-members" class="admin-nav-link">Members</a>
+      <a data-testid="link-superadmin-settings" href="#sa-section-settings" class="admin-nav-link">Pengaturan</a>
+      <a data-testid="btn-superadmin-logout-nav" href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
     </nav>
     <h2>Dashboard Super Admin</h2>
-    <div id="sa-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
-    <div id="sa-summary" class="card admin-section"></div>
+    <div data-testid="superadmin-notify-banner" id="sa-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
+    <div data-testid="superadmin-summary" id="sa-summary" class="card admin-section"></div>
 
     <div id="sa-section-campaigns" class="card admin-section">
       <h2 style="margin-top:0">Semua Campaign</h2>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
           <label for="sa-campaign-search">Cari campaign
-            <input id="sa-campaign-search" type="search" placeholder="Target atau nama PIC..."
+            <input data-testid="input-superadmin-campaign-search" id="sa-campaign-search" type="search" placeholder="Target atau nama PIC..."
               oninput="filterAdminCampaigns('sa-campaign-list', 'sa-campaign-search', 'sa-campaign-status-filter', 'sa-campaign-filter-summary')">
           </label>
           <label for="sa-campaign-status-filter">Filter status
-            <select id="sa-campaign-status-filter"
+            <select data-testid="select-superadmin-campaign-status" id="sa-campaign-status-filter"
               onchange="filterAdminCampaigns('sa-campaign-list', 'sa-campaign-search', 'sa-campaign-status-filter', 'sa-campaign-filter-summary')">
               <option value="all">Semua status</option>
               <option value="open">Terbuka</option>
@@ -321,21 +334,20 @@
             </select>
           </label>
         </div>
-        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
-        <p id="sa-campaign-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat campaign...</p>
+        <p data-testid="superadmin-campaign-filter-summary" id="sa-campaign-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat campaign...</p>
       </div>
-      <div id="sa-campaign-list"></div>
+      <div data-testid="superadmin-campaign-list" id="sa-campaign-list"></div>
     </div>
 
     <!-- Approval sections — will auto-collapse if empty -->
-    <div id="sa-pending-card" class="card hidden">
+    <div data-testid="superadmin-pending-card" id="sa-pending-card" class="card hidden">
       <h2 style="margin-top:0">Menunggu Persetujuan Member</h2>
-      <div id="sa-pending-members"></div>
+      <div data-testid="superadmin-pending-members" id="sa-pending-members"></div>
     </div>
 
-    <div id="sa-late-card" class="card hidden">
+    <div data-testid="superadmin-late-card" id="sa-late-card" class="card hidden">
       <h2 style="margin-top:0; color:var(--amber);">Persetujuan Donatur Susulan</h2>
-      <div id="sa-late-donors"></div>
+      <div data-testid="superadmin-late-donors" id="sa-late-donors"></div>
     </div>
 
     <!-- Full Width Data Tables -->
@@ -343,27 +355,27 @@
     <div id="sa-section-admins" class="card admin-section">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h2 style="margin-top:0; margin-bottom:12px;">Daftar Admin</h2>
-        <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
+        <button data-testid="btn-toggle-admin-token-form" class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
           onclick="document.getElementById('sa-gen-admin-form').classList.toggle('hidden')">+ Token Admin Baru</button>
       </div>
-      <div id="sa-gen-admin-form" class="hidden theme-surface-muted"
+      <div data-testid="admin-token-form" id="sa-gen-admin-form" class="hidden theme-surface-muted"
         style="padding:12px; border-radius:8px; margin-bottom:12px; position:relative;">
-        <button
+        <button data-testid="btn-close-admin-token-form"
           style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
           onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
         <label>Alias Admin</label>
-        <input id="sa-admin-alias" placeholder="contoh: Bela EE">
-        <button class="btn" style="margin-top:8px;" onclick="genAdminToken()">Buat token Admin baru</button>
-        <div id="sa-new-token"></div>
+        <input data-testid="input-admin-alias" id="sa-admin-alias" placeholder="contoh: Bela EE">
+        <button data-testid="btn-generate-admin-token" class="btn" style="margin-top:8px;" onclick="genAdminToken()">Buat token Admin baru</button>
+        <div data-testid="superadmin-new-token" id="sa-new-token"></div>
       </div>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
           <label for="sa-admin-search">Cari admin
-            <input id="sa-admin-search" type="search" placeholder="Alias atau nomor WhatsApp..."
+            <input data-testid="input-superadmin-admin-search" id="sa-admin-search" type="search" placeholder="Alias atau nomor WhatsApp..."
               oninput="filterAdminAccounts('sa-admin-list', 'sa-admin-search', 'sa-admin-status-filter', 'sa-admin-filter-summary')">
           </label>
           <label for="sa-admin-status-filter">Filter status
-            <select id="sa-admin-status-filter"
+            <select data-testid="select-superadmin-admin-status" id="sa-admin-status-filter"
               onchange="filterAdminAccounts('sa-admin-list', 'sa-admin-search', 'sa-admin-status-filter', 'sa-admin-filter-summary')">
               <option value="all">Semua status</option>
               <option value="active">Aktif</option>
@@ -371,27 +383,26 @@
             </select>
           </label>
         </div>
-        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
-        <p id="sa-admin-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat admin...</p>
+        <p data-testid="superadmin-admin-filter-summary" id="sa-admin-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat admin...</p>
       </div>
-      <div id="sa-admin-list"></div>
+      <div data-testid="superadmin-admin-list" id="sa-admin-list"></div>
     </div>
 
     <!-- Members Management -->
     <div id="sa-section-members" class="card admin-section">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h2 style="margin-top:0; margin-bottom:12px;">Daftar Members</h2>
-        <button class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
+        <button data-testid="btn-toggle-add-member-form" class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
           onclick="document.getElementById('sa-add-member-form').classList.toggle('hidden')">+ Tambah Member</button>
       </div>
       <div class="admin-data-toolbar">
         <div class="admin-data-toolbar-fields">
           <label for="sa-search-member">Cari member
-            <input id="sa-search-member" type="search" placeholder="Nama atau nomor WhatsApp..."
+            <input data-testid="input-superadmin-member-search" id="sa-search-member" type="search" placeholder="Nama atau nomor WhatsApp..."
               oninput="filterMembers('sa-member-list', 'sa-search-member', 'sa-member-status-filter', 'sa-member-filter-summary')">
           </label>
           <label for="sa-member-status-filter">Filter status
-            <select id="sa-member-status-filter"
+            <select data-testid="select-superadmin-member-status" id="sa-member-status-filter"
               onchange="filterMembers('sa-member-list', 'sa-search-member', 'sa-member-status-filter', 'sa-member-filter-summary')">
               <option value="all">Semua status</option>
               <option value="active">Active</option>
@@ -400,28 +411,27 @@
             </select>
           </label>
         </div>
-        <p class="admin-data-toolbar-hint">Cari dan filter tersedia sebelum data ditampilkan.</p>
-        <p id="sa-member-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat member...</p>
+        <p data-testid="superadmin-member-filter-summary" id="sa-member-filter-summary" class="admin-data-toolbar-summary" aria-live="polite">Memuat member...</p>
       </div>
-      <div id="sa-member-list"></div>
+      <div data-testid="superadmin-member-list" id="sa-member-list"></div>
 
-      <div id="sa-add-member-form" class="hidden theme-surface-muted"
+      <div data-testid="add-member-form" id="sa-add-member-form" class="hidden theme-surface-muted"
         style="padding:12px; border-radius:8px; margin-top:12px; position:relative;">
-        <button
+        <button data-testid="btn-close-add-member-form"
           style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
           onclick="document.getElementById('sa-add-member-form').classList.add('hidden')">&times;</button>
         <h3 style="margin-top:0; font-size:14px;">Tambah member manual</h3>
         <label>Nama</label>
-        <input id="sa-mem-name" placeholder="Nama">
+        <input data-testid="input-new-member-name" id="sa-mem-name" placeholder="Nama">
         <label>No. WhatsApp</label>
-        <input id="sa-mem-wa" placeholder="08xxxxxxxxxx">
+        <input data-testid="input-new-member-whatsapp" id="sa-mem-wa" placeholder="08xxxxxxxxxx">
         <label>Status</label>
-        <select id="sa-mem-status">
+        <select data-testid="select-new-member-status" id="sa-mem-status">
           <option value="active">active</option>
           <option value="ex">ex</option>
         </select>
-        <button class="btn" style="margin-top:8px;" onclick="addMemberUI()">Tambah member</button>
-        <div id="sa-member-msg"></div>
+        <button data-testid="btn-add-member" class="btn" style="margin-top:8px;" onclick="addMemberUI()">Tambah member</button>
+        <div data-testid="add-member-message" id="sa-member-msg"></div>
       </div>
     </div>
 
@@ -429,57 +439,64 @@
     <div id="sa-section-settings" class="admin-section" style="display:flex; gap:24px; flex-wrap:wrap; margin-top:24px;">
       <div class="card" style="flex:1; min-width:300px; margin-top:0;">
         <h2 style="margin-top:0">Pengaturan</h2>
-        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-rounding"
+        <label style="display:flex; align-items:center; gap:8px;"><input data-testid="input-rounding-enabled" type="checkbox" id="sa-rounding"
             style="width:auto;"> Aktifkan pembulatan nominal donasi</label>
         <label>Bulatkan ke kelipatan (IDR)</label>
-        <input id="sa-roundto" type="number" placeholder="500">
-        <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="sa-validation"
+        <input data-testid="input-rounding-amount" id="sa-roundto" type="number" placeholder="500">
+        <label style="display:flex; align-items:center; gap:8px;"><input data-testid="input-member-validation" type="checkbox" id="sa-validation"
             style="width:auto;"> Wajib cocok dengan daftar Members (validasi WhatsApp)</label>
         <label>Email Notifikasi Pendaftaran (pisahkan dengan koma)</label>
-        <input id="sa-notification-emails" type="text" placeholder="admin1@example.com, admin2@example.com">
+        <input data-testid="input-notification-emails" id="sa-notification-emails" type="text" placeholder="admin1@example.com, admin2@example.com">
         <label>URL Aplikasi (untuk link di email reminder)</label>
-        <input id="sa-app-url" type="text" placeholder="https://don4pro.com">
-        <button class="btn" style="margin-top:8px;" onclick="saveSettings()">Simpan pengaturan</button>
-        <div id="sa-settings-msg"></div>
+        <input data-testid="input-app-url" id="sa-app-url" type="text" placeholder="https://don4pro.com">
+        <button data-testid="btn-save-settings" class="btn" style="margin-top:8px;" onclick="saveSettings()">Simpan pengaturan</button>
+        <div data-testid="settings-message" id="sa-settings-msg"></div>
       </div>
       <div class="card" style="flex:1; min-width:300px; margin-top:0;">
         <h3 style="margin-top:0; font-size:14px; color:var(--muted);">Database Maintenance</h3>
         <p class="muted">Pindahkan data campaign yang sudah diarsipkan ke penyimpanan dingin untuk menjaga kecepatan sistem.</p>
-        <button class="btn amber" onclick="runDataSweep()">Bersihkan Arsip Data</button>
-        <div id="sa-sweep-msg"></div>
+        <button data-testid="btn-run-data-sweep" class="btn amber" onclick="runDataSweep()">Bersihkan Arsip Data</button>
+        <div data-testid="data-sweep-message" id="sa-sweep-msg"></div>
       </div>
     </div>
 
-    <button class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button>
+    <button data-testid="btn-superadmin-logout" class="btn secondary" onclick="logoutToken()">Keluar / Ganti Akun</button>
   </div>
 </div>
 
 <!-- PROFIL MODAL -->
-<div id="profile-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+<div data-testid="profile-modal" id="profile-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
   <div class="card" style="width:100%; max-width:400px; padding:24px; position:relative;">
     <h3 style="margin-top:0; margin-bottom:16px;">Profil Anda</h3>
     <label>Nomor WhatsApp (Tidak bisa diubah)</label>
-    <input type="text" id="prof-wa" disabled class="profile-disabled-input" style="cursor:not-allowed;">
+    <input data-testid="input-profile-whatsapp" type="text" id="prof-wa" disabled class="profile-disabled-input" style="cursor:not-allowed;">
     <label>Nama Anda</label>
-    <input type="text" id="prof-name">
+    <input data-testid="input-profile-name" type="text" id="prof-name">
     <label>Email <span style="font-size:12px; color:var(--muted);">(Opsional, untuk pengingat otomatis)</span></label>
-    <input type="email" id="prof-email" placeholder="contoh@email.com">
+    <input data-testid="input-profile-email" type="email" id="prof-email" placeholder="contoh@email.com">
     
-    <div id="prof-msg" style="margin-bottom:16px;"></div>
+    <div data-testid="profile-message" id="prof-msg" style="margin-bottom:16px;"></div>
     
     <div style="display:flex; gap:8px;">
-      <button class="btn blue" style="flex:1" onclick="saveProfile()">Simpan Profil</button>
-      <button class="btn secondary" style="flex:1" onclick="closeProfileModal()">Tutup</button>
+      <button data-testid="btn-save-profile" class="btn blue" style="flex:1" onclick="saveProfile()">Simpan Profil</button>
+      <button data-testid="btn-close-profile" class="btn secondary" style="flex:1" onclick="closeProfileModal()">Tutup</button>
     </div>
     <div style="margin-top:24px; border-top:1px solid var(--border); padding-top:16px;">
-      <button class="btn secondary" style="width:100%; color:var(--red);" onclick="logoutUser()">Keluar Akun</button>
+      <button data-testid="btn-logout-user" class="btn secondary" style="width:100%; color:var(--red);" onclick="logoutUser()">Keluar Akun</button>
     </div>
   </div>
 </div>
 
 <div id="toast" role="status" aria-live="polite">Teks berhasil disalin!</div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- [B7c · §0b.7] Pinned to an exact version with SRI. The floating `@2` tag meant every
+       deploy silently took whatever jsDelivr served that day, with no integrity check —
+       a compromised or broken release would have shipped unreviewed. 2.119.0 is the exact
+       build `@2` was serving when this was pinned (verified byte-identical, sha384 below),
+       so runtime behaviour is unchanged. Bump deliberately, not by drift. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"
+          integrity="sha384-gnyZit14c5lnGcarmA166QQjjJXpucw25ogZXuwH3HxxY904zHkBqmxVpelsPorb"
+          crossorigin="anonymous"></script>
 <script src="js/config/env.local.js"></script>
 <script type="module" src="js/services/supabaseClient.js"></script>
 <script type="module" src="js/services/backendAdapter.js"></script>
@@ -525,6 +542,8 @@
     });
   })();
 </script>
-</body>
+<script>
+  (() => { const b=document.getElementById('theme-toggle'); if(!b)return; const sync=()=>{const dark=document.documentElement.dataset.theme==='dark'; b.setAttribute('aria-label',dark?'Ganti ke tema terang':'Ganti ke tema gelap'); b.innerHTML=dark?'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 5.34l-1.41 1.41"/></svg>':'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg>';}; b.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('donatpro.theme',t);sync();}); sync(); })();
+</script></body>
 </html>
 

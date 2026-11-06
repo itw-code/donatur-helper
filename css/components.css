@@ -28,8 +28,8 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: var(--card-pad);
+  margin-bottom: var(--space-4);
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s ease;
 }
@@ -38,9 +38,7 @@
   box-shadow: var(--shadow);
 }
 
-/* Semantic surfaces keep runtime-generated markup themeable. Avoid placing
-   literal light-theme colors in JS templates; theme-aurora.css remaps these
-   classes without relying on fragile inline-style attribute selectors. */
+/* Semantic surfaces remain themeable through the consolidated token layer. */
 .theme-surface-warning {
   background: #fffbeb;
   border: 1px solid #fde68a;
@@ -118,15 +116,14 @@
 .btn {
   display: block;
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   border-radius: 8px;
   border: none;
   background: var(--primary);
-  color: #fff;
-  font-size: 14px;
+  color: #fff;font-size:var(--text-sm);
   font-weight: 600;
   cursor: pointer;
-  margin-top: 12px;
+  margin-top: var(--space-3);
   text-align: center;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -199,12 +196,11 @@ input,
 textarea,
 select {
   width: 100%;
-  padding: 10px 12px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 8px;font-size:var(--text-sm);
   font-family: inherit;
-  margin-top: 6px;
+  margin-top: var(--space-2);
   background: #fff;
   color: var(--text);
   transition: all 0.2s ease;
@@ -232,11 +228,10 @@ textarea::placeholder {
   color: #94a3b8;
 }
 
-label {
-  font-size: 13px;
+label {font-size:var(--text-sm);
   font-weight: 600;
   display: block;
-  margin-top: 16px;
+  margin-top: var(--space-4);
   color: #334155;
 }
 
@@ -245,10 +240,11 @@ label:first-child {
 }
 
 .badge {
-  display: inline-block;
-  font-size: 12px;
+  display: inline-block;font-size:var(--text-xs);
   font-weight: 600;
-  padding: 4px 10px;
+  /* [B5-fix2 · audit #10] horizontal 10px restored: at 8px the 12px uppercase text crowds the
+     pill's 9999px radius caps. Off-grid by judgement, documented rather than hidden. */
+  padding: var(--space-1) 10px;
   border-radius: 9999px;
   letter-spacing: 0.025em;
 }
@@ -288,7 +284,7 @@ svg.status-icon,
 .payment-status-badge {
   display: inline-flex;
   align-items: flex-start;
-  gap: 6px;
+  gap: var(--space-1);
   max-width: 100%;
 }
 
@@ -296,15 +292,14 @@ svg.status-icon,
   flex: 0 0 16px;
   width: 16px;
   height: 16px;
-  margin-top: 1px;
+  margin-top: 1px; /* [B5-fix2 · audit #9] optical alignment shim, was snapped to 0 */
 }
 
 .semantic-status {
   display: inline-flex;
   align-items: flex-start;
-  gap: 5px;
-  max-width: 100%;
-  font-size: 12px;
+  gap: var(--space-1);
+  max-width: 100%;font-size:var(--text-xs);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -313,7 +308,7 @@ svg.status-icon,
   flex: 0 0 16px;
   width: 16px;
   height: 16px;
-  margin-top: 1px;
+  margin-top: 1px; /* [B5-fix2 · audit #9] optical alignment shim, was snapped to 0 */
 }
 
 .semantic-status.success {
@@ -331,22 +326,20 @@ svg.status-icon,
 table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0;
-  font-size: 14px;
-  margin-top: 8px;
+  border-spacing: 0;font-size:var(--text-sm);
+  margin-top: var(--space-2);
 }
 
 th,
 td {
   text-align: left;
-  padding: 10px 8px;
+  padding: var(--space-dense) var(--space-2);
   border-bottom: 1px solid var(--border);
 }
 
 th {
   font-weight: 600;
-  color: var(--muted);
-  font-size: 12px;
+  color: var(--muted);font-size:var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -367,16 +360,15 @@ th .btn {
 td .action-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .token-box {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   background: #f1f5f9;
   color: #334155;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: var(--space-3);
+  border-radius: 8px;font-size:var(--text-sm);
   word-break: break-all;
   border: 1px solid var(--border);
 }
@@ -384,8 +376,7 @@ td .action-group {
 .link-btn {
   background: none;
   border: none;
-  color: var(--blue);
-  font-size: 14px;
+  color: var(--blue);font-size:var(--text-sm);
   font-weight: 500;
   cursor: pointer;
   padding: 0;
@@ -402,8 +393,8 @@ td .action-group {
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 10px 12px;
-  margin-left: 4px;
+  padding: var(--space-2) var(--space-3);
+  margin-left: var(--space-1);
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--blue);
@@ -419,7 +410,7 @@ td .action-group {
   display: block;
   border: 1px solid var(--border);
   border-radius: 8px;
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 .table-responsive table {
@@ -444,14 +435,13 @@ td .action-group {
   color: #fff;
   text-align: center;
   border-radius: 999px;
-  padding: 12px 24px;
+  padding: var(--space-3) var(--space-5);
   position: fixed;
   z-index: 9999;
   left: 50%;
   bottom: 24px;
   transform: translateX(-50%) translateY(20px);
-  box-shadow: var(--shadow-md);
-  font-size: 14px;
+  box-shadow: var(--shadow-md);font-size:var(--text-sm);
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0;
@@ -508,29 +498,19 @@ td .action-group {
   }
 }
 
-/* Flatpickr overrides */
-.flatpickr-calendar {
-  font-family: inherit !important;
-  font-size: 14px !important;
-}
-
-.flatpickr-current-month {
-  font-size: 110% !important;
-}
 
 /* Milestone timeline styling */
 .milestone-stack {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 4px 0;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
 }
 
 .milestone-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
+  gap: var(--space-2);font-size:var(--text-xs);
   line-height: 1.4;
 }
 
@@ -603,14 +583,13 @@ td .action-group {
   color: #38bdf8;
   border: 1px solid #334155;
   border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: var(--space-2) var(--space-3);font-size:var(--text-xs);
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .dh-debug-panel {
@@ -625,8 +604,7 @@ td .action-group {
   border: 1px solid #334155;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  padding: 12px;
-  font-size: 12px;
+  padding: var(--space-3);font-size:var(--text-xs);
 }
 
 .dh-debug-hidden {
@@ -638,15 +616,14 @@ td .action-group {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #1e293b;
-  padding-bottom: 8px;
-  margin-bottom: 8px;
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .dh-debug-badge {
   background: #0284c7;
-  color: #ffffff;
-  font-size: 10px;
-  padding: 2px 6px;
+  color: #ffffff;font-size:var(--text-xs);
+  padding: var(--space-1);
   border-radius: 4px;
   font-weight: 700;
 }
@@ -654,8 +631,7 @@ td .action-group {
 .dh-debug-close {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  font-size: 18px;
+  color: #94a3b8;font-size:var(--text-md);
   line-height: 1;
   cursor: pointer;
 }
@@ -663,8 +639,8 @@ td .action-group {
 .dh-debug-card {
   background: #1e293b;
   border-radius: 6px;
-  padding: 8px;
-  margin-bottom: 8px;
+  padding: var(--space-2);
+  margin-bottom: var(--space-2);
   border-left: 3px solid #38bdf8;
 }
 
@@ -676,12 +652,11 @@ td .action-group {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
 }
 
-.dh-budget-tag {
-  font-size: 10px;
-  padding: 2px 4px;
+.dh-budget-tag {font-size:var(--text-xs);
+  padding: var(--space-1);
   border-radius: 3px;
 }
 
@@ -698,8 +673,7 @@ td .action-group {
 .dh-debug-metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  font-size: 11px;
+  gap: var(--space-1);font-size:var(--text-xs);
 }
 
 .dh-metric-label {
@@ -707,15 +681,15 @@ td .action-group {
 }
 
 .dh-debug-card-warnings {
-  margin-top: 6px;
-  padding-top: 4px;
+  margin-top: var(--space-2);
+  padding-top: var(--space-1);
   border-top: 1px dashed #334155;
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .dh-debug-footer {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   text-align: right;
 }
 
@@ -723,14 +697,13 @@ td .action-group {
 .pic-state-callout {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   background: #f8fafc;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 13px;
+  padding: var(--space-3) var(--space-4);font-size:var(--text-md);
   color: #334155;
-  margin-top: 12px;
+  margin-top: var(--space-3);
   line-height: 1.4;
 }
 
@@ -751,12 +724,12 @@ td .action-group {
   transform: translateX(-50%);
   background: #0f172a;
   color: #f8fafc;
-  padding: 12px 18px;
+  padding: var(--space-3) var(--space-4);
   border-radius: 12px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-4);
   z-index: 99999;
   border: 1px solid rgba(255, 255, 255, 0.15);
   animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -764,21 +737,22 @@ td .action-group {
 }
 
 .app-update-banner p {
-  margin: 0;
-  font-size: 13px;
+  margin: 0;font-size:var(--text-md);
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .app-update-btn {
   background: #10b981;
   color: #ffffff;
   border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 13px;
+  padding: var(--space-2) var(--space-4);
+  /* [B5-fix2 · audit #15] no min-height meant a ~36px tap target; 8px vertical padding alone
+     does not reach 44px. */
+  min-height: var(--control-h);
+  border-radius: 6px;font-size:var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -801,3 +775,114 @@ td .action-group {
 }
 
 
+
+/* [B1 · P0-5] Field note replaces the privacy panel. */
+.field-note {
+  margin: var(--space-2) 0 var(--space-4);font-size:var(--text-xs);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* [B2 · P0-3] Shared empty state; anatomy documented in the plan. */
+.empty-state {
+  /* [B2-fix2 · audit #4] card chassis restored; detail in plan §0d */
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.empty-state-icon { margin-bottom: var(--space-2); line-height: 1; }
+.empty-state-title {
+  /* [B4-fix · F4] title must outrank its own note (was inverted by the px mapping) */
+  display: block;font-size:var(--text-md);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+  color: var(--text);
+}
+.empty-state-note {
+  margin: 0;font-size:var(--text-sm);
+  line-height: 1.5;
+  color: var(--muted);
+}
+.empty-state .btn { margin-top: var(--space-4); }
+/* admin tables/cards use a quieter inline variant — same wording, no box */
+.empty-state.is-inline {
+  padding: var(--space-4) var(--space-3);
+  text-align: left;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  /* [B2-fix2 · audit #5] separates the dashed box from .table-responsive's own border */
+  margin-top: var(--space-3);
+  background: transparent;
+}
+.empty-state.is-inline .empty-state-title { font-size:var(--text-sm); }
+
+/* ---------- landing tagline ticker (structure) ----------
+   [B6-fix] These rules used to live ONLY in the dark overlay file, so deleting that file
+   to build a light theme silently deleted the ticker's layout in light mode: the wrapper
+   computed display:block and collapsed, shrinking the landing header 133 -> 72px.
+   Layout belongs in a theme-agnostic sheet; theme-dark.css keeps only the colours. */
+.dh-ticker-wrapper{
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  padding: var(--space-1) var(--space-4) var(--space-2);
+  border-radius: 20px;
+  transition: background-color 0.2s ease;
+}
+.dh-ticker-wrapper:hover{
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.dh-ticker-wrapper:focus-visible{
+  outline: 2px solid #34d399;
+  outline-offset: 2px;
+}
+.dh-ticker-track{
+  height: 22px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dh-ticker-text{
+  margin: 0 !important;
+  text-align: center;font-size:var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+}
+.dh-ticker-text.slide-out{
+  opacity: 0;
+  transform: translateY(-14px);
+}
+.dh-ticker-text.slide-in-init{
+  opacity: 0;
+  transform: translateY(14px);
+}
+.dh-ticker-dots{
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  align-items: center;
+}
+.dh-dot{
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.dh-dot:hover{
+  background: rgba(255, 255, 255, 0.45);
+}
+.dh-dot.active{
+  width: 16px;
+  border-radius: 3px;
+  background: var(--accent-soft-ink);
+}

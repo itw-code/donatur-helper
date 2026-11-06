@@ -22,5 +22,10 @@ test('Admin token generation CTA is placed in Tools section with secondary styli
 
   // Secondary button styling and explanatory copy
   assert.match(html, /class="btn secondary btn-auto"[^>]*onclick="genPicToken\(\)"/);
-  assert.match(html, /Gunakan untuk membuat akses token PIC baru secara manual/);
+  // [B10 · P1-6] The helper sentence was deleted under Q13: the button directly below reads
+  // "+ Buat token PIC baru", so the sentence restated the control it sat next to. The CTA and its
+  // placement are what this test protects; assert those, not the narration.
+  assert.doesNotMatch(html, /Gunakan untuk membuat akses token PIC baru secara manual/,
+    'helper copy restating the button label must not return');
+  assert.match(html, /btn-generate-pic-token/, 'the CTA itself must remain');
 });

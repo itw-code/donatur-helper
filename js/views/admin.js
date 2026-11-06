@@ -1,7 +1,7 @@
 // Admin & SuperAdmin Shared Management: Members, Campaigns, Token Generation, Late Requests
 
 import { safeGet } from '../storage.js';
-import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, formatDate, formatTime, parseRibuan, formatInputRibuan, statusBadge, paymentStatusIcon } from '../utils.js';
+import { escapeHtml, sanitizeUrl, formatUserErrorMessage, showInfoModal, showConfirmModal, showToast, showView, formatIDR, formatDate, formatTime, parseRibuan, formatInputRibuan, statusBadge, paymentStatusIcon, emptyState } from '../utils.js';
 import { call, callQueued } from '../api.js';
 import { appState, currentToken } from '../state.js';
 import { deepDive, startAdminPolling, recordPendingFetchTime } from './auth.js';
@@ -215,7 +215,7 @@ export function renderPendingMembersSection(elId, list) {
   const bannerEl = document.getElementById(bannerId);
 
   if (!list.length) {
-    el.innerHTML = '<p class="muted">Tidak ada pendaftaran baru.</p>';
+    el.innerHTML = emptyState({ title: 'Tidak ada pendaftaran baru', note: 'Pendaftaran member akan muncul di sini.', inline: true });
     if (parentCard) parentCard.classList.add('hidden');
     if (bannerEl) bannerEl.classList.add('hidden');
     return list;
@@ -362,7 +362,7 @@ export function renderLateRequestsSection(elId, list) {
   if (elId === 'admin-late-donors') updateAdminActionQueue('late', list.length);
   const parentCard = getAdminParentCard(elId);
   if (!list.length) {
-    el.innerHTML = '<p class="muted">Tidak ada pengajuan donatur susulan.</p>';
+    el.innerHTML = emptyState({ title: 'Tidak ada pengajuan susulan', note: 'Permintaan ikut donatur yang terlambat akan muncul di sini.', inline: true });
     if (parentCard) parentCard.classList.add('hidden');
     return list;
   }
@@ -494,7 +494,7 @@ export function filterAdminAccounts(listId, searchId, statusId, summaryId) {
 
 export function renderAdminAccounts(list) {
   const items = Array.isArray(list) ? list : (list && Array.isArray(list.tokens) ? list.tokens : []);
-  if (!items.length) return '<p class="muted admin-data-empty">Belum ada Admin terdaftar.</p>';
+  if (!items.length) return emptyState({ title: 'Belum ada Admin terdaftar', note: 'Buat token Admin untuk menambah pengelola.', inline: true });
 
   let cards = '<div class="admin-account-cards">';
   let table = '<div class="admin-account-table-view"><div class="table-responsive"><table><tr><th>Alias</th><th>WhatsApp</th><th>Token</th><th>Status</th><th>Aksi</th></tr>';
@@ -549,8 +549,8 @@ export function renderAdminAccounts(list) {
     table += '</div></td></tr>';
   });
 
-  cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada admin yang sesuai filter.</p></div>';
-  table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada admin yang sesuai filter.</p></div>';
+  cards += '<div class="empty-state is-inline hidden" data-filter-empty><strong class="empty-state-title">Tidak ada admin yang cocok</strong></div></div>';
+  table += '</table></div><div class="empty-state is-inline hidden" data-filter-empty><strong class="empty-state-title">Tidak ada admin yang cocok</strong></div></div>';
   return cards + table;
 }
 
@@ -656,7 +656,7 @@ export function renderAdminCampaignActions(c, role) {
 
 export function renderAdminCampaignViews(list) {
   const role = safeGet('auth_role');
-  if (!list.length) return '<p class="muted admin-data-empty">Belum ada campaign.</p>';
+  if (!list.length) return emptyState({ title: 'Belum ada campaign', note: 'Campaign dibuat oleh PIC, bukan dari halaman ini.', inline: true });
 
   const sortedList = list.slice().sort((a, b) => {
     const isActiveA = (a.Status === 'Open' || a.Status === 'Closed') ? 1 : 0;
@@ -710,8 +710,8 @@ export function renderAdminCampaignViews(list) {
     table += '</div></td></tr>';
   });
 
-  cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada campaign yang sesuai filter.</p></div>';
-  table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada campaign yang sesuai filter.</p></div>';
+  cards += '<div class="empty-state is-inline hidden" data-filter-empty><strong class="empty-state-title">Tidak ada campaign yang cocok</strong></div></div>';
+  table += '</table></div><div class="empty-state is-inline hidden" data-filter-empty><strong class="empty-state-title">Tidak ada campaign yang cocok</strong></div></div>';
   return cards + table;
 }
 
@@ -817,7 +817,7 @@ export function adminView(campaignId) {
         donorTable += '</table></div></div>';
         html += donorCards + donorTable;
       } else {
-        html += '<p class="muted">Belum ada donatur.</p>';
+        html += emptyState({ title: 'Belum ada donatur', note: 'Donatur muncul setelah ada yang bergabung ke campaign ini.', inline: true });
       }
 
       if (c.Status !== 'Archived') {
@@ -1283,7 +1283,7 @@ export function renderMembersView(activeList, isSuperAdmin, scope = (isSuperAdmi
 }
 
 export function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, displayedCount, isFiltering, page = 1, totalPages = 1, startIndex = 0, endIndex = 0) {
-  if (!itemsToRender.length && total === 0) return '<p class="muted admin-data-empty">Belum ada member terdaftar.</p>';
+  if (!itemsToRender.length && total === 0) return emptyState({ title: 'Belum ada member terdaftar', note: 'Member muncul setelah pendaftaran disetujui.', inline: true });
 
   let cards = '<div class="admin-member-cards">';
   let table = '<div class="admin-member-table-view"><div class="table-responsive"><table><tr><th>Nama</th><th>WA</th><th>Role</th><th>Status</th><th>Terakhir Diupdate</th>' + (isSuperAdmin ? '<th>Aksi</th>' : '') + '</tr>';
@@ -1327,8 +1327,8 @@ export function renderMembersHtml(itemsToRender, isSuperAdmin, scope, total, dis
     table += '</tr>';
   });
 
-  cards += '<p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
-  table += '</table></div><p class="muted admin-data-empty hidden" data-filter-empty>Tidak ada member yang sesuai filter.</p></div>';
+  cards += '<div class="empty-state is-inline hidden" data-filter-empty><strong class="empty-state-title">Tidak ada member yang cocok</strong></div></div>';
+  table += '</table></div><div class="empty-state is-inline hidden" data-filter-empty><strong class="empty-state-title">Tidak ada member yang cocok</strong></div></div>';
 
   let paginationHtml = '';
   if (total > 0) {

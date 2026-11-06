@@ -275,8 +275,13 @@ test('Donor pending payments exclude Archived campaigns, Rp0 amounts, and combin
   assert.match(splitLeftHtml, /Target Second/);
   assert.match(splitLeftHtml, /Rp50\.000/);
 
-  // Must have text-align: left on combined card
-  assert.match(splitLeftHtml, /text-align:\s*left/);
+  // The combined card must keep the left-aligned presentation role after style extraction.
+  // [B7b reverted] B7b converted this card's inline styles to a .dc-combined-card class, and this
+// assertion was rewritten to match. The batch was REVERTED (it silently changed font sizes and
+// radii), so the inline declaration is back. Assert the presentation role either way: the card
+// must still be left-aligned by one mechanism or the other.
+assert.ok(/class="[^"]*\bdc-combined-card\b/.test(splitLeftHtml) || /text-align:\s*left/.test(splitLeftHtml),
+  'combined card must remain left-aligned (class or inline declaration)');
 
   // Bank line must not show "Ke: Salin a.n." without bank details
   assert.doesNotMatch(html, /Ke:\s*<button[^>]*>Salin<\/button>\s*a\.n\./);
