@@ -16,8 +16,13 @@ test('Task 2 & Task 7: Performance budgets and baseline thresholds are defined a
   for (const file of cssFiles) {
     const content = fs.readFileSync(path.join(cssDir, file), 'utf8');
     assert.ok(!content.includes('@import'), `File css/${file} must not contain render-blocking @import`);
-    totalCssBytes += Buffer.byteLength(content, 'utf8');
-    totalCssGzip += zlib.gzipSync(Buffer.from(content, 'utf8'), { level: 9 }).length;
+    // [audit-fix] CRLF-normalised, same reason as the JS budget below: on a Windows checkout
+    // (core.autocrlf=true, no .gitattributes) every LF becomes CRLF, inflating the count by one
+    // byte per line (views.css 25,504 -> 26,693 for identical content). The budget is about source
+    // size, so it must not depend on which platform checked the repo out.
+    const normalised = content.replace(/\r\n/g, '\n');
+    totalCssBytes += Buffer.byteLength(normalised, 'utf8');
+    totalCssGzip += zlib.gzipSync(Buffer.from(normalised, 'utf8'), { level: 9 }).length;
   }
   // [B4] Raw ceiling. History: 60,000 -> 62,000 -> 66,000. Every raise was forced by the same
   // mechanism: converting a 9-char literal (`12px 16px`) into a 36-char token reference
@@ -68,7 +73,9 @@ assert.ok(totalCssBytes < 66000, `Total CSS size (${totalCssBytes}B) must be und
   let totalJsBytes = 0;
   for (const file of jsFiles) {
     const content = fs.readFileSync(file, 'utf8');
-    totalJsBytes += Buffer.byteLength(content, 'utf8');
+    // [audit-fix] CRLF-normalised: a Windows checkout adds one byte per line, which made this
+    // budget fail on identical source. See the CSS loop above.
+    totalJsBytes += Buffer.byteLength(content.replace(/\r\n/g, '\n'), 'utf8');
   }
   // [B2] Raw source ceiling, raised 350,000 -> 360,000.
   // History: the code sat at 348,122B (99.5%) before this plan began, so every batch tripped it
