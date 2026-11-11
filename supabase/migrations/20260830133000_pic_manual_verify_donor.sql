@@ -172,7 +172,7 @@ BEGIN
         )
     );
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION pic_manual_verify_donor(TEXT, TEXT, TEXT, NUMERIC, TEXT, TEXT) IS 'PIC mutation RPC to manually verify a donor payment received directly via WhatsApp or cash, with optional storage proof attachment.';
 

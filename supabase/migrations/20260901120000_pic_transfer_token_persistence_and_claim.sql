@@ -222,6 +222,14 @@ GRANT EXECUTE ON FUNCTION admin_transfer_campaign_ownership(TEXT, TEXT, TEXT) TO
 -- 2. get_user_pic_campaigns: expose alias + whatsapp so donor dashboard can
 --    render a human-readable "campaign you manage as PIC" section.
 -- ------------------------------------------------------------------------------
+-- [fix 2026-11-11] This CREATE OR REPLACE adds pic_alias + pic_whatsapp to the
+-- RETURNS TABLE, which Postgres refuses with SQLSTATE 42P13 ("cannot change
+-- return type of existing function") because the 20260825 migration already
+-- defined the 9-column shape. A fresh `supabase start` / db reset therefore
+-- could not build the schema at all. Dropping first is required; the GRANT
+-- below re-establishes the privileges.
+DROP FUNCTION IF EXISTS get_user_pic_campaigns(TEXT);
+
 CREATE OR REPLACE FUNCTION get_user_pic_campaigns(p_whatsapp TEXT)
 RETURNS TABLE (
     campaign_id     TEXT,

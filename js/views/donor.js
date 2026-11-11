@@ -48,7 +48,10 @@ export async function openMediaFile(storagePath, fallbackUrl) {
   if (signed) {
     window.open(signed, '_blank', 'noopener,noreferrer');
   } else {
-    showInfoModal('Gagal memuat link dokumen/foto.', 'Error');
+    // A rendered button means the record HAS a path, so this is "the file is not reachable",
+    // not "the system broke". Saying "Kendala Sistem" told the donor to blame the app and
+    // hid the real next step: ask the PIC to re-upload.
+    showInfoModal('Berkas tidak dapat dibuka. Minta PIC mengunggah ulang.', 'Tidak Dapat Dibuka');
   }
 }
 
@@ -726,7 +729,13 @@ export function renderCampaignGiftActions(c) {
     if (giftImage.startsWith('http://') || giftImage.startsWith('https://')) {
       html += '<a data-testid="link-gift-image" href="' + escapeHtml(sanitizeUrl(giftImage)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">📷 Lihat Screenshot Harga</a>';
     } else {
-      html += '<button data-testid="btn-gift-image" type="button" class="donor-gift-btn" style="' + giftActionStyle + '" onclick="openMediaFile(\'' + escapeHtml(sanitizeUrl(giftImage)) + '\')">📷 Lihat Screenshot Harga</button>';
+      // [fix 2026-11-11] This branch handles a STORAGE PATH (e.g. gifts/<campaign>/<ts>.jpg),
+      // not a URL. It used to be passed through sanitizeUrl(), which only whitelists
+      // https:/mailto:/tel: — so on any http origin (localhost, previews) the path became '#'
+      // and openMediaFile('#') failed to sign, surfacing "Kendala Sistem / Gagal memuat link
+      // dokumen/foto" even though the screenshot was uploaded. Pass the raw path through;
+      // escapeHtml is enough here because it is inlined into an HTML attribute.
+      html += '<button data-testid="btn-gift-image" type="button" class="donor-gift-btn" style="' + giftActionStyle + '" onclick="openMediaFile(\'' + escapeHtml(giftImage) + '\')">📷 Lihat Screenshot Harga</button>';
     }
   }
   return html + '</div>';
