@@ -101,7 +101,7 @@ export function showConfirmModal(message, onConfirm) {
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
     modal.innerHTML = `
       <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
-        <button type="button" id="custom-confirm-close" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeConfirmModal()">&times;</button>
+        <button type="button" id="custom-confirm-close" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);" onclick="closeConfirmModal()">&times;</button>
         <h3 style="margin-top:0;">Konfirmasi</h3>
         <p id="custom-confirm-message"></p>
         <div class="modal-actions" style="display:flex;gap:8px;margin-top:16px;">

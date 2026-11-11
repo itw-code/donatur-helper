@@ -197,7 +197,7 @@
       <h2 id="admin-dashboard-title">Perlu ditinjau</h2>
       <p id="admin-dashboard-greeting">Persetujuan dan pengecualian campaign berada di urutan teratas.</p>
     </div>
-    <div data-testid="admin-notify-banner" id="admin-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
+    <div data-testid="admin-notify-banner" id="admin-notify-banner" class="hidden" style="background:var(--warning); color:#ffffff; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <section data-testid="action-queue" id="admin-action-queue" class="card admin-action-queue" aria-labelledby="admin-action-queue-title">
       <div class="admin-action-queue-heading">
         <div>
@@ -312,7 +312,7 @@
       <a data-testid="btn-superadmin-logout-nav" href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
     </nav>
     <h2>Dashboard Super Admin</h2>
-    <div data-testid="superadmin-notify-banner" id="sa-notify-banner" class="hidden" style="background:#d97706; color:white; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
+    <div data-testid="superadmin-notify-banner" id="sa-notify-banner" class="hidden" style="background:var(--warning); color:#ffffff; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <div data-testid="superadmin-summary" id="sa-summary" class="card admin-section"></div>
 
     <div id="sa-section-campaigns" class="card admin-section">
@@ -361,7 +361,7 @@
       <div data-testid="admin-token-form" id="sa-gen-admin-form" class="hidden theme-surface-muted"
         style="padding:12px; border-radius:8px; margin-bottom:12px; position:relative;">
         <button data-testid="btn-close-admin-token-form"
-          style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
+          style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:var(--muted);"
           onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
         <label>Alias Admin</label>
         <input data-testid="input-admin-alias" id="sa-admin-alias" placeholder="contoh: Bela EE">
@@ -418,7 +418,7 @@
       <div data-testid="add-member-form" id="sa-add-member-form" class="hidden theme-surface-muted"
         style="padding:12px; border-radius:8px; margin-top:12px; position:relative;">
         <button data-testid="btn-close-add-member-form"
-          style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#888;"
+          style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:var(--muted);"
           onclick="document.getElementById('sa-add-member-form').classList.add('hidden')">&times;</button>
         <h3 style="margin-top:0; font-size:14px;">Tambah member manual</h3>
         <label>Nama</label>

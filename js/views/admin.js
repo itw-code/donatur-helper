@@ -966,7 +966,7 @@ export function adminEditGiftAmountUI(campaignId, currentGiftAmount) {
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
     modal.innerHTML = `
       <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
-        <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeEditGiftModal()">&times;</button>
+        <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);" onclick="closeEditGiftModal()">&times;</button>
         <h3 style="margin-top:0;">Edit Total Hadiah</h3>
         <p class="muted">Isi nominal baru. Ketik 0 untuk mengosongkan target selama campaign masih terbuka.</p>
         <label>Total Hadiah</label>
@@ -1047,7 +1047,7 @@ export function editAmountPaid(campaignId, whatsapp, currentAmount) {
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;';
     modal.innerHTML = `
       <div class="card" style="max-width:400px;width:100%;margin:16px;position:relative;">
-        <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="closeEditAmountModal()">&times;</button>
+        <button style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);" onclick="closeEditAmountModal()">&times;</button>
         <h3 style="margin-top:0;">Edit Nominal Transfer</h3>
         <p class="muted" id="edit-amount-desc"></p>
         <label>Nominal Aktual (IDR)</label>

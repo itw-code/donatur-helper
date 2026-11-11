@@ -504,7 +504,7 @@ export function openBulkJoinModal() {
 
   modal.innerHTML = `
     <div class="card theme-surface-modal" data-testid="bulk-join-modal" style="width:90%; max-width:450px; padding:20px; border-radius:12px; position:relative; box-shadow:var(--shadow-lg); border:none;">
-      <button data-testid="btn-close-bulk-join" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#888;" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">&times;</button>
+      <button data-testid="btn-close-bulk-join" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);" onclick="document.getElementById('custom-bulk-join-modal').style.display='none'">&times;</button>
       <h3 style="margin-top:0; color:var(--blue); font-size:18px; font-weight:bold; margin-bottom:8px;">Ikut Patungan Massal</h3>
       <p style="font-size:13px; color:var(--text); margin-bottom:16px; line-height:1.4;">Anda memilih untuk bergabung ke <strong>${selectedIds.length} campaign</strong> sekaligus.</p>
       
@@ -774,16 +774,16 @@ export function renderCampaignPaymentSection(c) {
     const proofRef = c.proofLink || c.ProofLink || c.proofStoragePath || c.ProofStoragePath;
     const proofBtnHtml = proofRef
       ? (proofRef.startsWith('http://') || proofRef.startsWith('https://')
-        ? '<a data-testid="link-proof" class="link-btn" href="' + escapeHtml(sanitizeUrl(proofRef)) + '" target="_blank" rel="noopener noreferrer" style="font-size:12px; text-decoration:none; padding:4px 10px; border:1px solid rgba(52,211,153,0.3); border-radius:4px; background:rgba(52,211,153,0.08); color:#6ee7b7;">Lihat Bukti</a>'
-        : '<button data-testid="btn-proof" type="button" class="link-btn" style="cursor:pointer; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.3); border-radius:4px; padding:4px 10px; font-size:12px; color:#6ee7b7;" onclick="openMediaFile(\'' + escapeHtml(proofRef) + '\')">Lihat Bukti</button>')
+        ? '<a data-testid="link-proof" class="link-btn" href="' + escapeHtml(sanitizeUrl(proofRef)) + '" target="_blank" rel="noopener noreferrer" style="font-size:12px; text-decoration:none; padding:4px 10px; border:1px solid rgba(52,211,153,0.3); border-radius:4px; background:rgba(52,211,153,0.08); color:var(--success);">Lihat Bukti</a>'
+        : '<button data-testid="btn-proof" type="button" class="link-btn" style="cursor:pointer; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.3); border-radius:4px; padding:4px 10px; font-size:12px; color:var(--success);" onclick="openMediaFile(\'' + escapeHtml(proofRef) + '\')">Lihat Bukti</button>')
       : '';
 
-    html += '<div class="card theme-surface-blue theme-blue-total" data-testid="payment-status" style="padding:14px 16px; border-radius:10px; margin-top:8px; border:1px solid rgba(52,211,153,0.25); background:rgba(6,95,70,0.12);">';
+    html += '<div class="card theme-surface-blue theme-blue-total" data-testid="payment-status" style="padding:14px 16px; border-radius:10px; margin-top:8px; border:1px solid var(--border); background:var(--surface);">';
     html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
-    html += '<div style="display:flex; align-items:center; gap:6px; color:#6ee7b7; font-weight:700; font-size:13px;">';
+    html += '<div style="display:flex; align-items:center; gap:6px; color:var(--success); font-weight:700; font-size:13px;">';
     html += '<span>' + (c.verified ? '✓ Pembayaran Terverifikasi PIC' : '✓ Sudah konfirmasi transfer (Menunggu Verifikasi PIC)') + '</span>';
     html += '</div>';
-    html += '<div data-testid="donor-total" style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:17px; font-weight:800; color:#eef6ed;">' + formatIDR(c.amountPaid || c.amountDue) + '</div>';
+    html += '<div data-testid="donor-total" style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:17px; font-weight:800; color:var(--text);">' + formatIDR(c.amountPaid || c.amountDue) + '</div>';
     html += '</div>';
     // [audit-fix] Gate on member status too, not just payment verification. A verified EX
     // (alumni) donor saw this CTA, and the RPC refuses them outright:
@@ -796,7 +796,7 @@ export function renderCampaignPaymentSection(c) {
     html += (c.verified && _canBecomePic) ? '<p class="muted">Butuh patungan untuk orang lain? Kamu bisa <button type="button" class="link-btn" data-testid="cta-become-pic-after-pay" onclick="seamlessBecomePic()">buat campaign sendiri</button>.</p>' : '';
 
     if (cardBankAccount || cardBankName || cardHolder) {
-      html += '<div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); font-size:12px; color:var(--muted); flex-wrap:wrap; gap:6px;">';
+      html += '<div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); flex-wrap:wrap; gap:6px;">';
       html += '<div style="line-height:1.35;">';
       html += '<span>Transfer ke: <strong>' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</strong></span>';
       if (cardHolder) html += '<span style="display:block; font-size:11px; opacity:0.85;">a.n. ' + escapeHtml(cardHolder) + '</span>';
@@ -804,7 +804,7 @@ export function renderCampaignPaymentSection(c) {
       if (proofBtnHtml) html += '<div>' + proofBtnHtml + '</div>';
       html += '</div>';
     } else if (proofBtnHtml) {
-      html += '<div style="padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); text-align:right;">' + proofBtnHtml + '</div>';
+      html += '<div style="padding-top:8px; border-top:1px solid var(--border); text-align:right;">' + proofBtnHtml + '</div>';
     }
     return html + '</div>';
   }
@@ -819,10 +819,10 @@ export function renderCampaignPaymentSection(c) {
   html += '</div>';
 
   if (cardBankAccount || cardBankName || cardHolder) {
-    html += '<div style="background:rgba(0,0,0,0.28); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
     html += '<div style="line-height:1.4;">';
     html += '<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">Rekening Tujuan PIC:</div>';
-    html += '<div style="font-weight:700; font-size:14px; color:#ffffff;">' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</div>';
+    html += '<div style="font-weight:700; font-size:14px; color:var(--text);">' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</div>';
     if (cardHolder) html += '<div style="font-size:12px; color:var(--muted);">a.n. ' + escapeHtml(cardHolder) + '</div>';
     html += '</div>';
     if (cardBankAccount) {

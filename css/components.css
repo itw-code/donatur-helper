@@ -89,7 +89,9 @@
 
 .theme-status-unpaid {
   background: #faeeda;
-  color: #b45309;
+  /* [a11y 2026-11-11] was #b45309 (4.38:1 on #faeeda — below AA for 12px text).
+     #92400e is 6.18:1. */
+  color: #92400e;
 }
 
 .theme-custom-amount-badge {
@@ -110,7 +112,8 @@
 
 .profile-disabled-input {
   background: #f1f5f9;
-  color: #64748b;
+  /* [a11y 2026-11-11] was #64748b (4.34:1 on #f1f5f9 — below AA). #475569 is 6.92:1. */
+  color: #475569;
 }
 
 .btn {
@@ -225,7 +228,9 @@ select:focus-visible {
 
 input::placeholder,
 textarea::placeholder {
-  color: #94a3b8;
+  /* [a11y 2026-11-11] was #94a3b8 (2.56:1 on white — fails AA). --ink-muted is 4.76:1
+     in light and #a3b59d in dark. */
+  color: var(--ink-muted);
 }
 
 label {font-size:var(--text-sm);
