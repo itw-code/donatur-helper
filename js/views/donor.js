@@ -718,7 +718,12 @@ export function renderCombinedCampaignCard(groupList, bankKey, user) {
 export function renderCampaignGiftActions(c) {
   const giftLink = c.GiftLink || c.giftLink || '';
   const giftImage = c.GiftImage || c.giftImage || '';
-  if (c.status !== 'Finalized' || (!giftLink && !giftImage)) return '';
+  // [product 2026-11-11] Archived campaigns keep their gift proof visible — the donor paid
+  // for it and the PIC uploaded it — but ONLY for donors who actually took part. The
+  // "Riwayat" group also lists Closed/Finalized campaigns the donor never joined, so
+  // participation has to be checked explicitly rather than assumed from the group.
+  const statusEligible = c.status === 'Finalized' || c.status === 'Archived';
+  if (!statusEligible || c.joined === false || (!giftLink && !giftImage)) return '';
 
   const giftActionStyle = 'display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family:inherit; font-size:12px; font-weight:600; line-height:1.2; min-height:36px; padding:6px 12px; border:1px solid var(--border-hover); border-radius:6px; background:rgba(255,255,255,0.04); color:var(--amber,#f5d347); text-decoration:none; box-sizing:border-box; cursor:pointer; flex:1 1 auto; text-align:center;';
   let html = '<div class="donor-gift-actions" data-testid="gift-actions" style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">';
