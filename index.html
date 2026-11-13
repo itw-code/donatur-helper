@@ -68,6 +68,7 @@
       <button data-testid="btn-donasi" class="btn" onclick="showView('user-login')">Saya mau donasi</button>
       <button data-testid="btn-pengelola" class="btn secondary" onclick="showView('token-login')">Saya pengelola</button>
       <p class="field-note">Belum punya token? Kamu bisa <button type="button" class="link-btn" data-testid="link-become-pic" aria-label="Jadi pengelola tanpa token: masuk dulu dengan WhatsApp, lalu buat campaign" onclick="becomePicFromLanding()">jadi pengelola</button> dalam satu menit.</p>
+      <p class="field-note">Baru pertama kali? <a data-testid="link-panduan" class="link-btn" href="panduan.html">Baca panduan pengguna</a></p>
     </div>
   </div>
 
@@ -144,7 +145,7 @@
           <input data-testid="input-pic-target" id="pc-target" placeholder="contoh: Ihsan Wanda">
         </div>
         <div>
-          <label>Total nilai hadiah (IDR)</label>
+          <label>Total nilai hadiah (IDR) (opsional)</label>
           <input data-testid="input-pic-amount" id="pc-amount" type="text" inputmode="numeric" placeholder="1.000.000" onkeyup="formatInputRibuan(event)">
         </div>
       </div>

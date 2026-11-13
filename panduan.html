@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panduan Pengguna — DonatPRO</title>
+  <meta name="description" content="Panduan lengkap cara pakai DonatPRO untuk Donatur, Pengelola (PIC), dan Admin.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo/favicon.svg">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <script>
+    (() => { const stored = localStorage.getItem('donatpro.theme'); const theme = stored === 'dark' || stored === 'light' ? stored : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', theme); })();
+  </script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/theme-dark.css">
+  <style>
+    .guide-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .guide-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guide-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 0 0;
+    }
+    .guide-nav a {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .guide-nav a:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .guide-section {
+      margin-top: 20px;
+    }
+    .guide-section h2 {
+      margin-top: 0;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+    .guide-section h3 {
+      margin: 18px 0 8px 0;
+      font-size: 15px;
+    }
+    .guide-step {
+      margin: 0 0 10px 0;
+      line-height: 1.6;
+    }
+    .guide-substeps {
+      margin: 4px 0 12px 20px;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .guide-substeps li {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+  <header class="wrap app-header">
+    <div class="app-header-brand">
+      <img src="assets/logo/logo-icon.svg" width="36" height="36" alt="DonatPRO Logo">
+      <h1>Donat<span class="brand-accent">PRO</span></h1>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Ganti ke tema terang"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 5.34l-1.41 1.41"/></svg></button>
+  </header>
+
+  <main id="main-content" class="wrap" tabindex="-1">
+    <div class="guide-topbar">
+      <a class="btn secondary btn-auto" href="index.html" style="text-decoration:none; margin:0;">&larr; Kembali ke Beranda</a>
+      <div class="guide-topbar-actions">
+        <a class="btn btn-auto" href="guides/panduan-donatpro.pdf" download="panduan-donatpro.pdf" style="text-decoration:none; margin:0;">Download PDF</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Panduan pengguna DonatPRO</h2>
+      <p class="muted" style="margin-bottom:4px;">Cara patungan kado dan kelola campaign di DonatPRO, per peran.</p>
+      <p class="muted" style="font-size:12px; margin-top:0;">Versi 13 November 2026</p>
+      <nav class="guide-nav" aria-label="Daftar isi panduan">
+        <a href="#mulai">Mulai</a>
+        <a href="#donatur">Untuk Donatur</a>
+        <a href="#pic">Untuk Pengelola (PIC)</a>
+        <a href="#admin">Untuk Admin</a>
+        <a href="#kendala">Kendala &amp; FAQ</a>
+      </nav>
+    </div>
+
+    <section id="mulai" class="card guide-section">
+      <h2>Mulai di DonatPRO</h2>
+      <p>Panduan ini menjelaskan cara pakai DonatPRO di <strong>don4tpro.pages.dev</strong> untuk patungan kado perpisahan rekan SawitPRO. Bagian ini berisi cara masuk, lalu langkah untuk <em>Donatur</em>, <em>Pengelola (PIC)</em>, dan <em>Admin</em>.</p>
+
+      <h3>Dua pintu masuk di Beranda</h3>
+      <p class="guide-step"><strong>1.</strong> Buka <strong>don4tpro.pages.dev</strong> di browser HP atau laptop kamu. Di halaman awal ada dua tombol utama: <em>Saya mau donasi</em> dan <em>Saya pengelola</em>.</p>
+      <p class="guide-step"><strong>2.</strong> Pilih <em>Saya mau donasi</em> kalau kamu ingin ikut patungan, cek tagihan, atau upload bukti transfer. Kamu juga bisa langsung membuat campaign sendiri dari dashboard donatur.</p>
+      <p class="guide-step"><strong>3.</strong> Pilih <em>Saya pengelola</em> hanya kalau kamu sudah punya token khusus (misalnya <em>PIC-...</em> atau <em>ADM-...</em>). Kalau belum punya token tapi ingin bikin patungan baru, klik <em>jadi pengelola</em> di teks bawah tombol untuk daftar lewat WhatsApp dalam satu menit.</p>
+
+      <h3>Tema terang dan gelap</h3>
+      <p class="guide-step"><strong>4.</strong> Di pojok kanan atas ada tombol ikon bulan/matahari untuk ganti tema terang atau gelap. Pilihan kamu otomatis tersimpan di browser.</p>
+    </section>
+
+    <section id="donatur" class="card guide-section">
+      <h2>Untuk Donatur</h2>
+      <p>Dipakai oleh rekan kerja atau alumni yang mau ikut patungan kado, upload bukti transfer, atau cek status pembayaran.</p>
+
+      <h3>Masuk atau daftar baru</h3>
+      <p class="guide-step"><strong>1.</strong> Di halaman awal, klik <em>Saya mau donasi</em>. Masukkan <em>No. WhatsApp</em> kamu (contoh: 08xxxxxxxxxx), lalu klik <em>Lanjut</em>.</p>
+      <p class="guide-step"><strong>2.</strong> Kalau nomor kamu belum terdaftar, form <em>Pendaftaran Baru</em> muncul otomatis. Isi <em>Nama Lengkap</em> (pakai nama asli supaya PIC gampang mengenali kamu) dan pilih <em>Status Karyawan</em>: <em>Active (Karyawan Saat Ini)</em> atau <em>Ex (Alumni / Resign)</em>, lalu klik <em>Lanjut</em>.</p>
+      <p class="guide-step"><strong>3.</strong> Pendaftaran baru perlu persetujuan Admin dulu sebelum kamu bisa ikut patungan. Begitu disetujui, kamu langsung masuk ke dashboard donatur.</p>
+
+      <h3>Ikut patungan (satu atau banyak campaign)</h3>
+      <p class="guide-step"><strong>4.</strong> Di dashboard donatur, lihat daftar campaign yang sedang terbuka. Kamu bisa ikut satu per satu dengan klik <em>Gabung Donasi untuk ...</em>, atau centang beberapa campaign lalu klik <em>Ikut Patungan Massal</em>.</p>
+      <p class="guide-step"><strong>5.</strong> Kalau campaign belum difinalisasi PIC, kamu masih bisa membatalkan keikutsertaan dengan klik <em>Batal ikut</em>.</p>
+      <p class="guide-step"><strong>6.</strong> Kalau kamu punya link langsung ke sebuah campaign (akhiran <code>#c=...</code>), halaman langsung menampilkan campaign tersebut. Klik <em>Lihat Semua Campaign</em> untuk kembali ke daftar lengkap.</p>
+
+      <h3>Transfer dan kirim bukti</h3>
+      <p class="guide-step"><strong>7.</strong> Setelah PIC memfinalisasi campaign, nominal tagihan kamu dan nomor rekening PIC muncul di kartu campaign. Klik <em>Salin</em> di sebelah nominal atau <em>Salin Rek</em> supaya tidak salah transfer.</p>
+      <p class="guide-step"><strong>8.</strong> Kalau kamu ikut beberapa campaign dengan rekening PIC yang sama, DonatPRO menggabungkannya jadi satu tagihan. Upload satu bukti transfer, lalu klik <em>Konfirmasi Transfer</em>.</p>
+      <p class="guide-step"><strong>9.</strong> Untuk satu campaign, pilih foto atau PDF bukti di kolom upload, lalu klik <em>Sudah Transfer, Kirim Bukti</em>. Status kamu berubah menunggu konfirmasi PIC. Kalau mau cek ulang file yang sudah dikirim, klik <em>Lihat Bukti</em>.</p>
+      <p class="guide-step"><strong>10.</strong> Kalau PIC sudah mengunggah foto harga kado, kamu bisa klik <em>Lihat Screenshot Harga</em> di kartu campaign untuk transparansi.</p>
+
+      <h3>Profil dan keluar</h3>
+      <p class="guide-step"><strong>11.</strong> Klik <em>Profil</em> di bagian bawah dashboard untuk mengubah nama atau menambah email (opsional, untuk pengingat otomatis), atau klik <em>Keluar Akun</em>.</p>
+    </section>
+
+    <section id="pic" class="card guide-section">
+      <h2>Untuk Pengelola (PIC)</h2>
+      <p>Dipakai oleh karyawan aktif yang menginisiasi dan mengelola patungan kado dari awal sampai selesai.</p>
+
+      <h3>Buat campaign baru</h3>
+      <p class="guide-step"><strong>1.</strong> Kamu bisa mulai dengan dua cara: klik <em>+ Buat Campaign Baru (Jadi PIC)</em> dari dashboard donatur (khusus status <em>Active</em>), atau klik <em>jadi pengelola</em> di halaman awal.</p>
+      <p class="guide-step"><strong>2.</strong> Isi <em>Nama target (yang resign)</em> dan <em>Deadline donasi</em>. Kolom <em>Total nilai hadiah (IDR) (opsional)</em>, <em>Alasan / catatan (opsional)</em>, dan <em>Tanggal mulai (opsional)</em> boleh dikosongkan dulu kalau belum pasti (nominal akhir bisa diisi saat finalisasi). Lalu klik <em>Buat campaign</em>.</p>
+      <p class="guide-step"><strong>3.</strong> Kalau kamu sudah punya token <em>PIC-...</em>, masuk lewat <em>Saya pengelola</em> di halaman awal, ketik tokennya, lalu klik <em>Lanjut</em>. Campaign yang kamu kelola juga muncul di bagian <em>Campaign yang kamu kelola sebagai PIC</em> di dashboard donatur.</p>
+
+      <h3>Bagikan link &amp; kelola pendaftaran</h3>
+      <p class="guide-step"><strong>4.</strong> Di <em>Dashboard PIC</em>, klik <em>Salin Undangan Patungan</em> untuk menyalin pesan ajakan beserta link campaign ke grup WhatsApp.</p>
+      <p class="guide-step"><strong>5.</strong> Selama status masih <em>Open</em>, kamu bisa klik <em>Tutup pendaftaran</em> kalau peserta sudah cukup, atau <em>Buka lagi pendaftaran</em> kalau masih mau menerima donatur baru. Kalau campaign batal, klik <em>Hapus campaign</em> di bagian bawah.</p>
+
+      <h3>Finalisasi &amp; input rekening</h3>
+      <p class="guide-step"><strong>6.</strong> Kalau daftar peserta sudah fix, klik <em>Selesaikan &amp; input rekening</em>. Sistem membagi <em>Total nilai hadiah</em> secara adil ke jumlah donatur yang bergabung (dengan pembulatan sesuai pengaturan).</p>
+      <p class="guide-step"><strong>7.</strong> Masukkan bank, nomor rekening, atas nama, dan <em>Screenshot Total Harga (Opsional)</em>, lalu klik <em>Konfirmasi &amp; finalisasi</em>. Setelah ini, semua donatur melihat nominal tagihan mereka.</p>
+      <p class="guide-step"><strong>8.</strong> Klik <em>Salin Rincian Tagihan</em> atau <em>Salin Rekap Pengingat</em> untuk mengirim daftar siapa saja yang belum transfer ke grup.</p>
+
+      <h3>Verifikasi bukti transfer &amp; pengingat</h3>
+      <p class="guide-step"><strong>9.</strong> Saat donatur mengirim bukti, buka kartunya di daftar donatur. Cek gambarnya, lalu klik <em>Konfirmasi</em> kalau sesuai atau <em>Tolak</em> kalau salah/kurang. Kalau semua bukti aman, kamu bisa pakai <em>Setujui Semua Bukti</em>.</p>
+      <p class="guide-step"><strong>10.</strong> Kalau donatur mengirim bukti lewat chat WA atau bayar tunai, klik <em>Verifikasi Langsung</em> atau <em>Konfirmasi Lunas / WA</em>, lalu klik <em>Konfirmasi Lunas</em>.</p>
+      <p class="guide-step"><strong>11.</strong> Untuk donatur yang belum bayar, klik <em>Kirim pengingat WA</em> untuk membuka chat WhatsApp dengan teks pengingat yang sudah terisi otomatis.</p>
+
+      <h3>Donatur susulan, refund &amp; arsip</h3>
+      <p class="guide-step"><strong>12.</strong> Kalau ada yang telat gabung setelah campaign difinalisasi, klik <em>+ Ajukan Donatur Susulan</em>, isi datanya, lalu klik <em>Simpan &amp; Masukkan ke List</em>. Pengajuan ini menunggu persetujuan Admin sebelum tagihan dihitung ulang.</p>
+      <p class="guide-step"><strong>13.</strong> Kalau ada kelebihan bayar (misalnya karena tagihan turun setelah ada donatur susulan), muncul tanda <em>Refund perlu diselesaikan</em>. Setelah kamu transfer balik ke donatur, klik <em>Tandai Dikembalikan</em>.</p>
+      <p class="guide-step"><strong>14.</strong> Setelah kado dibeli dan diserahkan, klik <em>Upload Foto &amp; Link Hadiah</em>, lalu klik <em>Salin Laporan Selesai</em> untuk dibagikan ke grup. Terakhir, klik <em>Arsipkan campaign</em> supaya campaign rapi dan token ditutup.</p>
+    </section>
+
+    <section id="admin" class="card guide-section">
+      <h2>Untuk Admin</h2>
+      <p>Dipakai oleh Admin dan SuperAdmin untuk meninjau pendaftaran member, donatur susulan, serta memantau dan membantu seluruh campaign.</p>
+
+      <h3>Masuk &amp; navigasi</h3>
+      <p class="guide-step"><strong>1.</strong> Di halaman awal, klik <em>Saya pengelola</em>, masukkan token Admin/SuperAdmin kamu, lalu klik <em>Lanjut</em>.</p>
+      <p class="guide-step"><strong>2.</strong> Di bagian atas ada menu cepat: <em>Ringkasan</em>, <em>Campaign</em>, <em>Members</em>, <em>Tools PIC</em> (atau <em>Admin</em> dan <em>Pengaturan</em> untuk SuperAdmin), serta <em>Keluar</em>.</p>
+
+      <h3>Tinjau antrean persetujuan</h3>
+      <p class="guide-step"><strong>3.</strong> Bagian paling atas adalah <em>Perlu ditinjau</em>. Di sini muncul dua antrean utama:</p>
+      <ul class="guide-substeps">
+        <li><em>Menunggu Persetujuan Member</em>: periksa nama dan status (<em>Active</em> atau <em>Ex</em>), lalu klik <em>Setujui</em> atau <em>Tolak</em> (bisa satu per satu atau centang beberapa lalu klik <em>Setujui Terpilih</em>).</li>
+        <li><em>Persetujuan Donatur Susulan</em>: periksa pengajuan dari PIC. Klik <em>Setujui</em> untuk memasukkan donatur dan menghitung ulang tagihan campaign, atau <em>Tolak</em>.</li>
+      </ul>
+
+      <h3>Pantau &amp; bantu campaign</h3>
+      <p class="guide-step"><strong>4.</strong> Di <em>Semua campaign</em>, cari berdasarkan target atau nama PIC, atau filter status (<em>Terbuka</em>, <em>Ditutup</em>, <em>Final</em>, <em>Selesai</em>). Klik <em>Lihat detail</em> untuk membuka rincian campaign.</p>
+      <p class="guide-step"><strong>5.</strong> Di dalam detail campaign, Admin bisa:</p>
+      <ul class="guide-substeps">
+        <li>Klik <em>Lihat Sebagai PIC</em> untuk masuk sementara ke dashboard PIC dan membantu verifikasi.</li>
+        <li>Klik <em>Edit</em> di samping total hadiah, atau <em>Hitung Ulang Tagihan Donatur</em> jika diperlukan.</li>
+        <li>Ubah status lunas donatur (<em>Tandai lunas</em> / <em>belum lunas</em>), <em>Edit nominal transfer</em>, <em>Hapus donatur</em>, atau <em>Transfer</em> kepemilikan campaign ke PIC lain.</li>
+      </ul>
+      <p class="guide-step"><strong>6.</strong> Untuk menutup campaign dari panel Admin, klik <em>Arsipkan</em>. Khusus SuperAdmin tersedia tombol <em>Hapus campaign</em>.</p>
+
+      <h3>Kelola Members, Tools PIC &amp; Pengaturan</h3>
+      <p class="guide-step"><strong>7.</strong> Di <em>Daftar Members</em>, cari member berdasarkan nama atau nomor WA. Kamu bisa ubah peran (<em>Jadikan PIC</em>, <em>Jadikan Admin</em>, <em>Jadikan Member</em>) atau <em>Hapus member</em>.</p>
+      <p class="guide-step"><strong>8.</strong> Di <em>Tools PIC</em>, klik <em>+ Buat token PIC baru</em> kalau ada PIC yang membutuhkan token manual.</p>
+      <p class="guide-step"><strong>9.</strong> Khusus SuperAdmin, bagian <em>Pengaturan</em> mengatur pembulatan nominal donasi, validasi daftar Members, email notifikasi pendaftaran, dan URL aplikasi. Klik <em>Simpan pengaturan</em> setelah mengubah.</p>
+    </section>
+
+    <section id="kendala" class="card guide-section">
+      <h2>Fitur umum &amp; Kalau ada kendala</h2>
+      <p>Hal-hal yang sering ditanyakan oleh semua pengguna DonatPRO.</p>
+
+      <h3>Kalau belum bisa login atau ikut patungan</h3>
+      <p class="guide-step"><strong>1.</strong> Pastikan nomor WhatsApp ditulis dengan format yang benar (contoh: 08xxxxxxxxxx, tanpa spasi atau tanda strip).</p>
+      <p class="guide-step"><strong>2.</strong> Kalau baru mendaftar dan belum bisa masuk ke daftar campaign, tunggu Admin menyetujui pendaftaran kamu di antrean <em>Menunggu Persetujuan Member</em>.</p>
+      <p class="guide-step"><strong>3.</strong> Kalau kamu berstatus <em>Ex (Alumni)</em>, kamu tetap bisa ikut berdonasi, tetapi pembuatan campaign baru hanya tersedia untuk karyawan <em>Active</em>.</p>
+
+      <h3>Kalau gagal upload bukti transfer</h3>
+      <p class="guide-step"><strong>4.</strong> Pastikan file berupa gambar (JPG/PNG) atau PDF, dan koneksi internet stabil saat menekan <em>Sudah Transfer, Kirim Bukti</em> atau <em>Konfirmasi Transfer</em>.</p>
+      <p class="guide-step"><strong>5.</strong> Kalau tombol <em>Lihat Bukti</em> tidak bisa dibuka, minta donatur mengirim ulang foto bukti atau hubungi PIC untuk verifikasi manual.</p>
+
+      <h3>Tanya ke mana</h3>
+      <p class="guide-step"><strong>6.</strong> Kalau masih ada kendala atau butuh persetujuan cepat, hubungi PIC campaign terkait atau Admin DonatPRO lewat WhatsApp.</p>
+    </section>
+  </main>
+
+  <script>
+    (() => { const b=document.getElementById('theme-toggle'); if(!b)return; const sync=()=>{const dark=document.documentElement.dataset.theme==='dark'; b.setAttribute('aria-label',dark?'Ganti ke tema terang':'Ganti ke tema gelap'); b.innerHTML=dark?'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 5.34l-1.41 1.41"/></svg>':'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg>';}; b.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('donatpro.theme',t);sync();}); sync(); })();
+  </script>
+</body>
+</html>

@@ -24,6 +24,7 @@ const LOCAL_ENV_PATH = path.join(LOCAL_CONFIG_DIR, 'env.local.js');
 // Root static files allowed in dist
 const ROOT_STATIC_FILES = [
   'index.html',
+  'panduan.html',
   '_headers',
   'robots.txt',
   'manifest.json',
@@ -37,7 +38,8 @@ const STATIC_DIRECTORIES = [
   'js',
   'assets',
   'images',
-  'favicon'
+  'favicon',
+  'guides'
 ];
 
 // Explicit exclusions to safeguard against leaking non-frontend assets

@@ -381,7 +381,7 @@ td .action-group {
 .link-btn {
   background: none;
   border: none;
-  color: var(--blue);font-size:var(--text-sm);
+  color: var(--primary);font-size:var(--text-sm);
   font-weight: 500;
   cursor: pointer;
   padding: 0;
@@ -389,7 +389,7 @@ td .action-group {
 }
 
 .link-btn:hover {
-  color: var(--blue-hover);
+  color: var(--primary-hover);
   text-decoration: underline;
 }
 
