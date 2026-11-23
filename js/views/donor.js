@@ -725,14 +725,13 @@ export function renderCampaignGiftActions(c) {
   const statusEligible = c.status === 'Finalized' || c.status === 'Archived';
   if (!statusEligible || c.joined === false || (!giftLink && !giftImage)) return '';
 
-  const giftActionStyle = 'display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family:inherit; font-size:12px; font-weight:600; line-height:1.2; min-height:36px; padding:6px 12px; border:1px solid var(--border-hover); border-radius:6px; background:rgba(255,255,255,0.04); color:var(--amber,#f5d347); text-decoration:none; box-sizing:border-box; cursor:pointer; flex:1 1 auto; text-align:center;';
-  let html = '<div class="donor-gift-actions" data-testid="gift-actions" style="margin-bottom: 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">';
+  let html = '<div class="donor-gift-actions" data-testid="gift-actions">';
   if (giftLink) {
-    html += '<a data-testid="link-gift" href="' + escapeHtml(sanitizeUrl(giftLink)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">🔗 Lihat Barang/Hadiah</a>';
+    html += '<a data-testid="link-gift" href="' + escapeHtml(sanitizeUrl(giftLink)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn">🔗 Lihat Barang/Hadiah</a>';
   }
   if (giftImage) {
     if (giftImage.startsWith('http://') || giftImage.startsWith('https://')) {
-      html += '<a data-testid="link-gift-image" href="' + escapeHtml(sanitizeUrl(giftImage)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn" style="' + giftActionStyle + '">📷 Lihat Screenshot Harga</a>';
+      html += '<a data-testid="link-gift-image" href="' + escapeHtml(sanitizeUrl(giftImage)) + '" target="_blank" rel="noopener noreferrer" class="donor-gift-btn">📷 Lihat Screenshot Harga</a>';
     } else {
       // [fix 2026-11-11] This branch handles a STORAGE PATH (e.g. gifts/<campaign>/<ts>.jpg),
       // not a URL. It used to be passed through sanitizeUrl(), which only whitelists
@@ -740,7 +739,7 @@ export function renderCampaignGiftActions(c) {
       // and openMediaFile('#') failed to sign, surfacing "Kendala Sistem / Gagal memuat link
       // dokumen/foto" even though the screenshot was uploaded. Pass the raw path through;
       // escapeHtml is enough here because it is inlined into an HTML attribute.
-      html += '<button data-testid="btn-gift-image" type="button" class="donor-gift-btn" style="' + giftActionStyle + '" onclick="openMediaFile(\'' + escapeHtml(giftImage) + '\')">📷 Lihat Screenshot Harga</button>';
+      html += '<button data-testid="btn-gift-image" type="button" class="donor-gift-btn" onclick="openMediaFile(\'' + escapeHtml(giftImage) + '\')">📷 Lihat Screenshot Harga</button>';
     }
   }
   return html + '</div>';
@@ -828,19 +827,19 @@ export function renderCampaignPaymentSection(c) {
   html += '<span style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Jumlah Tagihan</span>';
   html += '<div style="display:flex; align-items:center; gap:8px;">';
   html += '<span data-testid="donor-total" style="font-family:\'Plus Jakarta Sans\', system-ui, sans-serif; font-size:22px; font-weight:800; color:var(--blue);">' + formatIDR(c.amountDue) + '</span>';
-  html += '<button data-testid="btn-copy-total" type="button" class="btn secondary" style="padding:3px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')">Salin</button>';
+  html += '<button data-testid="btn-copy-total" type="button" class="btn secondary btn-sm" onclick="copyAmount(' + c.amountDue + ', \'' + formatIDR(c.amountDue) + '\')">Salin</button>';
   html += '</div>';
   html += '</div>';
 
   if (cardBankAccount || cardBankName || cardHolder) {
-    html += '<div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:var(--space-3);">';
     html += '<div style="line-height:1.4;">';
     html += '<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">Rekening Tujuan PIC:</div>';
     html += '<div style="font-weight:700; font-size:14px; color:var(--text);">' + (cardBankName ? escapeHtml(cardBankName) + ' ' : '') + escapeHtml(cardBankAccount) + '</div>';
     if (cardHolder) html += '<div style="font-size:12px; color:var(--muted);">a.n. ' + escapeHtml(cardHolder) + '</div>';
     html += '</div>';
     if (cardBankAccount) {
-      html += '<button data-testid="btn-copy-account" type="button" class="btn secondary" style="padding:4px 10px; font-size:11px; min-height:unset; border-radius:4px;" onclick="navigator.clipboard.writeText(\'' + escapeHtml(cardBankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin Rek</button>';
+      html += '<button data-testid="btn-copy-account" type="button" class="btn secondary btn-sm" onclick="navigator.clipboard.writeText(\'' + escapeHtml(cardBankAccount) + '\'); showToast(\'Nomor rekening disalin!\');">Salin Rek</button>';
     }
     html += '</div>';
   }

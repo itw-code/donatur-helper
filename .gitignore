@@ -13,6 +13,7 @@ _skill-stage/
 .scratch/
 .cloudflareignore
 *.local.md
+*-local.html
 data/source/
 data/export/
 # Local backup output from scripts/migration/export-backup.mjs — contains PII.

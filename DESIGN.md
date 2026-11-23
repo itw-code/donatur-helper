@@ -113,7 +113,7 @@ inside a refactor.
 
 | Component | Anatomy | Notes |
 |---|---|---|
-| Button `.btn` | 44px min height, radius 999px, primary = forest fill + white ink | secondary = transparent + border |
+| Button `.btn` | 44px min-height, radius 10px, `.btn-sm` 36px / radius 8px, primary = forest fill + white ink | secondary = transparent + border |
 | Card `.card` | `--surface`, 1px `--border`, radius 12px, `--card-pad` 16px | |
 | Empty state `.empty-state` | icon + title + one note line + **one** action | `emptyState()` in `js/utils.js` |
 | Badge `.badge` | 12px uppercase, radius 999px, semantic pair | never reuse a status colour for decoration |

@@ -75,7 +75,7 @@
   <div id="view-user-login" data-testid="view-user-login" class="hidden">
     <h2>Masuk sebagai donatur</h2>
     <div class="card">
-      <label>No. WhatsApp</label>
+      <label for="u-wa">No. WhatsApp</label>
       <input data-testid="input-whatsapp" id="u-wa" placeholder="08xxxxxxxxxx">
       <!-- [B1 · P0-5] Was a 324x81px bordered panel with a lock emoji between the field and the
            button — it read as a tappable card and competed with the primary action. Now one
@@ -87,7 +87,7 @@
         <div style="font-weight:600; font-size:15px; margin-bottom:16px; color:var(--text);">Pendaftaran Baru</div>
         <div class="form-row">
           <div>
-            <label>Nama Lengkap</label>
+            <label for="u-name">Nama Lengkap</label>
             <input data-testid="input-donor-name" id="u-name" placeholder="Nama kamu">
             <div
               style="font-size: 12px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; margin-bottom: 16px;">
@@ -96,7 +96,7 @@
             </div>
           </div>
           <div>
-            <label>Status Karyawan</label>
+            <label for="u-status">Status Karyawan</label>
             <select data-testid="select-donor-status" id="u-status"
               style="margin-bottom:16px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px;">
               <option value="" disabled selected>-- Pilih Status --</option>
@@ -128,7 +128,7 @@
   <div id="view-token-login" data-testid="view-token-login" class="hidden">
     <h2>Masuk dengan token</h2>
     <div class="card">
-      <label>Token</label>
+      <label for="t-token">Token</label>
       <input data-testid="input-token" id="t-token" placeholder="contoh: PIC-AB12CD34">
       <button data-testid="btn-submit-token-login" id="btn-t-login" class="btn" onclick="tokenLogin()">Lanjut</button>
       <button data-testid="btn-cancel-token-login" class="btn secondary" onclick="showView('landing')">Kembali</button>
@@ -141,23 +141,23 @@
     <div class="card">
       <div class="form-row">
         <div>
-          <label>Nama target (yang resign)</label>
+          <label for="pc-target">Nama target (yang resign)</label>
           <input data-testid="input-pic-target" id="pc-target" placeholder="contoh: Ihsan Wanda">
         </div>
         <div>
-          <label>Total nilai hadiah (IDR) (opsional)</label>
+          <label for="pc-amount">Total nilai hadiah (IDR) (opsional)</label>
           <input data-testid="input-pic-amount" id="pc-amount" type="text" inputmode="numeric" placeholder="1.000.000" onkeyup="formatInputRibuan(event)">
         </div>
       </div>
-      <label>Alasan / catatan (opsional)</label>
+      <label for="pc-reason">Alasan / catatan (opsional)</label>
       <textarea data-testid="input-pic-reason" id="pc-reason" rows="2" placeholder="contoh: resign per 1 Juli 2026"></textarea>
       <div class="form-row">
         <div>
-          <label>Tanggal mulai (opsional)</label>
+          <label for="pc-start">Tanggal mulai (opsional)</label>
           <input data-testid="input-pic-start" id="pc-start" type="date">
         </div>
         <div>
-          <label>Deadline donasi</label>
+          <label for="pc-deadline">Deadline donasi</label>
           <input data-testid="input-pic-deadline" id="pc-deadline" type="date">
         </div>
       </div>
@@ -195,14 +195,13 @@
     </nav>
     <div class="admin-dashboard-heading">
       <span class="admin-data-card-label">ADMIN · OPERATIONS</span>
-      <h2 id="admin-dashboard-title">Perlu ditinjau</h2>
-      <p id="admin-dashboard-greeting">Persetujuan dan pengecualian campaign berada di urutan teratas.</p>
+      <h2 id="admin-dashboard-title">Dashboard Admin</h2>
+      <p id="admin-dashboard-greeting">Ringkasan operasional, antrean persetujuan, dan pengelolaan campaign.</p>
     </div>
     <div data-testid="admin-notify-banner" id="admin-notify-banner" class="hidden" style="background:var(--warning); color:#ffffff; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <section data-testid="action-queue" id="admin-action-queue" class="card admin-action-queue" aria-labelledby="admin-action-queue-title">
       <div class="admin-action-queue-heading">
         <div>
-          <span class="admin-data-card-label">ADMIN · OPERATIONS</span>
           <h3 id="admin-action-queue-title">Perlu ditinjau</h3>
           <p>Persetujuan dan pengecualian tampil lebih dulu supaya tindakan berikutnya selalu jelas.</p>
         </div>
@@ -312,7 +311,11 @@
       <a data-testid="link-superadmin-settings" href="#sa-section-settings" class="admin-nav-link">Pengaturan</a>
       <a data-testid="btn-superadmin-logout-nav" href="javascript:void(0)" onclick="logoutToken()" class="admin-nav-link admin-nav-logout">Keluar</a>
     </nav>
-    <h2>Dashboard Super Admin</h2>
+    <div class="admin-dashboard-heading">
+      <span class="admin-data-card-label">SUPERADMIN · SYSTEM</span>
+      <h2>Dashboard Super Admin</h2>
+      <p>Kelola campaign, admin, member, dan pengaturan sistem.</p>
+    </div>
     <div data-testid="superadmin-notify-banner" id="sa-notify-banner" class="hidden" style="background:var(--warning); color:#ffffff; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);"></div>
     <div data-testid="superadmin-summary" id="sa-summary" class="card admin-section"></div>
 
@@ -356,7 +359,7 @@
     <div id="sa-section-admins" class="card admin-section">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h2 style="margin-top:0; margin-bottom:12px;">Daftar Admin</h2>
-        <button data-testid="btn-toggle-admin-token-form" class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
+        <button data-testid="btn-toggle-admin-token-form" class="btn secondary btn-sm"
           onclick="document.getElementById('sa-gen-admin-form').classList.toggle('hidden')">+ Token Admin Baru</button>
       </div>
       <div data-testid="admin-token-form" id="sa-gen-admin-form" class="hidden theme-surface-muted"
@@ -364,7 +367,7 @@
         <button data-testid="btn-close-admin-token-form"
           style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:var(--muted);"
           onclick="document.getElementById('sa-gen-admin-form').classList.add('hidden')">&times;</button>
-        <label>Alias Admin</label>
+        <label for="sa-admin-alias">Alias Admin</label>
         <input data-testid="input-admin-alias" id="sa-admin-alias" placeholder="contoh: Bela EE">
         <button data-testid="btn-generate-admin-token" class="btn" style="margin-top:8px;" onclick="genAdminToken()">Buat token Admin baru</button>
         <div data-testid="superadmin-new-token" id="sa-new-token"></div>
@@ -393,7 +396,7 @@
     <div id="sa-section-members" class="card admin-section">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h2 style="margin-top:0; margin-bottom:12px;">Daftar Members</h2>
-        <button data-testid="btn-toggle-add-member-form" class="btn secondary btn-auto" style="padding:6px 12px; font-size:12px; margin-top:0;"
+        <button data-testid="btn-toggle-add-member-form" class="btn secondary btn-sm"
           onclick="document.getElementById('sa-add-member-form').classList.toggle('hidden')">+ Tambah Member</button>
       </div>
       <div class="admin-data-toolbar">
@@ -422,11 +425,11 @@
           style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:var(--muted);"
           onclick="document.getElementById('sa-add-member-form').classList.add('hidden')">&times;</button>
         <h3 style="margin-top:0; font-size:14px;">Tambah member manual</h3>
-        <label>Nama</label>
+        <label for="sa-mem-name">Nama</label>
         <input data-testid="input-new-member-name" id="sa-mem-name" placeholder="Nama">
-        <label>No. WhatsApp</label>
+        <label for="sa-mem-wa">No. WhatsApp</label>
         <input data-testid="input-new-member-whatsapp" id="sa-mem-wa" placeholder="08xxxxxxxxxx">
-        <label>Status</label>
+        <label for="sa-mem-status">Status</label>
         <select data-testid="select-new-member-status" id="sa-mem-status">
           <option value="active">active</option>
           <option value="ex">ex</option>
@@ -442,13 +445,13 @@
         <h2 style="margin-top:0">Pengaturan</h2>
         <label style="display:flex; align-items:center; gap:8px;"><input data-testid="input-rounding-enabled" type="checkbox" id="sa-rounding"
             style="width:auto;"> Aktifkan pembulatan nominal donasi</label>
-        <label>Bulatkan ke kelipatan (IDR)</label>
+        <label for="sa-roundto">Bulatkan ke kelipatan (IDR)</label>
         <input data-testid="input-rounding-amount" id="sa-roundto" type="number" placeholder="500">
         <label style="display:flex; align-items:center; gap:8px;"><input data-testid="input-member-validation" type="checkbox" id="sa-validation"
             style="width:auto;"> Wajib cocok dengan daftar Members (validasi WhatsApp)</label>
-        <label>Email Notifikasi Pendaftaran (pisahkan dengan koma)</label>
+        <label for="sa-notification-emails">Email Notifikasi Pendaftaran (pisahkan dengan koma)</label>
         <input data-testid="input-notification-emails" id="sa-notification-emails" type="text" placeholder="admin1@example.com, admin2@example.com">
-        <label>URL Aplikasi (untuk link di email reminder)</label>
+        <label for="sa-app-url">URL Aplikasi (untuk link di email reminder)</label>
         <input data-testid="input-app-url" id="sa-app-url" type="text" placeholder="https://don4pro.com">
         <!-- [audit-fix] Starts disabled: settings are not loaded until renderSuperAdminSettings runs. Without this, one click on a failed load wrote FALSE over member validation and rounding. -->
         <button data-testid="btn-save-settings" class="btn" style="margin-top:8px;" disabled title="Muat pengaturan terlebih dahulu" onclick="saveSettings()">Simpan pengaturan</button>
@@ -470,11 +473,11 @@
 <div data-testid="profile-modal" id="profile-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
   <div class="card" style="width:100%; max-width:400px; padding:24px; position:relative;">
     <h3 style="margin-top:0; margin-bottom:16px;">Profil Anda</h3>
-    <label>Nomor WhatsApp (Tidak bisa diubah)</label>
+    <label for="prof-wa">Nomor WhatsApp (Tidak bisa diubah)</label>
     <input data-testid="input-profile-whatsapp" type="text" id="prof-wa" disabled class="profile-disabled-input" style="cursor:not-allowed;">
-    <label>Nama Anda</label>
+    <label for="prof-name">Nama Anda</label>
     <input data-testid="input-profile-name" type="text" id="prof-name">
-    <label>Email <span style="font-size:12px; color:var(--muted);">(Opsional, untuk pengingat otomatis)</span></label>
+    <label for="prof-email">Email <span style="font-size:12px; color:var(--muted);">(Opsional, untuk pengingat otomatis)</span></label>
     <input data-testid="input-profile-email" type="email" id="prof-email" placeholder="contoh@email.com">
     
     <div data-testid="profile-message" id="prof-msg" style="margin-bottom:16px;"></div>

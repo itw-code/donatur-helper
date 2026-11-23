@@ -35,12 +35,12 @@ test('Task 6: Accessibility runtime attributes, landmarks, skip links, and aria 
   assert.equal(resolveToken(tokensCss, 'primary'), '#4a653b', 'WCAG AA contrast forest token must be active');
   assert.ok(baseCss.includes('.skip-link'), 'Skip link styling must be present in base.css');
 
-  // 4. Form inputs have associated labels
-  assert.ok(indexHtml.includes('<label>No. WhatsApp</label>'), 'WhatsApp input must have label');
-  assert.ok(indexHtml.includes('<label>Nama Lengkap</label>'), 'Name input must have label');
-  assert.ok(indexHtml.includes('<label>Token</label>'), 'Token input must have label');
-  assert.ok(indexHtml.includes('<label>Nama target (yang resign)</label>'), 'Campaign target input must have label');
-  assert.ok(indexHtml.includes('<label>Deadline donasi</label>'), 'Deadline input must have label');
+  // 4. Form inputs have explicitly associated labels (for=...)
+  assert.ok(indexHtml.includes('<label for="u-wa">No. WhatsApp</label>'), 'WhatsApp input must have for="u-wa" label');
+  assert.ok(indexHtml.includes('<label for="u-name">Nama Lengkap</label>'), 'Name input must have for="u-name" label');
+  assert.ok(indexHtml.includes('<label for="t-token">Token</label>'), 'Token input must have for="t-token" label');
+  assert.ok(indexHtml.includes('<label for="pc-target">Nama target (yang resign)</label>'), 'Campaign target input must have for="pc-target" label');
+  assert.ok(indexHtml.includes('<label for="pc-deadline">Deadline donasi</label>'), 'Deadline input must have for="pc-deadline" label');
 
   // 5. Check SVG icons for aria-hidden="true" in utils.js and components
   const utilsJs = fs.readFileSync(path.resolve('js/utils.js'), 'utf8');

@@ -9,7 +9,7 @@
 .badge.amber,
 .badge.warning {
   background: #fef3c7;
-  color: #b45309;
+  color: #92400e;
 }
 
 .badge.blue,
@@ -103,7 +103,16 @@
 .pic-share-box {
   background: #eaf3de;
   border: 1px solid #cce3b7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 8px;
+  margin-bottom: var(--space-3);
 }
+.pic-share-box .btn { margin-top: 0; }
 
 .admin-overdue-callout {
   background: #fff1f2;
@@ -117,26 +126,79 @@
 }
 
 .btn {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border-radius: 8px;
+  min-height: var(--control-h);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 10px;
   border: none;
   background: var(--primary);
-  color: #fff;font-size:var(--text-sm);
+  color: #fff;
+  font-size: var(--text-sm);
   font-weight: 600;
+  line-height: 1.25;
   cursor: pointer;
   margin-top: var(--space-3);
   text-align: center;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-auto {
   width: auto;
-  display: inline-block;
+  display: inline-flex;
   min-height: 44px;
+}
+
+.btn-sm {
+  min-height: 36px;
+  width: auto;
+  display: inline-flex;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  border-radius: 8px;
+  margin-top: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.donor-gift-actions {
+  margin-bottom: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.donor-gift-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.2;
+  min-height: 36px;
+  padding: 6px var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--accent-soft-ink);
+  text-decoration: none;
+  cursor: pointer;
+  flex: 1 1 auto;
+  text-align: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.donor-gift-btn:hover {
+  background: var(--surface-muted);
+  border-color: var(--border-hover);
 }
 
 .btn:hover:not(:disabled) {
@@ -206,7 +268,14 @@ select {
   margin-top: var(--space-2);
   background: #fff;
   color: var(--text);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
 input:focus,
@@ -261,7 +330,7 @@ label:first-child {
 
 .badge.closed {
   background: #fef3c7;
-  color: #b45309;
+  color: #92400e;
 }
 
 .badge.finalized {
@@ -321,7 +390,7 @@ svg.status-icon,
 }
 
 .semantic-status.warning {
-  color: #b45309;
+  color: #92400e;
 }
 
 .semantic-status.danger {
@@ -331,7 +400,9 @@ svg.status-icon,
 table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0;font-size:var(--text-sm);
+  border-spacing: 0;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
   margin-top: var(--space-2);
 }
 
@@ -410,7 +481,7 @@ td .action-group {
 
 /* Scrollable Table Upgrades */
 .table-responsive {
-  max-height: 400px;
+  max-height: 560px;
   overflow: auto;
   display: block;
   border: 1px solid var(--border);
@@ -750,12 +821,11 @@ td .action-group {
 }
 
 .app-update-btn {
-  background: #10b981;
+  background: var(--primary);
   color: #ffffff;
   border: none;
   padding: var(--space-2) var(--space-4);
-  /* [B5-fix2 · audit #15] no min-height meant a ~36px tap target; 8px vertical padding alone
-     does not reach 44px. */
+  /* Keep 44px min tap target */
   min-height: var(--control-h);
   border-radius: 6px;font-size:var(--text-sm);
   font-weight: 600;
@@ -765,7 +835,7 @@ td .action-group {
 }
 
 .app-update-btn:hover {
-  background: #059669;
+  background: var(--primary-hover);
 }
 
 @keyframes slideUpFade {
@@ -823,11 +893,7 @@ td .action-group {
 }
 .empty-state.is-inline .empty-state-title { font-size:var(--text-sm); }
 
-/* ---------- landing tagline ticker (structure) ----------
-   [B6-fix] These rules used to live ONLY in the dark overlay file, so deleting that file
-   to build a light theme silently deleted the ticker's layout in light mode: the wrapper
-   computed display:block and collapsed, shrinking the landing header 133 -> 72px.
-   Layout belongs in a theme-agnostic sheet; theme-dark.css keeps only the colours. */
+/* Landing tagline ticker (structure; dark colours live in theme-dark.css) */
 .dh-ticker-wrapper{
   display: inline-flex;
   flex-direction: column;

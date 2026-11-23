@@ -96,8 +96,9 @@
   flex: 1 1 140px;
   width: auto;
   min-height: 44px;
-  margin: 0 !important;
-  padding: var(--space-2) var(--space-3) !important;font-size:var(--text-sm)!important;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
 }
 
 .donor-proof-link,
@@ -152,8 +153,16 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--space-3) var(--space-4);
-  font-weight: 700;font-size:var(--text-sm);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+[data-testid="donor-total"],
+.pic-progress-total,
+.pic-progress-metric strong {
+  font-variant-numeric: tabular-nums;
 }
 
 .role-dashboard-heading {
@@ -196,7 +205,7 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  color: #b45309;
+  color: #92400e;
   background: #fef3c7;
 }
 
@@ -230,6 +239,16 @@
 .donor-campaign-card.donor-primary-card {
   border-color: #93c5fd;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.donor-campaign-card p.muted {
+  margin: var(--space-2) 0;
+}
+
+.donor-campaign-card [data-testid="donation-options"] {
+  border-radius: 8px;
+  box-shadow: none;
+  margin-bottom: 0;
 }
 
 
@@ -335,14 +354,11 @@
 }
 
 .pic-action-copy strong {font-size:var(--text-md);
-  /* [B4-fix · F3] Was --text-sm while the span below it became --text-md, so the description
-     rendered larger than the bold title it describes. Title promoted. */
   font-weight: 700;
   color: var(--text);
 }
 
 .pic-action-copy span {
-  /* [B4-fix · F3] secondary copy sits one step BELOW the title, not above it */
   color: var(--muted);font-size:var(--text-sm);
   line-height: 1.4;
   overflow-wrap: break-word;
@@ -446,13 +462,17 @@
 }
 
 .admin-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   text-decoration: none;
-  color: var(--text);font-size:var(--text-sm);
+  color: var(--text);
+  font-size: var(--text-sm);
   font-weight: 500;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border-radius: 6px;
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .admin-nav-link:hover {
@@ -627,8 +647,6 @@
 }
 
 .admin-data-card-meta dd {
-  /* [B5-fix2 · audit #8] was 2px; snapping DOWN to 0 made values touch their <dt> labels and
-     there is no bottom margin on dt to compensate. Snapped UP to --space-1 instead. */
   margin: var(--space-1) 0 0;
   overflow-wrap: anywhere;
 }
@@ -864,6 +882,14 @@
   #sa-pending-members .pending-cards {
     display: flex;
   }
+
+  .admin-nav-link {
+    min-height: 44px;
+  }
+
+  #sa-section-settings {
+    flex-direction: column;
+  }
 }
 
 @media (min-width: 768px) {
@@ -953,7 +979,7 @@
   }
 
   .btn,
-  button,
+  button:not(.link-btn),
   input:not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
@@ -971,9 +997,6 @@
   }
 
   select {
-    /* [B5-fix2 · audit #3] was raw 10px 12px while sibling input/textarea got --space-2 (8px),
-       so stacked form controls had mismatched vertical padding. Only font-size:16px is the iOS
-       zoom guard; the padding was never part of it. 10px is the table exception, not this. */
     padding: var(--space-2) var(--space-3) !important;
     font-size: 16px !important;
   }
@@ -1017,7 +1040,7 @@
   }
 
   .btn,
-  button,
+  button:not(.link-btn),
   input:not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
@@ -1043,8 +1066,19 @@
   }
 }
 
-/* Tier 3: Tablets (768–1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* Tier 3 & 4: Tablets & Desktop (≥768px) */
+.pic-workspace-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.pic-workspace-actions .btn {
+  margin-top: 0;
+}
+
+@media (min-width: 768px) {
   .wrap {
     max-width: 720px;
     padding: var(--space-6);
@@ -1057,7 +1091,8 @@
   }
 
   .split-left,
-  .split-right {
+  .split-right,
+  .form-row > * {
     flex: 1;
     min-width: 0;
   }
@@ -1067,37 +1102,49 @@
     gap: var(--space-4);
   }
 
-  .form-row > * {
-    flex: 1;
+  #pic-create-btn-container .btn,
+  #view-user-dashboard > [data-testid="btn-profile"],
+  #view-pic-dashboard > .btn,
+  #pic-danger-zone .btn,
+  #view-admin-dashboard > [data-testid="btn-admin-logout"],
+  #view-superadmin-dashboard > [data-testid="btn-superadmin-logout"],
+  #sa-section-settings .btn {
+    width: auto;
+    min-width: 220px;
+  }
+
+  .pic-workspace-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .pic-workspace-actions .btn {
+    width: auto;
+    margin: 0;
+  }
+
+  td .verification-controls {
+    flex-wrap: nowrap;
+  }
+
+  td .verification-controls .btn {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  td .donor-reminder {
+    width: auto;
+    white-space: nowrap;
+    min-height: 36px;
+    padding: var(--space-1) var(--space-3);
   }
 }
 
-/* Tier 4: Desktop (≥1024px) */
 @media (min-width: 1024px) {
   .wrap {
     max-width: 1200px;
-    padding: var(--space-6);
-  }
-
-  .split-layout {
-    display: flex;
-    gap: var(--space-5);
-    align-items: flex-start;
-  }
-
-  .split-left,
-  .split-right {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .form-row {
-    display: flex;
-    gap: var(--space-4);
-  }
-
-  .form-row > * {
-    flex: 1;
   }
 }
 
@@ -1135,56 +1182,30 @@
   }
 }
 
-/* [B1 · P0-2] Compact 44px app bar; the landing keeps the brand block and tagline carousel. */
-.app-header-brand{display:flex;align-items:center;justify-content:center;gap:var(--space-3);
-  /* [B5-fix2 · audit #7] 6px kept as an OFF-GRID value, deliberately and without pretending it
-     is a plan exception — it is not one. It is the label-to-logo gap on the landing brand row,
-     measured: 6px -> 133px header, 8px -> 135px, 4px -> 131px. Two pixels is imperceptible, so
-     this is a judgement call, not a rule. If B6 wants the grid to be absolute, take --space-2
-     (8px) and accept a 135px header. */
-  margin-bottom:6px}
-/* [B1-fix2 · audit #9] restores centring B1 dropped; tagline was 97px off-centre */
+/* [B1 · P0-2] Compact 44px app bar; landing keeps 133px brand block and ticker. */
+.app-header-brand{display:flex;align-items:center;justify-content:center;gap:var(--space-3);margin-bottom:6px /* 6px off-grid: keeps landing header 133px */}
 .app-header:not([data-compact]){text-align:center}
 .app-header-brand img{display:block}
-/* [B4-fix · F8] THE ONE font-size exemption: a logotype scales with the viewport, not the
-   type scale. Declared here (theme-agnostic) so the light theme keeps it too. See plan §0c. */
-.app-header h1{margin:0;font-size:clamp(30px,5vw,44px);font-weight:800;letter-spacing:-.02em}
 .brand-accent{color:var(--amber,var(--gold-400))}
-.app-header[data-compact]{padding-top:0;text-align:left;display:flex;align-items:center;gap:var(--space-2);
-  min-height:44px;margin-bottom:var(--space-3);border-bottom:1px solid var(--border)}
+.app-header[data-compact]{padding-top:0;padding-bottom:0;text-align:left;display:flex;align-items:center;gap:var(--space-2);
+  min-height:var(--control-h);margin-bottom:var(--space-3);border-bottom:1px solid var(--border)}
 .app-header[data-compact] .app-header-brand{justify-content:flex-start;gap:var(--space-2);margin-bottom:0}
 .app-header[data-compact] .app-header-brand img{width:24px;height:24px}
 .app-header[data-compact] h1{font-size:var(--text-sm);font-weight:700;letter-spacing:-.01em;
   background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--text)}
 .app-header[data-compact] .dh-ticker-wrapper{display:none}
-/* [B6-fix] The toggle is absolutely positioned, NOT a flex child of the header.
-   As a child it added 44px to the landing header (133 -> 177), breaking the one screen
-   Q3 protects. Anchored to the header's top-right corner instead, so it stays reachable
-   on the landing (where there is no compact bar) without joining the flow. */
 .theme-toggle{position:absolute;top:6px;right:8px;width:44px;height:44px;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;padding:0;cursor:pointer;z-index:2}
-/* [B6-fix] Header geometry is theme-agnostic. This rule used to live ONLY in the dark
-   overlay, so light mode lost the 48px header padding and the landing header measured 94px
-   instead of 133px. */
-.app-header{padding-top:var(--space-7)}
-/* [B6-fix] Wordmark geometry is theme-agnostic; only the gradient differs per theme.
-   Light gets forest->deep-gold ink, dark keeps white->gold. Both are the same logotype. */
-.app-header h1{font-size:clamp(30px,5vw,44px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;
+.app-header{position:relative;padding-top:var(--space-7)}
+.app-header h1{margin:0;font-size:clamp(30px,5vw,44px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;
   background:linear-gradient(100deg,var(--forest-900) 20%,var(--forest-500) 55%,var(--gold-700) 95%);
   -webkit-background-clip:text;background-clip:text;color:transparent}
 @supports not ((-webkit-background-clip:text) or (background-clip:text)){
   .app-header h1{background:none;color:var(--ink)}
 }
-.app-header{position:relative}
-/* Inside the compact bar it belongs to the flow again, next to the screen name. */
-.app-header[data-compact] .theme-toggle{position:static;top:auto;right:auto}.theme-toggle svg{width:20px;height:20px}.app-bar-title{font-size:var(--text-xs);font-weight:600;color:var(--muted);min-width:0;
+.app-header[data-compact] .theme-toggle{position:static;top:auto;right:auto;margin-left:auto}.theme-toggle svg{width:20px;height:20px}.app-bar-title{font-size:var(--text-xs);font-weight:600;color:var(--muted);min-width:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* [B8 · P1-4] Desktop PIC parity (≥1024px).
-   Measured at 1440×900: the PIC workspace laid each action item out as a single 1136px row with a
-   96px button pinned to the far edge, so the copy and the action that belongs to it sat ~1000px
-   apart and read as two unrelated things. A grid keeps every action a self-contained unit and
-   still uses the width. `max-width` is a backstop for the single-column fallback.
-   This is a layout-only change: no colour, no type, no spacing token, no component structure. */
+/* [B8 · P1-4] Desktop PIC action grid (≥1024px) */
 @media (min-width: 1024px) {
   .pic-action-list {
     display: grid;
@@ -1196,4 +1217,33 @@
   .pic-action-item {
     max-width: 560px;
   }
+}
+
+/* Constrain landing and auth/creation forms on wide viewports (DESIGN.md §4) */
+#view-landing,
+#view-user-login,
+#view-token-login,
+#view-pic-create {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+#view-landing .card {
+  padding: var(--space-5);
+}
+
+.card > .btn:first-child {
+  margin-top: 0;
+}
+
+#view-landing .field-note {
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+#view-landing .field-note + .field-note {
+  margin-top: 0;
+}
+
+#view-landing .field-note:last-child {
+  margin-bottom: 0;
 }

@@ -390,26 +390,30 @@ export function renderPicActions(detail) {
 
   let isAchieved = Boolean(detail.donors && detail.donors.length > 0 && detail.donors.every(d => String(d.Verified || (d.verified ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE'));
 
-  html += '<div class="pic-share-box" style="padding:10px; border-radius:8px; margin-bottom:12px;">';
+  html += '<div class="pic-share-box">';
   if (c.Status === 'Open' || c.Status === 'Closed') {
-    html += '<strong>Bagikan Undangan Patungan:</strong><br><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
+    html += '<strong>Bagikan Undangan Patungan:</strong><button class="btn secondary btn-auto" onclick="copyPicGroupReminder()">Salin Undangan Patungan</button>';
   } else if (c.Status === 'Finalized') {
     if (isAchieved) {
-      html += '<strong>Target Terkumpul! 🎉</strong><br><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Laporan Selesai</button>';
+      html += '<strong>Target Terkumpul! 🎉</strong><button class="btn secondary btn-auto" onclick="copyPicGroupReminder()">Salin Laporan Selesai</button>';
     } else {
-      html += '<strong>Tagihan Patungan (Grup):</strong><br><button class="btn secondary btn-auto" style="margin-top:4px;" onclick="copyPicGroupReminder()">Salin Rincian Tagihan</button>';
+      html += '<strong>Tagihan Patungan (Grup):</strong><button class="btn secondary btn-auto" onclick="copyPicGroupReminder()">Salin Rincian Tagihan</button>';
     }
   } else {
-    html += '<strong>Campaign Selesai:</strong><br><p class="muted" style="margin:4px 0;">Campaign sudah selesai/diarsipkan.</p>';
+    html += '<strong>Campaign Selesai:</strong><p class="muted" style="margin:0;">Campaign sudah selesai/diarsipkan.</p>';
   }
   html += '</div>';
 
   if (c.Status === 'Open') {
+    html += '<div class="pic-workspace-actions">';
     html += '<button class="btn blue" onclick="showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')">Selesaikan & input rekening</button>';
     html += '<button class="btn secondary" onclick="closeList()">Tutup pendaftaran</button>';
+    html += '</div>';
   } else if (c.Status === 'Closed') {
+    html += '<div class="pic-workspace-actions">';
     html += '<button class="btn blue" onclick="showFinalizeForm(' + (Number(c.GiftAmount) || 0) + ')">Selesaikan & input rekening</button>';
     html += '<button class="btn secondary" onclick="reopenList()">Buka lagi pendaftaran</button>';
+    html += '</div>';
   } else if (c.Status === 'Finalized') {
     const paidCount = detail.donors.filter(d => String(d.Paid || (d.paid ? 'TRUE' : 'FALSE')).toUpperCase() === 'TRUE').length;
     let totalRefund = 0;
@@ -437,9 +441,11 @@ export function renderPicActions(detail) {
       return isPaid && !isVerified && !hasProof;
     });
 
-    if (hasReviewableProof && !hasMissingProof) html += '<button class="btn green" style="margin-bottom:8px; margin-right:8px;" onclick="picVerifyAllUI(\'' + escapeHtml(c.CampaignID) + '\')">✓ Setujui Semua Bukti</button>';
-    if (!isAchieved) html += '<button class="btn secondary" style="margin-bottom:8px; margin-right:8px;" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
-    html += '<button class="btn blue" style="margin-bottom:8px;" onclick="showGiftProofForm()">📸 Upload Foto & Link Hadiah</button>';
+    html += '<div class="pic-workspace-actions">';
+    if (hasReviewableProof && !hasMissingProof) html += '<button class="btn green" onclick="picVerifyAllUI(\'' + escapeHtml(c.CampaignID) + '\')">✓ Setujui Semua Bukti</button>';
+    if (!isAchieved) html += '<button class="btn secondary" onclick="showLateDonorForm()">+ Ajukan Donatur Susulan</button>';
+    html += '<button class="btn blue" onclick="showGiftProofForm()">📸 Upload Foto & Link Hadiah</button>';
+    html += '</div>';
   } else {
     html += '<p class="muted">Campaign sudah diarsipkan. Token ini sudah tidak aktif.</p>';
   }
