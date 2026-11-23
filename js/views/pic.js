@@ -455,6 +455,41 @@ export function renderPicActions(detail) {
     '<div style="margin-top:12px;"><button id="btn-submit-late-donor" class="btn green" onclick="submitLateDonor(\'' + escapeHtml(c.CampaignID) + '\')">Simpan & Masukkan ke List</button> <button class="btn secondary" onclick="hideLateDonorForm()">Batal</button></div>' +
     '<div id="late-error" class="error" style="margin-top:8px;"></div></div>';
 
+  const hasGiftProof = Boolean(c.GiftLink || c.GiftImage);
+  let giftPreviewHtml = '';
+  if (hasGiftProof) {
+    giftPreviewHtml += '<div class="pic-gift-preview">';
+    if (c.GiftImage && /^https?:\/\//i.test(c.GiftImage)) {
+      const safeGiftImageUrl = escapeHtml(sanitizeUrl(c.GiftImage));
+      if (/\.pdf(\?|$)/i.test(c.GiftImage)) {
+        giftPreviewHtml += '<a class="link-btn" href="' + safeGiftImageUrl + '" target="_blank" rel="noopener noreferrer">Lihat Dokumen Hadiah</a>';
+      } else {
+        giftPreviewHtml += '<a class="pic-gift-thumb-link" href="' + safeGiftImageUrl + '" target="_blank" rel="noopener noreferrer"><img class="pic-gift-thumb" src="' + safeGiftImageUrl + '" alt="Foto hadiah"></a>';
+      }
+    }
+    if (c.GiftLink) {
+      giftPreviewHtml += '<a class="link-btn" href="' + escapeHtml(sanitizeUrl(c.GiftLink)) + '" target="_blank" rel="noopener noreferrer">Buka Link Barang/Hadiah</a>';
+    }
+    giftPreviewHtml += '<div class="pic-gift-preview-actions"><button type="button" class="btn secondary btn-auto" onclick="toggleGiftEditForm()">Edit Dokumentasi</button></div>';
+    giftPreviewHtml += '</div>';
+  }
+
+  html += '<div id="gift-proof-form" class="hidden card theme-surface-muted pic-gift-form">' +
+    '<div class="pic-gift-form-header"><h4>Dokumentasi Hadiah</h4>' +
+    '<button type="button" class="pic-gift-close" aria-label="Tutup form dokumentasi hadiah" onclick="hideGiftProofForm()">&times;</button></div>' +
+    giftPreviewHtml +
+    '<div id="gift-edit-form" class="' + (hasGiftProof ? 'hidden' : '') + '">' +
+    '<label for="gift-link">Link Barang / Hadiah (Opsional)</label>' +
+    '<input id="gift-link" type="url" placeholder="https://tokopedia.com/..." value="' + escapeHtml(c.GiftLink || '') + '">' +
+    '<label for="gift-image">Upload Foto / Nota Hadiah (Opsional, maks 10MB)</label>' +
+    '<input id="gift-image" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf,image/*">' +
+    '<div class="pic-gift-form-actions">' +
+    '<button id="btn-submit-gift-proof" type="button" class="btn blue" onclick="submitGiftProof()">' + (hasGiftProof ? 'Perbarui Dokumentasi' : 'Simpan Dokumentasi') + '</button>' +
+    '<button type="button" class="btn secondary" onclick="hideGiftProofForm()">Batal</button>' +
+    '</div>' +
+    '<div id="gift-error" class="error"></div>' +
+    '</div></div>';
+
   el.innerHTML = html;
 }
 
@@ -482,15 +517,30 @@ export function toggleLateCustomAmount() {
 export function showGiftProofForm() {
   const giftForm = document.getElementById('gift-proof-form');
   const lateForm = document.getElementById('late-donor-form');
-  if (giftForm) giftForm.classList.remove('hidden');
+  if (giftForm) {
+    giftForm.classList.remove('hidden');
+    if (typeof giftForm.scrollIntoView === 'function') {
+      giftForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
   if (lateForm) lateForm.classList.add('hidden');
+}
+
+export function hideGiftProofForm() {
+  const giftForm = document.getElementById('gift-proof-form');
+  if (giftForm) giftForm.classList.add('hidden');
+}
+
+export function toggleGiftEditForm() {
+  const editForm = document.getElementById('gift-edit-form');
+  if (editForm) editForm.classList.toggle('hidden');
 }
 
 export async function submitGiftProof() {
   const errEl = document.getElementById('gift-error');
   if (errEl) errEl.textContent = 'Menyimpan...';
 
-  const btn = document.querySelector('#gift-proof-form button.btn.blue') || document.getElementById('btn-submit-gift-proof');
+  const btn = document.getElementById('btn-submit-gift-proof') || document.querySelector('#gift-proof-form button.btn.blue');
   let originalText = '';
   if (btn) {
     originalText = btn.textContent;
@@ -516,8 +566,8 @@ export async function submitGiftProof() {
     return;
   }
 
-  if (file && file.size > 2 * 1024 * 1024) {
-    if (errEl) errEl.textContent = 'Ukuran gambar maksimal 2MB.';
+  if (file && file.size > 10 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran file maksimal 10MB.';
     resetBtn();
     return;
   }
@@ -759,8 +809,8 @@ export function doFinalize() {
   const fileInput = document.getElementById('fin-image');
   const file = fileInput ? (fileInput.files && fileInput.files[0]) : null;
 
-  if (file && file.size > 2 * 1024 * 1024) {
-    if (errEl) errEl.textContent = 'Ukuran gambar maksimal 2MB.';
+  if (file && file.size > 10 * 1024 * 1024) {
+    if (errEl) errEl.textContent = 'Ukuran file maksimal 10MB.';
     resetBtn();
     return;
   }

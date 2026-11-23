@@ -416,6 +416,16 @@
   border-color: #fcd34d;
 }
 
+.pic-gift-form{margin-top:var(--space-4);position:relative}
+.pic-gift-form-header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);margin-bottom:var(--space-3)}
+.pic-gift-form-header h4{margin:0;font-size:var(--text-md)}
+.pic-gift-close{background:none;border:none;color:var(--muted);font-size:var(--text-xl);line-height:1;min-width:var(--control-h);min-height:var(--control-h);cursor:pointer}
+.pic-gift-preview{display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-3);padding:var(--space-3);margin-bottom:var(--space-3);border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2)}
+.pic-gift-thumb-link{display:inline-block}
+.pic-gift-thumb{max-width:120px;max-height:120px;border-radius:var(--space-2);border:1px solid var(--border);object-fit:cover;display:block}
+.pic-gift-preview-actions,.pic-gift-form-actions{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-3)}
+.pic-gift-form-actions .btn{flex:1 1 140px;margin-top:0}
+
 
 /* --- ADMIN & SUPERADMIN VIEW --- */
 .admin-nav-bar {

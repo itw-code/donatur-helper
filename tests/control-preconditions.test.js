@@ -145,3 +145,25 @@ test('post-payment CTA requires an ACTIVE member, not just a verified payment', 
     'the CTA must check member status: the RPC refuses ex/alumni, so showing it to them is a '
     + 'control whose precondition cannot be met');
 });
+
+test('PIC Upload Foto & Link Hadiah button renders its target #gift-proof-form and wires close/toggle helpers', () => {
+  const picJs = read('js/views/pic.js');
+  const appJs = read('js/app.js');
+
+  assert.match(picJs, /onclick="showGiftProofForm\(\)"/,
+    'PIC actions must render the Upload Foto & Link Hadiah button');
+  assert.match(picJs, /id="gift-proof-form"/,
+    'renderPicActions must emit #gift-proof-form so showGiftProofForm() is not a silent no-op');
+  assert.match(picJs, /id="gift-link"/,
+    '#gift-proof-form must include the #gift-link input read by submitGiftProof()');
+  assert.match(picJs, /id="gift-image"/,
+    '#gift-proof-form must include the #gift-image file input read by submitGiftProof()');
+  assert.match(picJs, /id="gift-error"/,
+    '#gift-proof-form must include the #gift-error element read by submitGiftProof()');
+  assert.match(picJs, /onclick="submitGiftProof\(\)"/,
+    '#gift-proof-form must wire submitGiftProof()');
+  assert.match(appJs, /hideGiftProofForm/,
+    'hideGiftProofForm must be exposed on window in js/app.js');
+  assert.match(appJs, /toggleGiftEditForm/,
+    'toggleGiftEditForm must be exposed on window in js/app.js');
+});

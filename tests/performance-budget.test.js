@@ -30,12 +30,15 @@ test('Task 2 & Task 7: Performance budgets and baseline thresholds are defined a
   // or holding wire size*. B5 alone converted 206 spacing declarations and added no user-facing
   // payload. The raw figure is therefore a bloat tripwire only — it cannot distinguish "someone
   // vendored a framework" from "we used our own tokens". 66,000 leaves real headroom for B6.
-  // Ceiling history: 60,000 -> 62,000 -> 66,000. Each raise was forced by the same mechanism:
+  // Ceiling history: 60,000 -> 62,000 -> 66,000 -> 68,000. Each raise was forced by the same mechanism:
 // converting a 9-char literal (`12px 16px`) into a 36-char token reference
 // (`var(--space-3) var(--space-4)`) expands raw text while shrinking or holding wire size.
 // This is a bloat tripwire, not a payload measure — the codec assertions below are the real
 // guards. (B7b's short-lived 78,000 raise was reverted with that batch.)
-assert.ok(totalCssBytes < 66000, `Total CSS size (${totalCssBytes}B) must be under 66KB uncompressed`);
+// [2026-11-23 · pic gift-proof-form] 66,000 -> 68,000. Restoring the missing #gift-proof-form
+// styles without adding inline `style=` attributes (locked by invariants.json) moved raw CSS
+// from ~65.9KB to 67,009B; wire cost stays far below ceilings (gzip-9 17,699B / brotli 14,986B).
+assert.ok(totalCssBytes < 68000, `Total CSS size (${totalCssBytes}B) must be under 68KB uncompressed`);
 
   // [B5 · audit #13] The guard that actually reflects cost, using the codec Cloudflare prefers.
   // Measured at B5: raw 63,529 / gzip-9 16,547 / brotli 14,146. HEAD was 58,839 raw, so the whole
@@ -86,7 +89,10 @@ assert.ok(totalCssBytes < 66000, `Total CSS size (${totalCssBytes}B) must be und
   // the settings-loaded guard, the active-status gate on the post-payment CTA, and the token
   // minting in the become-PIC intent. Measured wire cost is unchanged in kind (82,984B gzip).
   // Raised with the measurement, not to make a test pass.
-  assert.ok(totalJsBytes < 366000, `Total JS size (${totalJsBytes}B) must be under 366KB uncompressed`);
+  // [2026-11-23 · pic gift-proof-form] 366,000 -> 370,000. Restoring #gift-proof-form and
+  // close/toggle helpers in pic.js + app.js brought raw JS to 366,299B; wire cost stays far
+  // below ceilings (gzip-9 84,319B / brotli 71,720B).
+  assert.ok(totalJsBytes < 370000, `Total JS size (${totalJsBytes}B) must be under 370KB uncompressed`);
 
   // [B2 · audit #15] The real wire cost, measured with the codec Cloudflare actually prefers.
   // Brotli, not gzip: measured at this commit, raw 355,608 / gzip-9 80,542 / brotli 68,619.

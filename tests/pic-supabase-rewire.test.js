@@ -437,3 +437,96 @@ test('PIC manual verification: adapter dispatches pic_manual_verify_donor RPC an
   assert.strictEqual(modalRpc.params.p_storage_path, null);
   assert.strictEqual(modal.style.display, 'none', 'Modal should be closed after submit');
 });
+
+test('PIC gift proof UI: renderPicActions mounts #gift-proof-form, toggles visibility, and submits photo (>2MB up to 10MB) + link', async () => {
+  const harness = createPicHarness({
+    initialStorage: { auth_token: 'pic_token_eugenia', auth_role: 'PIC' },
+    dashboardData: {
+      campaign: {
+        campaign_id: 'C-EF925655',
+        target_name: 'Eugenia Florensia Halim',
+        status: 'FINALIZED',
+        gift_amount: 1100000,
+        gift_link: '',
+        gift_image: ''
+      },
+      donors: [
+        { name: 'Donatur 1', whatsapp: '081111111', paid: true, verified: true, amount_due: 50000, amount_paid: 50000, proof_link: 'proofs/C-EF925655/1.jpg' }
+      ],
+      summary: { total_donors: 1, total_paid: 1 }
+    }
+  });
+
+  const { loadPicDashboard, showGiftProofForm, hideGiftProofForm, submitGiftProof, document } = harness.context;
+  await loadPicDashboard();
+
+  const actionsHtml = harness.elements.get('pic-actions').innerHTML;
+  assert.match(actionsHtml, /id="gift-proof-form"/, 'renderPicActions must render #gift-proof-form');
+  assert.match(actionsHtml, /id="gift-link"/, 'renderPicActions must render #gift-link');
+  assert.match(actionsHtml, /id="gift-image"/, 'renderPicActions must render #gift-image');
+  assert.match(actionsHtml, /id="btn-submit-gift-proof"/, 'renderPicActions must render #btn-submit-gift-proof');
+  assert.match(actionsHtml, /id="gift-error"/, 'renderPicActions must render #gift-error');
+
+  // Toggle visibility via showGiftProofForm / hideGiftProofForm
+  const giftForm = document.getElementById('gift-proof-form');
+  const lateForm = document.getElementById('late-donor-form');
+  giftForm.classList.add('hidden');
+  lateForm.classList.remove('hidden');
+
+  showGiftProofForm();
+  assert.strictEqual(giftForm.classList.contains('hidden'), false, 'showGiftProofForm must unhide #gift-proof-form');
+  assert.strictEqual(lateForm.classList.contains('hidden'), true, 'showGiftProofForm must hide #late-donor-form');
+
+  // Submit a realistic mobile photo (4MB > old 2MB cap, <= 10MB bucket limit) + gift link
+  document.getElementById('gift-link').value = 'https://tokopedia.com/hadiah-eugenia';
+  document.getElementById('gift-image').files = [{ name: 'IMG_20261123.jpg', size: 4 * 1024 * 1024 }];
+
+  await submitGiftProof();
+
+  const uploadCall = harness.storageCalls.find(c => c.action === 'upload');
+  assert.ok(uploadCall, 'Must upload gift image to Supabase storage');
+  assert.strictEqual(uploadCall.bucket, 'bukti-transfer');
+  assert.match(uploadCall.filePath, /^gifts\/C-EF925655\/\d+\.jpg$/);
+
+  const giftRpc = harness.rpcCalls.find(c => c.fn === 'update_campaign_gift_proof');
+  assert.ok(giftRpc, 'Must call update_campaign_gift_proof RPC');
+  assert.strictEqual(giftRpc.params.p_token, 'pic_token_eugenia');
+  assert.strictEqual(giftRpc.params.p_link, 'https://tokopedia.com/hadiah-eugenia');
+  assert.match(giftRpc.params.p_image_path, /^gifts\/C-EF925655\/\d+\.jpg$/);
+  assert.strictEqual(giftForm.classList.contains('hidden'), true, 'Form must hide after successful save');
+
+  // Reject oversized file (> 10MB) without uploading
+  showGiftProofForm();
+  document.getElementById('gift-image').files = [{ name: 'huge.jpg', size: 11 * 1024 * 1024 }];
+  await submitGiftProof();
+  assert.match(document.getElementById('gift-error').textContent, /10MB/);
+
+  hideGiftProofForm();
+  assert.strictEqual(giftForm.classList.contains('hidden'), true, 'hideGiftProofForm must hide #gift-proof-form');
+});
+
+test('PIC gift proof UI: existing gift proof renders sanitized preview and hides hostile URLs', async () => {
+  const harness = createPicHarness({
+    initialStorage: { auth_token: 'pic_token_preview', auth_role: 'PIC' },
+    dashboardData: {
+      campaign: {
+        campaign_id: 'C-PREVIEW',
+        target_name: 'Preview Target',
+        status: 'FINALIZED',
+        gift_amount: 500000,
+        gift_link: 'javascript:alert(1)',
+        gift_image: 'gifts/C-PREVIEW/photo.jpg'
+      },
+      donors: [],
+      summary: { total_donors: 0, total_paid: 0 }
+    }
+  });
+
+  await harness.context.loadPicDashboard();
+  const actionsHtml = harness.elements.get('pic-actions').innerHTML;
+
+  assert.match(actionsHtml, /pic-gift-preview/, 'Existing gift proof must render preview block');
+  assert.match(actionsHtml, /https:\/\/supabase\.co\/storage\/v1\/object\/sign\/bukti-transfer\/gifts\/C-PREVIEW\/photo\.jpg/, 'Resolved signed image URL must appear in preview');
+  assert.doesNotMatch(actionsHtml, /href="javascript:/i, 'Hostile gift_link must be sanitized out of href');
+  assert.match(actionsHtml, /id="gift-edit-form" class="hidden"/, 'Edit form starts collapsed when proof already exists');
+});
